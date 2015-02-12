@@ -1,7 +1,11 @@
 class FellRace.Collections.Instances extends FellRace.Collection
   model: FellRace.Models.Instance
 
-  url: "/api/instances"
+  url: =>
+    if @race
+      "#{@race.url()}/instances"      
+    else
+      "#{_fellrace.apiUrl()}/api/instances"
 
   past: =>
     _.filter @models, (instance) =>

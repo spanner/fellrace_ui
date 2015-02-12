@@ -117,10 +117,11 @@ class FellRace.Application extends Backbone.Marionette.Application
     @actionRegionSetup()
 
     @_config = new FellRace.Config(options.config)
+    @_api_url = @config("api_url")
     @session = new FellRace.Models.UserSession()
-    @events ?= new FellRace.Collections.Events([])
-    @publications ?= new FellRace.Collections.Publications([])
-    @previews ?= new FellRace.Collections.Publications([])
+    @races ?= new FellRace.Collections.Races([])
+
+    # ???
     @clubs ?= new FellRace.Collections.Clubs([])
     @competitors ?= new FellRace.Collections.Competitors([])
 
@@ -151,6 +152,9 @@ class FellRace.Application extends Backbone.Marionette.Application
     Backbone.history.start
       pushState: true
       root: '/'
+
+  apiUrl: =>
+    @_api_url
 
   listenToToggle: =>
     $("#view_toggle").on "click", =>

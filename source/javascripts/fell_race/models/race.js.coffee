@@ -32,7 +32,7 @@ class FellRace.Models.Race extends Backbone.Model
     twitter_id: null
 
   url: =>
-    "/api/races/#{@get("slug")}"
+    "#{_fellrace.apiUrl()}/races/#{@get("slug")}"
 
   initialize: ->
     @build()

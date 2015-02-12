@@ -11,7 +11,7 @@ class FellRace.Models.Instance extends Backbone.Model
     if @race
       "#{@race.url()}/instances/#{@get("name")}"
     else
-      "/api/instances/#{@id}"
+      "#{_fellrace.apiUrl()}/instances/#{@id}"
 
   initialize: (opts,{race:@race}={}) ->
     # separate datetime into date and time or use a single control?

@@ -25,12 +25,12 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
   event_bundles: {}
 
   initialize: ->
-    _fellrace.publications.on "add", (model) =>
-      @constructPublicationBundle model
-    _fellrace.previews.on "add", (model) =>
-      @constructPreviewBundle model
-    _fellrace.events.on "add", (model) =>
-      @constructEventBundle model
+    # _fellrace.publications.on "add", (model) =>
+    #   @constructPublicationBundle model
+    # _fellrace.previews.on "add", (model) =>
+    #   @constructPreviewBundle model
+    # _fellrace.events.on "add", (model) =>
+    #   @constructEventBundle model
 
   onRender: () =>
     throw new Error("Google maps API is not loaded.") unless google and google.maps
