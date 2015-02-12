@@ -1,0 +1,4 @@
+%h1.title
+  %a.back{href: "/runners"} <
+  Competitor merge requests
+%table.competitors

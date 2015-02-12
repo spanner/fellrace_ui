@@ -1,0 +1,7 @@
+%table
+  %thead
+    %tr
+      %th forename
+      %th surname
+      %th category
+  %tbody

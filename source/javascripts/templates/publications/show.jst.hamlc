@@ -1,0 +1,21 @@
+#eventhead
+  %h1#name
+  #eventcontrols
+    %a.edit
+      Edit
+    %a.publish
+      Publish &raquo;
+    %a.enter
+      Enter &raquo;
+
+#eventbody
+  #event_details
+    %p.date
+      %span.next Next
+      race:
+      %strong#event_date
+
+    #description
+
+  .races
+    .races_list

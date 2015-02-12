@@ -1,0 +1,32 @@
+#competitor_head
+  .picture
+    %img
+  .details
+    %h1.name
+    %a.club
+
+.summary
+  .attribute.cat
+    %span.value
+    %span.key Category
+  .attribute.age
+    %span.value
+    %span.key Years old
+  .attribute.performances_count
+    %span.value
+    %span.key Total races
+  .attribute.years_racing
+    %span.value
+    %span.key Years racing
+  .attribute.lives_in
+    %span.value
+    %span.key Lives
+  .attribute.born_in
+    %span.value
+    %span.key Born
+
+.futher_details
+
+.year_graph
+
+%table.performances

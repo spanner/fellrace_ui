@@ -1,0 +1,8 @@
+%table.performances
+  %thead
+    %tr
+      %th Date
+      %th Race
+      %th Time
+      %th Pos
+  %tbody

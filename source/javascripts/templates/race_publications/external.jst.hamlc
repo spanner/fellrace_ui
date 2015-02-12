@@ -1,0 +1,29 @@
+.race_head
+  .profile
+    %span.race_profile>
+      1,1,1,1
+
+  .main_info
+    .title.race_title
+      %h2
+        %a.opener
+          %span.name
+        %span.subtitle
+          %span.distance
+          km /
+          %span.climb
+          m
+
+.race_body
+  %p.description
+  .details
+    .attachments
+      %ul.attachments
+    .checkpoints
+      %h4
+        Checkpoints
+      %ul.checkpoints
+    .records
+      %h4
+        Records
+      %ul.records

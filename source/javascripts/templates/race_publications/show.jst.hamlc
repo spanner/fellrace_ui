@@ -1,0 +1,71 @@
+.race_head
+  .main_info
+    .title.race_title
+      %h2
+        %a.opener
+          %span.name
+
+    .subtitle
+      %strong.cat
+      %span.distance
+      km \u2192\&nbsp;
+      %span.climb
+      m \u2191
+
+  .profile
+    %span.race_profile
+
+.race_body
+  %p.description
+  .details
+    .attachments
+      %h3
+        Downloads
+      %ul.attachments
+
+    .race_requirements
+      %h3
+        Requirements
+      .show_requirements
+        %p.requirements
+
+    .checkpoints
+      %h3
+        Checkpoints
+      %ul.checkpoints.published
+
+    .records
+      %h3
+        Records
+      %ul.records
+
+  .moredetails
+
+    .start_time
+      %h3 Start time
+      %strong.race_start_time
+
+    .instances
+      %h3
+        Results
+      %ul.instances
+
+    .race_organiser
+      %h3 
+        Organiser
+      %ul.show_organiser
+        %li
+          %a.organiser_name
+        %li
+          %span.organiser_phone
+        %li
+          %p.organiser_address
+
+    .links
+      %h3 
+        Links
+      %a.social.fra FRA
+      %a.social.shr SHR
+      %a.social.fb facebook
+      %a.social.twit twitter
+      %ul.links

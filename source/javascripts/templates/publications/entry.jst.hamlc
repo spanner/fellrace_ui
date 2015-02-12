@@ -1,0 +1,6 @@
+#eventhead
+  %h1
+    %a#name
+
+#eventbody
+  #instances

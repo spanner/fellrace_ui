@@ -1,0 +1,5 @@
+%span.editable.name
+%span.distance
+km
+%a.extend{:href => "#"} \u271A
+%a.delete{:href => "#"} \u232B

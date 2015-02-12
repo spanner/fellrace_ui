@@ -1,0 +1,8 @@
+%nav
+  %a#by_date Date
+  %a#by_year Year
+  %a#by_category Category
+
+%table#results_by_race
+%table#results_by_year
+%table#results_by_category

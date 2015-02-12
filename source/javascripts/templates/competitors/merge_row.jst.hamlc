@@ -1,0 +1,12 @@
+%td.main_competitor
+%td \ <<<<
+%td.duplicate
+  %a.name
+  (
+  %span.club
+  )
+  %span.gender
+  %span.dob
+%td.controls
+  %a.accept Accept
+  %a.reject Reject

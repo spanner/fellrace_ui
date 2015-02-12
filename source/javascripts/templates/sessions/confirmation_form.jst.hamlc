@@ -1,0 +1,48 @@
+.confirm
+  %p.waiter
+    Please wait while we check your confirmation token.
+
+  %p.refusal
+    Sorry: this confirmation link does not seem to be correct. Have you already confirmed your account?
+    If not, you can 
+    %a.reconfirm
+      request another confirmation message.
+    Please make sure you're using the whole link.
+
+  %form
+    %h3.robot
+      Welcome back 
+
+    %p.preamble
+      Thank you for all the waiting and clicking.
+      To finish setting up your account, we only need your name and password.
+
+    %fieldset
+      %p.names
+        %label{:for => "first_name"}
+          Name
+        %br
+        %input#first_name{:name => "first_name", :type => "text", :required => "required", placeholder: "First name"}
+        %input#last_name{:name => "last_name", :type => "text", :required => "required", placeholder: "Surname"}
+      %p
+        %label{:for => "password"}
+          Password
+        %input#password{:name => "password", :type => "password", :required => "required"}
+      .password_confirmation
+        %p
+          %label{:for => "password_confirmation"}
+            and please confirm
+          %input#password_confirmation{:name => "password_confirmation", :type => "password", :required => "required"}
+      // #TODO: choose a running club too.
+      .buttons
+        %input{:type => "submit", :value => "Save me"}
+
+    %p.outcome
+      When you press 'save me' we will store this password and create a site at
+      %strong.domain
+
+  .confirmation
+    %h3.robot
+      All done
+    %p
+      Please wait while we create your site.

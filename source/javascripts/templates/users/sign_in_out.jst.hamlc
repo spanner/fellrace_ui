@@ -1,0 +1,4 @@
+%a.sign_in{href: "/sign_in"}
+  Sign in
+%a.sign_out{href: "/sign_out"}
+  Sign out

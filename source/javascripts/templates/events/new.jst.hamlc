@@ -1,0 +1,9 @@
+.check
+  %form.checker
+    %fieldset.event
+      %p.availability
+      %input#slug{name: "slug", type: "text", required: "required"}
+      %span.domain
+        \.fellrace.org.uk
+      .submit
+        %input{type: "submit", value: "create"}

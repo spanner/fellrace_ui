@@ -1,0 +1,1157 @@
+@import vendor/medium-editor
+@import lib/definitions
+@import lib/notifications
+@import lib/fonts
+
+$translucent: rgba(255,255,255,0.92)
+
+// -- temporary -- //
+
+span.entry_fee, span.received_fee
+  &:before
+    content: "£"
+
+// -------------- //
+
+body
+  margin: 0
+  +book
+  position: absolute
+  top: 0
+  right: 0
+  bottom: 0
+  left: 0
+  overflow: hidden
+
+a
+  text-decoration: none
+  color: $link
+  cursor: pointer
+
+[contentEditable]
+  color: $mid
+
+.hidden
+  display: none
+
+span.editable
+  display: inline-block
+  min-width: 12px
+
+input[type="file"]
+  display: none
+
+a.add
+  color: $green
+  font-weight: normal
+  // white-space: nowrap
+  +icon_link("add.png")
+  cursor: pointer
+
+a.set
+  color: $blue
+  font-weight: normal
+  white-space: nowrap
+  +icon_link("set.png")
+
+form.bubble
+  width: 320px
+  input.title, textarea, select
+    width: 295px
+    margin-bottom: 6px
+  input.title, select
+    font-size: 1.5em
+  textarea
+    height: 120px
+    font-size: 1em
+
+input[type="submit"]
+  +button($green)
+  &.unavailable
+    background-color: $mid
+    +opacity(0.5)
+    &:hover
+      background-color: $mid
+
+h3.robot
+  padding-left: 22px
+  min-height: 19px
+  padding-top: 11px
+  margin-left: -4px
+  background:
+    position: 0 0
+    repeat: no-repeat
+    image: image-url("robot.png")
+
+table
+  border-collapse: collapse
+  width: 100%
+  thead
+    th
+      text-align: left
+  tr
+    &.odd
+    &.even
+      background: $palest
+
+table.ranking
+  border-collapse: collapse
+  border: 0
+  margin-top: 10px
+  tr.prized
+    background-color: $palebg
+    font-weight: bold
+  tr.unfinished
+    color: $mid
+    a
+      color: $mid
+  th, td
+    vertical-align: top
+    font-size: 90%
+    padding: 6px 10px
+    text-align: left
+    a
+      color: $dark
+    a:hover
+      color: $hover
+    &.prizes
+      color: $mid
+      font-size: 75%
+  th
+    a.sortable
+      padding-left: 10px
+      background: image-url('race_results/sorts.png') no-repeat 0 5px
+      &.up
+        background-position: 0 -11px
+      &.down
+        background-position: 0 -27px
+      &:hover
+        color: #f06
+        background-position: 0 -59px
+      &.up:hover
+        background-position: 0 -43px
+      &:active, &.up:active
+        background-position: 0 -75px
+
+div.performance_chart
+  width: 800px
+  height: 500px
+  margin: 20px 0
+  overflow: hidden
+  ul
+    display: none
+  a.waiting
+    display: block
+    margin: 180px 380px
+
+div.tooltip
+  position: absolute
+  display: none
+  border: 1px solid #fdd
+  padding: 2px
+  background-color: white
+  opacity: 0.90
+  border: 1px solid $pale
+  z-index: 1000
+
+table.splits
+  border-collapse: collapse
+  border: 0
+  margin-top: 10px
+  tr.unfinished
+    color: $mid
+    a
+      color: $mid
+  th, td
+    vertical-align: top
+    font-size: 80%
+    padding: 3px 5px
+    text-align: left
+    a
+      color: $dark
+    a:hover
+      color: $hover
+    span.interval
+      color: $mid
+
+p.download
+  a.csv
+    padding-left: 20px
+    background: transparent image-url('race_results/csv.png') no-repeat 0 0
+    &:hover
+      background-position: 0 -16px
+
+table.index
+  td.race_name
+    font-size: 115%
+    font-weight: bold
+    vertical-align: top
+    a
+      color: black
+      text-decoration: none
+  td.race_instances
+    padding: 8px
+    width: 75%
+    font-size: 90%
+    vertical-align: top
+    ul.instances
+      list-style: square
+      padding-left: 0
+      li
+        margin-bottom: 6px
+        float: left
+        margin-right: 32px
+        a
+          font-size: 115%
+          font-weight: bold
+          text-decoration: none
+    p.new_instance
+      clear: left
+
+a.remove
+  font-weight: bold
+  color: #cc0000
+  text-decoration: none
+
+span.formnote, span.info
+  color: #666666
+  font-size: 85%
+
+#content .form-area p.body
+  margin-top: 20px
+
+ul.help
+  list-style: square
+  color: #666666
+  font-size: 85%
+  code
+    color: #cc0000
+    font-size: 115%
+
+p.haserror
+  border-left: 4px solid #cc0000
+  margin-left: -16px
+  padding-left: 12px
+  color: #cc0000 !important
+
+.placeheld
+  color: $pale
+
+// -------------------------------------LAYOUT----------------------------------- //
+
+$smallheight: 180px
+$narrowwidth: 800px
+$tallheight: 300px
+$widewidth: 960px
+$padding_x: 20px
+$shadow: 1px 3px 8px #333
+
+#view_toggle
+  position: absolute
+  background-color: $translucent
+  cursor: pointer
+
+.gmap
+  .map_holder
+    background-color: $mid
+    position: fixed !important
+    top: 0
+    right: 0
+    bottom: 0
+    left: 0
+  .map_data
+    display: block
+    position: absolute
+    top: 20px
+    left: 20px
+  .label
+    padding: 0 4px 0 3px
+    border-radius: 0 8px 8px 0
+
+#results
+  position: fixed !important
+  top: 0
+  left: 580px
+  right: 0
+  bottom: 0
+  background: white
+  display: none
+
+#banner
+  position: absolute
+  top: 10px
+  left: 10px
+  +opacity(0.4)
+  &:hover
+    +opacity(1)
+  a
+    color: $dark
+    +glow
+    span.title
+      display: block
+      margin: 0
+      font-size: 160%
+      +light
+    span.strapline
+      display: block
+      margin-top: -5px
+      margin-left: 1px
+      font-size: 60%
+      font-weight: bold
+
+#action
+  h3
+    margin: 0
+  position: fixed
+  width: 280px
+  max-height: 450px
+  padding: 10px
+  display: none
+  border-radius: 3px
+  box-shadow: 5px 5px 15px #bbb
+  background-color: $translucent
+  right: 20px
+  top: 20px
+  overflow: scroll
+.signin
+  span.email
+    font-weight: bold
+  .confirmation
+    display: none
+  p.error
+    color: $red
+  form
+    margin: 0
+    fieldset
+      border: 0
+      margin: 0
+      padding: 0
+      a.forgotten
+        float: right
+        color: $mid
+        font-size: 90%
+        margin-right: 5px
+      input[type="text"],input[type="email"],input[type="password"]
+        padding: 7px
+        border: 1px solid $pale
+        width: 265px
+        color: $dark
+        font-size: 1em
+    .password_confirmation
+      display: none
+  .refusal
+    color: $red
+    a
+      color: $red
+      font-weight: bold
+.register, .confirm
+  p.availability
+    &.ok,&.notok
+      padding-left: 24px
+      margin-left: -5px
+    margin-bottom: 0.2em
+    background:
+      position: 0 0
+      repeat: no-repeat
+      image: image-url("availability.png")
+    &.ok
+      color: $green
+      background-position: 0 -32px
+    &.notok
+      color: $red
+      background-position: 0 -64px
+  form
+    margin: 0
+    fieldset
+      border: 0
+      margin: 0
+      padding: 0
+      input[type="text"],input[type="email"],input[type="password"]
+        padding: 7px
+        border: 1px solid $pale
+        width: 230px
+        color: $dark
+        font-size: 1em
+      input#desired_slug
+        min-width: 60px
+        max-width: 120px
+        font-size: 1em
+        color: $mid
+      span.domain
+        font-size: 1em
+        color: $mid
+      p.names
+        input
+          width: 102px
+          &:first-child
+            margin-right: 6px
+
+@media screen
+  #main_content
+    bottom: 5px
+    left: 10px
+    right: 5px
+
+@media not screen
+  #main_content
+    bottom: 20px
+    left: 20px
+    right: 10px
+
+@media (orientation:landscape)
+  #content
+    top: 0
+    +box-shadow(10px 0 40px rgba(0,0,0,0.5))
+    #view_toggle
+      top: 40px
+      right: 0
+      margin-right: -25px
+      width: 25px
+      height: 35px
+      box-shadow: 6px 5px 10px 0 rgba(0, 0, 0, 0.25)
+      border-radius: 0 5px 5px 0    
+
+  @media (max-width:768px)
+    #content
+      width: 90%
+  @media (min-width:768px)  
+    #content
+      width: 580px
+
+
+@media (orientation:portrait)
+  #content
+    right: 0
+    +box-shadow(0 -10px 40px rgba(0,0,0,0.5))
+    #view_toggle
+      top: 0
+      margin-top: -25px
+      left: 30px
+      width: 35px
+      height: 25px
+      box-shadow: 6px -5px 10px 0 rgba(0, 0, 0, 0.25)
+      border-radius: 5px 5px 0 0
+
+  @media (max-height:768px)
+    #content
+      top: 40px
+  @media (min-height:768px)  
+    #content
+      top: 40%
+
+section#extra
+  height: 100%
+  position: absolute
+  background: $translucent
+  left: 580px
+  right: 0
+  overflow: auto
+  &:empty
+    display: none
+  // #table
+  //   position: relative
+  //   font-size: 0.8em
+  //   height: 100%
+  //   overflow: auto
+  //   width: 100%
+  //   .loading
+  //     width: 300px
+  //     margin: 200px auto
+  //     color: $pale
+  //     font-size: 3em
+  table#results_table
+    font-size: 0.8em
+    thead
+      th
+        text-align: left
+    tbody
+      overflow: auto
+      tr.female
+        background: #FFF7F7
+      tr:hover
+        background: #eee
+      td
+        vertical-align: top
+        text-align: left
+        &.time
+          font-weight: bold
+        &.checkpoint
+          span
+            &.elapsed
+              display: block
+            &.split
+              display: block
+              font-size: 0.75em
+              color: $pale
+
+#view_toggle
+  position: absolute
+  background-color: $translucent
+  cursor: pointer
+
+#content
+  position: absolute
+  bottom: 0
+  left: 0
+  overflow: visible
+  background-color: $translucent
+  [contenteditable=true]:empty:after
+    content: attr(data-placeholder)
+    color: #999
+  
+  header
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
+    height: 60px
+    #user_controls
+      position: relative
+      float: right
+      margin: 10px
+      .user
+        a.user_icon
+          position: relative
+          img
+            width: 36px
+            height: 36px
+        .pointer
+          border-color: transparent
+          border-bottom-color: $verypale
+          border-style: dashed dashed solid
+          border-width: 0 8px 8px
+          position: absolute
+          right: 10px
+          top: -8px
+          z-index: 1
+          height: 0
+          width: 0
+        .user_controls
+          position: absolute
+          top: 50px
+          right: 0
+          width: 120px
+          height: 100px
+          z-index: 999
+          background: $translucent
+          border: 1px solid $verypale
+          border-radius: 0 0 0 5px
+          &.closed
+            display: none
+          a.me
+            position: absolute
+            top: 10px
+            right: 10px
+            background: $blue
+          a.sign_out
+            position: absolute
+            right: 10px
+            bottom: 10px
+          
+
+  main
+    position: absolute
+    overflow-y: auto
+    overflow-x: hidden
+    width: 100%
+    top: 55px
+    #publications
+      width: 480px
+      float: left
+    .personal
+      width: 360px
+      float: left
+
+    #competitors
+      .search_form
+        margin-bottom: 10px
+        span.param
+          font-size: 1.2em
+          min-width: 80px
+          margin-right: 15px
+        a.search
+          +button($green)
+    #eventhead
+      position: relative
+      float: left
+      overflow: visible
+      h1
+        margin: 18px 14px 0 0//32px
+        font-size: 3em
+        line-height: 1
+        float: left
+
+    #eventcontrols
+      position: relative
+      float: left
+      margin: 20px 0 0
+      a
+        vertical-align: middle
+
+    #eventbody
+      position: relative
+      clear: left
+      overflow: hidden
+      #event_details
+        width: 100%
+        float: left
+        margin: 0 0 10px//32px
+        p.date
+          margin-top: 0
+        #description
+          // min-height: 510px
+          p:first-child
+            margin-top: 0
+            font-size: 1.25em
+            line-height: 1.4
+            letter-spacing: -0.01em
+          ul
+            list-style: square
+            padding-left: 1em
+            li
+              margin-bottom: 0.25em
+              margin-top: 0
+          &.empty
+            display: none
+      .races
+        position: relative
+        float: left
+        width: 100%
+    .race
+      position: relative
+      float: left
+      clear: left
+      margin: 0 0 10px
+      width: 100%
+      // margin-top: -60px
+      &:first-child, &.new
+        margin-top: 10px
+      h3
+        margin-bottom: 2px
+      &.add_race
+        margin-top: 0
+      #add_race
+        margin: 10px
+      &.small
+        .race_body
+          display: none
+        .race_head
+          .controls
+            .opener
+              display: block
+            .closer
+              display: none
+      .race_head
+        // padding: 10px
+        font-size: 1.2em
+        position: relative
+        height: 100px
+        // margin-top: 20px
+        .delete
+          display: none
+          line-height: 1em
+        &:hover
+          .delete
+            display: inline-block
+        .profile
+          width: 100%
+          height: 100px
+          float: left
+        .main_info
+          position: absolute
+          bottom: 15px
+          left: 10px
+          width: 420px
+          float: left
+          .title
+            width: 100%
+            h2
+              margin: 0
+              font-size: 1.1em
+            span.name
+              display: inline-block
+              vertical-align: top
+              min-width: 100px
+            a.delete
+              font-size: 75%
+            a.opener
+              display: inline-block
+              vertical-align: top
+              margin-left: -6px
+              color: $dark
+              &:before
+                display: inline-block
+                width: 16px
+                content: "\025B6"
+                font-family: sans-serif
+                font-size: 75%
+              &.open:before
+                content: "\025BC"
+              &:hover
+                color: $hover
+            
+          .subtitle
+            margin-top: 0
+            width: 100%
+            color: $dark
+        .controls
+          position: absolute
+          right: 5px
+          font-size: 2em
+          .opener
+            display: none
+          .closer
+            display: block
+
+      .race_body
+        position: relative
+        width: 100%
+        .delete
+          line-height: 1em
+        .profiles, .details, .moredetails
+          font-size: 85%
+          div
+            clear: left
+          ul
+            margin: 0
+            padding: 0
+            list-style: none
+          h3
+            input[type="checkbox"]
+              margin-left: -20px
+            clear: left
+          p
+            margin-top: 2px
+            &.editable
+              min-height: 50px
+          p.note, li.note
+            +quiet
+          span.note
+            color: $mid
+
+        .profiles
+          width: 380px
+          float: left
+          margin: 10px 20px 10px 10px
+          h3
+            margin-top: 0
+          div.elevations
+            width: 380px
+            height: 50px
+        .description
+          margin: 10px
+          &:not([contenteditable]):empty
+            display: none
+        .details
+          width: 250px
+          position: relative
+          float: left
+          margin: 0 0 10px
+          ul.checkpoints
+            li.checkpoint
+              height: 24px
+              line-height: 24px
+              border: 1px solid transparent
+              .delete
+                display: none
+              &:hover
+                .delete
+                  display: inline-block
+              &.placeholder
+                background-color: white
+                border: 1px dotted $pale
+            &.published
+              li.checkpoint
+                cursor: pointer
+                &:before
+                  content: "\025CB"
+                  width: 16px
+                  display: inline-block
+                  vertical-align: top
+                  text-align: center
+                &.start:before
+                  content: "\025B3"
+                &.finish:before
+                  content: "\025CE"
+            span.gridref
+              color: $mid
+              min-width: 20px
+              font-size: 0.8em
+            span.symbol
+              display: inline-block
+              vertical-align: middle
+              text-align: center
+              width: 14px
+              color: red
+              line-height: 1em
+              &.unfixed
+                cursor: move
+            .placeholder
+              margin-left: -1em
+          ul.records
+            li
+              margin-bottom: 6px
+              .delete
+                display: none
+              &:hover
+                .delete
+                  display: inline-block
+            span.record
+              font-weight: bold
+            span.holder
+              display: block
+              color: $mid
+          ul.attachments
+            .attachment
+              input[type="file"]
+                display: none
+              span.name
+                max-width: 200px
+                vertical-align: middle
+              a.file_icon
+                width: 20px
+              &.frozen
+                +opacity(0.25)
+              .delete
+                display: none
+              &:hover
+                .delete
+                  display: inline-block
+          .route
+            .route_controls
+              input[type="color"]
+                width: 23px
+              .delete
+                display: none
+              &:hover
+                .delete
+                  display: inline-block
+
+        .race_requirements, .attachments, .start_time
+          h3
+            margin-top: 0
+
+        .moredetails
+          width: 200px
+          position: relative
+          float: left
+          margin: 10px 0 0 10px
+          a.social
+            width: 16px
+            overflow: hidden
+          ul.links
+            li
+              margin-bottom: 4px
+              .delete
+                display: none
+              &:hover
+                .delete
+                  display: inline-block
+              .url:before
+                content: "http://"
+              span.title
+                font-weight: bold
+          ul.autolinks
+            margin-top: 10px
+            li
+              margin-bottom: 4px
+          ul.instances
+            li.instance
+              .delete
+                display: none
+              &:hover
+                .delete
+                  display: inline-block
+              span.name, a.name
+                font-weight: bold
+              input[type="file"]
+                display: none
+              &.frozen
+                +opacity(0.25)
+          .enter_race
+            background: $brightgreen
+        @media (max-height:768px) and (orientation:portrait)
+          .moredetails
+            margin: 0
+    #accountcontrols
+      position: relative
+      clear: left
+      overflow: hidden
+      background-color: $translucent
+      min-height: 40px
+      p
+        margin: 0 10px 10px 32px
+        color: $mid
+        font-size: 90%
+
+    #competitor
+      margin-left: 10px
+      margin-right: 10px
+      position: relative
+
+      #competitor_head
+        display: table
+        margin: 0 auto
+        .picture
+          float: left
+        .details
+          float: left
+          .name
+            margin: 0
+
+      .summary
+        display: table
+        margin: 10px auto 0
+        .attribute
+          display: inline-block
+          margin: 0 5px
+          &.empty
+            display: none
+          .value
+            width: 100%
+            float: left
+            text-align: center
+            border-bottom: 1px dotted $pale
+          .key
+            width: 100%
+            float: left
+            clear: left
+            text-align: center
+            color: $pale
+
+#controls, .controls
+  .edit, .accept
+    +button($green)
+  .reject, .disown
+    +button($red)
+  .save, .merge
+    +button($rubine)
+
+a.social, span.social
+  display: inline-block
+  vertical-align: top
+  height: 16px
+  text-indent: 20px
+  background:
+    color: transparent
+    image: image-url("site_icons.png")
+    repeat: no-repeat
+
+.organiser_address, .organiser_email, .organiser_phone, .organiser_name
+  // text-indent: 20px
+  margin-bottom: 5px
+  // background:
+  //   color: transparent
+  //   repeat: no-repeat
+
+// .organiser_address
+//   background-image: image-url("home.png")
+// 
+// .organiser_email
+//   background-image: image-url("email.png")
+// 
+// .organiser_phone
+//   background-image: image-url("phone.png")
+
+span.social
+  &.fb
+    background-position: 0 0
+  &.twit
+    background-position: 0 -96px
+  &.fra
+    background-position: 0 -192px
+  &.shr
+    background-position: 0 -288px
+
+a.social, span.social.present
+  &.fb
+    background-position: 0 -32px
+    color: #3b5998
+    &:hover
+      background-position: 0 -64px
+      color: $hover
+  &.twit
+    background-position: 0 -128px
+    color: #0084b4
+    &:hover
+      background-position: 0 -160px
+      color: $hover
+  &.fra
+    background-position: 0 -224px
+    color: #a1a129
+    &:hover
+      background-position: 0 -256px
+      color: $hover
+  &.shr
+    background-position: 0 -320px
+    color: #253d8f
+    &:hover
+      background-position: 0 -352px
+      color: $hover
+
+a.file_icon
+  display: inline-block
+  vertical-align: middle
+  overflow: hidden
+  padding: 2px
+  min-height: 26px
+  text-indent: 25px
+  line-height: 26px
+  background-image: image-url('icons.png')
+  background: 
+    repeat: no-repeat
+    position: 0 0
+  &.pdf
+    background-position: 0 -200px
+    color: #df0f00
+  &.doc, &.docx
+    background-position: 0 -400px
+    color: #1683ab
+    +hover
+  &.xls, &.xlsx
+    background-position: 0 -600px
+    color: #369620
+    +hover
+  &.ppt, &.pptx
+    background-position: 0 -800px
+    color: #cc440a
+    +hover
+  &.add
+    float: left
+    width: 20px
+
+a.file_name
+  vertical-align: middle
+  max-width: 222px
+  display: inline-block
+  &.pdf
+    color: #df0f00
+  &.doc, &.docx
+    color: #1683ab
+  &.xls, &.xlsx
+    color: #369620
+  &.ppt, &.pptx
+    color: #cc440a
+
+.map_menu
+  display: none
+  background: #fff
+  padding: 0
+  white-space: nowrap
+  -moz-transition: opacity 0.218s
+  -o-transition: opacity 0.218s
+  -webkit-transition: opacity 0.218s
+  transition: opacity 0.218s
+  -webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.2)
+  -moz-box-shadow: 0 2px 4px rgba(0,0,0,0.2)
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2)
+  z-index: 1000
+  position: absolute
+  outline: 1px solid rgba(0,0,0,0.2)
+  a
+    color: #222
+  li
+    display: block
+    padding: 6px 44px 6px 16px
+    position: relative
+    color: #333
+    font-weight: normal
+    -moz-transition: background 0.130s
+    -o-transition: background 0.130s
+    -webkit-transition: background 0.130s
+    transition: background 0.130s
+    .disable:hover, .disable
+      color: #ccc
+      background-color: #fff
+      cursor: default
+    &:hover, &.selected
+      background-color: #f1f1f1
+      color: #222
+      -moz-transition: background 0s
+      -o-transition: background 0s
+      -webkit-transition: background 0s
+      transition: background 0s
+    .rule
+      border-top: 1px solid #ebebeb
+      margin-top: 9px
+      margin-bottom: 10px
+
+.labels
+  color: #FF0066
+  font-size: 16px
+  text-align: center
+  white-space: nowrap
+
+
+.button
+  +button
+
+#eventcontrols
+  // max-width: 270px
+  .edit
+    +button($green)
+  .publish
+    +button($rubine)
+    overflow: hidden
+  .preview
+    +button($red)
+    overflow: hidden
+  .setmap
+    +button($blue)
+    overflow: hidden
+  .enter
+    +button($rubine)
+    overflow: hidden
+  .settings
+    +button($mid)
+    width: 10px
+    overflow: hidden
+    text-indent: 50px
+    span
+      display: block
+      position: absolute
+      width: 26px
+      height: 26px
+      left: 5px
+      top: 5px
+      background:
+        image: image-url('settings.png')
+        repeat: no-repeat
+
+ul.sortable
+  margin: 0
+  padding: 0
+  width: 200px
+
+ul.sortable li
+  list-style: none
+  background-color: #f8f8f8
+  margin: 0
+  padding: 5px 7px
+  border: 1px solid #dbdbdb
+  border-bottom: none
+  font-size: 17px
+  cursor: move
+
+ul.sortable li:last-child
+  border-bottom: 1px solid #dbdbdb
+
+ul.sortable li.over
+  background-color: yellow
+
+#footer
+  position: relative
+  padding: 10px 0
+  overflow: hidden
+  clear: both
+  // margin: 40px 10px 10px 32px
+  font-size: 75%
+  color: $pale
+  p
+    margin: 0
+  a
+    color: $mid
+  min-height: 20px
+  background-color: $translucent
+
+@import lib/results

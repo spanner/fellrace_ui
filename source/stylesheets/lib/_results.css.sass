@@ -1,0 +1,41 @@
+#results
+  position: fixed
+  overflow: scroll
+  top: 2%
+  left: 5%
+  right: 5%
+  height: 96%
+  width: 90%
+  background-color: white
+  +box-shadow
+  display: none
+  
+  table
+    thead
+      th
+        &.checkpoint, &.time, &.pos
+          text-align: right
+        a
+          padding: 0 10px
+    tbody
+      overflow: auto
+      tr.female
+        background: #FFF7F7
+      tr:hover
+        background: #eee
+      td
+        &.time
+          span
+            padding-right: 10px
+            font-weight: bold
+            float: right
+        &.checkpoint
+          span
+            padding-right: 10px
+            &.elapsed
+              color: #555
+              font-size: 0.7em
+              float: right
+            &.split
+              font-size: 0.9em
+              float: right

@@ -1,0 +1,358 @@
+@import lib/definitions
+@import lib/fonts
+
+$width: 800px
+$left_margin:0
+$right_margin: 15px
+$content_width: $width - $left_margin - $right_margin
+$translucent: rgba(255,255,255,0.92)
+$left_column_width: 420px
+$margin: 20px
+$unnecessary_curvature: 8px
+
+body
+  background-color: $mid
+  margin: 0
+  line-height: 1.5
+  +book
+
+a
+  text-decoration: none
+  color: $link
+  cursor: pointer
+
+a.add
+  color: $green
+  font-weight: normal
+  // white-space: nowrap
+  +icon_link("add.png")
+
+a.marker
+  color: $rubine
+  font-size: 75%
+  margin-left: 0
+
+input[type="submit"]
+  +button($green)
+  &.unavailable
+    background-color: $mid
+    +opacity(0.5)
+    &:hover
+      background-color: $mid
+
+h3.robot
+  padding-left: 22px
+  min-height: 19px
+  padding-top: 11px
+  margin-left: -4px
+  background:
+    position: 0 0
+    repeat: no-repeat
+    image: image-url("robot.png")
+
+p.success
+  color: $green
+  padding-left: 20px
+  background:
+    position: 0 0
+    repeat: no-repeat
+    image: image-url("valid.png")
+  
+h3 + p
+  margin-top: 0.1em
+
+h3 + ul
+  margin-top: 0.5em
+
+// -------------------------------------LAYOUT----------------------------------- //
+
+.gmap
+  .map_holder
+    position: fixed !important
+    top: 0
+    left: 0
+    width: 100%
+    height: 100%
+
+#admin
+  clear: left
+  margin: 30px
+  color: $pale
+  font-size: 75%
+  a
+    color: $mid
+
+#page
+  margin: 0
+  overflow: hidden
+
+#banner
+  position: fixed !important
+  top: 20px
+  left: 20px
+  +opacity(0.45)
+  &:hover
+    +opacity(1)
+  a
+    color: $dark
+    +glow
+    span.title
+      display: block
+      margin: 0
+      font-size: 160%
+      +thin
+    span.strapline
+      display: block
+      margin-top: -5px
+      margin-left: 1px
+      font-size: 75%
+      font-weight: bold
+
+#content
+  position: relative
+  overflow: hidden
+  margin-left: $left_margin
+  margin-right: $right_margin
+  margin-bottom: 0
+  margin-top: 50%
+  width: $content_width
+
+  #header
+    position: relative
+    display: inline-block
+    background-color: $translucent
+    overflow: visible
+    +border-top-right-radius($unnecessary_curvature)
+    h1
+      +heading
+      margin: 12px 24px 0 $margin
+      font-size: 2em
+      line-height: 1.3
+      a.upper
+        color: $dark
+  #controls
+    position: relative
+    float: right
+    overflow: visible
+    margin: 0
+    p
+      margin: 0
+
+  #body
+    position: relative
+    background-color: $translucent
+    overflow: hidden
+    color: $dark
+    +border-top-right-radius($unnecessary_curvature)
+    #general
+      width: $left_column_width
+      margin-left: $margin
+      display: inline-block
+      vertical-align: top
+      margin-bottom: 50px
+      margin-right: 40px
+      #publications
+        .event
+          margin-bottom: 1.6em
+          h3
+            margin-bottom: 2px
+            line-height: 24px
+            a.event
+              svg
+                display: inline-block
+                vertical-align: top
+              span.profile
+                display: inline-block
+                vertical-align: top
+                overflow: hidden
+                width: 40px
+                height: 20px
+                margin-right: 4px
+                margin-top: 4px
+              span.name
+                display: inline-block
+                vertical-align: top
+            span.date
+              font-weight: normal
+              font-size: 75%
+              color: $mid
+          p.intro
+            margin-top: 0
+    #personal
+      display: inline-block
+      vertical-align: top
+      width: 250px
+      margin: 24px 0 0 0
+      p
+        font-size: 90%
+      h2
+        font-size: 1.4em
+        margin-bottom: 0
+      h3
+        font-size: 1.2em
+        margin-bottom: 0
+        margin-top: 0
+      h4
+        font-size: 1em
+      .note
+        color: $mid
+      .preamble
+        margin: 0
+      span.email
+        font-weight: bold
+      .intro
+        p
+          margin-top: 0.2em
+          span.email
+            font-weight: bold
+          span.domain
+            font-weight: bold
+      .controls
+        position: absolute
+        top: 10px
+        right: 10px
+        font-size: 75%
+        a
+          color: $pale
+      .register, .confirm
+        p.availability
+          padding-left: 24px
+          margin-left: -24px
+          margin-bottom: 0.2em
+          background:
+            position: 0 0
+            repeat: no-repeat
+            image: image-url("availability.png")
+          &.ok
+            color: $green
+            background-position: 0 -32px
+          &.notok
+            color: $red
+            background-position: 0 -64px
+        form
+          margin: 0
+          fieldset
+            border: 0
+            margin: 0
+            padding: 0
+            input[type="text"],input[type="email"],input[type="password"]
+              padding: 7px
+              border: 1px solid $pale
+              width: 230px
+              color: $dark
+              font-size: 1em
+            input#desired_slug
+              width: 60px
+              font-size: 1em
+              color: $mid
+            span.domain
+              font-size: 1em
+              color: $mid
+            p.names
+              input
+                width: 102px
+                &:first-child
+                  margin-right: 6px
+
+      .signin
+        span.email
+          font-weight: bold
+        .confirmation
+          display: none
+        p.error
+          color: $red
+        form
+          margin: 0
+          fieldset
+            border: 0
+            margin: 0
+            padding: 0
+            a.forgotten
+              float: right
+              color: $mid
+              font-size: 90%
+              margin-right: 10px
+            input[type="text"],input[type="email"],input[type="password"]
+              padding: 7px
+              border: 1px solid $pale
+              width: 230px
+              color: $dark
+              font-size: 1em
+          .password_confirmation
+            display: none
+        .refusal
+          color: $red
+          a
+            color: $red
+            font-weight: bold
+
+      .new_event
+        p.availability
+          padding-left: 24px
+          margin-left: -24px
+          margin-bottom: 0.2em
+          background:
+            position: 0 0
+            repeat: no-repeat
+            image: image-url("availability.png")
+          &.ok
+            color: $green
+            background-position: 0 -32px
+          &.notok
+            color: $red
+            background-position: 0 -64px
+        form
+          margin: 0
+          fieldset
+            border: 0
+            margin: 0
+            padding: 0
+            input[type="text"]
+              padding: 7px
+              border: 1px solid $pale
+              width: 230px
+              color: $dark
+              font-size: 1em
+            input#slug
+              width: 60px
+              font-size: 1em
+              color: $mid
+            span.domain
+              font-size: 1em
+              color: $mid
+            p.names
+              input
+                width: 102px
+                &:first-child
+                  margin-right: 6px
+
+      a.account
+        display: inline-block
+        height: 1em
+        width: 1em
+        background:
+          size: contain
+          repeat: no-repeat
+        &.login
+          background-image: url('/images/login.png')
+        &.logout
+          background-image: url('/images/logout.png')
+      #events
+        .name
+          font-weight: normal
+        ul.events
+          padding-left: 1em
+          list-style: square
+
+#footer
+  clear: both
+  width: $left_column_width
+  margin: 40px 20px
+  font-size: 75%
+  color: $pale
+  p
+    margin: 0
+  a
+    color: $mid
+    
+@import lib/results

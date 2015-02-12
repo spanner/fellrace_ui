@@ -1,0 +1,30 @@
+.signin
+  %h3.robot
+    Sign in here
+
+  %form
+    %fieldset
+      %p
+        %label{:for => "email"}
+          Email
+        %input#email{:name => "email", :type => "email", :required => "required"}
+      %p
+        %label{:for => "password"}
+          Password
+        %a.forgotten
+          forgotten?
+        %input#password{:name => "password", :type => "password", :required => "required"}
+      .form-actions
+        %input{:type => "submit", :value => "Sign in"}
+        %span.note
+          or
+          %a.cancel cancel
+      %p
+        If you have signed up but not yet confirmed your account, this won't work. Please refer to your confirmation message. You can
+        %a.reconfirm
+          request a new one
+        if necessary.
+      %p
+        Don't have an account yet?
+        %a.sign_up Sign up
+        for one now.

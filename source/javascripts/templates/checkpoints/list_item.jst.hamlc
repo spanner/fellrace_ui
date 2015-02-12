@@ -1,0 +1,6 @@
+%span.symbol.unfixed o
+%span.pos
+%span.editable.name{:data => {:placeholder => "name"}}
+%span.gridref
+%a.place add to map
+%a.delete \u232B

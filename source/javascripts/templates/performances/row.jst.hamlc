@@ -1,0 +1,10 @@
+%td
+  %span.date
+%td
+  %span.race_name
+%td
+  %a.time
+    %span.time
+%td
+  %span.pos
+  %span.total

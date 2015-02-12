@@ -1,0 +1,10 @@
+#gmap
+#graph
+#content
+  #main_content
+  #user_controls
+#view_toggle
+  %a.expand >
+  %a.collapse <
+#notice
+#action

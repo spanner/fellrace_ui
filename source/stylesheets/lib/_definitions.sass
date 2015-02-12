@@ -1,0 +1,166 @@
+@import compass/css3
+
+$map_left_width: 35%
+$left_width: 50%
+
+$coolgrey0: #f2f0ed
+$coolgrey1: #e2e1dd
+$coolgrey2: #d6d6d4
+$coolgrey3: #cacac8
+$coolgrey4: #bdbdbd
+$coolgrey5: #b3b3b3
+$coolgrey6: #afafaf
+$coolgrey7: #9a9b9d
+$coolgrey8: #8c8d8e
+$coolgrey9: #747679
+$coolgrey10: #616265
+$coolgrey11: #4d4e53
+$black6: #101820
+
+$red: #e62f51
+$blue: #7489b8
+$green: #74b87a
+$midgreen: #9bbfa1
+$brightgreen: #00af68
+$palegreen: #d7e7da
+$rubine: #d1005d
+
+$palebg: $coolgrey0
+$dark: $black6
+$mid: $coolgrey8
+$pale: $coolgrey4
+$verypale: $coolgrey2
+$palest: $coolgrey0
+
+$page: #fff
+$text: $dark
+$link: $blue
+$visited: $green
+$hover: $rubine
+$active: $dark
+$input: $blue
+$error: #cc3333
+
+=big
+  font-size: 1.4em
+
+=pale
+  a
+    &:hover
+
+=bordered
+  border: 5px solid white
+  
+=shadowed
+  +box-shadow($dark 1px 3px 3px 1px)
+
+=glow($color: white)
+  text-shadow: 0 0 5px $color
+  
+=hover
+  &:hover
+    color: $hover
+
+=glow-on-hover
+  &:hover
+    +glow
+    color: white
+
+=text-hidden($indent: 500px)
+  overflow: hidden
+  text-indent: $indent
+
+=icon($url)
+  display: inline-block
+  padding-left: 34px
+  height: 32px
+  line-height: 32px
+  background:
+    color: transparent
+    position: 0 0
+    repeat: no-repeat
+    image: image-url($url)
+  &:hover
+    background-position: 0 -32px
+
+=quiet
+  font-weight: lighter
+  font-size: 85%
+  color: #cccccc
+  line-height: 1.4
+  text-shadow: none
+
+=flatbottom
+  margin-bottom: 0
+
+=clear
+  clear: left
+
+=spaced
+  letter-spacing: 0.04em
+  
+=button($color: $mid, $textcolor: white)
+  +light
+  +spaced
+  display: inline-block
+  position: relative
+  outline: none
+  cursor: pointer
+  text-align: center
+  text-decoration: none
+  font-size: 16px
+  padding: 8px 12px 6px
+  line-height: 20px
+  margin: 1px 0 0 0
+  +border-radius(3px)
+  +box-shadow(0 1px 2px rgba(0,0,0,0.6))
+  background-color: $color
+  color: $textcolor
+  border: solid 1px darken($color, 10)
+  +background-image(linear-gradient(lighten($color, 3), $color, darken($color, 10)))
+  &:hover
+    text-decoration: none
+    color: white
+    +background-image(linear-gradient(lighten($color, 5), darken($color, 8)))
+  &:active
+    position: relative
+    top: 1px
+    +box-shadow(0 1px 2px rgba(0,0,0,0.6) inset)
+    +background-image(linear-gradient(darken($color, 10), lighten($color, 3), $color, darken($color, 15)))
+  &.unavailable, &[disabled]
+    border: solid 1px darken($pale, 10)
+    color: lighten($pale, 15)
+    +background-image(linear-gradient($pale, lighten($pale, 3), $pale, darken($pale, 5)))
+    +box-shadow(none)
+    top: 0
+  &.waiting
+    +opacity(0.25)
+
+=icon_link($url)
+  display: inline-block
+  text-indent: 18px
+  margin-top: 0
+  line-height: 14px
+  min-height: 16px
+  background:
+    color: transparent
+    position: 0 0
+    repeat: no-repeat
+    image: image-url($url)
+  &:hover
+    background-position: 0 -32px
+  &.minimal
+    width: 16px
+    height: 16px
+    overflow: hidden
+    white-space: nowrap
+    +opacity(0.4)
+    &:hover
+      overflow: visible
+      +opacity(1)
+  &.big
+    text-indent: 26px
+    line-height: 32px
+    min-height: 26px
+    &:hover
+      background-position: 0 -48px

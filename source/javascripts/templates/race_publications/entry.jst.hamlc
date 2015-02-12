@@ -1,0 +1,6 @@
+.race_head
+  .main_info
+    .title.race_title
+      %h2.name
+
+.race_body

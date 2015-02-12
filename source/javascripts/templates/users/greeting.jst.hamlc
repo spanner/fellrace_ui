@@ -1,0 +1,5 @@
+%h3
+  Hello 
+  %span.first_name
+%p
+  Welcome to fellrace.org.uk.

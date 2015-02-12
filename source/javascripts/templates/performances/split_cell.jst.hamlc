@@ -1,0 +1,5 @@
+- if @elapsed_time? 
+  %span.elapsed= "#{parseInt(@elapsed_time, 10).toSimplestTime()} (#{@position})"
+- if @interval?
+  %span.split= "#{parseInt(@interval, 10).toSimplestTime()} (#{@split_position})"
+  

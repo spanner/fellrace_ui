@@ -1,0 +1,45 @@
+.signin
+  %form.password
+    %h3.robot
+      Resend confirmation
+
+    %fieldset
+      %p
+        %label{:for => "email"}
+          Email address
+        %input#email{:name => "email", :type => "email", :required => "required"}
+
+      .buttons
+        %input{:type => "submit", :value => "Send message"}
+        %span.formnote
+        or
+        %a.cancel
+          cancel
+
+      %p.note
+        When you click 'send instructions' we will check
+        %span.email
+        and if it is recognised, send another confirmation message to that address.
+        Please check the email address carefully.
+      %p
+        If you have confirmed your account, this isn't necessary (and won't work) but you can always
+        %a.request_reset
+          reset your password
+        instead.
+
+  .confirmation
+    %h3.robot
+      Confirmation sent
+
+    %p
+      Thank you. If we recognise
+      %span.email
+      then a new confirmation message will be sent.
+      Please allow a few minutes for it to arrive, and keep an eye on your spam folder.
+      The message will appear to come from robot@fellrace.org.uk.
+    %p
+      If all else fails, you can 
+      %a.sign_up
+        sign up again
+      with another address. 
+      Your address is still available until you confirm your account.

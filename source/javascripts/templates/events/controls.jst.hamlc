@@ -1,0 +1,5 @@
+#eventcontrols
+  %a.setmap
+    Save map state
+  %a.preview
+    Preview &raquo;

@@ -1,0 +1,6 @@
+%strong
+  %span.cat
+%span.distance
+km \u2192
+%span.climb
+m \u2191

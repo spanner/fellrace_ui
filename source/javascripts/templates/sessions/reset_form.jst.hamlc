@@ -1,0 +1,49 @@
+.signin
+  %form.password
+    %h3.robot
+      Reset your password
+
+    %fieldset
+      %p
+        %label{:for => "email"}
+          Email address
+        %input#email{:name => "email", :type => "email", :required => "required"}
+
+      .buttons
+        %input{:type => "submit", :value => "Send instructions"}
+        %span.formnote
+        or
+        %a.cancel
+          cancel
+
+      %p.note
+        When you click 'send instructions' we will check
+        %span.email
+        and if it is recognised, send a message explaining how to reset your password.
+        Please check the email address carefully.
+      %p
+        If you haven't confirmed your account yet, this won't work. You should 
+        %a.reconfirm
+          request a new confirmation message
+        instead.
+
+  .confirmation
+    %h3.robot
+      Reset message sent
+
+    %p
+      Thank you. If we recognised
+      %span.email
+      then a message was sent explaining how to reset your password. 
+      Please allow a few minutes for it to arrive, and keep an eye on your spam folder.
+      The message will appear to come from robot@fellrace.org.uk.
+    %p
+      Nothing has changed, so if you remember your password you can still
+      %a.sign_in
+        sign in
+      .
+      / or 
+      / %a{href: "/"}
+      /   request a site
+      / as usual.
+

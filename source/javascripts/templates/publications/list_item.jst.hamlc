@@ -1,0 +1,9 @@
+%h3
+  %a.event{:href => "#"}
+    %span.profile
+    %span.name
+  %span.note.date
+%p
+  %span.intro
+  / %a.marker
+  /   \u25B3

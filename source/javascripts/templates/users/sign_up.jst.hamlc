@@ -1,0 +1,16 @@
+%h3
+  Welcome!
+.register
+  %form.signup
+    %fieldset.user
+      %input#email{name: "email", type: "email", required: "required", placeholder: "email address"}
+      %input{ type: "submit", value: "Sign up"}
+      %p.note
+        When you click 'sign up' we'll send a confirmation message to
+        %span.email
+        Click on its large friendly button
+        %span.outcome
+  %p
+    Already got an account? Please
+    %a.sign_in
+      sign in first.

@@ -1,0 +1,6 @@
+%span.editable.title{:data => {:placeholder => "text"}}
+%span.note
+: 
+%span.editable.url{:data => {:placeholder => "www.example.com"}}
+%a.delete \u232B
+

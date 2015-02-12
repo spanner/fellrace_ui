@@ -1,0 +1,7 @@
+%td
+  %a.name
+%td
+  %span.club
+%td
+  .controls
+    %a.merge Merge

@@ -1,0 +1,9 @@
+%h1.title
+  %a.back{href: "/"} <
+  Find runners
+.search_form
+  %span.param.forename.editable{:data => {:placeholder => "forename"}
+  %span.param.surname.editable{:data => {:placeholder => "surname"}
+  / %span.club.editable{:data => {:placeholder => "forename"}
+  %a.search{:href => ""} Search
+.competitors

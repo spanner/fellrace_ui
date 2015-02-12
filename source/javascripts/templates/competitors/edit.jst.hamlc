@@ -1,0 +1,22 @@
+#head
+  %h1
+    %span.editable.forename{:data => {:placeholder => "forename"}}
+    %span.editable.surname{:data => {:placeholder => "surname"}}
+  #controls
+    %a.save.waiting Save
+#body
+  #ids
+    %li
+      %span.editable.twitter_name{:data => {:placeholder => "Twitter name"}}
+    %li
+      %span.editable.strava_id{:data => {:placeholder => "Strava id"}}
+    %li
+      %span.editable.ap_id{:data => {:placeholder => "Attackpoint id"}}
+    %li
+      %span.editable.power_of_ten_id{:data => {:placeholder => "Power of Ten id"}}
+    %li
+      %span.editable.uka_number{:data => {:placeholder => "UKA number"}}
+    %li
+      %span.editable.fra_number{:data => {:placeholder => "FRA number"}}
+  / .club
+  / %table.performances

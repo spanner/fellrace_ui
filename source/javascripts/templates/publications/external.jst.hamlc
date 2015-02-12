@@ -1,0 +1,11 @@
+#eventbody
+  #event_details
+    #description
+  .races
+    .races_list
+
+#credit
+  %p
+    Map and data provided by
+    %a.fellrace{href: "http://fellrace.org.uk/"}
+      fellrace.org.uk.
