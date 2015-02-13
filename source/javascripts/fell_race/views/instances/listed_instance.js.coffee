@@ -7,7 +7,7 @@ class FellRace.Views.ListedInstance extends Backbone.Marionette.ItemView
 
   bindings:
     "a.name":
-      observe: "name"
+      observe: "race_name"
       attributes: [
         {
           name: "href"

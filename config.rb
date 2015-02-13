@@ -77,9 +77,9 @@ use Rack::Rewrite do
   rewrite %r{^\/runners\/.+}, '/index.html'
 end
 
-activate :deploy do |deploy|
-  deploy.method = :rsync
-  deploy.host = "seagoon.spanner.org"
-  deploy.path = "/var/www/frui/static/public"
-  deploy.clean = true
-end
+# activate :deploy do |deploy|
+#   deploy.method = :rsync
+#   deploy.host = "seagoon.spanner.org"
+#   deploy.path = "/var/www/frui/static/public"
+#   deploy.clean = true
+# end
