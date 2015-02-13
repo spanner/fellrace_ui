@@ -7,82 +7,6 @@ root = exports ? this
 root.FellRace = FellRace
 
 
-class FellRace.Router extends Backbone.Router
-  constructor: ->
-    @handlers = []
-    super
-
-  handle: (fragment) =>
-    _.any @handlers, (handler) ->
-      if handler.route.test(fragment)
-        handler.callback(fragment)
-        true
-
-  route: (route, name, fn) =>
-    route = @_routeToRegExp(route) unless _.isRegExp(route)
-    if _.isFunction(name)
-      fn = name
-      name = ''
-    unless fn?
-      fn = this[name]
-    
-    @handlers.unshift
-      route: route
-      callback: (fragment) =>
-        args = @_extractParameters(route, fragment)
-        @execute(fn, args, name)
-
-
-class FellRace.Views.LayoutView extends Backbone.Marionette.Layout
-  routes: =>
-    {}
-
-  initialize: ({path:path}={}) ->
-    path ?= "/"
-    @_segment = null
-    @_child = null
-    @_router = new FellRace.Router
-      routes: _.result(this, 'routes')
-    @_router.handle(path)
-
-
-class FellRace.BaseRouter extends Backbone.Router
-  routes:
-    "(/)": "index"
-    "runners(/)": "competitors"
-    "runners/:id(/*path)": "competitor"
-    "races/:slug(/*path)": "race"
-    "clubs(/)": "clubs"
-    "clubs/:id(/*path)": "club"
-    "*path": "index"
-
-  index: =>
-    index = new FellRace.Views.IndexView
-    _fellrace.mainRegion.show index
-    _fellrace.closeRight()
-
-  competitors: =>
-    layout = new FellRace.Views.CompetitorsLayout
-
-  competitor: (id,path) =>
-    layout = new FellRace.Views.CompetitorLayout
-      model: new FellRace.Models.Competitor id:id
-      path: path
-
-  race: (slug,path) =>
-    layout = new FellRace.Views.RaceLayout
-      slug: slug
-      path: path
-
-  clubs: =>
-    layout = new FellRace.Views.ClubsLayout
-
-  club: (id,path) =>
-    layout = new FellRace.Views.ClubLayout
-      model: new FellRace.Models.Club id:id
-      path: path
-
-
 class FellRace.Application extends Backbone.Marionette.Application
   regions:
     gmapRegion: '#gmap'
@@ -125,8 +49,8 @@ class FellRace.Application extends Backbone.Marionette.Application
     @clubs ?= new FellRace.Collections.Clubs([])
     @competitors ?= new FellRace.Collections.Competitors([])
 
-    @mapView = new FellRace.Views.Map()
-    @gmapRegion.show @mapView
+    # @mapView = new FellRace.Views.Map()
+    # @gmapRegion.show @mapView
 
     @user_controlsRegion.show new FellRace.Views.UserControls()
 
@@ -411,10 +335,10 @@ class FellRace.Application extends Backbone.Marionette.Application
       @actionRegion.close()
 
   getMap: =>
-    @mapView.getMap()
+    @mapView?.getMap()
 
   setMapOptions: (opts) =>
-    @mapView.setOptions(opts)
+    @mapView?.setOptions(opts)
 
   currentUser: =>
     @session.user
