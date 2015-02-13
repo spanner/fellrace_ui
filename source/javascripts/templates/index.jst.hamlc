@@ -1,5 +1,7 @@
 #instances
+  %h2 Upcoming
   #future_instances
+  %h2 Recent
   #past_instances
 
 .personal

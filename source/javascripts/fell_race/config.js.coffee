@@ -27,7 +27,7 @@ class FellRace.Config
     api_url: "http://apis.fellrace.org.uk"
 
   development:
-    api_url: "http://api.fr.dev"
+    api_url: "http://api.fr.dev/api"
 
   constructor: (options={}) ->
     options.environment ?= @guessEnvironment()

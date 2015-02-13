@@ -73,7 +73,8 @@ end
 
 require 'rack/rewrite'
 use Rack::Rewrite do
-#  rewrite "/efellows/survey/welcome", '/efellows/survey/index.html'
+  rewrite %r{^\/races\/.+}, '/index.html'
+  rewrite %r{^\/runners\/.+}, '/index.html'
 end
 
 activate :deploy do |deploy|

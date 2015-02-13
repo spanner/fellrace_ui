@@ -71,11 +71,11 @@ class FellRace.Models.Race extends Backbone.Model
           @checkpoints.reset cps
     else
       @setUrls()
-      @attachments.fetch()
-      @checkpoints.fetch()
-      @links.fetch()
-      @records.fetch()
-      @instances.fetch()
+      # @attachments.fetch()
+      # @checkpoints.fetch()
+      # @links.fetch()
+      # @records.fetch()
+      # @instances.fetch()
 
   setUrls: =>
     url_stem = @url()

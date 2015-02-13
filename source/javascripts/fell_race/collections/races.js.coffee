@@ -2,7 +2,7 @@ class FellRace.Collections.Races extends FellRace.Collection
   model: FellRace.Models.Race
 
   url: =>
-    "#{_fellrace.apiUrl()}/api/races"
+    "#{_fellrace.apiUrl()}/races"
 
   initialize: (models) ->
     super

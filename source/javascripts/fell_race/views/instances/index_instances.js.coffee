@@ -1,25 +1,27 @@
 class FellRace.Views.IndexInstance extends Backbone.Marionette.ItemView
   class: "instance"
 
-  race_bindings:
+  bindings:
+    ".date":
+      observe: "date"
+      onGet: "date"
+
     "a.race_link":
       attributes: [
         name: "href"
-        observe: "slug"
+        observe: "race_slug"
         onGet: "raceUrl"
       ]
-
-    "span.race_name": "name"
+    "span.race_name": "race_name"
 
     'span.profile':
       observe: 'route_profile'
       onGet: 'simplifyProfile'
 
   onRender: =>
-    @_race = @model.race
+    _.extend(@bindings, @extra_bindings) if @extra_bindings
     @stickit()
-    @stickit @_race, @race_bindings
-    if @_race.has("route_profile") and @_race.get("route_profile") != ""
+    if @model.has("route_profile") and @model.get("route_profile") != ""
       _.defer @peify
 
   simplifyProfile: (profile) =>
@@ -36,47 +38,36 @@ class FellRace.Views.IndexInstance extends Backbone.Marionette.ItemView
     "/races/#{slug}"
 
   date: (datestring) =>
+    console.debug datestring, @model
     date = new Date(datestring).simpleDate()
 
-  instanceUrl: ([name,race]=[]) =>
-    if name and race and race.slug
-      "/races/#{race.slug}/#{name}"
+  instanceUrl: ([name,race_slug]=[]) =>
+    "/races/#{race_slug}/#{name}" if name and race_slug
 
 class FellRace.Views.FutureInstance extends FellRace.Views.IndexInstance
   template: "instances/index/future"
 
-  bindings:
-    ".date":
-      observe: "date"
-      onGet: "date"
+  extra_bindings:
     ".entry_count": 'entry_count'
-
     "a.entries_link":
-      observe: ["name","race"]
+      observe: ["name","race_slug"]
       onGet: "instanceUrl"
 
 class FellRace.Views.PastInstance extends FellRace.Views.IndexInstance
   template: "instances/index/past"
 
-  bindings:
-    ".date":
-      observe: "date"
-      onGet: "date"
-    ".result_count": 'result_count'
-
+  extra_bindings:
     ".results":
       observe: "performances_count"
       visible: true
-
     "a.results_link":
       attributes: [
         {
-          observe: ["name","race"]
+          observe: ["name","race_slug"]
           name: "href"
           onGet: "instanceUrl"
         }
       ]
-
     "span.performances_count": "performances_count"
 
 class FellRace.Views.FutureInstances extends Backbone.Marionette.CompositeView

@@ -27,7 +27,7 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
     #   el: @$el.find "#competitor"
 
   show: =>
-    @model = new FellRace.Models.RacePublication
+    @model = new FellRace.Models.Race
       slug: @slug
     @model.fetch()
     view = new FellRace.Views.RacePublication
