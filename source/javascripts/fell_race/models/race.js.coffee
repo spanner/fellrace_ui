@@ -1,4 +1,4 @@
-class FellRace.Models.Race extends Backbone.Model
+class FellRace.Models.Race extends FellRace.Model
   unsynced: ["checkpoints"]
   defaults:
     name: null
@@ -64,18 +64,19 @@ class FellRace.Models.Race extends Backbone.Model
     #   @future_instances.reset @instances.future()
     #   @past_instances.reset @instances.past()
 
-    if @isNew()
-      @once "sync", () =>
-        @setUrls()
-        if cps = @get "checkpoints"
-          @checkpoints.reset cps
-    else
-      @setUrls()
-      # @attachments.fetch()
-      # @checkpoints.fetch()
-      # @links.fetch()
-      # @records.fetch()
-      # @instances.fetch()
+    # if @isNew()
+    #   console.log "is new"
+    #   @once "sync", () =>
+    #     @setUrls()
+    #     if cps = @get "checkpoints"
+    #       @checkpoints.reset cps
+    # else
+    @setUrls()
+    @attachments.fetch()
+    @checkpoints.fetch()
+    @links.fetch()
+    @records.fetch()
+    @instances.fetch()
 
   setUrls: =>
     url_stem = @url()
@@ -128,6 +129,40 @@ class FellRace.Models.Race extends Backbone.Model
       Math.round(google.maps.geometry.spherical.computeLength(path)/ 1000 * 100) / 100
     else
       0
+
+  publish: ({preview:preview}={}) =>
+    json =
+      id: @id
+      name: @get("name")
+      slug: @get("slug")
+      cat: @get("cat")
+      climb: @get("climb")
+      distance: @get("distance")
+      description: @get("description")
+      start_time: @get("start_time")
+      colour: @get("route_colour")
+      organiser_email: @get("organiser_email")
+      organiser_name: @get("organiser_name")
+      organiser_address: @get("organiser_address")
+      organiser_phone: @get("organiser_phone")
+      fra_id: @get("fra_id")
+      shr_id: @get("shr_id")
+      fb_event_id: @get("fb_event_id")
+      twitter_id: @get("twitter_id")
+      requirements: @get("requirements")
+      route_profile: @get("route_profile")
+      route: @get("encoded_route")
+      links: @links.map (link) -> link.jsonForPublication()
+      records: @records.map (record) -> record.jsonForPublication()
+      # instances: @instances.map (instance) -> instance.jsonForPublication()
+      checkpoints: @checkpoints.map (checkpoint) -> checkpoint.jsonForPublication()
+      checkpoint_route: @getCheckpointRouteJson()
+
+
+    # json[:attachments] = options[:pub].published_attachments.map(&:as_json_for_publication) if options[:pub]
+
+  getCheckpointRouteJson: =>
+    MapStick.encodePathString @checkpoints.toGooglePoints()
 
   getEvent: =>
     @event

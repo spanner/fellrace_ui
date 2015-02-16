@@ -7,9 +7,10 @@ class FellRace.Views.ListedInstance extends Backbone.Marionette.ItemView
 
   bindings:
     "a.name":
-      observe: "race_name"
+      observe: "name"
       attributes: [
         {
+          observe: ["race_slug","name"]
           name: "href"
           onGet: "url"
         }
@@ -48,8 +49,8 @@ class FellRace.Views.ListedInstance extends Backbone.Marionette.ItemView
     else if count
       "#{count} entries"
 
-  url: (name) =>
-    "/events/#{@model.event.get("slug")}/#{@model.race.get("slug")}/#{name}/admin"
+  url: ([race_slug,name]=[]) =>
+    "/races/#{race_slug}/#{name}/admin"
 
   isPast: (date) =>
     date and Date.parse(date) <= Date.now()

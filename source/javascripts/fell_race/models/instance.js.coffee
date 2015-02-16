@@ -1,4 +1,4 @@
-class FellRace.Models.Instance extends Backbone.Model
+class FellRace.Models.Instance extends FellRace.Model
   defaults:
     total_entries: 0
     file: null
@@ -14,6 +14,7 @@ class FellRace.Models.Instance extends Backbone.Model
       "#{_fellrace.apiUrl()}/instances/#{@id}"
 
   initialize: (opts,{race:@race}={}) ->
+    super
     # separate datetime into date and time or use a single control?
     # @save_soon = _.debounce @save, 500
     # _.each @synced, (key) =>

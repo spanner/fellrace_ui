@@ -1,4 +1,4 @@
-class FellRace.Models.Record extends Backbone.Model
+class FellRace.Models.Record extends FellRace.Model
   defaults:
     holder: null
     year: null
@@ -6,6 +6,7 @@ class FellRace.Models.Record extends Backbone.Model
     elapsed_time: null
 
   initialize: () ->
+    super
     @wait_then_save = _.debounce @save, 500
     _.each @defaults, (value, key) =>
       @on "change:#{key}", () =>

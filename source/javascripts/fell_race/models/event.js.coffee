@@ -1,4 +1,4 @@
-class FellRace.Models.Event extends Backbone.Model
+class FellRace.Models.Event extends FellRace.Model
   defaults:
     name: 'Event name'
     description: "Description and instructions."
@@ -14,6 +14,7 @@ class FellRace.Models.Event extends Backbone.Model
     select: "selectFirstRace"
 
   initialize: () ->
+    super
     @build()
     @wait_then_save = _.debounce @save, 500
     _.each @defaults, (value, key) =>

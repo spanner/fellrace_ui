@@ -1,5 +1,6 @@
-class FellRace.Models.Performance extends Backbone.Model
+class FellRace.Models.Performance extends FellRace.Model
   initialize: ->
+    super
     @build()
     @collection?.on "sort", =>
       @set odd_or_even: if @collection.indexOf(@) % 2 then "odd" else "even"

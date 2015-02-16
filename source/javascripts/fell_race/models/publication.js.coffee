@@ -1,4 +1,4 @@
-class FellRace.Models.Publication extends Backbone.Model
+class FellRace.Models.Publication extends FellRace.Model
 
   urlRoot: "/api/publications"
 

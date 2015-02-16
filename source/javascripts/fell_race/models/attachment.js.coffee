@@ -1,4 +1,4 @@
-class FellRace.Models.Attachment extends Backbone.Model
+class FellRace.Models.Attachment extends FellRace.Model
   defaults:
     name: null
     file: null
@@ -6,7 +6,8 @@ class FellRace.Models.Attachment extends Backbone.Model
     url: null
   # unsynced: ['url']
 
-  initialize: () =>
+  initialize: () ->
+    super
     @wait_then_save = _.debounce @save, 500
     if url = @get('url')
       @set "extension", url.split('.').pop()

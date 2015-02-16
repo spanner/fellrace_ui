@@ -49,8 +49,8 @@ class FellRace.Application extends Backbone.Marionette.Application
     @clubs ?= new FellRace.Collections.Clubs([])
     @competitors ?= new FellRace.Collections.Competitors([])
 
-    # @mapView = new FellRace.Views.Map()
-    # @gmapRegion.show @mapView
+    @mapView = new FellRace.Views.Map()
+    @gmapRegion.show @mapView
 
     @user_controlsRegion.show new FellRace.Views.UserControls()
 

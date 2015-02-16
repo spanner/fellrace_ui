@@ -1,4 +1,4 @@
-class FellRace.Models.Checkpoint extends Backbone.Model
+class FellRace.Models.Checkpoint extends FellRace.Model
   defaults:
     name: null
     placed: false
@@ -6,6 +6,7 @@ class FellRace.Models.Checkpoint extends Backbone.Model
   unsynced: ["colour"]
 
   initialize: =>
+    super
     @save_soon = _.debounce @save, 500
 
     unless @isNew()

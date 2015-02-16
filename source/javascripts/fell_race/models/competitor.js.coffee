@@ -1,7 +1,8 @@
-class FellRace.Models.Competitor extends Backbone.Model
+class FellRace.Models.Competitor extends FellRace.Model
   urlRoot: "/api/competitors"
 
   initialize: ->
+    super
     @build()
 
   build: =>

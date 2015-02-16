@@ -1,2 +1,2 @@
-class FellRace.Models.Club extends Backbone.Model
+class FellRace.Models.Club extends FellRace.Model
   urlRoot: "/api/clubs"
