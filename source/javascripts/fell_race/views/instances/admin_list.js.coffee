@@ -58,6 +58,11 @@ class FellRace.Views.AdminListedInstance extends Backbone.Marionette.ItemView
   isFuture: (date) =>
     date and Date.parse(date) > Date.now()
 
+class FellRace.Views.AddInstance extends Backbone.Marionette.ItemView
+  template: 'instances/add_results'
+  tagName: "li"
+  className: "note"
+
 class FellRace.Views.AdminInstancesList extends Backbone.Marionette.CollectionView
   emptyView: FellRace.Views.AddInstance
   itemView: FellRace.Views.AdminListedInstance
