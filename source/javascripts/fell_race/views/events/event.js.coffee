@@ -42,7 +42,6 @@ class FellRace.Views.Event extends Backbone.Marionette.ItemView
 
   initialize: ->
     races = @model.races
-
     _.each ["add", "remove"], (event) =>
       races.on event, @updateRaceCount
 

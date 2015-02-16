@@ -1,13 +1,11 @@
-class FellRace.Views.Race extends Backbone.Marionette.ItemView
-  template: 'races/show'
+class FellRace.Views.RaceAdmin extends Backbone.Marionette.ItemView
+  template: 'races/edit'
   className: "race"
   modelEvents:
-    'change:show_route': 'setRouteVisibility'
     'change:show_checkpoints': 'setCheckpointVisibility'
 
   events:
-    # 'click .opener': 'toggle'
-    'click .race_head a.delete': 'destroy'
+    'click a.publish': 'publish'
     'click a.add_attachment': 'addAttachment'
     'click a.add_record': 'addRecord'
     'click a.add_checkpoint': 'addCheckpoint'
@@ -15,7 +13,6 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     'click a.add_link': 'addLink'
     'click a.checkpoint_route': "createRouteThroughCheckpoints"
     'click a.draw_route': "drawRoute"
-    # 'click a.extend': "drawRoute"
     'click a.delete_route': 'deleteRoute'
     'keyup span.social': 'showPresence'
 
@@ -23,50 +20,19 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     # generally best to bind one element with each declaration:
     # updates are not triggered within a set of bound elements.
 
-    '.race_title':
-      observe: 'hide_title'
-      updateView: false
-      visible: (val) ->
-        !val
-    '.name':
-      observe: 'name'
-      events: ['blur']
+    '.name': 'name'
     '.description':
       observe: 'description'
       updateMethod: 'html'
-      events: ['blur']
-    '.distance':
-      observe: 'distance'
-      events: ['blur']
-    '.climb':
-      observe: "climb"
-      events: ['blur']
-    '.cat':
-      observe: 'cat'
-      events: ['blur']
-    '.race_start_time':
-      observe: 'start_time'
-      events: ['blur']
+    '.distance': 'distance'
+    '.climb': "climb"
+    '.cat': 'cat'
 
-    # external event ids
-    'span.fb':
-      observe: 'fb_event_id'
-      events: ['blur']
-    'span.twit':
-      observe: 'twitter_id'
-      events: ['blur']
-    'span.fra':
-      observe: 'fra_id'
-      events: ['blur']
-    'span.shr':
-      observe: 'shr_id'
-      events: ['blur']
-
-    'span.age_limit': 
-      onserve: "age_limit"
-      events: ['blur']
-
-    'span.analytics_id': "analytics_id"
+    'span.fb': 'fb_event_id'
+    'span.twit': 'twitter_id'
+    'span.fra': 'fra_id'
+    'span.shr': 'shr_id'
+    # 'span.analytics_id': "analytics_id"
 
     'input.race_show_attachments': "show_attachments"
     'ul.attachments':
@@ -132,18 +98,11 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
       updateView: false
       visible: true
 
-    '.organiser_name':
-      observe: "organiser_name"
-      events: ['blur']
-    '.organiser_email':
-      observe: "organiser_email"
-      events: ['blur']
-    '.organiser_phone':
-      observe: "organiser_phone"
-      events: ['blur']
+    '.organiser_name': "organiser_name"
+    '.organiser_email': "organiser_email"
+    '.organiser_phone': "organiser_phone"
     '.organiser_address':
       observe: "organiser_address"
-      events: ['blur']
       onSet: (val) ->
         val = null if /(\<div\>\<br\>\<\/div\>|\<br\>)/.test(val)
         val
@@ -153,9 +112,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
       updateView: false
       visible: true
 
-    '.requirements':
-      observe: "requirements"
-      events: ['blur']
+    '.requirements': "requirements"
     'input.race_show_requirements': "show_requirements"
     '.show_requirements': 
       observe: "show_requirements"
@@ -169,30 +126,6 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
           onGet: "newInstanceUrl"
         }
       ]
-    # 'a.opener':
-    #   attributes: [
-    #     {
-    #       observe: "selected"
-    #       name: "class"
-    #       onGet: (selected) =>
-    #         "open" if selected
-    #     }
-    #   ]
-
-    # ':el':
-    #   attributes: [
-    #     {
-    #       observe: "selected"
-    #       name: "class"
-    #       onGet: (selected) =>
-    #         "small" unless selected
-    #     }
-    #   ]
-  #
-  # toggle: (e) =>
-  #   e.preventDefault()
-  #   unless $(e.target).is("[contenteditable]")
-  #     @model.trigger "toggle_select"
 
   onRender: =>
     @stickit()
@@ -225,9 +158,6 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
   addLink: =>
     @model.links.create({})
 
-  setRouteVisibility: () =>
-    if @model.get('show_route') then @model.trigger('show_route') else @model.trigger('hide_route')
-
   setCheckpointVisibility: () =>
     if @model.get('show_checkpoints') then @model.checkpoints.trigger('show') else @model.checkpoints.trigger('hide')
 
@@ -257,10 +187,8 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
   newInstanceUrl: (slug) =>
     "/races/#{slug}/new_instance"
 
-  destroy: (e) =>
-    e.preventDefault()
-    if confirm "Delete '#{@model.get "name"}' race?"
-      @model.destroy()
+  publish: =>
+    @model.publish()
 
   error: (args) =>
     $.notify "Error fetching record", args

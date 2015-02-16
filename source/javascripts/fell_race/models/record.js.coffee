@@ -4,3 +4,9 @@ class FellRace.Models.Record extends FellRace.Model
     year: null
     label: null
     elapsed_time: null
+
+  jsonForPublication: =>
+    elapsed_time: @get("elapsed_time")
+    holder: @get("holder")
+    label: @get("label")
+    year: @get("year")

@@ -2,119 +2,69 @@
   .main_info
     .title.race_title
       %h2
-        / %a.opener
-        %span.name.editable{:data => {:placeholder => "Race name"}}
+        %span.name
 
     .subtitle
-      %span.cat.editable{:data => {:placeholder => "Cat (e.g. AM)"}}>
-      \:&nbsp;
-      %span.distance.editable{:data => {:placeholder => "dist"}}>
+      %strong.cat
+      %span.distance
       km \u2192\&nbsp;
-      %span.climb.editable{:data => {:placeholder => "climb"}}>
+      %span.climb
       m \u2191
 
   .profile
     %span.race_profile
 
 .race_body
-  %p.description.editable{data: {placeholder: "Race description"}}
+  %p.description
   .details
     .attachments
       %h3
-        %input.race_show_attachments{:type => "checkbox"}
         Downloads
-        %a.add.add_attachment
-          add
       %ul.attachments
 
     .race_requirements
       %h3
-        %input.race_show_requirements{:type => "checkbox"}
         Requirements
       .show_requirements
-        %p.requirements.editable{:data => {:toolbar => true, :placeholder => "Required kit and other instructions"}}
+        %p.requirements
 
     .checkpoints
       %h3
-        %input.race_show_checkpoints{:type => "checkbox"}
         Checkpoints
-        %a.add.add_checkpoint
-          add
-      %ul.checkpoints
-
-    .route
-      %h3
-        %input.race_show_route{:type => "checkbox"}
-        Route
-      .route_controls
-        .no_route
-          %p.note
-            You can either
-            %a.add.checkpoint_route generate a route
-            from the checkpoints or
-            %a.add.draw_route draw one on the map
-        .route_details
-          %span.route_distance
-          km \u2192\&nbsp;
-          %span.route_elevation
-          m \u2191
-          %input.route_colour{:type => "color"}
-          / %a.extend extend
-          %a.delete.delete_route \u232B
-      %p.note
-        If you want to show a profile and checkpoints but not tell people
-        where to go, you can draw out a route then hide it by unchecking the 
-        box next to Route.
+      %ul.checkpoints.published
 
     .records
       %h3
-        %input.race_show_records{:type => "checkbox"}
         Records
-        %a.add.add_record
-          add
       %ul.records
 
   .moredetails
 
     .start_time
       %h3 Start time
-      %span.race_start_time.editable{:data => {:placeholder => "hh:mm"}}>
+      %strong.race_start_time
 
     .instances
       %h3
-        %input.race_show_instances{:type => "checkbox"}
-        Instances
-        %a.add.add_instance
-          add
+        Results
       %ul.instances
 
     .race_organiser
       %h3 
-        %input.race_show_organiser{:type => "checkbox"}
         Organiser
       %ul.show_organiser
         %li
-          %span.organiser_name.editable{:data => {:placeholder => "name"}}
+          %a.organiser_name
         %li
-          %span.organiser_email.editable{:data => {:placeholder => "email"}}
+          %span.organiser_phone
         %li
-          %span.organiser_phone.editable{:data => {:placeholder => "phone number"}}
-        %li
-          %p.organiser_address.editable{:data => {:placeholder => "address"}}
+          %p.organiser_address
 
     .links
       %h3 
-        %input.race_show_links{:type => "checkbox"}
         Links
-        %a.add.add_link
-          add
+      %a.social.fra FRA
+      %a.social.shr SHR
+      %a.social.fb facebook
+      %a.social.twit twitter
       %ul.links
-      %ul.autolinks
-        %li
-          %span.social.fra.editable{:data => {:placeholder => "FRA race id"}}
-        %li
-          %span.social.shr.editable{:data => {:placeholder => "SHR race id"}}
-        %li
-          %span.social.fb.editable{:data => {:placeholder => "Facebook event id"}}
-        %li
-          %span.social.twit.editable{:data => {:placeholder => "Twitter name"}}

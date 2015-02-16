@@ -5,7 +5,7 @@ class FellRace.Views.RaceAdminLayout extends FellRace.Views.LayoutView
     ":instance_name(/*path)": @instance
 
   edit: =>
-    view = new FellRace.Views.Race
+    view = new FellRace.Views.RaceAdmin
       model: @model
     _fellrace.mainRegion.show view
 

@@ -1,19 +1,13 @@
-class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
-  template: 'race_publications/show'
+class FellRace.Views.Race extends Backbone.Marionette.ItemView
+  template: 'races/show'
   className: "race"
 
   events:
-    'click .opener': 'toggle'
     'click a.social': 'openTab'
 
   bindings:
     # generally best to bind one element with each declaration:
     # updates are not triggered within a set of bound elements.
-    '.race_title':
-      observe: 'hide_title'
-      updateView: false
-      visible: (val) ->
-        !val
     '.name': 'name'
     '.distance': 'distance'
     '.description':
@@ -148,29 +142,6 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
       observe: "checkpoints"
       visible: "hasAny"
 
-    'a.opener':
-      attributes: [
-        {
-          observe: "selected"
-          name: "class"
-          onGet: (selected) =>
-            "open" if selected
-        }
-      ]
-
-    ':el':
-      attributes: [
-        {
-          observe: "selected"
-          name: "class"
-          onGet: (selected) =>
-            "small" unless selected
-        }
-      ]
-
-  toggle: =>
-    @model.trigger "toggle_select"
-
   quickSlide: ($el, isVisible, options) =>
     if (isVisible) then $el.slideDown('fast') else $el.slideUp('fast')
 
@@ -189,9 +160,6 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
       el.addClass('present')
     else
       el.removeClass('present')
-
-  getRouteDistance: =>
-    @model.getRouteDistance()
 
   visibleBlock: ($el, isVisible, options) =>
     if isVisible

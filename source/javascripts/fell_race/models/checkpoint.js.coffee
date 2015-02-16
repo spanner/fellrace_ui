@@ -64,3 +64,10 @@ class FellRace.Models.Checkpoint extends FellRace.Model
       @get "colour"
     else
       @collection.getColour()
+
+  jsonForPublication: =>
+    name: @get("name")
+    lat: @get("lat")
+    lng: @get("lng")
+    gridref: @get("gridref")
+    fixed: @get("fixed")

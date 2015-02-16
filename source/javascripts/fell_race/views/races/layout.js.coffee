@@ -30,7 +30,7 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
     @model = new FellRace.Models.Race
       slug: @slug
     @model.fetch()
-    view = new FellRace.Views.RacePublication
+    view = new FellRace.Views.Race
       model: @model
     _fellrace.mainRegion.show view
 

@@ -35,6 +35,7 @@ class FellRace.Models.Race extends FellRace.Model
     "#{_fellrace.apiUrl()}/races/#{@get("slug")}"
 
   initialize: ->
+    super
     @build()
     @on "select", @select
     @on "deselect", @deselect
@@ -59,7 +60,7 @@ class FellRace.Models.Race extends FellRace.Model
     @links = new FellRace.Collections.Links(@get("links"), race: @)
     @checkpoints = new FellRace.Collections.Checkpoints(@get("checkpoints"), race: @)
     @checkpoints.sort()
-    
+
     # @instances.on "add remove reset", () =>
     #   @future_instances.reset @instances.future()
     #   @past_instances.reset @instances.past()
@@ -85,10 +86,6 @@ class FellRace.Models.Race extends FellRace.Model
     @records.url = "#{url_stem}/records"
     @instances.url = "#{url_stem}/instances"
     @links.url = "#{url_stem}/links"
-
-  toJSON: () =>
-    json =
-      race: super
 
   getColour: =>
     @get "route_colour"
@@ -134,36 +131,37 @@ class FellRace.Models.Race extends FellRace.Model
     @set preview_json: @jsonForPublication()
 
   publish: =>
-    @set
+    @set({
       published_json: @jsonForPublication()
       preview_json: null
-      # published_at: now
+    }, persistChange: true)
 
   jsonForPublication: =>
-    id: @id
-    name: @get("name")
-    slug: @get("slug")
-    cat: @get("cat")
-    climb: @get("climb")
-    distance: @get("distance")
-    description: @get("description")
-    start_time: @get("start_time")
-    colour: @get("route_colour")
-    organiser_email: @get("organiser_email")
-    organiser_name: @get("organiser_name")
-    organiser_address: @get("organiser_address")
-    organiser_phone: @get("organiser_phone")
-    fra_id: @get("fra_id")
-    shr_id: @get("shr_id")
-    fb_event_id: @get("fb_event_id")
-    twitter_id: @get("twitter_id")
-    requirements: @get("requirements")
-    route_profile: @get("route_profile")
-    route: @get("encoded_route")
-    links: @links.map (link) -> link.jsonForPublication()
-    records: @records.map (record) -> record.jsonForPublication()
-    checkpoints: @checkpoints.map (checkpoint) -> checkpoint.jsonForPublication()
-    checkpoint_route: @checkpoints.getEncodedRoute()
+    JSON.stringify
+      id: @id
+      name: @get("name")
+      slug: @get("slug")
+      cat: @get("cat")
+      climb: @get("climb")
+      distance: @get("distance")
+      description: @get("description")
+      start_time: @get("start_time")
+      colour: @get("route_colour")
+      organiser_email: @get("organiser_email")
+      organiser_name: @get("organiser_name")
+      organiser_address: @get("organiser_address")
+      organiser_phone: @get("organiser_phone")
+      fra_id: @get("fra_id")
+      shr_id: @get("shr_id")
+      fb_event_id: @get("fb_event_id")
+      twitter_id: @get("twitter_id")
+      requirements: @get("requirements")
+      route_profile: @get("route_profile")
+      route: @get("encoded_route")
+      links: @links.map (link) -> link.jsonForPublication()
+      records: @records.map (record) -> record.jsonForPublication()
+      checkpoints: @checkpoints.map (checkpoint) -> checkpoint.jsonForPublication()
+      checkpoint_route: @checkpoints.getEncodedRoute()
 
   getEvent: =>
     @event
