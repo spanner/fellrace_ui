@@ -1,3 +1,0 @@
-%li.delete
-  %a{:href => "#"}
-    Delete point

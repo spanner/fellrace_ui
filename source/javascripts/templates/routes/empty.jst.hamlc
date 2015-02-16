@@ -1,6 +1,0 @@
-Press any 
-%a.add.add_route{:href => "#"}
-  add route button
-to draw out a route on the map. Press enter or click somewhere on the drawn line to finish. 
-%a.add.checkpoint_route{:href => "#"}
-  Create route from checkpoints
