@@ -3,29 +3,29 @@ class FellRace.Views.Record extends Backbone.Marionette.ItemView
   model: FellRace.Models.Record
   tagName: "li"
   className: "record"
-  modelEvents:
-    destroy: "close"
+
   events:
     'click a.delete': "delete"
+
   bindings:
-    'span.label':
-      observe: 'label'
-      events: ['blur']
+    'span.label': 'label'
     'span.time':
       observe: 'elapsed_time'
-      events: ['blur']
-    'span.name':
-      observe: 'holder'
-      events: ['blur']
-    'span.year':
-      observe: 'year'
-      events: ['blur']
+      onGet: 'secondsToString'
+      onSet: "stringToSeconds"
+    'span.name': 'holder'
+    'span.year': 'year'
 
   onRender: () =>
-    @model.save() if @model.isNew()
     @$el.find('.editable').editable()
     @stickit()
 
+  secondsToString: (seconds) =>
+    _fellrace.secondsToTime seconds
+
+  stringToSeconds: (string) =>
+    moment.duration(string).asSeconds()
+
   delete: (e) =>
-    e.preventDefault() if e
+    e.stopPropagation() if e
     @model.destroy()

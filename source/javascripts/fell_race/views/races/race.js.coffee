@@ -6,7 +6,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     'change:show_checkpoints': 'setCheckpointVisibility'
 
   events:
-    'click .opener': 'toggle'
+    # 'click .opener': 'toggle'
     'click .race_head a.delete': 'destroy'
     'click a.add_attachment': 'addAttachment'
     'click a.add_record': 'addRecord'
@@ -169,30 +169,30 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
           onGet: "newInstanceUrl"
         }
       ]
-    'a.opener':
-      attributes: [
-        {
-          observe: "selected"
-          name: "class"
-          onGet: (selected) =>
-            "open" if selected
-        }
-      ]
+    # 'a.opener':
+    #   attributes: [
+    #     {
+    #       observe: "selected"
+    #       name: "class"
+    #       onGet: (selected) =>
+    #         "open" if selected
+    #     }
+    #   ]
 
-    ':el':
-      attributes: [
-        {
-          observe: "selected"
-          name: "class"
-          onGet: (selected) =>
-            "small" unless selected
-        }
-      ]
-
-  toggle: (e) =>
-    e.preventDefault()
-    unless $(e.target).is("[contenteditable]")
-      @model.trigger "toggle_select"
+    # ':el':
+    #   attributes: [
+    #     {
+    #       observe: "selected"
+    #       name: "class"
+    #       onGet: (selected) =>
+    #         "small" unless selected
+    #     }
+    #   ]
+  #
+  # toggle: (e) =>
+  #   e.preventDefault()
+  #   unless $(e.target).is("[contenteditable]")
+  #     @model.trigger "toggle_select"
 
   onRender: =>
     @stickit()
@@ -214,16 +214,16 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
   # The new empty object in each collection will be picked up by the relevant subview.
 
   addAttachment: =>
-    @model.attachments.add({})
+    @model.attachments.create({})
 
   addCheckpoint: =>
-    @model.checkpoints.add({})
+    @model.checkpoints.create({})
 
   addRecord: =>
-    @model.records.add({})
+    @model.records.create({})
 
   addLink: =>
-    @model.links.add({})
+    @model.links.create({})
 
   setRouteVisibility: () =>
     if @model.get('show_route') then @model.trigger('show_route') else @model.trigger('hide_route')

@@ -2,8 +2,8 @@
   .main_info
     .title.race_title
       %h2
-        %a.opener
-          %span.name.editable{:data => {:placeholder => "Race name"}}
+        / %a.opener
+        %span.name.editable{:data => {:placeholder => "Race name"}}
 
     .subtitle
       %span.cat.editable{:data => {:placeholder => "Cat (e.g. AM)"}}>

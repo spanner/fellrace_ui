@@ -40,20 +40,11 @@ class FellRace.Collections.Checkpoints extends FellRace.Collection
     placed = @pluck('placed')
     _.first(placed) and _.last(placed) and _.compact(placed).length >= 3
 
-  toGooglePoints: () =>
-    points = @map (cpt) ->
-      cpt.getLatLng()
-    _.compact(points)
+  getEncodedRoute: () =>
+    points = @filter((cp) -> cp.has("lat") and cp.has("lng")).map((cp) ->
+      cp.getLatLng())
+    if points.length > 1
+      MapStick.encodePathString points
 
   getColour: =>
     @race.getColour()
-
-  setRaceCheckpointRoute: =>
-    console.log "setRaceCheckpointRoute"
-    cps = @filter (cp) ->
-      cp.has("lat") and cp.has("lng")
-
-    path = cps.map (cp) ->
-      cp.getLatLng()
-    @race.set
-      encoded_checkpoint_route: MapStick.encodePathString(path)

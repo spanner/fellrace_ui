@@ -4,10 +4,3 @@ class FellRace.Models.Record extends FellRace.Model
     year: null
     label: null
     elapsed_time: null
-
-  initialize: () ->
-    super
-    @wait_then_save = _.debounce @save, 500
-    _.each @defaults, (value, key) =>
-      @on "change:#{key}", () =>
-        @wait_then_save()

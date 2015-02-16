@@ -5,24 +5,14 @@ class FellRace.Models.Checkpoint extends FellRace.Model
     fixed: false
   unsynced: ["colour"]
 
-  initialize: =>
+  initialize: ->
     super
-    @save_soon = _.debounce @save, 500
-
     unless @isNew()
       @placed()
 
     @on "change:lat", (model, val, opts) =>
       @setGridrefFromLatLng()
-      @collection?.setRaceCheckpointRoute()
       @placed()
-      @save_soon()
-
-    @on "destroy change:pos", (model, val, opts) =>
-      @collection.setRaceCheckpointRoute()
-
-    @on "change:name change:pos", (model, val, opts) =>
-      @save_soon()
 
     @on "select", @selectRace
 
