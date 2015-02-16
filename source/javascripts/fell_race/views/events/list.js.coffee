@@ -29,3 +29,7 @@ class FellRace.Views.EventsListItem extends Backbone.Marionette.ItemView
 
   url: (slug) =>
     "/events/#{slug}/admin"
+
+
+class FellRace.Views.EventsList extends Backbone.Marionette.CollectionView
+  itemView: FellRace.Views.EventsListItem
