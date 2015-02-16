@@ -1,5 +1,5 @@
-class FellRace.Views.ListedPublishedInstance extends Backbone.Marionette.ItemView
-  template: 'instances/published/list_item'
+class FellRace.Views.ListedInstance extends Backbone.Marionette.ItemView
+  template: 'instances/list_item'
   tagName: "li"
   className: "instance"
 
@@ -27,5 +27,5 @@ class FellRace.Views.ListedPublishedInstance extends Backbone.Marionette.ItemVie
     else
       "#{value} runners"
 
-class FellRace.Views.PublishedInstancesList extends Backbone.Marionette.CollectionView
-  itemView: FellRace.Views.ListedPublishedInstance
+class FellRace.Views.InstancesList extends Backbone.Marionette.CollectionView
+  itemView: FellRace.Views.ListedInstance

@@ -1,5 +1,5 @@
 class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
-  template: 'instances/published/results'
+  template: 'instances/results'
 
   bindings:
     "a.instance_name":

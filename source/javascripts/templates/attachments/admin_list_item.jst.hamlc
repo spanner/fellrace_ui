@@ -1,0 +1,5 @@
+%span
+  %a.file_icon.minimal
+%span.editable.name{:data => {:placeholder => "file name"}}
+%a.delete \u232B
+%input.file{:type => 'file'}

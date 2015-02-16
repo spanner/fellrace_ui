@@ -1,43 +1,33 @@
 Date
-%span.day.editable{data: {placeholder: "dd"}}
+%span.day
 \-
-%span.month.editable{data: {placeholder: "mm"}}
+%span.month
 \-
-%span.year.editable{data: {placeholder: "yyyy"}}
-#more_details
-  Time
-  %span.time.editable{data: {placeholder: "hh-mm"}}
+%span.year
+Time
+%span.time
 
-  #past
-    .results
-      %h3 Results
-      %a.upload_file Upload file
-      %input.file{:type => 'file'}
-      %span.file_name
-      / %a.remove_file Delete file
-      %span.total.info
+#past
+  .results
+    %h3 Results
+    %span.total.info
 
-    .report
-      %h3 Report
-      %p.report.editable{data: {placeholder: "Did anything interesting happen?"}}
+  .report
+    %h3 Report
+    %p.report
 
-  #future
-    Online entry?
-    %input.online_entry{type: "checkbox"}
-    #entry_details
-      .fee
-        Fee
-        %span.entry_fee.editable{data: {placeholder: "0.00"}}
-        %span.info.fee_details
-          You will receive
-          %span.received_fee
-          from each entry.
-      .limit
-        Limit
-        %span.entry_limit.editable{data: {placeholder: "e.g. 500"}}
-      .opening
-        Entries open on
-        %span.entry_opening.editable{data: {placeholder: "dd-mm-yyyy"}}
-      .closing
-        Entries close on
-        %span.entry_closing.editable{data: {placeholder: "dd-mm-yyyy"}}
+#future
+  #entry_details
+    .fee
+      Fee
+      %span.entry_fee
+    .limit
+      Limit
+      %span.entry_limit
+    .opening
+      Entries open on
+      %span.entry_opening
+    .closing
+      Entries close on
+      %span.entry_closing
+    .entries

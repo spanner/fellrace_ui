@@ -38,7 +38,6 @@ class FellRace.Views.IndexInstance extends Backbone.Marionette.ItemView
     "/races/#{slug}"
 
   date: (datestring) =>
-    console.debug datestring, @model
     date = new Date(datestring).simpleDate()
 
   instanceUrl: ([name,race_slug]=[]) =>

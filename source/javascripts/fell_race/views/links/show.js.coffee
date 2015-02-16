@@ -1,5 +1,5 @@
-class FellRace.Views.PublishedLink extends Backbone.Marionette.ItemView
-  template: 'links/published/list_item'
+class FellRace.Views.Link extends Backbone.Marionette.ItemView
+  template: 'links/list_item'
   tagName: "li"
   className: "link"
 
@@ -26,3 +26,6 @@ class FellRace.Views.PublishedLink extends Backbone.Marionette.ItemView
   openTab: (e) =>
     e.preventDefault() if e
     window.open "http://#{@model.get("url")}"
+
+class FellRace.Views.LinksList extends Backbone.Marionette.CollectionView
+  itemView: FellRace.Views.Link

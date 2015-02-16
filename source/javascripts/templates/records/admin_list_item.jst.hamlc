@@ -1,0 +1,9 @@
+%span.record
+  %span.label.editable{:data => {:placeholder => "Category"}}>
+  \:
+  %span.time.editable{:data => {:placeholder => "hh:mm:ss"}}
+%a.delete \u232B
+%span.holder
+  %span.name.editable{:data => {:placeholder => "name"}}>
+  \,
+  %span.year.editable{:data => {:placeholder => "year"}}

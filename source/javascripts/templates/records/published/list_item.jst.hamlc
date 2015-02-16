@@ -1,8 +1,0 @@
-%span.record
-  %span.label
-  \:
-  %span.time
-%span.holder
-  %span.name
-  \,
-  %span.year

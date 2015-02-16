@@ -1,5 +1,5 @@
 class FellRace.Views.EntryInstance extends Backbone.Marionette.ItemView
-  template: 'instances/published/entry'
+  template: 'instances/entry'
   className: "instance"
 
   events:

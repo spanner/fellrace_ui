@@ -1,5 +1,5 @@
-class FellRace.Views.PublishedInstance extends Backbone.Marionette.ItemView
-  template: 'instances/published/show'
+class FellRace.Views.Instance extends Backbone.Marionette.ItemView
+  template: 'instances/show'
   className: "instance"
 
   bindings:

@@ -1,5 +1,5 @@
-class FellRace.Views.ListedInstance extends Backbone.Marionette.ItemView
-  template: 'instances/list_item'
+class FellRace.Views.AdminListedInstance extends Backbone.Marionette.ItemView
+  template: 'instances/admin_list_item'
   tagName: "li"
   className: "instance"
   events:
@@ -58,6 +58,6 @@ class FellRace.Views.ListedInstance extends Backbone.Marionette.ItemView
   isFuture: (date) =>
     date and Date.parse(date) > Date.now()
 
-class FellRace.Views.InstancesList extends Backbone.Marionette.CollectionView
+class FellRace.Views.AdminInstancesList extends Backbone.Marionette.CollectionView
   emptyView: FellRace.Views.AddInstance
-  itemView: FellRace.Views.ListedInstance
+  itemView: FellRace.Views.AdminListedInstance

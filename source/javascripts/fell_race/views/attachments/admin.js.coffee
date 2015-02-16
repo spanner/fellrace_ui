@@ -1,6 +1,5 @@
-class FellRace.Views.Attachment extends Backbone.Marionette.ItemView
-  template: 'attachments/list_item'
-  model: FellRace.Models.Attachment
+class FellRace.Views.AdminAttachment extends Backbone.Marionette.ItemView
+  template: 'attachments/admin_list_item'
   tagName: "li"
   className: "attachment"
   events:

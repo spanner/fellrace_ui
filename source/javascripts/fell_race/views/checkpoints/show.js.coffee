@@ -1,5 +1,5 @@
-class FellRace.Views.PublishedCheckpoint extends Backbone.Marionette.ItemView
-  template: 'checkpoints/published/list_item'
+class FellRace.Views.Checkpoint extends Backbone.Marionette.ItemView
+  template: 'checkpoints/list_item'
   tagName: "li"
   className: "checkpoint"
 

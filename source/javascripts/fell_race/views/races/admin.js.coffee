@@ -1,5 +1,5 @@
-class FellRace.Views.RaceAdmin extends Backbone.Marionette.ItemView
-  template: 'races/edit'
+class FellRace.Views.AdminRace extends Backbone.Marionette.ItemView
+  template: 'races/admin'
   className: "race"
   modelEvents:
     'change:show_checkpoints': 'setCheckpointVisibility'
@@ -132,11 +132,11 @@ class FellRace.Views.RaceAdmin extends Backbone.Marionette.ItemView
     @$el.find('.editable').editable()
     @stickit()
 
-    new FellRace.Views.AttachmentsList(collection: @model.attachments, el: @$el.find("ul.attachments")).render()
-    new FellRace.Views.LinksList(collection: @model.links, el: @$el.find("ul.links")).render()
-    new FellRace.Views.CheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints")).render()
-    new FellRace.Views.RecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
-    new FellRace.Views.InstancesList(collection: @model.instances, el: @$el.find("ul.instances")).render()
+    new FellRace.Views.AdminAttachmentsList(collection: @model.attachments, el: @$el.find("ul.attachments")).render()
+    new FellRace.Views.AdminLinksList(collection: @model.links, el: @$el.find("ul.links")).render()
+    new FellRace.Views.AdminCheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints")).render()
+    new FellRace.Views.AdminRecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
+    new FellRace.Views.AdminInstancesList(collection: @model.instances, el: @$el.find("ul.instances")).render()
 
   ## Flash a dom element to show that it has changed
 

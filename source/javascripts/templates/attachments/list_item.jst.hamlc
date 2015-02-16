@@ -1,5 +1,2 @@
-%span
-  %a.file_icon.minimal
-%span.editable.name{:data => {:placeholder => "file name"}}
-%a.delete \u232B
-%input.file{:type => 'file'}
+%a.file_icon{:data => {:window => "true"}}
+%a.file_name{:data => {:window => "true"}}

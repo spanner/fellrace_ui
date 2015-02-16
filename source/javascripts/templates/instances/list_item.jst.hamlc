@@ -1,3 +1,2 @@
 %a.name
-%span.future.total_entries.note
-%span.past.total.note
+%span.total.note

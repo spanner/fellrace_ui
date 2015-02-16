@@ -1,6 +1,5 @@
-class FellRace.Views.PublishedAttachment extends Backbone.Marionette.ItemView
-  template: 'attachments/published/list_item'
-  model: FellRace.Models.PublishedAttachment
+class FellRace.Views.Attachment extends Backbone.Marionette.ItemView
+  template: 'attachments/list_item'
   tagName: "li"
   className: "attachment"
 

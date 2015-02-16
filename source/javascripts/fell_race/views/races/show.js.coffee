@@ -150,7 +150,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     new FellRace.Views.PublishedAttachmentsList(collection: @model.attachments, el: @$el.find("ul.attachments")).render()
     new FellRace.Views.PublishedLinksList(collection: @model.links, el: @$el.find("ul.links")).render()
     new FellRace.Views.PublishedCheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints")).render()
-    new FellRace.Views.PublishedRecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
+    new FellRace.Views.RecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
     new FellRace.Views.PublishedInstancesList(collection: @model.instances, el: @$el.find("ul.instances")).render()
 
   showPresence: (e) =>

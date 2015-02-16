@@ -1,5 +1,5 @@
-class FellRace.Views.CheckpointsList extends Backbone.Marionette.CollectionView
-  itemView: FellRace.Views.Checkpoint
+class FellRace.Views.AdminCheckpointsList extends Backbone.Marionette.CollectionView
+  itemView: FellRace.Views.AdminCheckpoint
   emptyView: FellRace.Views.AddFirstCheckpoint
   selectable: true
   sortable: true

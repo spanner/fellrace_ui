@@ -1,5 +1,5 @@
-class FellRace.Views.Instance extends Backbone.Marionette.ItemView
-  template: 'instances/show'
+class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
+  template: 'instances/admin'
   className: "instance"
 
   events:
