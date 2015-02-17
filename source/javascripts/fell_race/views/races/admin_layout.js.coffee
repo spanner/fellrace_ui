@@ -1,4 +1,4 @@
-class FellRace.Views.RaceAdminLayout extends FellRace.Views.LayoutView
+class FellRace.Views.AdminRaceLayout extends FellRace.Views.LayoutView
   routes: () =>
     "(/)": @default
     "new_instance": @newInstance
@@ -15,6 +15,7 @@ class FellRace.Views.RaceAdminLayout extends FellRace.Views.LayoutView
 
   instance: (instance_name,path) =>
     instance = new FellRace.Models.Instance(name: instance_name)
+    instance.fetch()
     layout = new FellRace.Views.AdminInstanceLayout
       model: instance
       path: path

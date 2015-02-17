@@ -1,7 +1,6 @@
 class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
   routes: () =>
     "(/)": @results
-    "edit(/)": @edit
     "entry(/)": @entry
 
   initialize: ->

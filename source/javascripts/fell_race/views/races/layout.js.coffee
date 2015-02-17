@@ -1,7 +1,6 @@
 class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
   routes: () =>
     "(/)": @default
-    "admin(/*path)": @admin
     ":instance_name(/*path)": @instance
 
   initialize: ({slug:@slug,path:path}) ->
@@ -37,6 +36,7 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
   instance: (instance_name,path) =>
     @show()
     instance = new FellRace.Models.Instance(name: instance_name, {race:@model})
-    new FellRace.Views.InstanceLayout
-      model: instance
-      path: path
+    new FellRace.Views.Instance
+    # new FellRace.Views.InstanceLayout
+    #   model: instance
+    #   path: path

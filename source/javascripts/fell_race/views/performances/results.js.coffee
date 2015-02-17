@@ -40,7 +40,7 @@ class FellRace.Views.TimeCell extends Backbone.Marionette.ItemView
     @stickit()
 
   time: (seconds) =>
-    _fellrace.secondsToTime seconds
+    _fellrace.secondsToString seconds
 
 class FellRace.Views.NameCell extends Backbone.Marionette.ItemView
   template: "performances/name_cell"

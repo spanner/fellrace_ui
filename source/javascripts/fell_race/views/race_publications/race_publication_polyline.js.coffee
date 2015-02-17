@@ -59,7 +59,7 @@ class FellRace.Views.RacePublicationPolyline extends MapStick.Polyline
     super
     @checkpoints.show()
 
-class FellRace.Views.RacePublicationPolylines extends MapStick.CollectionView
+class FellRace.Views.RacePublicationPolylines extends MapStick.OverlayCollection
   itemView: FellRace.Views.RacePublicationPolyline
 
 
@@ -86,5 +86,5 @@ class FellRace.Views.SimpleRacePublicationPolyline extends MapStick.Polyline
     @model.trigger "select_publication"
     @model.trigger "select"
 
-class FellRace.Views.SimpleRacePublicationPolylines extends MapStick.CollectionView
+class FellRace.Views.SimpleRacePublicationPolylines extends MapStick.OverlayCollection
   itemView: FellRace.Views.SimpleRacePublicationPolyline

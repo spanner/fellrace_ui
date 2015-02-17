@@ -77,7 +77,7 @@ class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
     "/runners/#{id}/#{@_race.get("slug")}/#{@_instance.get("name")}"
 
   time: (seconds) =>
-    _fellrace.secondsToTime seconds
+    _fellrace.secondsToString seconds
 
 class FellRace.Views.CompetitorPerformancesTable extends Backbone.Marionette.CompositeView
   template: "competitors/performances"

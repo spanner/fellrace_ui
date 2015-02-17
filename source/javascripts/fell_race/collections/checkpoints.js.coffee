@@ -13,6 +13,8 @@ class FellRace.Collections.Checkpoints extends FellRace.Collection
       @resequence_soon()
     @on "change:lat", () =>
       @checkRoutability()
+    @on "add remove reset", =>
+      @sort()
 
   add: (models, options) =>
     options ?= {}

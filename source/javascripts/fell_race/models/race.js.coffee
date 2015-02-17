@@ -40,44 +40,31 @@ class FellRace.Models.Race extends FellRace.Model
     @on "select", @select
     @on "deselect", @deselect
     @on "toggle_select", @toggleSelect
-    # @wait_then_save = _.debounce @save, 500
-    # _.each @defaults, (value, key) =>
-    #   @on "change:#{key}", () =>
-    #     @wait_then_save()
     @elevator = new google.maps.ElevationService()
     @on "change:encoded_route", @setProfile
 
   build: =>
-    if @collection
-      @event = @collection.event
-    else if @has("event")
-      @event = new FellRace.Models.Event @get("event")
     @attachments = new FellRace.Collections.Attachments(@get("attachments"), race: @)
     @records = new FellRace.Collections.Records(@get("records"), race: @)
     @instances = new FellRace.Collections.Instances(@get("instances"), race: @)
-    # @future_instances = new FellRace.Collections.Instances(@instances.future(), race: @)
-    # @past_instances = new FellRace.Collections.Instances(@instances.past(), race: @)
     @links = new FellRace.Collections.Links(@get("links"), race: @)
     @checkpoints = new FellRace.Collections.Checkpoints(@get("checkpoints"), race: @)
     @checkpoints.sort()
 
-    # @instances.on "add remove reset", () =>
-    #   @future_instances.reset @instances.future()
-    #   @past_instances.reset @instances.past()
+    _.each ["attachments","checkpoints","records","links","instances"], (collection) =>
+      @on "change:#{collection}", (model,data) =>
+        @[collection].reset data
 
-    # if @isNew()
-    #   console.log "is new"
-    #   @once "sync", () =>
-    #     @setUrls()
-    #     if cps = @get "checkpoints"
-    #       @checkpoints.reset cps
-    # else
-    @setUrls()
-    @attachments.fetch()
-    @checkpoints.fetch()
-    @links.fetch()
-    @records.fetch()
-    @instances.fetch()
+    if @isNew()
+      console.log "is new"
+      @once "sync", () =>
+        @setUrls()
+    else
+      @setUrls()
+
+  isNew: =>
+    console.log @
+    !@get("slug")
 
   setUrls: =>
     url_stem = @url()
@@ -171,7 +158,7 @@ class FellRace.Models.Race extends FellRace.Model
 
   select: =>
     unless @selected()
-      # @collection.deselectAll()
+      @collection.deselectAll()
       @set selected: true
 
   deselect: =>

@@ -20,7 +20,7 @@ class FellRace.Views.AdminRecord extends Backbone.Marionette.ItemView
     @stickit()
 
   secondsToString: (seconds) =>
-    _fellrace.secondsToTime seconds
+    _fellrace.secondsToString seconds
 
   stringToSeconds: (string) =>
     moment.duration(string).asSeconds()

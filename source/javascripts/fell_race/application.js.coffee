@@ -27,10 +27,11 @@ class FellRace.Application extends Backbone.Marionette.Application
     top: ''
     left: ''
 
+  inAdmin: false
+
   constructor: (options={}) ->
     super
     root._fellrace = @
-    
     $.notify = (type, argument) =>
       @vent.trigger(type, argument)
 
@@ -64,7 +65,6 @@ class FellRace.Application extends Backbone.Marionette.Application
     @session.load()
 
     @router = new FellRace.BaseRouter
-      main_region: @mainRegion
 
     @content = $('#content')
     view = $(window)
@@ -77,15 +77,15 @@ class FellRace.Application extends Backbone.Marionette.Application
       pushState: true
       root: '/'
 
-  apiUrl: =>
-    @_api_url
+  apiUrl: =>      
+    if @inAdmin then "#{@_api_url}/admin" else @_api_url
 
   listenToToggle: =>
     $("#view_toggle").on "click", =>
       @open_drawer = !@open_drawer
       @resizeContent(animate:true)
 
-  secondsToTime: (totalSeconds) =>
+  secondsToString: (totalSeconds) =>
     if totalSeconds
       hours = Math.floor(totalSeconds / 3600)
       totalSeconds %= 3600

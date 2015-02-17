@@ -147,11 +147,11 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
 
   onRender: =>
     @stickit()
-    new FellRace.Views.PublishedAttachmentsList(collection: @model.attachments, el: @$el.find("ul.attachments")).render()
-    new FellRace.Views.PublishedLinksList(collection: @model.links, el: @$el.find("ul.links")).render()
-    new FellRace.Views.PublishedCheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints")).render()
+    new FellRace.Views.AttachmentsList(collection: @model.attachments, el: @$el.find("ul.attachments")).render()
+    new FellRace.Views.LinksList(collection: @model.links, el: @$el.find("ul.links")).render()
+    new FellRace.Views.CheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints")).render()
     new FellRace.Views.RecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
-    new FellRace.Views.PublishedInstancesList(collection: @model.instances, el: @$el.find("ul.instances")).render()
+    new FellRace.Views.InstancesList(collection: @model.instances, el: @$el.find("ul.instances")).render()
 
   showPresence: (e) =>
     el = $(e.currentTarget)

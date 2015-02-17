@@ -5,8 +5,8 @@ class FellRace.Views.RacePolyline extends MapStick.Polyline
 
   bindings:
     path:
-      attribute: "encoded_route"
-      modelChanged: ({encoded_route:string}={}) ->
+      attribute: "route"
+      modelChanged: ({route:string}={}) ->
         MapStick.decodePathString(string or= "")
       overlayChanged: (path, e) ->
         string = MapStick.encodePathString(path or=[])
@@ -44,5 +44,5 @@ class FellRace.Views.RacePolyline extends MapStick.Polyline
     super
     @checkpoints.show()
 
-class FellRace.Views.RacePolylines extends MapStick.CollectionView
+class FellRace.Views.RacePolylines extends MapStick.OverlayCollection
   itemView: FellRace.Views.RacePolyline

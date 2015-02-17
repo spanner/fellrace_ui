@@ -1,17 +1,13 @@
 class FellRace.Views.AdminLink extends Backbone.Marionette.ItemView
-  template: 'links/admin'
+  template: 'links/admin_list_item'
   tagName: "li"
   className: "link"
   events:
     'click a.delete': "delete"
     'click a.visit': "goto"
   bindings:
-    "span.title": 
-      observe: "title"
-      events: ['blur']
-    'span.url':
-      observe: 'url'
-      events: ['blur']
+    "span.title": "title"
+    'span.url': 'url'
 
   onRender: () =>
     @$el.find('.editable').editable()

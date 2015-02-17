@@ -71,5 +71,5 @@ class FellRace.Views.CheckpointMarker extends MapStick.Marker
   select: =>
     @model.trigger "select"
 
-class FellRace.Views.CheckpointMarkers extends MapStick.CollectionView
+class FellRace.Views.CheckpointMarkers extends MapStick.OverlayCollection
   itemView: FellRace.Views.CheckpointMarker

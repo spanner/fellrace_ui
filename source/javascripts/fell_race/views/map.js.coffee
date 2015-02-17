@@ -20,18 +20,6 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
       ]
       style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
 
-  publication_bundles: {}
-  preview_bundles: {}
-  event_bundles: {}
-
-  initialize: ->
-    # _fellrace.publications.on "add", (model) =>
-    #   @constructPublicationBundle model
-    # _fellrace.previews.on "add", (model) =>
-    #   @constructPreviewBundle model
-    # _fellrace.events.on "add", (model) =>
-    #   @constructEventBundle model
-
   onRender: () =>
     throw new Error("Google maps API is not loaded.") unless google and google.maps
     @_gmap = new google.maps.Map @$el.find('.map_holder')[0], @mapConfig
@@ -40,76 +28,20 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
       model: _fellrace.currentUser()
       map: @_gmap
 
+    console.debug @_gmap
+
+    polys = new FellRace.Views.RacePolylines
+      collection: _fellrace.races
+      map: @_gmap
+
+    polys.show()
+
   setOptions: (opts={}) =>
     @_gmap.setOptions _.extend(_.clone(@mapConfig), opts)
     @_gmap.panBy _fellrace.offsetX(), _fellrace.offsetY()
 
   getMap: =>
     @_gmap
-
-  removeBundle: (model, bundles) =>
-    bundles[model.cid].hide()
-    delete bundles[model.cid]
-
-  constructPublicationBundle: (model) =>
-    bundle = @publication_bundles[model.cid] =
-      races: new FellRace.Views.RacePublicationPolylines
-        collection: model.race_publications
-        map: @_gmap
-      simple_races: new FellRace.Views.SimpleRacePublicationPolylines
-        collection: model.race_publications
-        map: @_gmap
-      hide: =>
-        bundle.races.hide()
-        bundle.simple_races.hide()
-      showSimple: =>
-        bundle.races.hide()
-        bundle.simple_races.show()
-      show: =>
-        @hideEvents()
-        @showSimplePublications()
-        bundle.races.show()
-        bundle.simple_races.hide()
-
-    model.on "select", =>
-      bundle.show()
-
-    bundle.showSimple()
-    bundle
-
-  constructPreviewBundle: (model) =>
-    bundle = @preview_bundles[model.cid] =
-      races: new FellRace.Views.RacePublicationPolylines
-        collection: model.race_publications
-        map: @_gmap
-      show: =>
-        @hidePublications()
-        @hideEvents()
-        bundle.races.show()
-      hide: =>
-        bundle.races.hide()
-
-    model.on "select", =>
-      bundle.show()
-
-    bundle
-
-  constructEventBundle: (model) =>
-    bundle = @event_bundles[model.cid] =
-      races: new FellRace.Views.RacePolylines
-        collection: model.races
-        map: @_gmap
-      hide: =>
-        bundle.races.hide()
-      show: =>
-        @hidePublications()
-        @hideEvents()
-        bundle.races.show()
-
-    model.on "select", =>
-      bundle.show()
-    bundle.hide()
-    bundle
 
   goToModel: (model) =>
     unless @model is model
@@ -118,30 +50,6 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
       @model = model
     model.trigger "select", model
 
-  index: =>
-    @model = null
-    @hideEvents()
-    @showSimplePublications()
-
-  hideEvents: =>
-    @hideBundles @event_bundles
-
-  hidePublications: =>
-    @hideBundles @publication_bundles
-    @hideBundles @preview_bundles
-
-  showSimplePublications: =>
-    @hideBundles @preview_bundles
-    _.each @publication_bundles, (bundle) =>
-      bundle.showSimple()
-
-  hideBundles: (bundles) =>
-    _.each bundles, (bundle) =>
-      bundle.hide()
-
-  showBundles: (bundles) =>
-    _.each bundles, (bundle) =>
-      bundle.show()
 
   addMapTypes: =>
     

@@ -50,7 +50,7 @@ class FellRace.Views.AdminListedInstance extends Backbone.Marionette.ItemView
       "#{count} entries"
 
   url: ([race_slug,name]=[]) =>
-    "/races/#{race_slug}/#{name}/admin"
+    "/admin/races/#{race_slug}/#{name}"
 
   isPast: (date) =>
     date and Date.parse(date) <= Date.now()
