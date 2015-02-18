@@ -41,6 +41,7 @@ class FellRace.Application extends Backbone.Marionette.Application
 
     @_config = new FellRace.Config(options.config)
     @_api_url = @config("api_url")
+    @_domain = @config("domain")
     @session = new FellRace.Models.UserSession()
     @race_publications ?= new FellRace.Collections.RacePublications([])
 
@@ -56,9 +57,6 @@ class FellRace.Application extends Backbone.Marionette.Application
     @listenToToggle()
 
     @noticeRegion.show new Notifier model: @vent, wait: 4000
-
-    @vent.on "login:changed", =>
-      @events.fetch() if @userSignedIn()
 
     @session.load()
 
@@ -77,6 +75,9 @@ class FellRace.Application extends Backbone.Marionette.Application
 
   apiUrl: =>      
     @_api_url
+
+  domain: =>
+    @_domain
 
   listenToToggle: =>
     $("#view_toggle").on "click", =>

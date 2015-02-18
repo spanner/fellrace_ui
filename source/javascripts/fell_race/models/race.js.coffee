@@ -62,7 +62,6 @@ class FellRace.Models.Race extends FellRace.Model
       @setUrls()
 
   isNew: =>
-    console.log @
     !@get("slug")
 
   setUrls: =>
@@ -117,14 +116,19 @@ class FellRace.Models.Race extends FellRace.Model
     @set preview_json: @jsonForPublication()
 
   publish: =>
-    @save {
+    data =
       published_json: @jsonForPublication()
-      preview_json: null
-      },
-      success: =>
-        @set publishing: false
-        _fellrace.navigate "/races/#{@get("slug")}"
-    @set publishing: true
+    $.notify "publishing race"
+    $.post "#{@url()}/publish", data, (response) =>
+      console.log "published"
+      _fellrace.navigate("/races/#{@get("slug")}")
+    , 'json'
+    # @save {
+    #   published_json: @jsonForPublication()
+    #   preview_json: null
+    #   },
+    #   success: =>
+    #     _fellrace.navigate "/races/#{@get("slug")}"
 
   jsonForPublication: =>
     JSON.stringify
@@ -135,7 +139,6 @@ class FellRace.Models.Race extends FellRace.Model
       climb: @get("climb")
       distance: @get("distance")
       description: @get("description")
-      start_time: @get("start_time")
       colour: @get("route_colour")
       organiser_email: @get("organiser_email")
       organiser_name: @get("organiser_name")

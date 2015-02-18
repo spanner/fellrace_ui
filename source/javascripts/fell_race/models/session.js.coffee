@@ -41,7 +41,7 @@ class FellRace.Models.UserSession extends Backbone.Model
   #
   load: () =>
     if @authToken()
-      $.getJSON("/api/users/me").done(@setUser)#.fail(@unsetCookie)
+      $.getJSON("#{_fellrace.apiUrl()}/users/me").done(@setUser) #.fail(@unsetCookie)
 
   reset: () =>
     @user.clear()

@@ -22,12 +22,15 @@ Modernizr.addTest 'ios6plus', ->
 class FellRace.Config
   defaults: 
     api_url: "http://api.fellrace.org.uk"
+    domain: "fellrace.og.uk"
 
   staging:
     api_url: "http://apis.fellrace.org.uk"
+    domain: "fellrace.og.uk"
 
   development:
     api_url: "http://api.fr.dev"
+    domain: "fr.dev"
 
   constructor: (options={}) ->
     options.environment ?= @guessEnvironment()

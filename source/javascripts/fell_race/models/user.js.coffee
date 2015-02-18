@@ -1,7 +1,4 @@
 class FellRace.Models.User extends Backbone.Model
-  # urlRoot: =>
-  #   "#{_fellrace.config("api_url")}/api/users"
-
   defaults:
     email: ""
     first_name: ""
