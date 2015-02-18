@@ -1,6 +1,9 @@
 class FellRace.Collections.RacePublications extends FellRace.Collection
   model: FellRace.Models.RacePublication
 
+  url: =>
+    "#{_fellrace.apiUrl()}/race_publications"
+
   initialize: (models) ->
     super
     @on "add", (model, collection, options) =>

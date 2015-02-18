@@ -1,12 +1,6 @@
 class FellRace.Collections.Instances extends FellRace.Collection
   model: FellRace.Models.Instance
 
-  url: =>
-    if @race
-      "#{@race.url()}/instances"      
-    else
-      "#{_fellrace.apiUrl()}/instances"
-
   past: =>
     _.filter @models, (instance) =>
       instance.inPast()

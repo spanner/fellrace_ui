@@ -1,6 +1,6 @@
 class FellRace.Models.RacePublication extends Backbone.Model
   url: =>
-    "/api/races/#{@get("slug")}"
+    "#{_fellrace.apiUrl()}/race_publications/#{@get("slug")}"
 
   initialize: ->
     @build()
@@ -10,14 +10,24 @@ class FellRace.Models.RacePublication extends Backbone.Model
     @on "select_publication", @selectPublication
 
   build: =>
-    # @publication = @collection.publication
+    @attachments = new FellRace.Collections.Attachments([])
+    @records = new FellRace.Collections.Records([])
+    @instances = new FellRace.Collections.Instances([])
+    @links = new FellRace.Collections.Links([])
+    @checkpoints = new FellRace.Collections.Checkpoints([])
+    @setUrls()
 
-    @attachments = new FellRace.Collections.Attachments(@get("attachments"), race_publication: @)
-    @records = new FellRace.Collections.Records(@get("records"), race_publication: @)
-    @instances = new FellRace.Collections.Instances(@get("instances"), race_publication: @)
-    @links = new FellRace.Collections.Links(@get("links"), race_publication: @)
-    @checkpoints = new FellRace.Collections.Checkpoints(@get("checkpoints"), race_publication: @)
-    @checkpoints.sort()
+    _.each ["attachments","checkpoints","records","links","instances"], (collection) =>
+      @on "change:#{collection}", (model,data) =>
+        @[collection].reset data
+
+  setUrls: =>
+    url_stem = @url()
+    @attachments.url = "#{url_stem}/attachments"
+    @checkpoints.url = "#{url_stem}/checkpoints"
+    @records.url = "#{url_stem}/records"
+    @instances.url = "#{url_stem}/instances"
+    @links.url = "#{url_stem}/links"
 
   select: =>
     unless @selected()
@@ -41,9 +51,3 @@ class FellRace.Models.RacePublication extends Backbone.Model
 
   hasRoute: =>
     @has("route") or @has("checkpoint_route")
-
-  selectPublication: =>
-    @publication.trigger "go_to"
-
-  getPubZoom: =>
-    @publication?.get "map_zoom"

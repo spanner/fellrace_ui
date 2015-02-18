@@ -23,7 +23,7 @@ class FellRace.Views.AdminRecord extends Backbone.Marionette.ItemView
     _fellrace.secondsToString seconds
 
   stringToSeconds: (string) =>
-    moment.duration(string).asSeconds()
+    _fellrace.stringToSeconds string
 
   delete: (e) =>
     e.stopPropagation() if e

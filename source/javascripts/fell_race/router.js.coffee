@@ -45,7 +45,7 @@ class FellRace.PublicRouter extends FellRace.Router
     "(/)": "index"
     "runners(/)": "competitors"
     "runners/:id(/*path)": "competitor"
-    "races/:slug(/*path)": "race"
+    "races/:slug(/*path)": "racePublication"
     "clubs(/)": "clubs"
     "clubs/:id(/*path)": "club"
     "*path": "index"
@@ -63,10 +63,14 @@ class FellRace.PublicRouter extends FellRace.Router
       model: new FellRace.Models.Competitor id:id
       path: path
 
-  race: (slug,path) =>
-    layout = new FellRace.Views.RaceLayout
+  racePublication: (slug,path) =>
+    model = new FellRace.Models.RacePublication
       slug: slug
-      path: path
+    model.fetch
+      success: =>
+        layout = new FellRace.Views.RacePublicationLayout
+          model: model
+          path: path
 
   clubs: =>
     layout = new FellRace.Views.ClubsLayout
@@ -90,10 +94,11 @@ class FellRace.AdminRouter extends FellRace.Router
   race: (slug,path) =>
     race = new FellRace.Models.Race
       slug: slug
-    race.fetch()
-    layout = new FellRace.Views.AdminRaceLayout
-      model: race
-      path: path
+    race.fetch
+      success: =>
+        layout = new FellRace.Views.RaceLayout
+          model: race
+          path: path
 #
 #
 # class FellRace.Router extends Backbone.Router

@@ -8,39 +8,22 @@ class FellRace.Models.Instance extends FellRace.Model
   synced: ["date","time","entry_fee","entry_limit","summary","started_at","name","file","file_delete","entry_closing","entry_opening"]
 
   url: =>
-    if @race
-      "#{@race.url()}/instances/#{@get("name")}"
+    if @collection
+      "#{@collection.url}/#{@get("name")}"
     else
-      "#{_fellrace.apiUrl()}/instances/#{@id}"
+      "#{_fellrace.apiUrl()}/#{@get("name")}"
 
-  initialize: (opts,{race:@race}={}) ->
+  initialize: (opts) ->
     super
-    # separate datetime into date and time or use a single control?
-    # @save_soon = _.debounce @save, 500
-    # _.each @synced, (key) =>
-    #   @on "change:#{key}", (model, value, options) =>
-    #     @save_soon() unless options.quiet
-
     @build()
 
   build: =>
-    @buildRace()
     @buildPerformances()
     @buildWinner()
 
     @entries = new FellRace.Collections.Entries([],{instance:@,url:"#{@url}/entries"})
     @entries.on "change", () =>
       @set total_entries: @entries.length
-
-  buildRace: =>
-    unless @race
-      if @collection and @collection.race
-        @race = @collection.race 
-      else
-        @race = new FellRace.Models.Race(@get("race"))
-    @on "change:race", (model,race) =>
-      @race.clear(silent:true)
-      @race.set race
 
   buildPerformances: =>
     @performances = new FellRace.Collections.Performances @get("performances"), instance: @

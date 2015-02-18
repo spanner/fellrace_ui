@@ -27,8 +27,6 @@ class FellRace.Application extends Backbone.Marionette.Application
     top: ''
     left: ''
 
-  inAdmin: false
-
   constructor: (options={}) ->
     super
     root._fellrace = @
@@ -44,14 +42,14 @@ class FellRace.Application extends Backbone.Marionette.Application
     @_config = new FellRace.Config(options.config)
     @_api_url = @config("api_url")
     @session = new FellRace.Models.UserSession()
-    @races ?= new FellRace.Collections.Races([])
+    @race_publications ?= new FellRace.Collections.RacePublications([])
 
     # ???
     @clubs ?= new FellRace.Collections.Clubs([])
     @competitors ?= new FellRace.Collections.Competitors([])
 
-    @mapView = new FellRace.Views.Map()
-    @gmapRegion.show @mapView
+    # @mapView = new FellRace.Views.Map()
+    # @gmapRegion.show @mapView
 
     @user_controlsRegion.show new FellRace.Views.UserControls()
 
@@ -78,7 +76,7 @@ class FellRace.Application extends Backbone.Marionette.Application
       root: '/'
 
   apiUrl: =>      
-    if @inAdmin then "#{@_api_url}/admin" else @_api_url
+    @_api_url
 
   listenToToggle: =>
     $("#view_toggle").on "click", =>
@@ -96,6 +94,11 @@ class FellRace.Application extends Backbone.Marionette.Application
       string = "#{minutes}:#{seconds}"
       string = "#{hours}:#{string}" if hours > 0
       string
+
+  stringToSeconds: (string) =>
+    if string
+      [s,m,h] = string.split(":").reverse()
+      seconds = (parseInt(s,10)||0) + 60 * (parseInt(m,10)||0) + 3600 * (parseInt(h,10)||0)
 
   offsetX: =>
     if @isPortrait()

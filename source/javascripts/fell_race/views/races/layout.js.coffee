@@ -1,42 +1,29 @@
 class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
   routes: () =>
     "(/)": @default
+    "new_instance": @newInstance
     ":instance_name(/*path)": @instance
 
-  initialize: ({slug:@slug,path:path}) ->
-    super
-
-  default: =>
-    _fellrace.closeRight()
-    @show()
-
-  admin: (path) =>
-    _fellrace.closeRight()
-    @model = new FellRace.Models.Race
-      slug: @slug
-    @model.fetch()
-    view = new FellRace.Views.RaceAdminLayout
-      model: @model
-      path: path
-
-    #TODO check for permission
-    # if not permitted, redirect and warn
-    # else show edit view
-    # view = new FellRace.Views.RaceAdmin
-    #   el: @$el.find "#competitor"
-
-  show: =>
-    @model = new FellRace.Models.Race
-      slug: @slug
-    @model.fetch()
+  edit: =>
     view = new FellRace.Views.Race
       model: @model
     _fellrace.mainRegion.show view
 
+  default: =>
+    _fellrace.closeRight()
+    @edit()
+
   instance: (instance_name,path) =>
-    @show()
-    instance = new FellRace.Models.Instance(name: instance_name, {race:@model})
-    new FellRace.Views.Instance
-    # new FellRace.Views.InstanceLayout
-    #   model: instance
-    #   path: path
+    @edit()
+    instance = @model.instances.findWhere(name: instance_name)
+    instance.fetch()
+    view = new FellRace.Views.AdminInstance
+      model: instance
+    _fellrace.extraContentRegion.show view
+
+  newInstance: =>
+    @edit()
+    instance = @model.instances.add({})
+    view = new FellRace.Views.AdminInstance
+      model: instance
+    _fellrace.extraContentRegion.show view

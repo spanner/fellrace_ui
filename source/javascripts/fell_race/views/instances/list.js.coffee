@@ -8,9 +8,9 @@ class FellRace.Views.ListedInstance extends Backbone.Marionette.ItemView
       attributes: [
         {
           name: "href"
-          observe: ["event_slug", "race_slug", "name"]
+          observe: ["race_slug", "name"]
           onGet: (vals) =>
-            "/events/#{vals[0]}/#{vals[1]}/#{vals[2]}"
+            "/races/#{vals[0]}/#{vals[1]}"
         }
       ]
       observe: "name"

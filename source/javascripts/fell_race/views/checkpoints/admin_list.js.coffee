@@ -16,10 +16,7 @@ class FellRace.Views.AdminCheckpoint extends Backbone.Marionette.ItemView
       observe: "name"
       updateMethod: 'text'
       onGet: 'setSymbol'
-    'span.name':
-      observe: "name"
-      updateMethod: 'html'
-      events: ['blur']
+    'span.name': "name"
     'span.gridref': "gridref"
     'span.pos':
       observe: "pos"

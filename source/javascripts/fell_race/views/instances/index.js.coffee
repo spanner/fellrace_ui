@@ -72,19 +72,19 @@ class FellRace.Views.PastInstance extends FellRace.Views.IndexInstance
 class FellRace.Views.FutureInstances extends Backbone.Marionette.CompositeView
   itemView: FellRace.Views.FutureInstance
 
+  url: =>
+    "#{_fellrace.apiUrl()}/instances/future"
+
   initialize: ->
     @collection = new FellRace.Collections.Instances([])
-    @collection.fetch
-      data:
-        period: "future"
-      processData: true
+    @collection.url = "#{_fellrace.apiUrl()}/instances/future"
+    @collection.fetch()
 
 class FellRace.Views.PastInstances extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.PastInstance
 
   initialize: ->
     @collection = new FellRace.Collections.Instances([])
-    @collection.fetch
-      data:
-        period: "past"
-      processData: true
+    @collection.url = "#{_fellrace.apiUrl()}/instances/past"
+    @collection.fetch()
+

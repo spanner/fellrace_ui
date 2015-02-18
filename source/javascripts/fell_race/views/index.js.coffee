@@ -17,7 +17,7 @@ class FellRace.Views.IndexView extends Backbone.Marionette.Layout
 
   initialize: =>
     @model = _fellrace.session
-    @collection = _fellrace.races
+    @collection = _fellrace.race_publications
     @collection.fetch()
 
   onRender: =>

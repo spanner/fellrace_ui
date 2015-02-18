@@ -1,5 +1,5 @@
-class FellRace.Views.AdminRace extends Backbone.Marionette.ItemView
-  template: 'races/admin'
+class FellRace.Views.Race extends Backbone.Marionette.ItemView
+  template: 'races/edit'
   className: "race"
   modelEvents:
     'change:show_checkpoints': 'setCheckpointVisibility'
@@ -19,6 +19,15 @@ class FellRace.Views.AdminRace extends Backbone.Marionette.ItemView
   bindings:
     # generally best to bind one element with each declaration:
     # updates are not triggered within a set of bound elements.
+    'a.publish':
+      attributes: [
+        {
+          observe: "publishing"
+          name: "class"
+          onGet: (publishing) =>
+            "publishing" if publishing
+        }
+      ]      
 
     '.name': 'name'
     '.description':

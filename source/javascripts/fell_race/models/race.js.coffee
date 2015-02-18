@@ -56,7 +56,6 @@ class FellRace.Models.Race extends FellRace.Model
         @[collection].reset data
 
     if @isNew()
-      console.log "is new"
       @once "sync", () =>
         @setUrls()
     else
@@ -118,10 +117,14 @@ class FellRace.Models.Race extends FellRace.Model
     @set preview_json: @jsonForPublication()
 
   publish: =>
-    @set({
+    @save {
       published_json: @jsonForPublication()
       preview_json: null
-    }, persistChange: true)
+      },
+      success: =>
+        @set publishing: false
+        _fellrace.navigate "/races/#{@get("slug")}"
+    @set publishing: true
 
   jsonForPublication: =>
     JSON.stringify
@@ -149,12 +152,6 @@ class FellRace.Models.Race extends FellRace.Model
       records: @records.map (record) -> record.jsonForPublication()
       checkpoints: @checkpoints.map (checkpoint) -> checkpoint.jsonForPublication()
       checkpoint_route: @checkpoints.getEncodedRoute()
-
-  getEvent: =>
-    @event
-
-  eventUrl: =>
-    @event.publicUrl() if @event
 
   select: =>
     unless @selected()

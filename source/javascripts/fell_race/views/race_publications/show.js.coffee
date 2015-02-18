@@ -1,5 +1,5 @@
-class FellRace.Views.Race extends Backbone.Marionette.ItemView
-  template: 'races/show'
+class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
+  template: 'race_publications/show'
   className: "race"
 
   events:

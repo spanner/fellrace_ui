@@ -81,7 +81,7 @@
 
     .start_time
       %h3 Start time
-      %span.race_start_time.editable{:data => {:placeholder => "hh:mm"}}>
+      %span.race_start_time
 
     .instances
       %h3
