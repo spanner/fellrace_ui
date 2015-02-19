@@ -31,10 +31,12 @@ class FellRace.BaseRouter extends Backbone.Router
     "*path": "public"
 
   public: (path) =>
+    _fellrace.publicView()
     router = new FellRace.PublicRouter
     router.handle path
 
   admin: (path) =>
+    _fellrace.adminView()
     router = new FellRace.AdminRouter
     router.handle path
 
@@ -49,6 +51,7 @@ class FellRace.PublicRouter extends FellRace.Router
     "*path": "index"
 
   index: =>
+    _fellrace.race_publications.fetch()
     index = new FellRace.Views.IndexView
     _fellrace.mainRegion.show index
     _fellrace.closeRight()
@@ -62,13 +65,15 @@ class FellRace.PublicRouter extends FellRace.Router
       path: path
 
   racePublication: (slug,path) =>
-    model = new FellRace.Models.RacePublication
-      slug: slug
+    model = _fellrace.race_publications.add(slug: slug)
     model.fetch
       success: =>
+        _fellrace.vent.on 'login:changed', =>
+          model.fetchPermissions()
         layout = new FellRace.Views.RacePublicationLayout
           model: model
           path: path
+        model.trigger("select")
 
   clubs: =>
     layout = new FellRace.Views.ClubsLayout
@@ -80,18 +85,12 @@ class FellRace.PublicRouter extends FellRace.Router
 
 class FellRace.AdminRouter extends FellRace.Router
   routes:
-    "(/)": "index"
     "races/:slug(/*path)": "race"
-    "*path": "index"
-
-  index: =>
-    index = new FellRace.Views.IndexView
-    _fellrace.mainRegion.show index
-    _fellrace.closeRight()
 
   race: (slug,path) =>
     race = new FellRace.Models.Race
       slug: slug
+    _fellrace.showRace race
     race.fetch
       success: =>
         layout = new FellRace.Views.RaceLayout

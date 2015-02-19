@@ -6,8 +6,19 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     'click a.social': 'openTab'
 
   bindings:
-    # generally best to bind one element with each declaration:
-    # updates are not triggered within a set of bound elements.
+    '#racecontrols':
+      observe: "permissions"
+      visible: ({can_edit:can_edit}={}) ->
+        console.log can_edit
+        can_edit
+    'a.edit':
+      attributes: [
+        observe: "slug"
+        name: "href"
+        onGet: (slug) ->
+          "/admin/races/#{slug}"
+      ]
+
     '.name': 'name'
     '.distance': 'distance'
     '.description':

@@ -43,14 +43,14 @@ class FellRace.Application extends Backbone.Marionette.Application
     @_api_url = @config("api_url")
     @_domain = @config("domain")
     @session = new FellRace.Models.UserSession()
-    @race_publications ?= new FellRace.Collections.RacePublications([])
+    @race_publications = new FellRace.Collections.RacePublications([])
 
     # ???
     @clubs ?= new FellRace.Collections.Clubs([])
     @competitors ?= new FellRace.Collections.Competitors([])
 
-    # @mapView = new FellRace.Views.Map()
-    # @gmapRegion.show @mapView
+    @mapView = new FellRace.Views.Map()
+    @gmapRegion.show @mapView
 
     @user_controlsRegion.show new FellRace.Views.UserControls()
 
@@ -116,6 +116,19 @@ class FellRace.Application extends Backbone.Marionette.Application
     else
       0
 
+  moveMapTo: (model) =>
+    @mapView.moveTo model
+
+  showRace: (race) =>
+    @mapView.showRace race
+
+  publicView: =>
+    @mapView.showRacePublications()
+    @mapView.removeRace()
+
+  adminView: =>
+    @mapView.hideRacePublications()
+
   resizeContent: ({animate:animate}={}) =>
     # TODO .animate then .css when animate==true
     css =
@@ -165,154 +178,6 @@ class FellRace.Application extends Backbone.Marionette.Application
       JST[path](data)
     else
       ""
-
-
-
-  # event: (slug) =>
-  #   event = @events.findOrAddBy slug: slug
-  #   @mainRegion.show new FellRace.Views.Event(model: event)
-  #   event.fetch
-  #     success: =>
-  #       @mapView.goToModel event
-  #       @vent.once "login:changed", =>
-  #         @event(slug)
-  #       unless event.editable()
-  #         $.notify "error", "You have to be logged in to make changes to this event"
-  #         @navigate "/events/#{slug}"
-  #     error: (model, error) =>
-  #       if @userSignedIn()
-  #         $.notify('error', "Can't edit that event.")
-  #       else
-  #         $.notify('flash', "To edit your events, you have to be signed in.")
-  #       @navigate "/events/#{slug}"
-  #
-  # publication: (slug) =>
-  #   publication = @publications.findOrAddBy slug: slug
-  #   @vent.once "login:changed", =>
-  #     @publication(slug)
-  #   publication.fetch
-  #     success: (a, b, c) =>
-  #       @mainRegion.show new FellRace.Views.Publication(model: publication)
-  #       @mapView.goToModel publication
-  #     error: ->
-  #       $.notify('error', "Error during initialisation.")
-  #
-  # preview: (slug) =>
-  #   publication = @previews.findOrAddBy slug: slug
-  #   publication.set preview: true
-  #   @vent.once "login:changed", =>
-  #     @preview(slug)
-  #   publication.fetch
-  #     success: =>
-  #       @mainRegion.show new FellRace.Views.Publication(model: publication)
-  #       @mapView.goToModel publication
-  #     error: =>
-  #       $.notify('error', "Error during initialisation.")
-  #
-  # competitor: (id) =>
-  #   competitor = new FellRace.Models.Competitor(id: id)
-  #   @vent.once "login:changed", =>
-  #     @competitor(id)
-  #   competitor.fetch
-  #     success: =>
-  #       @mainRegion.show(new FellRace.Views.Competitor(model: competitor))
-  # competitors_index: =>
-  #   @searchModel ?= new Backbone.Model()
-  #   @mainRegion.show(new FellRace.Views.CompetitorsTable(
-  #     collection: @competitors
-  #     model: @searchModel))
-  # competitor_merging: =>
-  #   competitors = new FellRace.Collections.Competitors()
-  #   competitors.url = "/api/competitors/merge_requests"
-  #   @mainRegion.show(new FellRace.Views.CompetitorsMergeTable(collection: competitors))
-  #   competitors.fetch()
-  # edit_competitor: (id) =>
-  #   competitor = @competitors.findOrAdd(id: id)
-  #   @vent.once "login:changed", =>
-  #     @competitor_views.edit(id)
-  #   competitor.fetch
-  #     success: =>
-  #       if competitor.editable()
-  #         @mainRegion.show(new FellRace.Views.CompetitorEdit(model: competitor))
-  #       else
-  #         $.notify "error", "You have to be logged in to make changes to this runner"
-  #         @navigate "/runners/#{id}"
-  # instance: (slug,race_slug,name) =>
-  #   publication = @publications.findOrAddBy slug: slug
-  #   publication.fetch
-  #     success: (a, b, c) =>
-  #       @mapView.goToModel publication
-  #       if race_publication = publication.race_publications.findWhere(slug: race_slug)
-  #         if instance = race_publication.instances.findWhere(name: name)
-  #           console.debug instance
-  #           @mainRegion.show(new FellRace.Views.PublishedInstance model:instance)
-  #     error: ->
-  #       $.notify('error', "Error during initialisation.")
-  #
-  # instance_admin: (slug,race_slug,name) =>
-  #   event = new FellRace.Models.Event(slug:slug)
-  #   event.fetch
-  #     success: =>
-  #       @mapView.goToModel event
-  #       event.races.once "sync", =>
-  #         if race = event.races.findWhere(slug: race_slug)
-  #           race.instances.once "sync", =>
-  #             if instance = race.instances.findWhere(name:name)
-  #               @mainRegion.show(new FellRace.Views.Instance model:instance)
-  #     error: =>
-  #       $.notify('error', "Error during initialisation.")
-  #
-  # new_instance: (slug,race_slug) =>
-  #   event = new FellRace.Models.Event(slug:slug)
-  #   event.fetch
-  #     success: =>
-  #       @mapView.goToModel event
-  #       event.races.once "sync", =>
-  #         if race = event.races.findWhere(slug: race_slug)
-  #           race.instances.once "sync", =>
-  #             instance = race.instances.add({})
-  #             @mainRegion.show(new FellRace.Views.Instance model:instance)
-  #     error: =>
-  #       $.notify('error', "Error during initialisation.")
-  #
-  # event_entry: (slug) =>
-  #   if publication = @publications.findOrAddBy(slug: slug)
-  #     publication.fetch
-  #       success: =>
-  #         @mainRegion.show new FellRace.Views.PublicationEntry(model: publication)
-  #         @mapView.goToModel publication
-  #       error: =>
-  #         $.notify('error', "Error during initialisation.")
-  #
-  # show_club: (id) =>
-  #   club = new FellRace.Models.Club(id: id)
-  #   @mainRegion.show(new FellRace.Views.Club(model: club))
-  #   club.fetch()
-  # clubs_index: =>
-  #   @mainRegion.show(new FellRace.Views.ClubsList(collection: @clubs))
-  #   @clubs.fetch()
-  #
-  # resetPassword: (uid, token) =>
-  #   @navigate "/"
-  #   @user_actions().resetPassword(uid, token)
-  # confirm_user: (uid, token) =>
-  #   @navigate "/"
-  #   @user_actions().confirm(uid, token)
-  #
-  # me: =>
-  #   @mapView.index()
-  #   @vent.once "login:changed", =>
-  #     if @userSignedIn()
-  #       @mainRegion.show(new FellRace.Views.Me())
-  #       @user_actions().hideAction()
-  #       @vent.once "login:changed", =>
-  #         @navigate "/", trigger:true
-  #     else
-  #       @navigate "/", trigger:true
-  #   if @userSignedIn()
-  #     @mainRegion.show(new FellRace.Views.Me())
-  #   else
-  #     @user_actions().signIn()
 
   user_actions: =>
     resetPassword: (uid, token) =>

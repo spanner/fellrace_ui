@@ -1,55 +1,65 @@
 class FellRace.Views.RacePublicationPolyline extends MapStick.Polyline
   defaultOptions:
-    strokeOpacity: 0
+    strokeWeight: 4
+    strokeOpacity: 0.4
+    strokeColor: "#d1005d"
+    zIndex: 1
 
   bindings:
     path:
-      attribute: "route"
+      attributes: ["route","checkpoint_route"]
       modelChanged: "path"
-    strokeColor: "colour"
     icons:
       attributes: ["colour","selected"]
       modelChanged: "icons"
+    strokeOpacity:
+      attribute: "selected"
+      modelChanged: "strokeOpacity"
+    visible:
+      attributes: ["route","selected"]
+      modelChanged: "visible"
 
   overlayEvents:
     click: "select"
 
   initialize: ({map:map}={}) ->
-    @checkpoints = new FellRace.Views.PublishedCheckpointMarkers
+    @checkpoints = new FellRace.Views.CheckpointMarkers
       collection: @model.checkpoints
       map: map
 
   select: =>
-    @model.trigger "select"
+    _fellrace.navigate("/races/#{@model.get("slug")}") unless @model.get("selected")
 
-  path: ({route:string}={}) ->
-    MapStick.decodePathString(string or= "")    
+  path: ({route:route_string,checkpoint_route:cp_route_string}={}) ->
+    MapStick.decodePathString(route_string or cp_route_string or "")    
 
   icons: ({colour:colour,selected:selected}={}) =>
-    strength = if selected then 0.8 else 0.35
-    [
-      {
+    if selected
+      [
         icon:
           path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
-          fillOpacity: strength
+          fillOpacity: 0.8
           scale: 5
           strokeWeight: 1
           strokeColor: colour
-          strokeOpacity: strength
+          strokeOpacity: 0.8
         offset: "80px"
         repeat: "180px"
-      }
-      {
         icon:
           path: 'M 0,-1 0,1'
           strokeColor: colour
-          strokeOpacity: strength
+          strokeOpacity: 0.8
           strokeWeight: 5
           scale: 5
         offset: "0"
         repeat: "20px"
-      }
-    ]
+      ]
+
+  visible: ({route:route,selected:selected}={}) =>
+    !(!route and selected)
+
+  strokeOpacity: ({selected:selected}={}) =>
+    if selected then 0 else @defaultOptions.strokeOpacity
 
   hide: =>
     super
@@ -61,30 +71,3 @@ class FellRace.Views.RacePublicationPolyline extends MapStick.Polyline
 
 class FellRace.Views.RacePublicationPolylines extends MapStick.OverlayCollection
   itemView: FellRace.Views.RacePublicationPolyline
-
-
-
-class FellRace.Views.SimpleRacePublicationPolyline extends MapStick.Polyline
-  defaultOptions:
-    strokeWeight: 5
-    strokeOpacity: 0.3
-    strokeColor: "#d1005d"
-    zIndex: 1
-  bindings:
-    path:
-      attributes: ["route","checkpoint_route"]
-      modelChanged: "path"
-
-  overlayEvents:
-    click: "selectPublication"
-
-  path: ({route:route,checkpoint_route:checkpoint_route}={}) =>
-    route ?= checkpoint_route
-    MapStick.decodePathString route    
-
-  selectPublication: =>
-    @model.trigger "select_publication"
-    @model.trigger "select"
-
-class FellRace.Views.SimpleRacePublicationPolylines extends MapStick.OverlayCollection
-  itemView: FellRace.Views.SimpleRacePublicationPolyline

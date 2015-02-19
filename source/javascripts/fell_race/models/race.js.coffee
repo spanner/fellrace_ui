@@ -120,7 +120,6 @@ class FellRace.Models.Race extends FellRace.Model
       published_json: @jsonForPublication()
     $.notify "publishing race"
     $.post "#{@url()}/publish", data, (response) =>
-      console.log "published"
       _fellrace.navigate("/races/#{@get("slug")}")
     , 'json'
     # @save {

@@ -1,9 +1,10 @@
-class FellRace.Views.CheckpointMarker extends MapStick.Marker
+class FellRace.Views.AdminCheckpointMarker extends MapStick.Marker
   defaultOptions:
     labelInBackground: true
     labelClass: "label"
     labelAnchor: new google.maps.Point(-17, 10)
-    opacity: 0.8
+    raiseOnDrag: false
+    draggable: true
 
   # buildOverlay: (options) =>
   #   new MarkerWithLabel(options)
@@ -14,7 +15,7 @@ class FellRace.Views.CheckpointMarker extends MapStick.Marker
       modelChanged: "labelVisible"
     labelContent: "pos"
     labelStyle:
-      attributes: ["colour","selected"]
+      attributes: ["colour","race_selected"]
       modelChanged: "labelStyle"
     icon:
       attributes: ["name","colour"]
@@ -22,13 +23,14 @@ class FellRace.Views.CheckpointMarker extends MapStick.Marker
     position:
       lat: "lat"
       lng: "lng"
-    visible:
-      attribute: "selected"
-      modelChanged: "visible"
 
-  labelStyle: ({colour:colour,selected:selected}={}) =>
+  overlayEvents:
+    click: "select"
+
+  labelStyle: ({colour:colour,race_selected:race_selected}={}) =>
     "background-color": colour
     color: @textColour colour
+    opacity: 0.8
 
   labelVisible: ({name:name}={}) =>
     name isnt "Start" and name isnt "Finish"
@@ -60,8 +62,5 @@ class FellRace.Views.CheckpointMarker extends MapStick.Marker
     else
       "black"
 
-  visible: ({selected:selected}={}) =>
-    selected is true
-
-class FellRace.Views.CheckpointMarkers extends MapStick.OverlayCollection
-  itemView: FellRace.Views.CheckpointMarker
+class FellRace.Views.AdminCheckpointMarkers extends MapStick.OverlayCollection
+  itemView: FellRace.Views.AdminCheckpointMarker

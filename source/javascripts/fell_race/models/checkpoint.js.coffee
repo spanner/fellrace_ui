@@ -21,7 +21,6 @@ class FellRace.Models.Checkpoint extends FellRace.Model
         colour: @race.getColour()
         race_selected: @race.selected()
       @listenTo @race, "change:route_colour", @setColourFromRace
-      @listenTo @race, "change:selected", @setRaceSelected
     else if @race_publication = @collection.race_publication
       @set
         colour: @race_publication.getColour()
@@ -31,12 +30,8 @@ class FellRace.Models.Checkpoint extends FellRace.Model
   setColourFromRace: (model, value, options) =>
     @set colour: value
 
-  selectRace: =>
-    @race?.trigger "select"
+  selectRacePublication: =>
     @race_publication?.trigger "select"
-
-  setRaceSelected: (model, value, options) =>
-    @set race_selected: value
 
   placed: =>
     @set
@@ -66,8 +61,10 @@ class FellRace.Models.Checkpoint extends FellRace.Model
       @collection.getColour()
 
   jsonForPublication: =>
+    pos: @get("pos")
     name: @get("name")
     lat: @get("lat")
     lng: @get("lng")
     gridref: @get("gridref")
     fixed: @get("fixed")
+    colour: @getColour()

@@ -20,6 +20,8 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
       ]
       style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
 
+  _race: null
+
   onRender: () =>
     throw new Error("Google maps API is not loaded.") unless google and google.maps
     @_gmap = new google.maps.Map @$el.find('.map_holder')[0], @mapConfig
@@ -28,13 +30,28 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
       model: _fellrace.currentUser()
       map: @_gmap
 
-    console.debug @_gmap
-
-    polys = new FellRace.Views.RacePolylines
-      collection: _fellrace.races
+    @_polys = new FellRace.Views.RacePublicationPolylines
+      collection: _fellrace.race_publications
       map: @_gmap
 
-    polys.show()
+  showRace: (race) =>
+    @hideRacePublications()
+    @_race_poly?.hide()
+    @_race_poly = new FellRace.Views.RacePolyline
+      model: race
+      map: @_gmap
+
+  removeRace: =>
+    @_race_poly?.hide()
+    @_race_poly = null
+
+  showRacePublications: =>
+    _fellrace.race_publications.deselectAll()
+    @_polys.show()
+
+  hideRacePublications: =>
+    # _fellrace.race_publications.deselectAll()
+    @_polys.hide()
 
   setOptions: (opts={}) =>
     @_gmap.setOptions _.extend(_.clone(@mapConfig), opts)
@@ -43,13 +60,13 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
   getMap: =>
     @_gmap
 
-  goToModel: (model) =>
-    unless @model is model
+  moveTo: (model) =>
+    bounds = model.getBounds()
+    if bounds.isEmpty()
       @setOptions model.getMapOptions()
-      # @setOptions _.omit model.getMapOptions(), "mapTypeId"
-      @model = model
-    model.trigger "select", model
-
+    else
+      @_gmap.fitBounds model.getBounds()
+    @_gmap.panBy _fellrace.offsetX(), _fellrace.offsetY()
 
   addMapTypes: =>
     
