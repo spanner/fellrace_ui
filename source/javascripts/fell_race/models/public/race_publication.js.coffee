@@ -26,7 +26,6 @@ class FellRace.Models.RacePublication extends Backbone.Model
     @instances.url = "#{url_stem}/instances"
 
   select: =>
-    console.debug @
     unless @selected()
       _fellrace.moveMapTo @
       @collection.deselectAll()

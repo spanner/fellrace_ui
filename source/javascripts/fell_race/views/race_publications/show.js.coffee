@@ -9,7 +9,6 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     '#racecontrols':
       observe: "permissions"
       visible: ({can_edit:can_edit}={}) ->
-        console.log can_edit
         can_edit
     'a.edit':
       attributes: [
