@@ -1,34 +1,26 @@
 class FellRace.Models.Instance extends FellRace.Model
-  defaults:
-    total_entries: 0
-    file: null
-    performances_count: null
-  unsynced: []
-
-  synced: ["date","time","entry_fee","entry_limit","summary","started_at","name","file","file_delete","entry_closing","entry_opening"]
-
-  url: =>
-    if @collection
-      "#{@collection.url}/#{@get("name")}"
-    else
-      "#{_fellrace.apiUrl()}/#{@get("name")}"
 
   initialize: (opts) ->
     super
     @build()
 
   build: =>
-    @buildPerformances()
-    @buildWinner()
+    @entries = new FellRace.Collections.Entries(@get("entries"),instance:@)
+    @performances = new FellRace.Collections.Performances @get("performances"), instance: @
 
-    @entries = new FellRace.Collections.Entries([],{instance:@,url:"#{@url}/entries"})
-    @entries.on "change", () =>
+    @entries.on "add remove reset", () =>
       @set total_entries: @entries.length
 
-  buildPerformances: =>
-    @performances = new FellRace.Collections.Performances @get("performances"), instance: @
-    @on "change:performances", (model, performances) =>
-      @performances.reset performances
+    _.each ["performances","entries"], (collection) =>
+      @on "change:#{collection}", (model,data) =>
+        @[collection].reset data
+
+    @buildWinner()
+
+  setUrls: =>
+    url_stem = @url
+    @entries.url = "#{url_stem}/entries"
+    @performances.url = "#{url_stem}/performances"
 
   buildWinner: =>
     @winner = new FellRace.Models.Competitor(@get("winner"))
@@ -38,15 +30,6 @@ class FellRace.Models.Instance extends FellRace.Model
 
   filename: () =>
     @get('file')?.name
-
-  getYearFromFilename: =>
-    if @get('file')? and not @get('name')
-      re = new RegExp(/(\d+)/)
-      year = re.exec(@filename())[0]
-      # started_at = moment("#{@event.get("date")} #{@race.get("start_time")}","DD MMM YYYY HH:mma").year(year)
-      @set
-        name: year
-        # started_at: started_at
 
   validate: (attrs, options) =>
     # return "Please choose a file" unless attrs.file? or attrs.url?
@@ -92,33 +75,26 @@ class FellRace.Models.Instance extends FellRace.Model
     $.notify "error", "upload failed for #{@filename}"
 
   resultsUrl: =>
-    "/#{@race.get "slug"}/#{@get "name"}" if @race
-
-  getRaceName: =>
-    @race.get("name")
-
-  getRaceSlug: =>
-    @race.get("slug")
+    "/#{@get("race_slug")}/#{@get("name")}"
 
   getPerformancesCount: =>
     @get "performances_count"
 
-  onSetDate: (val) =>
-    @setClosingDate()
+  onSetDate: (val, opts) =>
     date = val.split "-"
-    @set
+    data =
       day: date[2]
       month: date[1]
       year: date[0]
-      name: date[0]#"#{date[2]}_#{date[1]}_#{date[0]}"
+      name: date[0]
+    unless @get("entry_closing") and Date.parse(@get("entry_closing")) < Date.parse(@get("date"))
+      data["entry_closing"] = new Date(val)
+    @set data,
+      opts
 
   getDate: =>
     if date = @get("date")
       Date.parse(date)
-
-  setClosingDate: =>
-    unless @get("entry_closing") and Date.parse(@get("entry_closing")) < Date.parse(@get("date"))
-      @set(entry_closing: new Date(@get("date")))
 
   inFuture: =>
     if date = @getDate()

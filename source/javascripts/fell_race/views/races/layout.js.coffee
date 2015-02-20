@@ -23,7 +23,7 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
 
   newInstance: =>
     @edit()
-    instance = @model.instances.add({})
+    instance = @model.instances.add(race_slug:@model.get("slug"))
     view = new FellRace.Views.AdminInstance
       model: instance
     _fellrace.extraContentRegion.show view

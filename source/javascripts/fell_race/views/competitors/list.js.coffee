@@ -20,3 +20,7 @@ class FellRace.Views.CompetitorListItem extends Backbone.Marionette.ItemView
 
   name: (values) =>
     "#{values[0]} #{values[1]}"
+
+
+class FellRace.Views.CompetitorsList extends Backbone.Marionette.CollectionView
+  itemView: FellRace.Views.CompetitorListItem

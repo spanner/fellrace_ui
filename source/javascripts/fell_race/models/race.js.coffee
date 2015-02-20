@@ -112,9 +112,6 @@ class FellRace.Models.Race extends FellRace.Model
     else
       0
 
-  preview: =>
-    @set preview_json: @jsonForPublication()
-
   publish: =>
     data =
       published_json: @jsonForPublication()
@@ -130,8 +127,12 @@ class FellRace.Models.Race extends FellRace.Model
     #     _fellrace.navigate "/races/#{@get("slug")}"
 
   jsonForPublication: =>
+    # instance = @nextOrRecentInstance()
+    console.log @nextOrRecentInstance()
     JSON.stringify
       id: @id
+      # date: instance?.get("date")
+      # start_time: instance?.get("start_time")
       name: @get("name")
       slug: @get("slug")
       cat: @get("cat")
@@ -154,6 +155,12 @@ class FellRace.Models.Race extends FellRace.Model
       records: @records.map (record) -> record.jsonForPublication()
       checkpoints: @checkpoints.map (checkpoint) -> checkpoint.jsonForPublication()
       checkpoint_route: @checkpoints.getEncodedRoute()
+
+  nextOrRecentInstance: =>
+    instance = @instances.next()
+    unless instance
+      instance = @instances.mostRecent()
+    instance
 
   select: =>
     unless @selected()

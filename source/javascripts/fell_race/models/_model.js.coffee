@@ -23,7 +23,6 @@ class FellRace.Model extends Backbone.Model
     if @savedAttributes?
       json[root] = {}
       for att in @savedAttributes
-        # console.log "att:", att, @get(att)
         json[root][att] = @get(att)
     else
       json[root] = super

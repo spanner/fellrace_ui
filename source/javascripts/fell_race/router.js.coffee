@@ -36,6 +36,11 @@ class FellRace.BaseRouter extends Backbone.Router
     router.handle path
 
   admin: (path) =>
+    _fellrace.vent.once "login:changed", (a, b, c) =>
+      if match = Backbone.history.fragment.match(/admin(.+)/)
+        if !_fellrace.userSignedIn()
+          _fellrace.navigate match[1]
+
     _fellrace.adminView()
     router = new FellRace.AdminRouter
     router.handle path

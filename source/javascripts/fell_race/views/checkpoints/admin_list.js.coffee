@@ -41,8 +41,8 @@ class FellRace.Views.AdminCheckpoint extends Backbone.Marionette.ItemView
     @model.destroy()
 
   sorted: (e) =>
-    @model.set
-      pos: @$el.index()
+    @model.set pos: @$el.index(),
+      persistChange: true
 
   place: =>
     @model.trigger "draw"

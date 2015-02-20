@@ -2,32 +2,28 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
   template: 'instances/results'
 
   bindings:
-    "a.instance_name":
-      observe: "name"
+    ".race_name":
+      observe: "race_name"
       attributes: [
-        {
-          name: "href"
-          onGet: "instanceUrl"
-        }
+        name: "href"
+        observe: "race_slug"
+        onGet: (race_slug) =>
+          "/races/#{race_slug}"
       ]
-
-  race_bindings:
-    "a.race_name":
+    ".instance_name":
       observe: "name"
       attributes: [
         name: "href"
-        observe: "slug"
-        onGet: "raceUrl"
+        observe: ["race_slug","name"]
+        onGet: ([race_slug,name]=[]) =>
+          "/races/#{race_slug}/#{name}"
       ]
 
   initialize: ({competitor:@_competitor}) ->
-    @_race = @model.race
     @_performances = @model.performances
 
   onRender: =>
     @stickit()
-    @_race.fetch()
-    @stickit @_race, @race_bindings
     
     @_checkpoints = new FellRace.Collections.Checkpoints @model.get("checkpoints"), instance: @model
 
@@ -108,9 +104,3 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
     #     model: @model
     #     collection: @_performances
     #   chart.render()
-
-  raceUrl: (slug) =>
-    "/races/#{slug}"
-
-  instanceUrl: (name) =>
-    "/races/#{@_race.get("slug")}/#{name}"

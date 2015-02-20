@@ -73,16 +73,18 @@ class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
     if date = @model.get("date")
       @model.onSetDate(date)
     @model.on "change:date", (model, value, opts) =>
-      @model.onSetDate(value) if value
+      @model.onSetDate(value,opts) if value
 
-    @model.on "change:day change:month change:year", =>
+    @model.on "change:day change:month change:year", (model,value,opts) =>
       day = @model.get("day")
       month = @model.get("month")
       year = @model.get("year")
-      if _.any @model.collection.inYearExcept(year,@model)
-        $.notify "error", "There is already an instance for #{year}; not saving."
-      else if day and month and year and year.length is 4
-        @model.set date: "#{year}-#{month}-#{day}"
+      if year
+        if _.any @model.collection.inYearExcept(year,@model)
+          $.notify "error", "There is already an instance for #{year}; not saving."
+        else if day and month and year.length is 4
+          @model.set {date: "#{year}-#{month}-#{day}"},
+            opts
 
   pickFile: =>
     @_filefield.trigger('click')
@@ -124,10 +126,7 @@ class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
         trigger: false
 
   url: (name) =>
-    "/events/#{@model.event.get("slug")}/#{@model.race.get("slug")}/#{name}/admin"
-
-  goto: (e) =>
-    window.location.href = "/#{@model.get('name')}"
+    "/admin/races/#{@model.get("race_slug")}/#{name}"
 
   summarise: (value, options) =>
     if !value?

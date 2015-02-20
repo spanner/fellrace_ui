@@ -16,5 +16,6 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
     @show()
     instance = @model.instances.findWhere(name: instance_name)
     instance.fetch()
-    new FellRace.Views.Instance
+    view = new FellRace.Views.InstanceResults
       model: instance
+    _fellrace.extraContentRegion.show view

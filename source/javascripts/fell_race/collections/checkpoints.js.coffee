@@ -33,7 +33,7 @@ class FellRace.Collections.Checkpoints extends FellRace.Collection
     names
 
   resequence: () =>
-    cpt.set('pos', i) for cpt, i in @models
+    cpt.set(pos: i) for cpt, i in @models
 
   checkRoutability: () =>
     if @validAsRoute() then @trigger('routable') else @trigger('unroutable')

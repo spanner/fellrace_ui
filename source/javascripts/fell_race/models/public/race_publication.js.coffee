@@ -1,6 +1,6 @@
 class FellRace.Models.RacePublication extends Backbone.Model
   url: =>
-    "#{@collection.url()}/#{@get("slug")}"
+    "#{_fellrace.apiUrl()}/race_publications/#{@get("slug")}"
 
   initialize: ->
     @build()
@@ -11,7 +11,7 @@ class FellRace.Models.RacePublication extends Backbone.Model
   build: =>
     @attachments = new FellRace.Collections.Attachments(@get("attachments")||[])
     @records = new FellRace.Collections.Records(@get("records")||[])
-    @instances = new FellRace.Collections.Instances(@get("instances")||[])
+    @instances = new FellRace.Collections.PublicInstances(@get("instances")||[])
     @links = new FellRace.Collections.Links(@get("links")||[])
     @checkpoints = new FellRace.Collections.PublicCheckpoints(@get("checkpoints")||[], race_publication: this)
     @setUrls()

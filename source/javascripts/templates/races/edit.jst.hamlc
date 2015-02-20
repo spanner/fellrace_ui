@@ -1,26 +1,26 @@
 .race_head
-  .main_info
-    .title.race_title
-      %h2
-        / %a.opener
-        %span.name.editable{:data => {:placeholder => "Race name"}}
-      #racecontrols
-        / %a.preview
-        %a.publish publish &raquo;
-
-    .subtitle
-      %span.cat.editable{:data => {:placeholder => "Cat (e.g. AM)"}}>
-      \:&nbsp;
-      %span.distance.editable{:data => {:placeholder => "dist"}}>
-      km \u2192\&nbsp;
-      %span.climb.editable{:data => {:placeholder => "climb"}}>
-      m \u2191
-
-  .profile
-    %span.race_profile
+  .picture
+  .title
+    %h2.name.editable{:data => {:placeholder => "Race name"}}
+  .controls
+    %a.publish publish &raquo;
 
 .race_body
-  %p.description.editable{data: {placeholder: "Race description"}}
+  .summary
+    .profile
+      %span.race_profile
+      .basic_details
+        %span.cat.editable{:data => {:placeholder => "Cat (e.g. AM)"}}>
+        &nbsp;
+        %span.distance.editable{:data => {:placeholder => "dist"}}>
+        km /
+        %span.climb.editable{:data => {:placeholder => "climb"}}>
+        m
+    .next
+      %span.date
+      %span.time
+
+  .description.editable{data: {placeholder: "Race description"}}
   .details
     .attachments
       %h3
@@ -78,10 +78,6 @@
       %ul.records
 
   .moredetails
-
-    .start_time
-      %h3 Start time
-      %span.race_start_time
 
     .instances
       %h3

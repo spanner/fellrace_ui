@@ -26,8 +26,10 @@ class FellRace.Views.CompetitorLayout extends FellRace.Views.LayoutView
 
   race: (race_slug,path) =>
     @show()
-    race = new FellRace.Models.Race(slug: race_slug)
-    layout = new FellRace.Views.CompetitorRaceLayout
-      model: race
-      competitor: @model
-      path: path
+    race = new FellRace.Models.RacePublication(slug: race_slug)
+    race.fetch
+      success: =>
+        layout = new FellRace.Views.CompetitorRaceLayout
+          model: race
+          competitor: @model
+          path: path

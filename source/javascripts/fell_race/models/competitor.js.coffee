@@ -1,5 +1,6 @@
 class FellRace.Models.Competitor extends FellRace.Model
-  urlRoot: "/api/competitors"
+  urlRoot: =>
+    "#{_fellrace.apiUrl()}/competitors"
 
   initialize: ->
     super

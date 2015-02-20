@@ -1,20 +1,12 @@
 class FellRace.Models.Checkpoint extends FellRace.Model
-  defaults:
-    name: null
-    placed: false
-    fixed: false
-  unsynced: ["colour"]
-
   initialize: ->
     super
     unless @isNew()
       @placed()
 
     @on "change:lat", (model, val, opts) =>
-      @setGridrefFromLatLng()
       @placed()
-
-    @on "select", @selectRace
+      @setGridrefFromLatLng(opts)
 
     if @race = @collection.race
       @set
@@ -30,12 +22,8 @@ class FellRace.Models.Checkpoint extends FellRace.Model
   setColourFromRace: (model, value, options) =>
     @set colour: value
 
-  selectRacePublication: =>
-    @race_publication?.trigger "select"
-
   placed: =>
-    @set
-      placed: @has('lat') and @has('lng')
+    @set placed: @has('lat') and @has('lng')
 
   getLatLng: =>
     if @has("lat") and @has("lng")
@@ -44,15 +32,15 @@ class FellRace.Models.Checkpoint extends FellRace.Model
   getPubZoom: =>
     @race_publication?.getPubZoom()
 
-  setGridrefFromLatLng: ->
+  setGridrefFromLatLng: (opts) ->
     lat = @get("lat")
     lng = @get("lng")
     if lat and lng
       wgs84 = new LatLon lat, lng
       gb36 = CoordTransform.convertWGS84toOSGB36(wgs84)
-      @set gridref: OsGridRef.latLongToOsGrid(gb36).toString(6)
+      @set gridref: OsGridRef.latLongToOsGrid(gb36).toString(6), opts
     else
-      @set gridref: null
+      @set(gridref: null, opts)
 
   getColour: =>
     if @has "colour"

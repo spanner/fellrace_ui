@@ -6,15 +6,13 @@ class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
     "span.pos": "pos"
     "span.time":
       observe: "time"
-      onGet: "time"
-
-  instance_bindings:
+      onGet: "secondsToString"
     "a.date":
-      observe: "date"
+      observe: "instance_date"
       attributes: [
         {
           name: "href"
-          observe: "name"
+          observe: ["instance_name","race_slug"]
           onGet: "instanceUrl"
         }
       ]
@@ -22,50 +20,39 @@ class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
       observe: "performances_count"
       onGet: "totalCompetitors"
 
-  winner_bindings:
+    "a.race_name":
+      observe: "race_name"
+      attributes: [
+        {
+          name: "href"
+          observe: "race_slug"
+          onGet: "raceUrl"
+        }
+      ]
+    "span.race_cat": "race_cat"
+
     "a.winner":
-      observe: "name"
-      onGet: "fullName"
+      observe: "winner_name"
       attributes: [
         {
           name: "href"
           onGet: "winnerUrl"
-          observe: "id"
+          observe: ["winner_id","race_slug","instance_name"]
         }
       ]
     "span.winning_time":
-      observe: "time"
-      onGet: "time"
-
-  race_bindings:
-    "a.race_name":
-      observe: "name"
-      attributes: [
-        {
-          name: "href"
-          observe: "slug"
-          onGet: "raceUrl"
-        }
-      ]
-    "span.race_cat": "cat"
+      observe: "winning_time"
+      onGet: "secondsToString"
 
   onRender: =>
-    @_instance = @model.instance
-    @_race = @_instance.race
     @_competitor = @model.competitor
-    @_winner = @_instance.winner
-
     @stickit()
-    @stickit @_instance, @instance_bindings
-    @stickit @_winner, @winner_bindings
-    @stickit @_race, @race_bindings
-    console.log "@_winner",@_winner
 
-  raceUrl: (slug) =>
-    "/runners/#{@_competitor.id}/#{slug}"
+  raceUrl: (race_slug) =>
+    "/runners/#{@_competitor.id}/#{race_slug}"
 
-  instanceUrl: (name) =>
-    "/runners/#{@_competitor.id}/#{@_race.get("slug")}/#{name}"
+  instanceUrl: ([name,race_slug]=[]) =>
+    "/runners/#{@_competitor.id}/#{race_slug}/#{name}"
 
   totalCompetitors: (count) =>
     "/#{count}" if count
@@ -73,10 +60,10 @@ class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
   fullName: ([first,last]=[]) =>
     "#{first} #{last}" if first and last
 
-  winnerUrl: (id) =>
-    "/runners/#{id}/#{@_race.get("slug")}/#{@_instance.get("name")}"
+  winnerUrl: ([winner_id,race_slug,instance_name]=[]) =>
+    "/runners/#{winner_id}/#{race_slug}/#{instance_name}"
 
-  time: (seconds) =>
+  secondsToString: (seconds) =>
     _fellrace.secondsToString seconds
 
 class FellRace.Views.CompetitorPerformancesTable extends Backbone.Marionette.CompositeView

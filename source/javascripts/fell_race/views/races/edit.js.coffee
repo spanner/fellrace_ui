@@ -159,7 +159,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     @model.attachments.create({})
 
   addCheckpoint: =>
-    @model.checkpoints.create({})
+    @model.checkpoints.create(pos: @model.checkpoints.length - 1)
 
   addRecord: =>
     @model.records.create({})
@@ -194,7 +194,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     @model.getRouteDistance()
 
   newInstanceUrl: (slug) =>
-    "/races/#{slug}/new_instance"
+    "/admin/races/#{slug}/new_instance"
 
   publish: =>
     @model.publish()
@@ -215,5 +215,5 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     @$el.find('span.race_profile').peity "line",
       fill: "#e2e1dd"
       stroke: "#d6d6d4"
-      width: 480
-      height: 100
+      width: @$el.width() / 2.1
+      height: 50

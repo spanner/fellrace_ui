@@ -65,6 +65,7 @@ class FellRace.Views.NameCell extends Backbone.Marionette.ItemView
       ]
 
   onRender: =>
+    @_instance = @model.instance
     if @model.has("competitor")
       @stickit(new FellRace.Models.Competitor(@model.get("competitor")), @competitor_bindings)
     else
@@ -79,7 +80,7 @@ class FellRace.Views.NameCell extends Backbone.Marionette.ItemView
     "/runners/#{id}/#{@raceSlug()}/#{@instanceName()}"
 
   raceSlug: =>
-    @model.getRace().get("slug")
+    @_instance.get("race_slug")
 
   instanceName: =>
-    @model.instance.get("name")
+    @_instance.get("name")

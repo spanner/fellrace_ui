@@ -555,9 +555,7 @@ section#extra
     overflow-x: hidden
     width: 100%
     top: 55px
-    #publications
-      width: 480px
-      float: left
+    bottom: 0
     .personal
       width: 360px
       float: left
@@ -571,182 +569,89 @@ section#extra
           margin-right: 15px
         a.search
           +button($green)
-    #eventhead
-      position: relative
-      float: left
-      overflow: visible
-      h1
-        margin: 18px 14px 0 0//32px
-        font-size: 3em
-        line-height: 1
-        float: left
 
-    #eventcontrols
-      position: relative
-      float: left
-      margin: 20px 0 0
-      a
-        vertical-align: middle
-
-    #eventbody
-      position: relative
-      clear: left
-      overflow: hidden
-      #event_details
-        width: 100%
-        float: left
-        margin: 0 0 10px//32px
-        p.date
-          margin-top: 0
-        #description
-          // min-height: 510px
-          p:first-child
-            margin-top: 0
-            font-size: 1.25em
-            line-height: 1.4
-            letter-spacing: -0.01em
-          ul
-            list-style: square
-            padding-left: 1em
-            li
-              margin-bottom: 0.25em
-              margin-top: 0
-          &.empty
-            display: none
-      .races
-        position: relative
-        float: left
-        width: 100%
     .race
       position: relative
       float: left
       clear: left
-      margin: 0 0 10px
+      margin: 0
       width: 100%
-      // margin-top: -60px
-      &:first-child, &.new
-        margin-top: 10px
-      h3
-        margin-bottom: 2px
-      &.add_race
-        margin-top: 0
-      #add_race
-        margin: 10px
-      &.small
-        .race_body
-          display: none
-        .race_head
-          .controls
-            .opener
-              display: block
-            .closer
-              display: none
       .race_head
-        // padding: 10px
-        font-size: 1.2em
         position: relative
-        height: 100px
-        // margin-top: 20px
-        .delete
-          display: none
-          line-height: 1em
-        &:hover
-          .delete
-            display: inline-block
-        .profile
+        min-height: 70px
+        .picture
           width: 100%
-          height: 100px
-          float: left
-        .main_info
-          position: absolute
-          bottom: 15px
-          left: 10px
-          width: 420px
-          float: left
-          .title
-            width: 100%
-            h2
-              margin: 0
-              font-size: 1.1em
-            span.name
-              display: inline-block
-              vertical-align: top
-              min-width: 100px
-            a.delete
-              font-size: 75%
-            a.opener
-              display: inline-block
-              vertical-align: top
-              margin-left: -6px
-              color: $dark
-              &:before
-                display: inline-block
-                width: 16px
-                content: "\025B6"
-                font-family: sans-serif
-                font-size: 75%
-              &.open:before
-                content: "\025BC"
-              &:hover
-                color: $hover
-            
-          .subtitle
-            margin-top: 0
-            width: 100%
-            color: $dark
+          
         .controls
           position: absolute
           right: 5px
-          font-size: 2em
-          .opener
-            display: none
-          .closer
-            display: block
+          bottom: 0
+          margin: 0 20px 15px 0
+          font-size: 1.7em
+
+        .title
+          position: absolute
+          bottom: 0
+          left: 0
+          margin: 0 0 15px 20px
+          h2.name
+            margin: 0
+            font-size: 1.5em
 
       .race_body
         position: relative
+        box-sizing: border-box
+        padding: 10px 20px
         width: 100%
+        .summary
+          width: 50%
+          float: right
+          position: relative
+          .profile
+            position: relative
+            height: 50px
+            .basic_details
+              font-weight: bold
+              position: absolute
+              bottom: 3px
+          .next_or_recent
+
         .delete
           line-height: 1em
-        .profiles, .details, .moredetails
+        .details, .moredetails
+          position: relative
+          float: left
           font-size: 85%
-          div
+          box-sizing: border-box
+          width: 50%
+          > div
             clear: left
+            &:not(:first-child)
+              margin-top: 10px
           ul
             margin: 0
             padding: 0
             list-style: none
           h3
+            margin: 0
             input[type="checkbox"]
               margin-left: -20px
-            clear: left
           p
             margin-top: 2px
             &.editable
-              min-height: 50px
+              min-height: 40px
           p.note, li.note
             +quiet
           span.note
             color: $mid
 
-        .profiles
-          width: 380px
-          float: left
-          margin: 10px 20px 10px 10px
-          h3
-            margin-top: 0
-          div.elevations
-            width: 380px
-            height: 50px
         .description
-          margin: 10px
           &:not([contenteditable]):empty
             display: none
+          p:first-child
+            margin-top: 0
+
         .details
-          width: 250px
-          position: relative
-          float: left
-          margin: 0 0 10px
           ul.checkpoints
             li.checkpoint
               height: 24px
@@ -827,15 +732,8 @@ section#extra
                 .delete
                   display: inline-block
 
-        .race_requirements, .attachments, .start_time
-          h3
-            margin-top: 0
-
         .moredetails
-          width: 200px
-          position: relative
-          float: left
-          margin: 10px 0 0 10px
+          padding-left: 10px
           a.social
             width: 16px
             overflow: hidden
@@ -870,9 +768,7 @@ section#extra
                 +opacity(0.25)
           .enter_race
             background: $brightgreen
-        @media (max-height:768px) and (orientation:portrait)
-          .moredetails
-            margin: 0
+
     #accountcontrols
       position: relative
       clear: left
@@ -919,14 +815,6 @@ section#extra
             text-align: center
             color: $pale
 
-#controls, .controls
-  .edit, .accept
-    +button($green)
-  .reject, .disown
-    +button($red)
-  .save, .merge
-    +button($rubine)
-
 a.social, span.social
   display: inline-block
   vertical-align: top
@@ -938,20 +826,7 @@ a.social, span.social
     repeat: no-repeat
 
 .organiser_address, .organiser_email, .organiser_phone, .organiser_name
-  // text-indent: 20px
   margin-bottom: 5px
-  // background:
-  //   color: transparent
-  //   repeat: no-repeat
-
-// .organiser_address
-//   background-image: image-url("home.png")
-// 
-// .organiser_email
-//   background-image: image-url("email.png")
-// 
-// .organiser_phone
-//   background-image: image-url("phone.png")
 
 span.social
   &.fb
@@ -1033,68 +908,25 @@ a.file_name
   &.ppt, &.pptx
     color: #cc440a
 
-.map_menu
-  display: none
-  background: #fff
-  padding: 0
-  white-space: nowrap
-  -moz-transition: opacity 0.218s
-  -o-transition: opacity 0.218s
-  -webkit-transition: opacity 0.218s
-  transition: opacity 0.218s
-  -webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.2)
-  -moz-box-shadow: 0 2px 4px rgba(0,0,0,0.2)
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2)
-  z-index: 1000
-  position: absolute
-  outline: 1px solid rgba(0,0,0,0.2)
-  a
-    color: #222
-  li
-    display: block
-    padding: 6px 44px 6px 16px
-    position: relative
-    color: #333
-    font-weight: normal
-    -moz-transition: background 0.130s
-    -o-transition: background 0.130s
-    -webkit-transition: background 0.130s
-    transition: background 0.130s
-    .disable:hover, .disable
-      color: #ccc
-      background-color: #fff
-      cursor: default
-    &:hover, &.selected
-      background-color: #f1f1f1
-      color: #222
-      -moz-transition: background 0s
-      -o-transition: background 0s
-      -webkit-transition: background 0s
-      transition: background 0s
-    .rule
-      border-top: 1px solid #ebebeb
-      margin-top: 9px
-      margin-bottom: 10px
-
 .labels
   color: #FF0066
   font-size: 16px
   text-align: center
   white-space: nowrap
 
-
 .button
   +button
 
-#racecontrols
-  // max-width: 270px
-  .edit
+#controls, .controls
+  .edit, .accept
     +button($green)
+  .reject, .disown
+    +button($red)
+  .save, .merge
+    +button($rubine)
   .publish
     +button($rubine)
-    overflow: hidden
-    &.waiting
-      opacity: 0.4
+    // overflow: hidden
   .preview
     +button($red)
     overflow: hidden

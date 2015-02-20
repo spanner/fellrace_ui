@@ -6,16 +6,17 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     'click a.social': 'openTab'
 
   bindings:
-    '#racecontrols':
+    '.controls':
       observe: "permissions"
       visible: ({can_edit:can_edit}={}) ->
         can_edit
     'a.edit':
       attributes: [
-        observe: "slug"
+        observe: ["slug","permissions"]
         name: "href"
-        onGet: (slug) ->
-          "/admin/races/#{slug}"
+        onGet: ([slug,permissions]=[]) ->
+          if permissions?.can_edit
+            "/admin/races/#{slug}"
       ]
 
     '.name': 'name'
@@ -192,8 +193,8 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     @$el.find('span.race_profile').peity "line",
       fill: "#e2e1dd"
       stroke: "#d6d6d4"
-      width: @$el.width()
-      height: 100
+      width: @$el.width() / 2.1
+      height: 50
 
   hasAny: (array) =>
     array.length > 0

@@ -1,23 +1,25 @@
 .race_head
-  #racecontrols
+  .picture
+  .title
+    %h2.name
+  .controls
     %a.edit edit
-  .main_info
-    .title.race_title
-      %h2
-        %span.name
-
-    .subtitle
-      %strong.cat
-      %span.distance
-      km \u2192\&nbsp;
-      %span.climb
-      m \u2191
-
-  .profile
-    %span.race_profile
 
 .race_body
-  %p.description
+  .summary
+    .profile
+      %span.race_profile
+      .basic_details
+        %span.cat
+        %span.distance
+        km /
+        %span.climb
+        m
+    .next_or_recent
+      %span.date
+      %span.time
+
+  .description
   .details
     .attachments
       %h3
@@ -41,10 +43,6 @@
       %ul.records
 
   .moredetails
-
-    .start_time
-      %h3 Start time
-      %strong.race_start_time
 
     .instances
       %h3
