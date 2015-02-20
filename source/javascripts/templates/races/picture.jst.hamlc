@@ -1,0 +1,9 @@
+%img.preview
+%input#picker.file{type: "file", accept: "image/*"}
+
+.confirmation
+  %span.imagestatus
+  %span.filename
+  %br
+  %span.filesize
+  %span.dimensions

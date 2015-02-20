@@ -27,7 +27,10 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
           onGet: (publishing) =>
             "publishing" if publishing
         }
-      ]      
+      ]
+    "label.pick":
+      observe: 'picture'
+      onGet: "buttonText"
 
     '.name': 'name'
     '.description':
@@ -141,6 +144,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     @$el.find('.editable').editable()
     @stickit()
 
+    new FellRace.Views.Picture(model: @model, el: @$el.find(".picture")).render()
     new FellRace.Views.AdminAttachmentsList(collection: @model.attachments, el: @$el.find("ul.attachments")).render()
     new FellRace.Views.AdminLinksList(collection: @model.links, el: @$el.find("ul.links")).render()
     new FellRace.Views.AdminCheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints")).render()
@@ -217,3 +221,9 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
       stroke: "#d6d6d4"
       width: @$el.width() / 2.1
       height: 50
+
+  buttonText: (image) =>
+    if image
+      "Replace picture"
+    else
+      "Choose picture"

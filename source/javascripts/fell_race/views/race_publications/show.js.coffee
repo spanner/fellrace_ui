@@ -19,6 +19,13 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
             "/admin/races/#{slug}"
       ]
 
+    '.picture img':
+      attributes: [
+        name: "src"
+        observe: "picture"
+        onGet: "pictureUrl"
+      ]
+
     '.name': 'name'
     '.distance': 'distance'
     '.description':
@@ -202,6 +209,9 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
   openTab: (e) =>
     e.preventDefault() if e
     window.open e.currentTarget.href
+
+  pictureUrl: (url) =>
+    "#{_fellrace.apiUrl()}/#{url}" if url
 
 class FellRace.Views.RacePublicationsList extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.RacePublication

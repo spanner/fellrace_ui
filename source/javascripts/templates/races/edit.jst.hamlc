@@ -3,6 +3,8 @@
   .title
     %h2.name.editable{:data => {:placeholder => "Race name"}}
   .controls
+    %label.pick{for: "picker"}
+      Choose picture
     %a.publish publish &raquo;
 
 .race_body

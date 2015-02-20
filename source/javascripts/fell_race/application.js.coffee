@@ -29,6 +29,9 @@ class FellRace.Application extends Backbone.Marionette.Application
 
   constructor: (options={}) ->
     super
+    @original_backbone_sync = Backbone.sync
+    Backbone.sync = @sync
+
     root._fellrace = @
     $.notify = (type, argument) =>
       @vent.trigger(type, argument)
@@ -72,6 +75,21 @@ class FellRace.Application extends Backbone.Marionette.Application
     Backbone.history.start
       pushState: true
       root: '/'
+
+  sync: (method, model, opts) =>
+      # unless method is "read"
+        # job = opts.job || @announce("Saving")
+        # opts.beforeSend = (xhr, settings) ->
+        #   settings.xhr = () ->
+        #     xhr = new window.XMLHttpRequest()
+        #     xhr.upload.addEventListener "progress", (e) ->
+        #       job.setProgress e
+        #     , false
+        #     xhr
+        # opts.success = ->
+        #   job.setCompleted true
+        # opts.error = ->
+      @original_backbone_sync method, model, opts
 
   apiUrl: =>      
     @_api_url

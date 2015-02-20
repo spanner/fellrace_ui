@@ -64,6 +64,11 @@ class FellRace.Models.Race extends FellRace.Model
   isNew: =>
     !@get("slug")
 
+  toJSON: =>
+    json = super
+    delete json["picture"] unless @get("image_changed")?
+    json
+
   setUrls: =>
     url_stem = @url()
     @attachments.url = "#{url_stem}/attachments"
