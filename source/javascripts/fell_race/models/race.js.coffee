@@ -1,35 +1,14 @@
 class FellRace.Models.Race extends FellRace.Model
-  unsynced: ["checkpoints"]
-  defaults:
-    name: null
-    description: null
-    requirements: null
-    organiser_name: null
-    organiser_email: null
-    organiser_phone: null
-    organiser_address: null
-    distance: 0
-    climb: 0
-    cat: null
-    show_attachments: true
-    show_checkpoints: true
-    show_elevation: true
-    show_records: true
-    show_links: true
-    show_requirements: true
-    show_organiser: true
-    show_instances: true
-    route_colour: "#FF0066"
-    show_route: true
-    encoded_route: null
-    encoded_checkpoint_route: null
-    route_profile: null
-    route_elevation: null
-    start_time: null
-    fb_event_id: null
-    fra_id: null
-    shr_id: null
-    twitter_id: null
+  savedAttributes: ["name","description","cat","climb","distance",
+    "requirements","encoded_route","route_profile","route_colour",
+    "route_elevation","shr_id","organiser_name","organiser_email",
+    "organiser_phone","organiser_address","picture"
+  ]
+
+  toJSON: =>
+    json = super
+    delete json.race["picture"] unless @get("image_changed")?
+    json
 
   url: =>
     "#{_fellrace.apiUrl()}/races/#{@get("slug")}"
@@ -63,11 +42,6 @@ class FellRace.Models.Race extends FellRace.Model
 
   isNew: =>
     !@get("slug")
-
-  toJSON: =>
-    json = super
-    delete json["picture"] unless @get("image_changed")?
-    json
 
   setUrls: =>
     url_stem = @url()
@@ -124,20 +98,14 @@ class FellRace.Models.Race extends FellRace.Model
     $.post "#{@url()}/publish", data, (response) =>
       _fellrace.navigate("/races/#{@get("slug")}")
     , 'json'
-    # @save {
-    #   published_json: @jsonForPublication()
-    #   preview_json: null
-    #   },
-    #   success: =>
-    #     _fellrace.navigate "/races/#{@get("slug")}"
 
   jsonForPublication: =>
-    # instance = @nextOrRecentInstance()
-    console.log @nextOrRecentInstance()
+    next_instance = @nextOrRecentInstance()
+    console.log next_instance
     JSON.stringify
       id: @id
-      # date: instance?.get("date")
-      # start_time: instance?.get("start_time")
+      date: next_instance?.get("date")
+      time: next_instance?.get("time")
       name: @get("name")
       slug: @get("slug")
       cat: @get("cat")

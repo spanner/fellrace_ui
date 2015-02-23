@@ -5,21 +5,17 @@ Date
 \-
 %span.year.editable{data: {placeholder: "yyyy"}}
 #more_details
-  Time
-  %span.time.editable{data: {placeholder: "hh-mm"}}
+  Start time
+  %span.time.editable{data: {placeholder: "hh:mm"}}
 
   #past
-    .results
-      %h3 Results
-      %a.upload_file Upload file
-      %input.file{:type => 'file'}
-      %span.file_name
-      / %a.remove_file Delete file
-      %span.total.info
-
     .report
       %h3 Report
-      %p.report.editable{data: {placeholder: "Did anything interesting happen?"}}
+      %p.report.editable{data: {placeholder: "Anything to say?"}}
+    .results
+      %h3 Results
+      .results_file
+      .results_preview
 
   #future
     Online entry?

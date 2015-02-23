@@ -1,11 +1,9 @@
 class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
   template: 'instances/admin'
   className: "instance"
+  tagName: "section"
 
   events:
-    'click a.upload_file': "pickFile"
-    'change input[type="file"]': "filePicked"
-    # 'click a.remove_file': "deleteFile"
     'click a.delete': "delete"
 
   bindings:
@@ -40,32 +38,20 @@ class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
     "span.year": "year"
     "span.time": "time"
 
-    "a.upload_file":
-      observe: "file_name"
-      visible: "untrue"
-    "a.remove_file":
-      observe: "file_name"
-      visible: true
-
-    "span.file_name": "file_name"
     "p.report": "summary"
     "span.total":
       observe: "performances_count"
       onGet: "summarise"
 
   onRender: () =>
-    if @model.isNew()
-      @model.once "sync", (model,attributes) =>
-        _fellrace.navigate @url(attributes.name),
-          replace:true
-          trigger:false
-        @onChangeName()
-    else
-      @onChangeName()
-
+    @onChangeName()
     @manageDate()
 
-    @_filefield = @$el.find('input[type="file"]')
+    new FellRace.Views.ResultsFile(model: @model, el: @$el.find(".results_file")).render()
+
+    new FellRace.Views.ResultsPreview(model:@model, el: @$el.find(".results_preview")).render()
+
+    # @_filefield = @$el.find('input[type="file"]')
     @$el.find('.editable').editable()
     @stickit()
 
@@ -85,13 +71,15 @@ class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
         else if day and month and year.length is 4
           @model.set {date: "#{year}-#{month}-#{day}"},
             opts
-
-  pickFile: =>
-    @_filefield.trigger('click')
+  #
+  # pickFile: =>
+  #   @_filefield.trigger('click')
 
   filePicked: (e) =>
     if files = @_filefield[0].files
-      @model.set file: files.item(0)
+      console.log files.item(0)
+      @model.set file: files.item(0),
+        persistChange: true
 
   delete: (e) =>
     e.preventDefault() if e
@@ -99,8 +87,8 @@ class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
 
   receivedFee: (fee) =>
     fee ?= 0
-    merchant_ratio = 0.034
-    merchant_fixed = 0.02
+    merchant_ratio = 0.024
+    merchant_fixed = 0.2
     fr_ratio = 0.05
     fr_fixed = 0.05
     # if fee <= 9.37
@@ -120,10 +108,20 @@ class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
     date and Date.parse(date) > Date.now()
 
   onChangeName: =>
-    @model.on "change:name", (model,name) =>
-      _fellrace.navigate @url(name),
-        replace: true
-        trigger: false
+    if @model.isNew()
+      @model.once "change:name", (model,name) =>
+        @model.save {},
+          success: =>
+            @redirect(name)
+            @onChangeName()
+    else
+      @model.on "change:name", (model,name) =>
+        @redirect(name)
+
+  redirect: (name) =>
+    _fellrace.navigate @url(name),
+      replace: true
+      trigger: false
 
   url: (name) =>
     "/admin/races/#{@model.get("race_slug")}/#{name}"

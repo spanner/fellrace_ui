@@ -20,13 +20,13 @@
         m
     .next
       %span.date
+      at
       %span.time
 
   .description.editable{data: {placeholder: "Race description"}}
   .details
     .attachments
       %h3
-        %input.race_show_attachments{:type => "checkbox"}
         Downloads
         %a.add.add_attachment
           add
@@ -34,14 +34,12 @@
 
     .race_requirements
       %h3
-        %input.race_show_requirements{:type => "checkbox"}
         Requirements
       .show_requirements
         %p.requirements.editable{:data => {:toolbar => true, :placeholder => "Required kit and other instructions"}}
 
     .checkpoints
       %h3
-        %input.race_show_checkpoints{:type => "checkbox"}
         Checkpoints
         %a.add.add_checkpoint
           add
@@ -73,7 +71,6 @@
 
     .records
       %h3
-        %input.race_show_records{:type => "checkbox"}
         Records
         %a.add.add_record
           add
@@ -83,7 +80,6 @@
 
     .instances
       %h3
-        %input.race_show_instances{:type => "checkbox"}
         Instances
         %a.add.add_instance
           add
@@ -91,7 +87,6 @@
 
     .race_organiser
       %h3 
-        %input.race_show_organiser{:type => "checkbox"}
         Organiser
       %ul.show_organiser
         %li
@@ -105,17 +100,12 @@
 
     .links
       %h3 
-        %input.race_show_links{:type => "checkbox"}
         Links
         %a.add.add_link
           add
       %ul.links
       %ul.autolinks
         %li
-          %span.social.fra.editable{:data => {:placeholder => "FRA race id"}}
-        %li
           %span.social.shr.editable{:data => {:placeholder => "SHR race id"}}
-        %li
-          %span.social.fb.editable{:data => {:placeholder => "Facebook event id"}}
         %li
           %span.social.twit.editable{:data => {:placeholder => "Twitter name"}}

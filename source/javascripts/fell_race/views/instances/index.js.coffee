@@ -87,4 +87,3 @@ class FellRace.Views.PastInstances extends Backbone.Marionette.CollectionView
     @collection = new FellRace.Collections.Instances([])
     @collection.url = "#{_fellrace.apiUrl()}/instances/past"
     @collection.fetch()
-

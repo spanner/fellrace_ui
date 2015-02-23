@@ -23,10 +23,10 @@ class FellRace.Collections.Instances extends FellRace.Collection
     @sort()
     future = @future()
     if future.length > 0
-      future[0]
+      future.reverse()[0]
 
   mostRecent: =>
     @sort()
     past = @past()
     if past.length > 0
-      past.reverse()[0]
+      past[0]

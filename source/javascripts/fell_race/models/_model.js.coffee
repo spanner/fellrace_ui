@@ -1,4 +1,5 @@
 class FellRace.Model extends Backbone.Model
+
   initialize: ->
     @_class_name = @constructor.name
     @on "sync", =>

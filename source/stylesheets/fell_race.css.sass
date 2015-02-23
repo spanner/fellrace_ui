@@ -446,6 +446,8 @@ section#extra
   left: 580px
   right: 0
   overflow: auto
+  padding: 15px
+
   &:empty
     display: none
   // #table
@@ -459,6 +461,13 @@ section#extra
   //     margin: 200px auto
   //     color: $pale
   //     font-size: 3em
+  .instance
+    .results
+      .results_preview
+        // max-height: 250px
+        overflow: auto
+      label.pick
+        +button
   table#results_table
     font-size: 0.8em
     thead
@@ -489,15 +498,16 @@ section#extra
   background-color: $translucent
   cursor: pointer
 
+[contenteditable=true]:empty:after
+  content: attr(data-placeholder)
+  color: #999
+
 #content
   position: absolute
   bottom: 0
   left: 0
   overflow: visible
   background-color: $translucent
-  [contenteditable=true]:empty:after
-    content: attr(data-placeholder)
-    color: #999
   
   header
     position: absolute
@@ -554,7 +564,7 @@ section#extra
     overflow-y: auto
     overflow-x: hidden
     width: 100%
-    top: 55px
+    top: 60px
     bottom: 0
     .personal
       width: 360px
@@ -585,6 +595,8 @@ section#extra
           max-height: 360px
           min-height: 100px
           overflow: hidden
+          img
+            opacity: 0.95
           .preview
             position: relative
             width: 100%
@@ -607,12 +619,15 @@ section#extra
             margin: 0
             font-size: 1.5em
             // &:not(.editable)
-            //   text-shadow: #ffffff 0 0 0.1em
+            // text-shadow: 0 0 0.1em #ffffff,0 0 0.1em #ffffff
+            text-shadow: 0 0 0.3em #000,0 0 0.3em #000
+            color: #ffffff
 
       .race_body
         position: relative
         box-sizing: border-box
-        padding: 10px 20px
+        margin: 20px 0
+        padding: 0 20px
         width: 100%
         .summary
           width: 50%
@@ -637,8 +652,7 @@ section#extra
           width: 50%
           > div
             clear: left
-            &:not(:first-child)
-              margin-top: 10px
+            margin-bottom: 10px
           ul
             margin: 0
             padding: 0

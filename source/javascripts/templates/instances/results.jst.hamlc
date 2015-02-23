@@ -1,5 +1,6 @@
 %h2
   %a.race_name
+  :
   %a.instance_name
 
 %table#results_table

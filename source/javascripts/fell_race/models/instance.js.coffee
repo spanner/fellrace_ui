@@ -1,4 +1,12 @@
 class FellRace.Models.Instance extends FellRace.Model
+  savedAttributes: ["name","date","file","report","entry_opening",
+    "entry_closing","online_entry","entry_fee","entry_limit","time"
+  ]
+
+  toJSON: =>
+    json = super
+    delete json.instance["file"] unless @get("file_changed")?
+    json
 
   initialize: (opts) ->
     super
@@ -16,6 +24,9 @@ class FellRace.Models.Instance extends FellRace.Model
         @[collection].reset data
 
     @buildWinner()
+
+    @on "change:date", =>
+      @collection?.trigger "check_dates"
 
   setUrls: =>
     url_stem = @url
@@ -38,13 +49,12 @@ class FellRace.Models.Instance extends FellRace.Model
 
   formdata: () =>
     formdata = new FormData()
-    _.each _.pick(@attributes, @synced), (value, key, list) =>
+    _.each @attributes, (value, key, list) =>
       formdata.append("instance[#{key}]", value)
     formdata
 
   sync: (method, model, options) =>
-    # can we rely on @changed(file)?
-    return super unless @get('file')? and (method is "create" or method is "update")
+    return super unless @get("file_changed")?
     options.data = @formdata()
     options.contentType = false
     options.processData = false
@@ -73,9 +83,6 @@ class FellRace.Models.Instance extends FellRace.Model
 
   upload_error: (model, xhr, options) =>
     $.notify "error", "upload failed for #{@filename}"
-
-  resultsUrl: =>
-    "/#{@get("race_slug")}/#{@get("name")}"
 
   getPerformancesCount: =>
     @get "performances_count"

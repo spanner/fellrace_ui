@@ -2,7 +2,6 @@
   %span.profile
   %span.race_name
 %span.date
-.results
-  %a.results_link
-    %span.performances_count
-    runners
+%a.results_link
+  %span.performances_count
+  runners

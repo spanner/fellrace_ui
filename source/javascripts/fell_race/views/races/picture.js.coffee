@@ -56,7 +56,7 @@ class FellRace.Views.Picture extends Backbone.Marionette.ItemView
   getPickedFile: (e) =>
     if files = @_filefield[0].files
       @readLocalFile files[0]
-    
+
   getDropboxFile: (e) =>
     e.preventDefault() if e
     Dropbox.choose
@@ -64,7 +64,7 @@ class FellRace.Views.Picture extends Backbone.Marionette.ItemView
       linkType: "direct"
       extensions: @allowed_extensions
       success: @readDropboxFile
-    
+
   getDroppedFile: (e) =>
     @dragOut(e)
     if files = e.originalEvent.dataTransfer.files

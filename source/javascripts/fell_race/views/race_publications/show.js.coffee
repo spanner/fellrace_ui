@@ -19,6 +19,12 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
             "/admin/races/#{slug}"
       ]
 
+    ".date":
+      observe: "date"
+      onGet: "date"
+
+    ".time": "time"
+
     '.picture img':
       attributes: [
         name: "src"
@@ -33,22 +39,8 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
       updateMethod: 'html'
     '.climb': "climb"
     '.cat': 'cat'
-    '.race_start_time': 'start_time'
 
     # external event ids
-    'a.fb':
-      observe: 'fb_event_id'
-      updateView: false
-      visible: true
-      visibleFn: "visibleBlock"
-      attributes: [
-        {
-          name: "href"
-          observe: "fb_event_id"
-          onGet: (val) =>
-            "https://www.facebook.com/events/#{val}" if val
-        }
-      ]
 
     'a.twit':
       observe: 'twitter_id'
@@ -61,19 +53,6 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
           observe: "twitter_id"
           onGet: (val) =>
             "http://www.twitter.com/#{val}" if val
-        }
-      ]
-    'a.fra':
-      observe: 'fra_id'
-      updateView: false
-      visible: true
-      visibleFn: "visibleBlock"
-      attributes: [
-        {
-          name: "href"
-          observe: "fra_id"
-          onGet: (val) =>
-            "http://www.fellrunner.org.uk/races.php?id=#{val}" if val
         }
       ]
 
@@ -212,6 +191,9 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
 
   pictureUrl: (url) =>
     "#{_fellrace.apiUrl()}/#{url}" if url
+
+  date: (date) =>
+    moment(date).format("D MMMM YYYY")
 
 class FellRace.Views.RacePublicationsList extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.RacePublication

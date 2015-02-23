@@ -9,7 +9,6 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     'click a.add_attachment': 'addAttachment'
     'click a.add_record': 'addRecord'
     'click a.add_checkpoint': 'addCheckpoint'
-    # 'click a.add_instance': 'addInstance'
     'click a.add_link': 'addLink'
     'click a.checkpoint_route': "createRouteThroughCheckpoints"
     'click a.draw_route': "drawRoute"
@@ -46,13 +45,11 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     'span.shr': 'shr_id'
     # 'span.analytics_id': "analytics_id"
 
-    'input.race_show_attachments': "show_attachments"
     'ul.attachments':
       observe: "show_attachments"
       updateView: false
       visible: true
 
-    'input.race_show_checkpoints': "show_checkpoints"
     'ul.checkpoints':
       observe: "show_checkpoints"
       updateView: false
@@ -88,19 +85,16 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
       observe: 'route_profile'
       update: "peify"
 
-    'input.race_show_records': "show_records"
     'ul.records': 
       observe: "show_records"
       updateView: false
       visible: true
 
-    'input.race_show_instances': "show_instances"
     'ul.instances':
       observe: "show_instances"
       updateView: false
       visible: true
 
-    'input.race_show_links': "show_links"
     'ul.links':
       observe: "show_links"
       updateView: false
@@ -139,10 +133,20 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
         }
       ]
 
+  instance_bindings:
+    ".date":
+      observe: "date"
+      onGet: "date"
+
+    ".time": "time"
+
   onRender: =>
     @stickit()
     @$el.find('.editable').editable()
     @stickit()
+    @stickit @model.nextOrRecentInstance(), @instance_bindings
+    @model.instances.on "add remove reset check_dates", () =>
+      @stickit @model.nextOrRecentInstance(), @instance_bindings
 
     new FellRace.Views.Picture(model: @model, el: @$el.find(".picture")).render()
     new FellRace.Views.AdminAttachmentsList(collection: @model.attachments, el: @$el.find("ul.attachments")).render()
@@ -227,3 +231,6 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
       "Replace picture"
     else
       "Choose picture"
+
+  date: (date) =>
+    moment(date).format("D MMMM YYYY")
