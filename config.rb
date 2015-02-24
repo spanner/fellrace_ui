@@ -76,6 +76,7 @@ use Rack::Rewrite do
   rewrite %r{^\/admin(\/.+)?}, '/index.html'
   rewrite %r{^\/races(\/.+)?}, '/index.html'
   rewrite %r{^\/runners(\/.+)?}, '/index.html'
+  rewrite %r{^\/confirm(\/.+)?}, '/index.html'
 end
 
 # activate :deploy do |deploy|

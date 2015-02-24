@@ -208,7 +208,7 @@ class FellRace.Application extends Backbone.Marionette.Application
     signUp: =>
       @actionRegion.show(new FellRace.Views.UserSignupForm())
     signUpForEvent: =>
-      @actionRegion.show(new FellRace.Views.UserSignupFormForEvent())
+      @actionRegion.show(new FellRace.Views.UserSignupFormForRace())
     signIn: =>
       @actionRegion.show(new FellRace.Views.SessionLoginForm())
     confirm: (uid, token) =>

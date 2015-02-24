@@ -53,6 +53,7 @@ class FellRace.PublicRouter extends FellRace.Router
     "races/:slug(/*path)": "racePublication"
     "clubs(/)": "clubs"
     "clubs/:id(/*path)": "club"
+    "confirm/:uid/:token(/)": "confirmUser"
     "*path": "index"
 
   index: =>
@@ -87,6 +88,9 @@ class FellRace.PublicRouter extends FellRace.Router
     layout = new FellRace.Views.ClubLayout
       model: new FellRace.Models.Club id:id
       path: path
+
+  confirmUser: (uid,token) =>
+    _fellrace.actionRegion.show(new FellRace.Views.SessionConfirmationForm({uid: uid, token: token}))
 
 class FellRace.AdminRouter extends FellRace.Router
   routes:

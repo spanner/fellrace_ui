@@ -36,4 +36,4 @@ class FellRace.Views.IndexView extends Backbone.Marionette.Layout
     past_list.render()
 
   signUpForEvent: =>
-    _fellrace.actionRegion.show(new FellRace.Views.UserSignupFormForEvent())
+    _fellrace.actionRegion.show(new FellRace.Views.UserSignupFormForRace())

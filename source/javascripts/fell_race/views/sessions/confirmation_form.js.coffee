@@ -35,7 +35,7 @@ class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemVie
     @$el.find('#password').complexify @showComplexity
     @stickit()
     $.ajax
-      url: "/api/users/verify"
+      url: "#{_fellrace.apiUrl()}/users/verify"
       type: "POST"
       data: 
         uid: @_uid
@@ -64,7 +64,7 @@ class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemVie
         _fellrace.user_actions().signedUp()
         _fellrace.session.setUser(json)
         if slug
-          _fellrace.navigate "/events/#{slug}/admin"
+          _fellrace.navigate "#{_fellrace.apiUrl()}/admin/races/#{slug}"
         #TODO: show friendly starter message, set status to 'new user' somehow
 
   fail: (err) =>

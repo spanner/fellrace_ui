@@ -1,5 +1,5 @@
-class FellRace.Views.UserSignupFormForEvent extends Backbone.Marionette.ItemView
-  template: 'users/sign_up_for_event'
+class FellRace.Views.UserSignupFormForRace extends Backbone.Marionette.ItemView
+  template: 'users/sign_up_for_race'
 
   events:
     'submit form': 'signup'
@@ -23,7 +23,7 @@ class FellRace.Views.UserSignupFormForEvent extends Backbone.Marionette.ItemView
   initialize: () ->
     @model = _fellrace.currentUser()
     _fellrace.vent.on "auth.change", @observeState
-    $.getJSON "/api/events/taken", (response) =>
+    $.getJSON "#{_fellrace.apiUrl()}/races/taken", (response) =>
       @slugs = response
       @render()
 

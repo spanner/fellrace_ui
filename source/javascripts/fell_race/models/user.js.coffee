@@ -10,6 +10,9 @@ class FellRace.Models.User extends Backbone.Model
     authentication_token: ""
     confirmed: false
 
+  urlRoot: =>
+    "#{_fellrace.apiUrl()}/users"
+
   initialize: ->
     @_competitor = new FellRace.Models.Competitor @get("competitor")
     @on "change:competitor", () =>

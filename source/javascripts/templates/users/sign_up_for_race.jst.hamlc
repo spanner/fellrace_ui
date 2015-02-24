@@ -12,7 +12,7 @@
 .check
 .register
   %form.signup
-    %fieldset.event
+    %fieldset.race
       %p.availability
       %input#desired_slug{name: "slug", type: "text", required: "required"}
       %span.domain
