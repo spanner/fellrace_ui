@@ -64,7 +64,7 @@ class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemVie
         _fellrace.user_actions().signedUp()
         _fellrace.session.setUser(json)
         if slug
-          _fellrace.navigate "#{_fellrace.apiUrl()}/admin/races/#{slug}"
+          _fellrace.navigate "/admin/races/#{slug}"
         #TODO: show friendly starter message, set status to 'new user' somehow
 
   fail: (err) =>
