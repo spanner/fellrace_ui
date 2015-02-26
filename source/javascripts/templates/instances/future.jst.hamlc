@@ -14,40 +14,41 @@
 .eod
   Entry on the day
   %span.eod_fee
-  %span.limit_not_reached if limit not reached
 
 .pre_entry
 
-  %h3 Pre Entries
+  %span.heading Pre entry
+  #pre_entry_details
+    .online
+      %span.heading online
+      #online_entry_details
+        .fee
+          Fee:
+          %span.online_entry_fee
+        .opening
+          Opening:
+          %span.online_entry_opening
+        .closing
+          Closing:
+          %span.online_entry_closing
+        .controls
+          %a.enter enter
 
-  .online
-    %h4 online
-    .fee
-      Fee:
-      %span.online_entry_fee
-    .opening
-      Opening:
-      %span.online_entry_opening
-    .closing
-      Closing:
-      %span.online_entry_closing
-    .controls
-      %a.enter enter
-
-  .postal
-    %h4 by post
-    .fee
-      Fee:
-      %span.postal_entry_fee
-    .opening
-      accepted from:
-      %span.postal_entry_opening
-    .closing
-      accepted until:
-      %span.postal_entry_closing
-    %a.entry_form entry form
-    .address
-      address:
-      %p.postal_entry_address
+    .postal
+      %span.heading by post
+      #postal_entry_details
+        .fee
+          Fee:
+          %span.postal_entry_fee
+        .opening
+          accepted from:
+          %span.postal_entry_opening
+        .closing
+          accepted until:
+          %span.postal_entry_closing
+        %a.entry_form entry form
+        .address
+          address:
+          %p.postal_entry_address
 
 %table.entries
