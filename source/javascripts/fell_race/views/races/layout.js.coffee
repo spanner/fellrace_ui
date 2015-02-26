@@ -15,12 +15,19 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
 
   instance: (instance_name,path) =>
     @edit()
-    instance = @model.past_instances.findWhere(name: instance_name)
-    instance = @model.future_instances.findWhere(name: instance_name) unless instance
-    instance.fetch()
-    view = new FellRace.Views.AdminInstance
-      model: instance
-    _fellrace.extraContentRegion.show view
+    if instance = @model.past_instances.findWhere(name: instance_name)
+      view = new FellRace.Views.AdminPastInstance
+        model: instance
+    else if instance = @model.future_instances.findWhere(name: instance_name)
+      view = new FellRace.Views.AdminFutureInstance
+        model: instance
+
+    if instance
+      instance.fetch()
+      _fellrace.extraContentRegion.show view
+    else
+      $.notify "error", "This instance doesn't exist"
+      _fellrace.navigate "/admin/races/#{@model.get("slug")}"
 
   newInstance: =>
     @edit()

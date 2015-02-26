@@ -14,13 +14,15 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
 
   instance: (instance_name,path) =>
     @show()
-    view = null
     if instance = @model.past_instances.findWhere(name: instance_name)
       view = new FellRace.Views.InstanceResults
         model: instance
+    else if instance = @model.future_instances.findWhere(name: instance_name)
+      view = new FellRace.Views.FutureInstance
+        model: instance
+    if instance
+      instance.fetch()
       _fellrace.extraContentRegion.show(view)
     else
-      instance = @model.future_instances.findWhere(name: instance_name)
-      _fellrace.extraContentRegion.close()
-      console.log "entries page?" #TODO entries page
-    instance.fetch()
+      $.notify "error", "This instance doesn't exist. Redirecting to the race page."
+      _fellrace.navigate "/races/#{@model.get("slug")}"

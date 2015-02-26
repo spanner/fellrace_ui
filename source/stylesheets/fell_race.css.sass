@@ -7,7 +7,7 @@ $translucent: rgba(255,255,255,0.92)
 
 // -- temporary -- //
 
-span.entry_fee, span.received_fee
+span.online_entry_fee, span.received_fee, span.postal_entry_fee
   &:before
     content: "£"
 
@@ -474,6 +474,15 @@ section#extra
           color: $green
         &.notready
           color: $red
+    &.future
+      .pre_entry
+        label
+          font-weight: bold
+        .online, .postal
+          float: left
+          width: 50%
+        .entries
+          +clear
 
     .results
       .results_preview

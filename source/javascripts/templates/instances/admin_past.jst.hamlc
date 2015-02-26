@@ -1,0 +1,10 @@
+%h3.date
+Start time
+%span.time.editable{data: {placeholder: "hh:mm"}}
+.report
+  %h3 Report
+  %p.report.editable{data: {placeholder: "Anything to say?"}}
+.results
+  %h3 Results
+  .results_file
+  .results_preview

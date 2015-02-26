@@ -1,0 +1,52 @@
+.basic_details
+  %h3.date
+  Start time
+  %span.time.editable{data: {placeholder: "hh:mm"}}
+
+.pre_entry
+  %label{for: "pre_entry"} Pre entry?
+  %input#pre_entry{type: "checkbox"}
+
+  #pre_entry_details
+    .limit
+      Entry limit
+      %input.entry_limit{type: "number"}
+
+    .online
+      %label{for: "online_entry"} Online entry?
+      %input#online_entry{type: "checkbox"}
+
+      #online_entry_details
+        .fee
+          Fee
+          %span.online_entry_fee.editable{data: {placeholder: "0.00"}}
+          %span.info.fee_details
+            You will receive
+            %span.received_fee
+            from each entry.
+        .opening
+          Opening
+          %span.online_entry_opening.editable{data: {placeholder: "dd-mm-yyyy"}}
+        .closing
+          Closing
+          %span.online_entry_closing.editable{data: {placeholder: "dd-mm-yyyy"}}
+
+    .postal
+      %label{for: "postal_entry"} Postal entry?
+      %input#postal_entry{type: "checkbox"}
+
+      #postal_entry_details
+        .fee
+          Fee
+          %span.postal_entry_fee.editable{data: {placeholder: "0.00"}}
+        .opening
+          Opening
+          %span.postal_entry_opening.editable{data: {placeholder: "dd-mm-yyyy"}}
+        .closing
+          Closing
+          %span.postal_entry_closing.editable{data: {placeholder: "dd-mm-yyyy"}}
+        .entry_form
+        .address
+          Postal Entry address
+          %p.postal_entry_address.editable
+  .entries

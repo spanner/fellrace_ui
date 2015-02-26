@@ -4,9 +4,3 @@
   %a.surname
 %td.cat
   %span.cat
-/ %td.paid
-/   %input.paid{type:"checkbox"}
-/ %td.accepted{type:"checkbox"}
-/ %td.owner
-/ %td.delete
-/   %a.delete

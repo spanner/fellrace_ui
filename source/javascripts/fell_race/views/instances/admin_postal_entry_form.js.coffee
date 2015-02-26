@@ -1,7 +1,7 @@
-class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
-  template: "instances/results_file"
-  size_limit: 10
-  allowed_extensions: [".csv"]
+class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
+  template: "instances/admin_postal_entry_form"
+  size_limit: 1
+  allowed_extensions: [".doc",".docx",".pdf"]
 
   events: 
     "change input.file": 'getPickedFile'
@@ -33,10 +33,6 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
     @stickit()
 
   # file-selection
-
-  clickFileField: (e) =>
-    # not very reliable. we prefer to use labels where possible.
-    @_filefield.trigger('click')
 
   getPickedFile: (e) =>
     if files = @_filefield[0].files
@@ -82,7 +78,7 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
   fileNameOk: (filename, filesize) =>
     ext = filename.split('.').pop().toLowerCase()
     if @allowed_extensions.indexOf(".#{ext}") is -1
-      @complain('notcsv', filename, filesize) 
+      @complain('wrongtype', filename, filesize) 
       false
     else
       true
@@ -101,8 +97,8 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
   complain: (error, filename, filesize) =>
     if error is "toobig"
       _fellrace.notify "refusal", "Sorry: there is a limit of #{@size_limit}MB for these files and #{filename} is #{@niceSize(filesize)}."
-    else if error is "notcsv"
-      _fellrace.notify "refusal", "Sorry: #{filename} doesn't look like a CSV file. Please choose another, or make sure that your file has the right extension."
+    else if error is "wrongtype"
+      _fellrace.notify "refusal", "Sorry: #{filename} doesn't look like a '.pdf', '.doc' or '.docx' file. Please choose another, or make sure that your file has the right extension."
     else
       _fellrace.notify "error", "Unknown file-selection error"
 
@@ -120,6 +116,7 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
 
   buttonText: (file) =>
     if file
-      "Replace results file"
+      "Replace entry form"
     else
-      "Upload CSV results file"
+      "Upload entry form"
+  

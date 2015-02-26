@@ -1,0 +1,14 @@
+%td.forename
+  %a.forename
+  %a.middlename
+%td.surname
+  %a.surname
+%td.cat
+  %span.cat
+%td.paid
+  %input.paid{type:"checkbox"}
+%td.accepted
+  %input.accepted{type:"checkbox"}
+%td.owner
+%td.delete
+  %a.delete

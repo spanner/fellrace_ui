@@ -1,0 +1,3 @@
+%span.file_name
+%input#picker.file{type: "file", accept: ".pdf .docx .doc"}
+%label.pick{for: "picker"} Upload entry form

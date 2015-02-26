@@ -1,5 +1,5 @@
-class FellRace.Views.EntryRow extends Backbone.Marionette.ItemView
-  template: "entries/row"
+class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
+  template: "entries/admin_row"
   className: "entry"
   tagName: "tr"
 
@@ -41,7 +41,8 @@ class FellRace.Views.EntryRow extends Backbone.Marionette.ItemView
 
 
 
-class FellRace.Views.EntriesTable extends Backbone.Marionette.CompositeView
-  itemView: FellRace.Views.EntryRow
-  template: "entries/table"
+class FellRace.Views.AdminEntriesTable extends Backbone.Marionette.CompositeView
+  itemView: FellRace.Views.AdminEntryRow
+  template: "entries/admin_table"
+  tagName: "table"
   itemViewContainer: "tbody"

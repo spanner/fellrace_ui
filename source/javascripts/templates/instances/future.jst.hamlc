@@ -1,1 +1,53 @@
-%a.name
+.basic_details
+  %h3.date
+  Start time
+  %span.time
+
+.limit
+  Entry limit
+  %span.entry_limit
+
+.no_eod
+  %span.no_eod
+    No entry on the day
+
+.eod
+  Entry on the day
+  %span.eod_fee
+  %span.limit_not_reached if limit not reached
+
+.pre_entry
+
+  %h3 Pre Entries
+
+  .online
+    %h4 online
+    .fee
+      Fee:
+      %span.online_entry_fee
+    .opening
+      Opening:
+      %span.online_entry_opening
+    .closing
+      Closing:
+      %span.online_entry_closing
+    .controls
+      %a.enter enter
+
+  .postal
+    %h4 by post
+    .fee
+      Fee:
+      %span.postal_entry_fee
+    .opening
+      accepted from:
+      %span.postal_entry_opening
+    .closing
+      accepted until:
+      %span.postal_entry_closing
+    %a.entry_form entry form
+    .address
+      address:
+      %p.postal_entry_address
+
+.entries
