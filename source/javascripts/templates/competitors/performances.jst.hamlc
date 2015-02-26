@@ -1,10 +1,9 @@
 %thead
   %tr
-    %th.date Date
-    %th.race_name Race
-    %th.cat Race cat
-    %th.time Time
-    %th.pos Position
-    %th.winner Winner
+    %th.date date
+    %th.race_name race
+    %th.time time
+    %th.pos pos
+    %th.winner winner
 
 %tbody

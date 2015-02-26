@@ -27,6 +27,10 @@ a
   text-decoration: none
   color: $link
   cursor: pointer
+  &:active
+    color: $dark
+  &:hover
+    color: $hover
 
 [contentEditable]
   color: $mid
@@ -462,6 +466,15 @@ section#extra
   //     color: $pale
   //     font-size: 3em
   .instance
+    &.new
+      .save
+        +button($rubine)
+      p.instructions
+        &.okay
+          color: $green
+        &.notready
+          color: $red
+
     .results
       .results_preview
         // max-height: 250px
@@ -475,10 +488,14 @@ section#extra
         text-align: left
     tbody
       overflow: auto
-      tr.female
-        background: #FFF7F7
-      tr:hover
-        background: #eee
+      tr
+        &.current
+          font-weight: bold
+          +glow($brightgreen) //TODO de-uglify
+        &.female
+          background: #FFF7F7
+        &:hover
+          background: #eee
       td
         vertical-align: top
         text-align: left
@@ -606,8 +623,6 @@ section#extra
           bottom: 0
           margin: 0 20px 15px 0
           font-size: 1.7em
-          .pick
-            +button
 
         .title
           position: absolute
@@ -629,19 +644,26 @@ section#extra
         padding: 0 20px
         width: 100%
         .summary
+          box-sizing: border-box
           width: 50%
+          padding-left: 10px
           float: right
           position: relative
+          margin-bottom: 10px
           .profile
             position: relative
             height: 50px
+            .race_profile
+              display: none
             .basic_details
               margin-left: 5px
               font-weight: bold
               position: absolute
               bottom: 3px
-          .next_or_recent
+          .next_instance
             margin-left: 5px
+            a.date
+              font-weight: bold
           .next
             margin-left: 5px
 
@@ -843,6 +865,30 @@ section#extra
             text-align: center
             color: $pale
 
+      table.performances
+        tr
+          th
+          th, td
+            padding: 5px
+            &:last-child
+              padding-right: 0
+            &:first-child
+              padding-left: 0
+          th
+            text-align: center
+          td
+            &.winner
+              font-size: 0.7em
+              span.winning_time
+                float: right
+            span.time
+              float: right
+            span.pos
+              float: right
+            span.total_competitors
+              color: $pale
+              float: right
+
 a.social, span.social
   display: inline-block
   vertical-align: top
@@ -946,7 +992,7 @@ a.file_name
   +button
 
 #controls, .controls
-  .edit, .accept
+  .edit, .accept, .pick
     +button($green)
   .reject, .disown
     +button($red)
@@ -955,15 +1001,14 @@ a.file_name
   .publish
     +button($rubine)
     // overflow: hidden
-  .preview
-    +button($red)
-    overflow: hidden
   .setmap
     +button($blue)
     overflow: hidden
   .enter
     +button($rubine)
     overflow: hidden
+  .cancel
+    +button($mid)
   .settings
     +button($mid)
     width: 10px

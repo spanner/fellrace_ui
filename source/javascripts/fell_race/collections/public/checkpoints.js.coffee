@@ -4,6 +4,7 @@ class FellRace.Collections.PublicCheckpoints extends FellRace.Collection
 
   initialize: (models) ->
     super
+    @sort()
     @on "add reset", =>
       @sort()
 

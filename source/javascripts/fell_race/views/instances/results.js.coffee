@@ -19,8 +19,10 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
           "/races/#{race_slug}/#{name}"
       ]
 
-  initialize: ({competitor:@_competitor}) ->
+  initialize: ({competitor:competitor}={}) ->
     @_performances = @model.performances
+    if competitor
+      @_performances.findWhere(competitor_id: competitor.id)?.set current: true
 
   onRender: =>
     @stickit()
@@ -92,7 +94,6 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
       columns: grid_columns
       row: FellRace.Views.ResultRow
       el: @$el.find("#results_table")
-      competitor: @competitor
 
     table.render()
 

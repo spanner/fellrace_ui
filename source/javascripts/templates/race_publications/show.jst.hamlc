@@ -46,10 +46,15 @@
 
   .moredetails
 
-    .instances
+    .future_instances
+      %h3
+        Future Instances
+      %ul.future_instances
+
+    .past_instances
       %h3
         Results
-      %ul.instances
+      %ul.past_instances
 
     .race_organiser
       %h3 
@@ -65,7 +70,6 @@
     .links
       %h3 
         Links
-      %a.social.fra FRA
       %a.social.shr SHR
       %a.social.fb facebook
       %a.social.twit twitter

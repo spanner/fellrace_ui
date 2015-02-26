@@ -43,7 +43,7 @@ class FellRace.Views.IndexInstance extends Backbone.Marionette.ItemView
   instanceUrl: ([name,race_slug]=[]) =>
     "/races/#{race_slug}/#{name}" if name and race_slug
 
-class FellRace.Views.FutureInstance extends FellRace.Views.IndexInstance
+class FellRace.Views.FutureIndexInstance extends FellRace.Views.IndexInstance
   template: "instances/index/future"
 
   extra_bindings:
@@ -52,7 +52,7 @@ class FellRace.Views.FutureInstance extends FellRace.Views.IndexInstance
       observe: ["name","race_slug"]
       onGet: "instanceUrl"
 
-class FellRace.Views.PastInstance extends FellRace.Views.IndexInstance
+class FellRace.Views.PastIndexInstance extends FellRace.Views.IndexInstance
   template: "instances/index/past"
 
   extra_bindings:
@@ -69,21 +69,18 @@ class FellRace.Views.PastInstance extends FellRace.Views.IndexInstance
       ]
     "span.performances_count": "performances_count"
 
-class FellRace.Views.FutureInstances extends Backbone.Marionette.CompositeView
-  itemView: FellRace.Views.FutureInstance
-
-  url: =>
-    "#{_fellrace.apiUrl()}/instances/future"
+class FellRace.Views.FutureIndexInstances extends Backbone.Marionette.CompositeView
+  itemView: FellRace.Views.FutureIndexInstance
 
   initialize: ->
-    @collection = new FellRace.Collections.Instances([])
+    @collection = new FellRace.Collections.FutureInstances([])
     @collection.url = "#{_fellrace.apiUrl()}/instances/future"
     @collection.fetch()
 
-class FellRace.Views.PastInstances extends Backbone.Marionette.CollectionView
-  itemView: FellRace.Views.PastInstance
+class FellRace.Views.PastIndexInstances extends Backbone.Marionette.CollectionView
+  itemView: FellRace.Views.PastIndexInstance
 
   initialize: ->
-    @collection = new FellRace.Collections.Instances([])
+    @collection = new FellRace.Collections.PastInstances([])
     @collection.url = "#{_fellrace.apiUrl()}/instances/past"
     @collection.fetch()

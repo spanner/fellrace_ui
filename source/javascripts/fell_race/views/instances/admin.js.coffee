@@ -13,9 +13,6 @@ class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
     "#future":
       observe: "date"
       visible: "isFuture"
-    "#more_details":
-      observe: "name"
-      visible: true
     "#entry_details":
       observe: "online_entry"
       visible: true
@@ -32,10 +29,10 @@ class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
     "span.entry_closing": "entry_closing"
     "span.entry_opening": "entry_opening"    
 
-    "span.name": "name"
-    "span.day": "day"        
-    "span.month": "month"
-    "span.year": "year"
+    "h3.date":
+      observe: "date"
+      onGet: "date"
+
     "span.time": "time"
 
     "p.report": "summary"
@@ -44,40 +41,15 @@ class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
       onGet: "summarise"
 
   onRender: () =>
-    @onChangeName()
-    @manageDate()
-
     new FellRace.Views.ResultsFile(model: @model, el: @$el.find(".results_file")).render()
 
     new FellRace.Views.ResultsPreview(model:@model, el: @$el.find(".results_preview")).render()
 
-    # @_filefield = @$el.find('input[type="file"]')
     @$el.find('.editable').editable()
     @stickit()
 
-  manageDate: =>
-    if date = @model.get("date")
-      @model.onSetDate(date)
-    @model.on "change:date", (model, value, opts) =>
-      @model.onSetDate(value,opts) if value
-
-    @model.on "change:day change:month change:year", (model,value,opts) =>
-      day = @model.get("day")
-      month = @model.get("month")
-      year = @model.get("year")
-      if year
-        if _.any @model.collection.inYearExcept(year,@model)
-          $.notify "error", "There is already an instance for #{year}; not saving."
-        else if day and month and year.length is 4
-          @model.set {date: "#{year}-#{month}-#{day}"},
-            opts
-  #
-  # pickFile: =>
-  #   @_filefield.trigger('click')
-
   filePicked: (e) =>
     if files = @_filefield[0].files
-      console.log files.item(0)
       @model.set file: files.item(0),
         persistChange: true
 
@@ -107,25 +79,6 @@ class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
   isFuture: (date) =>
     date and Date.parse(date) > Date.now()
 
-  onChangeName: =>
-    if @model.isNew()
-      @model.once "change:name", (model,name) =>
-        @model.save {},
-          success: =>
-            @redirect(name)
-            @onChangeName()
-    else
-      @model.on "change:name", (model,name) =>
-        @redirect(name)
-
-  redirect: (name) =>
-    _fellrace.navigate @url(name),
-      replace: true
-      trigger: false
-
-  url: (name) =>
-    "/admin/races/#{@model.get("race_slug")}/#{name}"
-
   summarise: (value, options) =>
     if !value?
       ""
@@ -136,3 +89,6 @@ class FellRace.Views.AdminInstance extends Backbone.Marionette.ItemView
 
   untrue: (val) ->
     !val
+
+  date: (date) =>
+    moment(date).format("D MMMM YYYY") if date

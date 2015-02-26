@@ -1,33 +1,8 @@
 class FellRace.Views.AdminListedInstance extends Backbone.Marionette.ItemView
-  template: 'instances/admin_list_item'
   tagName: "li"
   className: "instance"
   events:
     'click a.delete': "delete"
-
-  bindings:
-    "a.name":
-      observe: "name"
-      attributes: [
-        {
-          observe: ["race_slug","name"]
-          name: "href"
-          onGet: "url"
-        }
-      ]
-    ".past":
-      observe: "date"
-      visible: "isPast"
-    ".future":
-      observe: "date"
-      visible: "isFuture"
-    "span.summary": "summary"
-    "span.total_entries": 
-      observe: ["entries_count","entry_limit"]
-      onGet: "summariseEntries"
-    "span.total": 
-      observe: "performances_count"
-      onGet: "summarise"
 
   onRender: () =>
     @$el.find('.editable').editable()
@@ -37,32 +12,70 @@ class FellRace.Views.AdminListedInstance extends Backbone.Marionette.ItemView
     e.preventDefault() if e
     @model.destroy()
 
+  url: ([race_slug,name]=[]) =>
+    "/admin/races/#{race_slug}/#{name}"
+
+class FellRace.Views.AdminFutureListedInstance extends FellRace.Views.AdminListedInstance
+  template: 'instances/admin_future_list_item'
+  bindings:
+    "a.date":
+      observe: "date"
+      onGet: "date"
+      attributes: [
+        observe: ["race_slug","name"]
+        name: "href"
+        onGet: "url"
+      ]
+    "span.time":
+      observe: "time"
+      onGet: "time"
+    "span.total_entries": 
+      observe: ["online_entries","entries_count","entry_limit"]
+      onGet: "summarise"
+
+  summarise: ([online_entry,entries_count,entry_limit]=[]) ->
+    string = ""
+    if online_entry
+      string = entries_count
+      if entry_limit and entry_limit > 0
+        string = "#{string} / #{entry_limit}"
+      string = "#{string} entries"
+
+  date: (date) =>
+    moment(date).format("D MMMM YYYY") if date
+
+  time: (time) =>
+    "at #{time}" if time
+
+class FellRace.Views.AdminPastListedInstance extends FellRace.Views.AdminListedInstance
+  template: 'instances/admin_past_list_item'
+  bindings:
+    "a.name":
+      observe: "name"
+      attributes: [
+        observe: ["race_slug","name"]
+        name: "href"
+        onGet: "url"
+      ]
+    "span.total": 
+      observe: "performances_count"
+      onGet: "summarise"
+
   summarise: (value, options) =>
     if !value?
       ""
     else
       "#{value} runners"
 
-  summariseEntries: ([count,limit]=[]) =>
-    if limit
-      "#{count||0}/#{limit} entries"
-    else if count
-      "#{count} entries"
 
-  url: ([race_slug,name]=[]) =>
-    "/admin/races/#{race_slug}/#{name}"
-
-  isPast: (date) =>
-    date and Date.parse(date) <= Date.now()
-
-  isFuture: (date) =>
-    date and Date.parse(date) > Date.now()
-
-class FellRace.Views.AddInstance extends Backbone.Marionette.ItemView
+class FellRace.Views.AddPastInstance extends Backbone.Marionette.ItemView
   template: 'instances/add_results'
   tagName: "li"
   className: "note"
 
-class FellRace.Views.AdminInstancesList extends Backbone.Marionette.CollectionView
-  emptyView: FellRace.Views.AddInstance
-  itemView: FellRace.Views.AdminListedInstance
+class FellRace.Views.AdminPastInstancesList extends Backbone.Marionette.CollectionView
+  emptyView: FellRace.Views.AddPastInstance
+  itemView: FellRace.Views.AdminPastListedInstance
+
+class FellRace.Views.AdminFutureInstancesList extends Backbone.Marionette.CollectionView
+  itemView: FellRace.Views.AdminFutureListedInstance

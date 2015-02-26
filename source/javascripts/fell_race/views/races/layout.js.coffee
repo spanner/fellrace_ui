@@ -15,7 +15,8 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
 
   instance: (instance_name,path) =>
     @edit()
-    instance = @model.instances.findWhere(name: instance_name)
+    instance = @model.past_instances.findWhere(name: instance_name)
+    instance = @model.future_instances.findWhere(name: instance_name) unless instance
     instance.fetch()
     view = new FellRace.Views.AdminInstance
       model: instance
@@ -23,7 +24,8 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
 
   newInstance: =>
     @edit()
-    instance = @model.instances.add(race_slug:@model.get("slug"))
-    view = new FellRace.Views.AdminInstance
-      model: instance
+    model = new FellRace.Models.Instance(race_slug:@model.get("slug"))
+    model.urlRoot = "#{@model.url()}/instances"
+    view = new FellRace.Views.NewInstance
+      model: model
     _fellrace.extraContentRegion.show view

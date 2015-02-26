@@ -25,9 +25,6 @@ class FellRace.Models.Instance extends FellRace.Model
 
     @buildWinner()
 
-    @on "change:date", =>
-      @collection?.trigger "check_dates"
-
   setUrls: =>
     url_stem = @url
     @entries.url = "#{url_stem}/entries"
@@ -87,18 +84,6 @@ class FellRace.Models.Instance extends FellRace.Model
   getPerformancesCount: =>
     @get "performances_count"
 
-  onSetDate: (val, opts) =>
-    date = val.split "-"
-    data =
-      day: date[2]
-      month: date[1]
-      year: date[0]
-      name: date[0]
-    unless @get("entry_closing") and Date.parse(@get("entry_closing")) < Date.parse(@get("date"))
-      data["entry_closing"] = new Date(val)
-    @set data,
-      opts
-
   getDate: =>
     if date = @get("date")
       Date.parse(date)
@@ -111,4 +96,6 @@ class FellRace.Models.Instance extends FellRace.Model
     if date = @getDate()
       date < Date.now()
 
+  onlineEntryReady: =>
+    #TODO !!
   

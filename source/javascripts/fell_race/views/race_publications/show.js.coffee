@@ -127,9 +127,13 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
       visible: (vals) =>
         vals[0].length > 0 or vals[1] or vals[2] or vals[3] or vals[4]
 
-    '.instances':
-      observe: "instances"
+    '.past_instances':
+      observe: "past_instances"
       visible: "hasAny"
+
+    '.future_instances':
+      observe: "future_instances"
+      visible: "moreThanOne"
 
     '.records':
       observe: "records"
@@ -148,7 +152,8 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     new FellRace.Views.LinksList(collection: @model.links, el: @$el.find("ul.links")).render()
     new FellRace.Views.CheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints")).render()
     new FellRace.Views.RecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
-    new FellRace.Views.InstancesList(collection: @model.instances, el: @$el.find("ul.instances")).render()
+    new FellRace.Views.FutureInstancesList(collection: @model.future_instances, el: @$el.find("ul.future_instances")).render()
+    new FellRace.Views.PastInstancesList(collection: @model.past_instances, el: @$el.find("ul.past_instances")).render()
 
   showPresence: (e) =>
     el = $(e.currentTarget)
@@ -179,11 +184,14 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     @$el.find('span.race_profile').peity "line",
       fill: "#e2e1dd"
       stroke: "#d6d6d4"
-      width: @$el.width() / 2.1
+      width: @$el.find(".profile").width()
       height: 50
 
   hasAny: (array) =>
     array.length > 0
+
+  moreThanOne: (array) =>
+    array.length > 1
 
   openTab: (e) =>
     e.preventDefault() if e

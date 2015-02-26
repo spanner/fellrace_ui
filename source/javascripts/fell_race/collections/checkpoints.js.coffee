@@ -4,6 +4,7 @@ class FellRace.Collections.Checkpoints extends FellRace.Collection
 
   initialize: (models) ->
     super
+    @sort()
     @resequence_soon = _.debounce @resequence, 200
     @on "add", (point, collection) =>
       @checkRoutability()

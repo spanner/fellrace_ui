@@ -1,0 +1,9 @@
+Date
+
+%input.date{type: "date"}
+
+%p.instructions
+
+.controls
+  %a.cancel Cancel
+  %a.save Save and continue

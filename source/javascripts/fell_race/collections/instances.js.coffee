@@ -1,32 +1,26 @@
 class FellRace.Collections.Instances extends FellRace.Collection
   model: FellRace.Models.Instance
-  comparator: (m) ->
-    -m.getDate()
-
-  past: =>
-    _.filter @models, (instance) =>
-      instance.inPast()
-
-  future: =>
-    _.filter @models, (instance) =>
-      instance.inFuture()
-
-  onlineEntry: =>
-    _.filter @future(), (instance) =>
-      instance.get("online_entry")
 
   inYearExcept: (year,instance) =>
-    _.filter @models, (model) =>
+    @filter (model) =>
       instance.id isnt model.id and model.get("year") is year
+
+class FellRace.Collections.FutureInstances extends FellRace.Collections.Instances
+  comparator: (m) ->
+    m.getDate()
+
+  onlineEntry: =>
+    @filter (instance) ->
+      instance.get("online_entry")
 
   next: =>
     @sort()
-    future = @future()
-    if future.length > 0
-      future.reverse()[0]
+    @filter((instance)->instance.getDate())[0]
+
+class FellRace.Collections.PastInstances extends FellRace.Collections.Instances
+  comparator: (m) ->
+    -m.getDate()
 
   mostRecent: =>
     @sort()
-    past = @past()
-    if past.length > 0
-      past[0]
+    @filter((instance)->instance.getDate())[0]

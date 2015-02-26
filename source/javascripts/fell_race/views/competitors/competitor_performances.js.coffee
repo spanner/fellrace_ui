@@ -9,6 +9,7 @@ class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
       onGet: "secondsToString"
     "a.date":
       observe: "instance_date"
+      onGet: "date"
       attributes: [
         {
           name: "href"
@@ -29,7 +30,6 @@ class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
           onGet: "raceUrl"
         }
       ]
-    "span.race_cat": "race_cat"
 
     "a.winner":
       observe: "winner_name"
@@ -65,6 +65,9 @@ class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
 
   secondsToString: (seconds) =>
     _fellrace.secondsToString seconds
+
+  date: (date) =>
+    moment(date).format("D MMM YY") if date
 
 class FellRace.Views.CompetitorPerformancesTable extends Backbone.Marionette.CompositeView
   template: "competitors/performances"

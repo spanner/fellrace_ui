@@ -23,7 +23,7 @@ class FellRace.Views.CompetitorRaceLayout extends FellRace.Views.LayoutView
     _fellrace.extraContentRegion.show view
 
   instance: (instance_name) =>
-    instance = @model.instances.findWhere name: instance_name
+    instance = @model.past_instances.findWhere name: instance_name
     instance.fetch
       success: =>
         view = new FellRace.Views.InstanceResults

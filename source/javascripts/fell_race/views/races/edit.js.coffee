@@ -41,19 +41,8 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
 
     'span.fb': 'fb_event_id'
     'span.twit': 'twitter_id'
-    'span.fra': 'fra_id'
     'span.shr': 'shr_id'
     # 'span.analytics_id': "analytics_id"
-
-    'ul.attachments':
-      observe: "show_attachments"
-      updateView: false
-      visible: true
-
-    'ul.checkpoints':
-      observe: "show_checkpoints"
-      updateView: false
-      visible: true
 
     'input.race_show_route': "show_route"
 
@@ -85,25 +74,6 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
       observe: 'route_profile'
       update: "peify"
 
-    'ul.records': 
-      observe: "show_records"
-      updateView: false
-      visible: true
-
-    'ul.instances':
-      observe: "show_instances"
-      updateView: false
-      visible: true
-
-    'ul.links':
-      observe: "show_links"
-      updateView: false
-      visible: true
-    'ul.autolinks':
-      observe: "show_links"
-      updateView: false
-      visible: true
-
     '.organiser_name': "organiser_name"
     '.organiser_email': "organiser_email"
     '.organiser_phone': "organiser_phone"
@@ -112,48 +82,30 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
       onSet: (val) ->
         val = null if /(\<div\>\<br\>\<\/div\>|\<br\>)/.test(val)
         val
-    'input.race_show_organiser': "show_organiser"
-    '.show_organiser':
-      observe: "show_organiser"
-      updateView: false
-      visible: true
 
     '.requirements': "requirements"
-    'input.race_show_requirements': "show_requirements"
-    '.show_requirements': 
-      observe: "show_requirements"
-      updateView: false
-      visible: true
+
     'a.add_instance':
       attributes: [
-        {
-          observe: "slug"
-          name: "href"
-          onGet: "newInstanceUrl"
-        }
+        observe: "slug"
+        name: "href"
+        onGet: "newInstanceUrl"
       ]
-
-  instance_bindings:
-    ".date":
-      observe: "date"
-      onGet: "date"
-
-    ".time": "time"
 
   onRender: =>
     @stickit()
     @$el.find('.editable').editable()
     @stickit()
-    @stickit @model.nextOrRecentInstance(), @instance_bindings
-    @model.instances.on "add remove reset check_dates", () =>
-      @stickit @model.nextOrRecentInstance(), @instance_bindings
+
+    new FellRace.Views.NextRaceInstance(model:@model,el:@$el.find(".next_instance")).render()
 
     new FellRace.Views.Picture(model: @model, el: @$el.find(".picture")).render()
     new FellRace.Views.AdminAttachmentsList(collection: @model.attachments, el: @$el.find("ul.attachments")).render()
     new FellRace.Views.AdminLinksList(collection: @model.links, el: @$el.find("ul.links")).render()
     new FellRace.Views.AdminCheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints")).render()
     new FellRace.Views.AdminRecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
-    new FellRace.Views.AdminInstancesList(collection: @model.instances, el: @$el.find("ul.instances")).render()
+    new FellRace.Views.AdminFutureInstancesList(collection: @model.future_instances, el: @$el.find("ul.future_instances")).render()
+    new FellRace.Views.AdminPastInstancesList(collection: @model.past_instances, el: @$el.find("ul.past_instances")).render()
 
   ## Flash a dom element to show that it has changed
 
@@ -223,7 +175,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     @$el.find('span.race_profile').peity "line",
       fill: "#e2e1dd"
       stroke: "#d6d6d4"
-      width: @$el.width() / 2.1
+      width: @$el.find(".profile").width()
       height: 50
 
   buttonText: (image) =>
@@ -233,4 +185,4 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
       "Choose picture"
 
   date: (date) =>
-    moment(date).format("D MMMM YYYY")
+    moment(date).format("D MMMM YYYY") if date

@@ -24,13 +24,13 @@ class FellRace.Models.Race extends FellRace.Model
 
   build: =>
     @attachments = new FellRace.Collections.Attachments(@get("attachments"), race: @)
-    @records = new FellRace.Collections.Records(@get("records"), race: @)
-    @instances = new FellRace.Collections.Instances(@get("instances"), race: @)
-    @links = new FellRace.Collections.Links(@get("links"), race: @)
     @checkpoints = new FellRace.Collections.Checkpoints(@get("checkpoints"), race: @)
-    @checkpoints.sort()
+    @records = new FellRace.Collections.Records(@get("records"), race: @)
+    @future_instances = new FellRace.Collections.FutureInstances(@get("future_instances"), race: @)
+    @past_instances = new FellRace.Collections.PastInstances(@get("past_instances"), race: @)
+    @links = new FellRace.Collections.Links(@get("links"), race: @)
 
-    _.each ["attachments","checkpoints","records","links","instances"], (collection) =>
+    _.each ["attachments","checkpoints","records","links","past_instances","future_instances"], (collection) =>
       @on "change:#{collection}", (model,data) =>
         @[collection].reset data
 
@@ -48,7 +48,8 @@ class FellRace.Models.Race extends FellRace.Model
     @attachments.url = "#{url_stem}/attachments"
     @checkpoints.url = "#{url_stem}/checkpoints"
     @records.url = "#{url_stem}/records"
-    @instances.url = "#{url_stem}/instances"
+    @past_instances.url = "#{url_stem}/instances"
+    @future_instances.url = "#{url_stem}/instances"
     @links.url = "#{url_stem}/links"
 
   getColour: =>
@@ -101,11 +102,11 @@ class FellRace.Models.Race extends FellRace.Model
 
   jsonForPublication: =>
     next_instance = @nextOrRecentInstance()
-    console.log next_instance
     JSON.stringify
       id: @id
       date: next_instance?.get("date")
       time: next_instance?.get("time")
+      online_entry: next_instance?.onlineEntryReady()
       name: @get("name")
       slug: @get("slug")
       cat: @get("cat")
@@ -117,9 +118,8 @@ class FellRace.Models.Race extends FellRace.Model
       organiser_name: @get("organiser_name")
       organiser_address: @get("organiser_address")
       organiser_phone: @get("organiser_phone")
-      fra_id: @get("fra_id")
       shr_id: @get("shr_id")
-      fb_event_id: @get("fb_event_id")
+      # fb_event_id: @get("fb_event_id") #TODO FB page?
       twitter_id: @get("twitter_id")
       requirements: @get("requirements")
       route_profile: @get("route_profile")
@@ -130,9 +130,8 @@ class FellRace.Models.Race extends FellRace.Model
       checkpoint_route: @checkpoints.getEncodedRoute()
 
   nextOrRecentInstance: =>
-    instance = @instances.next()
-    unless instance
-      instance = @instances.mostRecent()
+    instance = @future_instances.next()
+    instance = @past_instances.mostRecent() unless instance
     instance
 
   select: =>

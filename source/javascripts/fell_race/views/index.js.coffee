@@ -25,12 +25,12 @@ class FellRace.Views.IndexView extends Backbone.Marionette.Layout
       el: @$el.find(".confirm")
     confirmation.render()
 
-    future_list = new FellRace.Views.FutureInstances
+    future_list = new FellRace.Views.FutureIndexInstances
       template: "instances/future_list"
       el: @$el.find("#future_instances")
     future_list.render()
 
-    past_list = new FellRace.Views.PastInstances
+    past_list = new FellRace.Views.PastIndexInstances
       template: "instances/past_list"
       el: @$el.find("#past_instances")
     past_list.render()

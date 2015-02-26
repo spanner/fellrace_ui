@@ -11,19 +11,21 @@ class FellRace.Models.RacePublication extends Backbone.Model
   build: =>
     @attachments = new FellRace.Collections.Attachments(@get("attachments")||[])
     @records = new FellRace.Collections.Records(@get("records")||[])
-    @instances = new FellRace.Collections.PublicInstances(@get("instances")||[])
+    @future_instances = new FellRace.Collections.PublicFutureInstances(@get("future_instances")||[])
+    @past_instances = new FellRace.Collections.PublicPastInstances(@get("past_instances")||[])
     @links = new FellRace.Collections.Links(@get("links")||[])
     @checkpoints = new FellRace.Collections.PublicCheckpoints(@get("checkpoints")||[], race_publication: this)
     @setUrls()
 
-    _.each ["attachments","checkpoints","records","links","instances"], (collection) =>
+    _.each ["attachments","checkpoints","records","links","past_instances","future_instances"], (collection) =>
       @on "change:#{collection}", (model,data) =>
         @[collection].reset data
 
   setUrls: =>
     url_stem = @url()
     @attachments.url = "#{url_stem}/attachments"
-    @instances.url = "#{url_stem}/instances"
+    @past_instances.url = "#{url_stem}/instances"
+    @future_instances.url = "#{url_stem}/instances"
 
   select: =>
     unless @selected()

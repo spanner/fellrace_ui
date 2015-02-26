@@ -1,5 +1,14 @@
 class FellRace.Views.ResultRow extends Backgrid.Row
-  initialize: =>
+  bindings:
+    ":el":
+      attributes: [
+        observe: "current"
+        name: "class"
+        onGet: (current) =>
+          "current" if current
+      ]
+
+  initialize: ->
     super
     if @model.get("cat")?.match /[lfw]/i
       @$el.addClass "female"
@@ -18,6 +27,7 @@ class FellRace.Views.ResultRow extends Backgrid.Row
 
   render: =>
     super
+    @stickit()
     @$el.find(".select-row-cell").css
       background: @model.colour
     @
@@ -49,27 +59,29 @@ class FellRace.Views.NameCell extends Backbone.Marionette.ItemView
 
   bindings:
     "span.name":
-      observe: ["forename","middlename","surname"]
-      onGet: "fullName"
+      observe: ["competitor_id","forename","middlename","surname"]
+      onGet: "perfFullName"
 
-  competitor_bindings:
-    "a.competitor_name":
-      observe: ["forename","middlename","surname"]
-      onGet: "fullName"
+    "a.name":
+      observe: ["competitor_id","competitor_forename","competitor_middlename","competitor_surname"]
+      onGet: "compFullName"
       attributes: [
         {
           name: "href"
-          observe: "id"
+          observe: "competitor_id"
           onGet: "url"
         }
       ]
 
   onRender: =>
     @_instance = @model.instance
-    if @model.has("competitor")
-      @stickit(new FellRace.Models.Competitor(@model.get("competitor")), @competitor_bindings)
-    else
-      @stickit()
+    @stickit()
+
+  compFullName: ([id,first,middle,last]=[]) =>
+    @fullName([first,middle,last]) if id
+
+  perfFullName: ([id,first,middle,last]=[]) =>
+    @fullName([first,middle,last]) unless id
 
   fullName: ([first,middle,last]=[]) =>
     name = first

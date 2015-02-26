@@ -1,14 +1,12 @@
-%td
+%td.date
   %a.date
-%td
+%td.race
   %a.race_name
-%td
-  %span.race_cat
-%td
+%td.time
   %span.time
-%td
-  %span.pos
+%td.pos
   %span.total_competitors
-%td
+  %span.pos
+%td.winner
   %a.winner
   %span.winning_time
