@@ -12,9 +12,9 @@ class FellRace.Views.EntryRow extends Backbone.Marionette.ItemView
         }
       ]
 
-  competitorBindings:
     "a.forename":
-      observe: "forename"
+      observe: ["competitor_forename","competitor_middlename"]
+      onGet: "name"
       attributes: [
         {
           observe: "id"
@@ -23,7 +23,7 @@ class FellRace.Views.EntryRow extends Backbone.Marionette.ItemView
         }
       ]
     "a.surname":
-      observe: "surname"
+      observe: "competitor_surname"
       attributes: [
         {
           observe: "id"
@@ -31,18 +31,19 @@ class FellRace.Views.EntryRow extends Backbone.Marionette.ItemView
           onGet: "competitorUrl"
         }
       ]
+    "span.cat": "category"
 
   onRender: =>
     @stickit()
-    @stickit(@model.competitor, @competitorBindings)
 
-  competitorUrl: (id) =>
+  competitorUrl: (id) ->
     "/runners/#{id}"
 
+  name: ([fore,middle]=[]) ->
+    if middle then "#{fore} #{middle}" else fore
 
 
 class FellRace.Views.EntriesTable extends Backbone.Marionette.CompositeView
   itemView: FellRace.Views.EntryRow
   template: "entries/table"
-  tagName: "table"
   itemViewContainer: "tbody"

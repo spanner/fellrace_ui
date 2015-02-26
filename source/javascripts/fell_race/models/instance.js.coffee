@@ -2,7 +2,7 @@ class FellRace.Models.Instance extends FellRace.Model
   savedAttributes: ["name","date","file","report","online_entry_opening",
     "online_entry_closing","online_entry","online_entry_fee","entry_limit",
     "time","pre_entry","postal_entry","postal_entry_fee","postal_entry_opening",
-    "postal_entry_closing"
+    "postal_entry_closing","eod","eod_fee"
   ]
 
   toJSON: =>

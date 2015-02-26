@@ -65,7 +65,13 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
     entries_table.render()
 
   enter: =>
-    console.log "enter"
+    $.notify "error", "You haven't built that bit yet (TODO!)"
+    $.notify "success", "...but you do have the instance '#{@model.get("name")}'"
+    if _fellrace.userSignedIn()
+      user = _fellrace.currentUser()
+      $.notify "success", "...and the user '#{user.get("email")}'"
+    else
+      $.notify "error", "...but no user"
 
   date: (date) =>
     moment(date).format("D MMMM YYYY") if date

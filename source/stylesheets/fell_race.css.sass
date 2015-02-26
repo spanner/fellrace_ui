@@ -7,7 +7,7 @@ $translucent: rgba(255,255,255,0.92)
 
 // -- temporary -- //
 
-span.online_entry_fee, span.received_fee, span.postal_entry_fee
+span.online_entry_fee, span.received_fee, span.postal_entry_fee, span.eod_fee
   &:before
     content: "£"
 
@@ -475,14 +475,22 @@ section#extra
         &.notready
           color: $red
     &.future
+      label.heading
+        font-weight: bold
+      .eod, .pre_entry
+        margin-top: 20px
+      .eod
+        #eod_details
+          padding: 20px
       .pre_entry
-        label
-          font-weight: bold
+        #pre_entry_details
+          padding: 20px
         .online, .postal
           float: left
           width: 50%
         .entries
           +clear
+          
 
     .results
       .results_preview

@@ -50,4 +50,4 @@
       address:
       %p.postal_entry_address
 
-.entries
+%table.entries

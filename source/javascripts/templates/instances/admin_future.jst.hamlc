@@ -3,17 +3,27 @@
   Start time
   %span.time.editable{data: {placeholder: "hh:mm"}}
 
+.limit
+  Entry limit
+  %input.entry_limit{type: "number"}
+
+.eod
+  %label.heading{for: "eod"} Entry on the day?
+  %input#eod{type: "checkbox"}
+
+  #eod_details
+    .fee
+      Fee
+      %span.eod_fee.editable{data: {placeholder: "0.00"}}
+
 .pre_entry
-  %label{for: "pre_entry"} Pre entry?
+  %label.heading{for: "pre_entry"} Pre entry?
   %input#pre_entry{type: "checkbox"}
 
   #pre_entry_details
-    .limit
-      Entry limit
-      %input.entry_limit{type: "number"}
 
     .online
-      %label{for: "online_entry"} Online entry?
+      %label.heading{for: "online_entry"} Online entry?
       %input#online_entry{type: "checkbox"}
 
       #online_entry_details
@@ -32,7 +42,7 @@
           %span.online_entry_closing.editable{data: {placeholder: "dd-mm-yyyy"}}
 
     .postal
-      %label{for: "postal_entry"} Postal entry?
+      %label.heading{for: "postal_entry"} Postal entry?
       %input#postal_entry{type: "checkbox"}
 
       #postal_entry_details
@@ -49,4 +59,4 @@
         .address
           Postal Entry address
           %p.postal_entry_address.editable
-  .entries
+  %table.entries

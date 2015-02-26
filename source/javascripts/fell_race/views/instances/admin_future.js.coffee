@@ -12,6 +12,14 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       onGet: "date"
     "span.time": "time"
 
+    "span.entry_limit": "entry_limit"
+
+    "input#eod": "eod"
+
+    "#eod_details":
+      observe: "eod"
+      visible: true
+
     "input#pre_entry": "pre_entry"
     "#pre_entry_details":
       observe: "pre_entry"
@@ -27,7 +35,8 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       observe: "postal_entry"
       visible: true
 
-    "span.entry_limit": "entry_limit"
+    #eod details
+    "span.eod_fee": "eod_fee"
 
     #online details
     "span.online_entry_fee":

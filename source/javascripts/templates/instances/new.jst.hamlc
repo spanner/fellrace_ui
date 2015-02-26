@@ -1,6 +1,9 @@
 Date
-
-%input.date{type: "date"}
+%span.day.editable{data: {placeholder: "dd"}}
+\-
+%span.month.editable{data: {placeholder: "mm"}}
+\-
+%span.year.editable{data: {placeholder: "yyyy"}}
 
 %p.instructions
 

@@ -12,9 +12,9 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
         }
       ]
 
-  competitorBindings:
     "a.forename":
-      observe: "forename"
+      observe: ["competitor_forename","competitor_middlename"]
+      onGet: "name"
       attributes: [
         {
           observe: "id"
@@ -23,7 +23,7 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
         }
       ]
     "a.surname":
-      observe: "surname"
+      observe: "competitor_surname"
       attributes: [
         {
           observe: "id"
@@ -31,6 +31,7 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
           onGet: "competitorUrl"
         }
       ]
+    "span.cat": "category"
 
   onRender: =>
     @stickit()
@@ -44,5 +45,4 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
 class FellRace.Views.AdminEntriesTable extends Backbone.Marionette.CompositeView
   itemView: FellRace.Views.AdminEntryRow
   template: "entries/admin_table"
-  tagName: "table"
   itemViewContainer: "tbody"

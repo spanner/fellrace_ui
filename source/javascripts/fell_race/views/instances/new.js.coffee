@@ -16,6 +16,11 @@ class FellRace.Views.NewInstance extends Backbone.Marionette.ItemView
         observe: ["date","taken"]
         onGet: "instructionsClass"
       ]
+
+    "span.day": "day"        
+    "span.month": "month"
+    "span.year": "year"
+
     "a.save":
       observe: ["date","taken"]
       visible: "true_and_false"
@@ -25,34 +30,33 @@ class FellRace.Views.NewInstance extends Backbone.Marionette.ItemView
       @_dates_taken = response
 
   onRender: =>
+    @$el.find('.editable').editable()
     @stickit()
-    
-    # window.setTimeout picker, 1
 
-    # @model.on "change:day change:month change:year", () =>
-    #   day = @model.get("day")
-    #   month = @model.get("month")
-    #   year = @model.get("year")
-    #
-    #   taken = false
-    #   date_string = null
-    #   if year.length is 4
-    #     d = parseInt(day,10)
-    #     m = parseInt(month,10)
-    #     y = parseInt(year,10)
-    #     date = new Date(y,m-1,d)
-    #
-    #     if date.getFullYear() is y and date.getMonth() + 1 is m and date.getDate() is d
-    #       date_string = "#{year}-#{month}-#{day}"
-    #       if _.contains @_dates_taken, date_string
-    #         taken = true
-    #     @model.set
-    #       date: date_string
-    #       taken: taken
-    #   else
-    #     @model.set
-    #       date: null
-    #       taken: taken
+    @model.on "change:day change:month change:year", () =>
+      day = @model.get("day")
+      month = @model.get("month")
+      year = @model.get("year")
+
+      taken = false
+      date_string = null
+      if year.length is 4
+        d = parseInt(day,10)
+        m = parseInt(month,10)
+        y = parseInt(year,10)
+        date = new Date(y,m-1,d)
+
+        if date.getFullYear() is y and date.getMonth() + 1 is m and date.getDate() is d
+          date_string = "#{year}-#{month}-#{day}"
+          if _.contains @_dates_taken, date_string
+            taken = true
+        @model.set
+          date: date_string
+          taken: taken
+      else
+        @model.set
+          date: null
+          taken: taken
 
   save: =>
     @model.save {},
@@ -62,10 +66,8 @@ class FellRace.Views.NewInstance extends Backbone.Marionette.ItemView
         #TODO prompt: try again with different date
 
   cancel: =>
-    @$el.find("input.date").trigger "picker"
-    
-    # _fellrace.navigate "/admin/races/#{@model.get("race_slug")}",
-    #   replace: true
+    _fellrace.navigate "/admin/races/#{@model.get("race_slug")}",
+      replace: true
 
   true_and_false: ([date,taken]=[]) =>
     date and !taken
