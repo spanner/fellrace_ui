@@ -15,8 +15,9 @@ class FellRace.Models.Instance extends FellRace.Model
     @build()
 
   build: =>
-    @entries = new FellRace.Collections.Entries(@get("entries"),instance:@)
+    @entries = new FellRace.Collections.Entries @get("entries"), instance: @
     @performances = new FellRace.Collections.Performances @get("performances"), instance: @
+    @setUrls()
 
     @entries.on "add remove reset", () =>
       @set total_entries: @entries.length
@@ -28,7 +29,7 @@ class FellRace.Models.Instance extends FellRace.Model
     @buildWinner()
 
   setUrls: =>
-    url_stem = @url
+    url_stem = @url()
     @entries.url = "#{url_stem}/entries"
     @performances.url = "#{url_stem}/performances"
 

@@ -5,6 +5,7 @@ class FellRace.Models.PublicInstance extends Backbone.Model
   build: =>
     @entries = new FellRace.Collections.Entries(@get("entries"),instance:@)
     @performances = new FellRace.Collections.Performances @get("performances"), instance: @
+    @rootPerformances()
 
     @entries.on "add remove reset", () =>
       @set total_entries: @entries.length
@@ -12,13 +13,16 @@ class FellRace.Models.PublicInstance extends Backbone.Model
     _.each ["performances","entries"], (collection) =>
       @on "change:#{collection}", (model,data) =>
         @[collection].reset data
+        if collection is "performances"
+          @rootPerformances()
 
     @buildWinner()
 
-  setUrls: =>
-    url_stem = @url
-    @entries.url = "#{url_stem}/entries"
-    @performances.url = "#{url_stem}/performances"
+  rootPerformances: =>
+    @performances.each (p) =>
+      p.set
+        race_slug: @get("race_slug")
+        instance_name: @get("name")
 
   buildWinner: =>
     @winner = new FellRace.Models.Competitor(@get("winner"))

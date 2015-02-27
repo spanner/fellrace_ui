@@ -492,9 +492,13 @@ section#extra
         .online, .postal
           float: left
           width: 50%
-        .entries
+        table.entries
           +clear
-          
+          tr
+            .complete
+              color: $green
+            .incomplete
+              color: $red
 
     .results
       .results_preview
