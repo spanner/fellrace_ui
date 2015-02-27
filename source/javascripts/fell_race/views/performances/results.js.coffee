@@ -68,7 +68,7 @@ class FellRace.Views.NameCell extends Backbone.Marionette.ItemView
       attributes: [
         {
           name: "href"
-          observe: "competitor_id"
+          observe: ["competitor_id","race_slug","instance_name"]
           onGet: "url"
         }
       ]
@@ -88,11 +88,5 @@ class FellRace.Views.NameCell extends Backbone.Marionette.ItemView
     name = "#{name} #{middle}" if middle
     "#{name} #{last}"
 
-  url: (id) =>
-    "/runners/#{id}/#{@raceSlug()}/#{@instanceName()}"
-
-  raceSlug: =>
-    @_instance.get("race_slug")
-
-  instanceName: =>
-    @_instance.get("name")
+  url: ([id,race_slug,instance_name]=[]) =>
+    "/runners/#{id}/#{race_slug}/#{instance_name}"

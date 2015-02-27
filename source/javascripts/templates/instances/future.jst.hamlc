@@ -13,7 +13,7 @@
 
 .eod
   Entry on the day
-  %span.eod_fee
+  %span.eod_fee.currency
 
 .pre_entry
 
@@ -24,7 +24,7 @@
       #online_entry_details
         .fee
           Fee:
-          %span.online_entry_fee
+          %span.online_entry_fee.currency
         .opening
           Opening:
           %span.online_entry_opening
@@ -39,7 +39,7 @@
       #postal_entry_details
         .fee
           Fee:
-          %span.postal_entry_fee
+          %span.postal_entry_fee.currency
         .opening
           accepted from:
           %span.postal_entry_opening
@@ -52,3 +52,7 @@
           %p.postal_entry_address
 
 %table.entries
+
+.extra_content_controls.controls
+  %a.edit edit
+  %a.close X

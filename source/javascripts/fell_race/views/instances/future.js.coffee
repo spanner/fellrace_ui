@@ -6,6 +6,20 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
     "click a.enter": "enter"
 
   bindings:
+    "a.close":
+      attributes: [
+        observe: "race_slug"
+        name: "href"
+        onGet: "racePublicationUrl"
+      ]
+
+    "a.edit":
+      attributes: [
+        observe: ["race_slug","name"]
+        name: "href"
+        onGet: "adminUrl"
+      ]
+
     ".date":
       observe: "date"
       onGet: "date"
@@ -81,3 +95,9 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
 
   untrue: (val) =>
     !val
+
+  racePublicationUrl: (slug) =>
+    "/races/#{slug}"
+
+  adminUrl: ([slug,name]) =>
+    "/admin/races/#{slug}/#{name}"

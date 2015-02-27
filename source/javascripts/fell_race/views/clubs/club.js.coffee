@@ -15,10 +15,8 @@ class FellRace.Views.Club extends Backbone.Marionette.ItemView
       ]
 
   onRender: =>
-    @_competitors = new FellRace.Collections.Competitors()
-    @_competitors.url = "#{@model.url()}/competitors"
-    @_competitors.fetch()
+    competitors = @model.competitors
     @_competitors_table = new FellRace.Views.CompetitorsList
-      collection: @_competitors
+      collection: competitors
       el: @$el.find ".competitors"
     @stickit()

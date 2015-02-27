@@ -7,6 +7,13 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     'click a.delete': "delete"
 
   bindings:
+    "a.close":
+      attributes: [
+        observe: "race_slug"
+        name: "href"
+        onGet: "raceUrl"
+      ]
+
     "h3.date":
       observe: "date"
       onGet: "date"
@@ -36,24 +43,24 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       visible: true
 
     #eod details
-    "span.eod_fee": "eod_fee"
+    "span.eod_fee":
+      observe: "eod_fee"
+      onGet: "currency"
 
     #online details
     "span.online_entry_fee":
       observe: "online_entry_fee"
-      onGet: (fee) =>
-        fee?.toFixed(2)
-    "span.received_fee":
+      onGet: "currency"
+    "span.admin_charge":
       observe: "online_entry_fee"
-      onGet: "receivedFee"
+      onGet: "adminCharge"
     "span.online_entry_closing": "online_entry_closing"
     "span.online_entry_opening": "online_entry_opening"    
 
     #postal details
     "span.postal_entry_fee":
       observe: "postal_entry_fee"
-      onGet: (fee) =>
-        fee?.toFixed(2)
+      onGet: "currency"
     "span.postal_entry_closing": "postal_entry_closing"
     "span.postal_entry_opening": "postal_entry_opening"    
     "p.postal_entry_address": "postal_entry_address"
@@ -83,22 +90,24 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     e.preventDefault() if e
     @model.destroy()
 
-  receivedFee: (fee) =>
+  adminCharge: (fee) ->
     fee ?= 0
     merchant_ratio = 0.024
     merchant_fixed = 0.2
-    fr_ratio = 0.05
-    fr_fixed = 0.05
-    # if fee <= 9.37
-    #   merchant_ratio = 0.05
-    #   merchant_fixed = 0.05
+    fr_ratio = 0.025
+    fr_fixed = 0
     ratio = merchant_ratio + fr_ratio
     fixed = merchant_fixed + fr_fixed
-    received = 0
+    charge = 0
     if fee > fixed
-      received = (fee - (fee * ratio) - fixed).toFixed(4)
-    (Math.floor(received * 100) / 100).toFixed(2)
+      charge = (fee * ratio + fixed).toFixed(4)
+    @currency (Math.ceil(charge * 100) / 100)
 
-  date: (date) =>
+  date: (date) ->
     moment(date).format("D MMMM YYYY") if date
 
+  raceUrl: (slug) ->
+    "/admin/races/#{slug}"
+
+  currency: (amount) ->
+    amount?.toFixed(2)

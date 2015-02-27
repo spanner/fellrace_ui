@@ -1,6 +1,6 @@
 .user
   %a.user_icon
-    %img{src: "/assets/user.svg"}
+    %img
   .user_controls.closed
     .pointer
     %a.button.me{href: "/me"} My profile

@@ -1,6 +1,8 @@
 %thead
   %tr
-    %th forename
-    %th surname
+    %th name
     %th category
+    %th club
+    %th accept
+    %th status
 %tbody

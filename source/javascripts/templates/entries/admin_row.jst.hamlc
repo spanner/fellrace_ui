@@ -1,14 +1,13 @@
-%td.forename
-  %a.forename
-  %a.middlename
-%td.surname
-  %a.surname
+%td.name
+  %a.name
+    %span.fore
+    %span.middle
+    %span.sur
 %td.cat
   %span.cat
-%td.paid
-  %input.paid{type:"checkbox"}
+%td.club
+  %a.club
 %td.accepted
   %input.accepted{type:"checkbox"}
-%td.owner
-%td.delete
-  %a.delete
+%td.paid_or_accepted
+  %span.paid_or_accepted

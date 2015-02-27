@@ -13,7 +13,7 @@ class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
       attributes: [
         {
           name: "href"
-          observe: ["instance_name","race_slug"]
+          observe: ["competitor_id","instance_name","race_slug"]
           onGet: "instanceUrl"
         }
       ]
@@ -26,7 +26,7 @@ class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
       attributes: [
         {
           name: "href"
-          observe: "race_slug"
+          observe: ["competitor_id","race_slug"]
           onGet: "raceUrl"
         }
       ]
@@ -45,14 +45,14 @@ class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
       onGet: "secondsToString"
 
   onRender: =>
-    @_competitor = @model.competitor
     @stickit()
 
-  raceUrl: (race_slug) =>
-    "/runners/#{@_competitor.id}/#{race_slug}"
+  raceUrl: ([competitor_id,race_slug]=[]) =>
+    "/races/#{race_slug}" #TODO change when a competitor race view is completed
+    # "/runners/#{competitor_id}/#{race_slug}"
 
-  instanceUrl: ([name,race_slug]=[]) =>
-    "/runners/#{@_competitor.id}/#{race_slug}/#{name}"
+  instanceUrl: ([competitor_id,name,race_slug]=[]) =>
+    "/runners/#{competitor_id}/#{race_slug}/#{name}"
 
   totalCompetitors: (count) =>
     "/#{count}" if count
