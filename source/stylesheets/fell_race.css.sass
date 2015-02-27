@@ -19,7 +19,8 @@ body, html
 
 body
   margin: 0
-  +book
+  +light
+  line-height: 1.4
   position: absolute
   top: 0
   right: 0
@@ -297,15 +298,16 @@ $shadow: 1px 3px 8px #333
   a
     color: $dark
     +glow
-    span.title
+    .title
       display: block
       margin: 0
       font-size: 160%
+      font-weight: normal
       +light
-    span.strapline
+    .strapline
       display: block
-      margin-top: -5px
-      margin-left: 1px
+      margin: 0
+      margin: -5px 0 0 1px
       font-size: 60%
       font-weight: bold
 
@@ -423,13 +425,9 @@ $shadow: 1px 3px 8px #333
   @media (max-width:768px)
     #content
       width: 90%
-      header
-        width: 90%
   @media (min-width:768px)  
     #content
       width: 580px
-      header
-        width: 580px
 
 @media (orientation:portrait)
   #content
@@ -563,6 +561,51 @@ section#extra
   content: attr(data-placeholder)
   color: #999
 
+#user_controls
+  position: relative
+  float: right
+  margin: 10px
+  .user
+    a.user_icon
+      position: relative
+      img
+        width: 36px
+        height: 36px
+        border-radius: 24px
+        background-color: white
+    .pointer
+      border-color: transparent
+      border-bottom-color: $verypale
+      border-style: dashed dashed solid
+      border-width: 0 8px 8px
+      position: absolute
+      right: 10px
+      top: -8px
+      z-index: 1
+      height: 0
+      width: 0
+    .user_controls
+      position: absolute
+      top: 50px
+      right: 0
+      width: 120px
+      height: 100px
+      z-index: 999
+      background: $translucent
+      border: 1px solid $verypale
+      border-radius: 0 0 0 5px
+      &.closed
+        display: none
+      a.me
+        position: absolute
+        top: 10px
+        right: 10px
+        background: $blue
+      a.sign_out
+        position: absolute
+        right: 10px
+        bottom: 10px
+
 #content
   position: absolute
   bottom: 0
@@ -578,52 +621,6 @@ section#extra
     left: 0
     right: 0
     height: 60px
-    &.pinned
-      position: fixed
-      background-color: white
-    
-    #user_controls
-      position: relative
-      float: right
-      margin: 10px
-      .user
-        a.user_icon
-          position: relative
-          img
-            width: 36px
-            height: 36px
-        .pointer
-          border-color: transparent
-          border-bottom-color: $verypale
-          border-style: dashed dashed solid
-          border-width: 0 8px 8px
-          position: absolute
-          right: 10px
-          top: -8px
-          z-index: 1
-          height: 0
-          width: 0
-        .user_controls
-          position: absolute
-          top: 50px
-          right: 0
-          width: 120px
-          height: 100px
-          z-index: 999
-          background: $translucent
-          border: 1px solid $verypale
-          border-radius: 0 0 0 5px
-          &.closed
-            display: none
-          a.me
-            position: absolute
-            top: 10px
-            right: 10px
-            background: $blue
-          a.sign_out
-            position: absolute
-            right: 10px
-            bottom: 10px
 
   main
     position: absolute
@@ -667,8 +664,8 @@ section#extra
 
         .controls
           position: absolute
-          right: 5px
-          bottom: 0
+          right: 10px
+          top: 10px
           margin: 0 20px 15px 0
           font-size: 1.7em
 
@@ -676,10 +673,10 @@ section#extra
           position: absolute
           bottom: 0
           left: 0
-          margin: 0 0 15px 20px
+          margin: 0 0 15px 28px
           h2.name
             margin: 0
-            font-size: 1.5em
+            font-size: 2em
             text-shadow: 0 0 0.3em #000,0 0 0.3em #000
             color: #ffffff
 
@@ -687,27 +684,24 @@ section#extra
         position: relative
         box-sizing: border-box
         margin: 20px 0
-        padding: 0 20px
+        padding: 0 24px 20px 32px
         width: 100%
         .summary
           box-sizing: border-box
-          width: 50%
+          width: 45%
           padding-left: 10px
           float: right
           position: relative
-          margin-bottom: 10px
+          margin: 10px
           .profile
             position: relative
-            height: 50px
-            .race_profile
-              display: none
             .basic_details
-              margin-left: 5px
+              margin-top: -2em
               font-weight: bold
-              position: absolute
-              bottom: 3px
-          .next_instance
-            margin-left: 5px
+              text-align: center
+          .next_or_recent
+            margin-top: 5px
+            text-align: center
             a.date
               font-weight: bold
           .next
@@ -718,18 +712,19 @@ section#extra
         .details, .moredetails
           position: relative
           float: left
-          font-size: 85%
           box-sizing: border-box
           width: 50%
+          padding-right: 20px
           > div
             clear: left
-            margin-bottom: 10px
+            margin: 1em 0
           ul
             margin: 0
             padding: 0
             list-style: none
           h3
             margin: 0
+            margin-bottom: 0.25em
             input[type="checkbox"]
               margin-left: -20px
           p
@@ -770,6 +765,8 @@ section#extra
                   display: inline-block
                   vertical-align: top
                   text-align: center
+                  margin-right: 0.5em
+                  margin-left: -0.2em
                 &.start:before
                   content: "\025B3"
                 &.finish:before
@@ -830,6 +827,7 @@ section#extra
 
         .moredetails
           padding-left: 10px
+          margin-bottom: 3em
           a.social
             width: 16px
             overflow: hidden

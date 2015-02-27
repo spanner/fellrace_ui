@@ -131,10 +131,6 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
       observe: "past_instances"
       visible: "hasAny"
 
-    '.future_instances':
-      observe: "future_instances"
-      visible: "moreThanOne"
-
     '.records':
       observe: "records"
       visible: "hasAny"
@@ -142,6 +138,7 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     '.checkpoints':
       observe: "checkpoints"
       visible: "hasAny"
+
 
   quickSlide: ($el, isVisible, options) =>
     if (isVisible) then $el.slideDown('fast') else $el.slideUp('fast')
@@ -152,7 +149,6 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     new FellRace.Views.LinksList(collection: @model.links, el: @$el.find("ul.links")).render()
     new FellRace.Views.CheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints")).render()
     new FellRace.Views.RecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
-    new FellRace.Views.FutureInstancesList(collection: @model.future_instances, el: @$el.find("ul.future_instances")).render()
     new FellRace.Views.PastInstancesList(collection: @model.past_instances, el: @$el.find("ul.past_instances")).render()
 
   showPresence: (e) =>
@@ -171,21 +167,22 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
 
   peify: ($el, value, model, options) =>
     $(window).on "resize", =>
-      @old_peify()
+      @old_peify($el)
     checkExist = setInterval(() =>
       if $el.length
         clearInterval(checkExist)
         $el.text value
-        $el.peity("line")
-        @old_peify()
+        # $el.peity("line")
+        @old_peify($el)
     , 100)
 
-  old_peify: () =>
-    @$el.find('span.race_profile').peity "line",
+  old_peify: ($el) =>
+    holder = $el.parent()
+    $el.peity "line",
       fill: "#e2e1dd"
       stroke: "#d6d6d4"
-      width: @$el.find(".profile").width()
-      height: 50
+      width: holder.width()
+      height: 64
 
   hasAny: (array) =>
     array.length > 0

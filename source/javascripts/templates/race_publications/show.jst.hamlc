@@ -44,17 +44,13 @@
         Records
       %ul.records
 
+    .links
+      %h3 
+        Links
+      %ul.links
+
+
   .moredetails
-
-    .future_instances
-      %h3
-        Next race
-      %ul.future_instances
-
-    .past_instances
-      %h3
-        Results
-      %ul.past_instances
 
     .race_organiser
       %h3 
@@ -67,10 +63,7 @@
         %li
           %p.organiser_address
 
-    .links
-      %h3 
-        Links
-      %a.social.shr SHR
-      %a.social.fb facebook
-      %a.social.twit twitter
-      %ul.links
+    .past_instances
+      %h3
+        Results
+      %ul.past_instances
