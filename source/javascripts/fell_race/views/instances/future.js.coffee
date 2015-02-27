@@ -75,7 +75,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
     @stickit()
     entries_table = new FellRace.Views.EntriesTable
       collection: @model.entries
-      el: @$el.find(".entries")
+      el: @$el.find("table.entries")
     entries_table.render()
 
   enter: =>

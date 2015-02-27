@@ -51,7 +51,10 @@
           address:
           %p.postal_entry_address
 
-%table.entries
+.entries
+  %span.heading Current entries
+  %span.entry_count
+  %table.entries
 
 .extra_content_controls.controls
   %a.edit edit

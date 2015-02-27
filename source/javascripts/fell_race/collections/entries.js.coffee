@@ -2,12 +2,15 @@ class FellRace.Collections.Entries extends FellRace.Collection
   model: FellRace.Models.Entry
 
   paid: =>
-    # @where(paid_at: true)
+    @where(paid: true)
 
-  paidOrAccepted: =>
-    # paidOrAccepted
+  paidCount: =>
+    @paid().length
 
   pending: =>
-    # @where
-    #   paid: false
-    #   accepted: false
+    @where
+      paid: false
+      accepted: false
+
+  pendingCount: =>
+    @pending().length

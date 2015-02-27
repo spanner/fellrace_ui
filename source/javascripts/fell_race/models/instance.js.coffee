@@ -15,23 +15,33 @@ class FellRace.Models.Instance extends FellRace.Model
     @build()
 
   build: =>
-    @entries = new FellRace.Collections.Entries @get("entries"), instance: @
-    @performances = new FellRace.Collections.Performances @get("performances"), instance: @
-    @setUrls()
-
-    @entries.on "add remove reset", () =>
-      @set total_entries: @entries.length
-
-    _.each ["performances","entries"], (collection) =>
-      @on "change:#{collection}", (model,data) =>
-        @[collection].reset data
-
+    if @inFuture()
+      @buildEntries()
+    else
+      @buildPerformances()
     @buildWinner()
 
-  setUrls: =>
-    url_stem = @url()
-    @entries.url = "#{url_stem}/entries"
-    @performances.url = "#{url_stem}/performances"
+  buildEntries: =>
+    @entries = new FellRace.Collections.Entries @get("entries"), instance: @
+    @on "change:entries", (model,data) =>
+      @entries.reset data
+    @entries.url = "#{@url()}/entries"
+    @entries.on "add remove reset update_counts", () =>
+      @setEntryCounts()
+
+  setEntryCounts: =>
+    total = @entries.length
+    pending = @entries.pendingCount()
+    @set
+      total_count: total
+      completed_count: total - pending
+      pending_count: pending
+
+  buildPerformances: =>
+    @performances = new FellRace.Collections.Performances @get("performances"), instance: @
+    @on "change:performances", (model,data) =>
+      @performances.reset data
+    @performances.url = "#{@url()}/performances"
 
   buildWinner: =>
     @winner = new FellRace.Models.Competitor(@get("winner"))
