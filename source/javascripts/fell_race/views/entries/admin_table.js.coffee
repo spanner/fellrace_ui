@@ -17,7 +17,7 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
       onGet: "name"
       attributes: [
         {
-          observe: "id"
+          observe: "competitor_id"
           name: "href"
           onGet: "competitorUrl"
         }
@@ -26,21 +26,30 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
       observe: "competitor_surname"
       attributes: [
         {
-          observe: "id"
+          observe: "competitor_id"
           name: "href"
           onGet: "competitorUrl"
         }
       ]
     "span.cat": "category"
 
+    "input.paid": "paid"
+
+    "input.accepted":
+      observe: "accepted"
+      attributes: [
+        observe: "paid"
+        name: "disabled"
+      ]
+
   onRender: =>
     @stickit()
-    @stickit(@model.competitor, @competitorBindings)
 
   competitorUrl: (id) =>
     "/runners/#{id}"
 
-
+  name: ([fore,middle]=[]) ->
+    if middle then "#{fore} #{middle}" else fore
 
 class FellRace.Views.AdminEntriesTable extends Backbone.Marionette.CompositeView
   itemView: FellRace.Views.AdminEntryRow

@@ -6,9 +6,6 @@
 %td.cat
   %span.cat
 %td.paid
-  %input.paid{type:"checkbox"}
+  %input.paid{type:"checkbox",disabled:true}
 %td.accepted
   %input.accepted{type:"checkbox"}
-%td.owner
-%td.delete
-  %a.delete

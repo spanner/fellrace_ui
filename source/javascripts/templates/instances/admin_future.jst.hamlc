@@ -5,7 +5,7 @@
 
 .limit
   Entry limit
-  %input.entry_limit{type: "number"}
+  %span.entry_limit.editable{data: {placeholder: "e.g. 500"}}
 
 .eod
   %label.heading{for: "eod"} Entry on the day?
@@ -14,7 +14,7 @@
   #eod_details
     .fee
       Fee
-      %span.eod_fee.editable{data: {placeholder: "0.00"}}
+      %span.eod_fee.currency.editable{data: {placeholder: "0.00"}}
 
 .pre_entry
   %label.heading{for: "pre_entry"} Pre entry?
@@ -29,10 +29,10 @@
       #online_entry_details
         .fee
           Fee
-          %span.online_entry_fee.editable{data: {placeholder: "0.00"}}
+          %span.online_entry_fee.currency.editable{data: {placeholder: "0.00"}}
           %span.info.fee_details
-            You will receive
-            %span.received_fee
+            We will take
+            %span.admin_charge.currency
             from each entry.
         .opening
           Opening
@@ -48,7 +48,7 @@
       #postal_entry_details
         .fee
           Fee
-          %span.postal_entry_fee.editable{data: {placeholder: "0.00"}}
+          %span.postal_entry_fee.currency.editable{data: {placeholder: "0.00"}}
         .opening
           Opening
           %span.postal_entry_opening.editable{data: {placeholder: "dd-mm-yyyy"}}
@@ -60,3 +60,6 @@
           Postal Entry address
           %p.postal_entry_address.editable
   %table.entries
+
+.extra_content_controls.controls
+  %a.close X

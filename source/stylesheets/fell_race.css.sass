@@ -7,7 +7,7 @@ $translucent: rgba(255,255,255,0.92)
 
 // -- temporary -- //
 
-span.online_entry_fee, span.received_fee, span.postal_entry_fee, span.eod_fee
+span.currency
   &:before
     content: "£"
 
@@ -475,6 +475,10 @@ section#extra
         &.notready
           color: $red
     &.future
+      .extra_content_controls
+        position: absolute
+        top: 10px
+        right: 10px
       .heading
         font-weight: bold
       .eod, .pre_entry
@@ -1024,7 +1028,7 @@ a.file_name
   .enter
     +button($rubine)
     overflow: hidden
-  .cancel
+  .cancel, .close
     +button($mid)
   .settings
     +button($mid)

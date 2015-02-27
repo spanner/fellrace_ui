@@ -1,6 +1,9 @@
-%td.forename
-  %a.forename
-%td.surname
-  %a.surname
+%td.name
+  %a.name
+    %span.fore
+    %span.middle
+    %span.sur
 %td.cat
   %span.cat
+%td.club
+  %a.club
