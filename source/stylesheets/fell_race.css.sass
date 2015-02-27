@@ -482,18 +482,22 @@ section#extra
       .heading
         font-weight: bold
       .eod, .pre_entry
-        margin-top: 20px
+        margin-top: 10px
       .eod
         #eod_details
-          padding: 20px
+          padding: 10px
       .pre_entry
         #pre_entry_details
-          padding: 20px
+          padding: 10px
+          overflow: hidden
+          #online_entry_details, #postal_entry_details
+            padding: 10px
         .online, .postal
           float: left
           width: 50%
-        table.entries
+        .entries
           +clear
+        table.entries
           tr
             .complete
               color: $green
@@ -502,7 +506,6 @@ section#extra
 
     .results
       .results_preview
-        // max-height: 250px
         overflow: auto
       label.pick
         +button
@@ -634,7 +637,7 @@ section#extra
           position: relative
           width: 100%
           max-height: 360px
-          min-height: 100px
+          min-height: 70px
           overflow: hidden
           img
             opacity: 0.95
@@ -657,10 +660,9 @@ section#extra
           h2.name
             margin: 0
             font-size: 1.5em
-            // &:not(.editable)
-            // text-shadow: 0 0 0.1em #ffffff,0 0 0.1em #ffffff
-            text-shadow: 0 0 0.3em #000,0 0 0.3em #000
-            color: #ffffff
+            &.on_picture
+              text-shadow: 0 0 0.3em #000,0 0 0.3em #000
+              color: #ffffff
 
       .race_body
         position: relative
