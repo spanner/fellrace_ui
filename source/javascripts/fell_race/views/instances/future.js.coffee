@@ -68,8 +68,8 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
     "span.entry_count": "entry_count"
 
     ".entries":
-      observe: "entries"
-      visible: "any"
+      observe: ["entry_count","pre_entry"]
+      visible: "entriesAndPreEntry"
 
   onRender: =>
     @stickit()
@@ -90,8 +90,8 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
   date: (date) =>
     moment(date).format("D MMMM YYYY") if date
 
-  any: (array) =>
-    array.length > 0
+  entriesAndPreEntry: ([entry_count,pre_entry]) =>
+    pre_entry and entry_count > 0
 
   untrue: (val) =>
     !val

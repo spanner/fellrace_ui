@@ -59,6 +59,7 @@
         .address
           Postal Entry address
           %p.postal_entry_address.editable
+
   .entries
     %span.heading Current entries
     %br
