@@ -18,15 +18,30 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
         onGet: ([race_slug,name]=[]) =>
           "/races/#{race_slug}/#{name}"
       ]
+    "a.file_icon":
+      observe: "file_name"
+      attributes: [
+        name: "href"
+        observe: "file"
+      ,
+        name: "class"
+        observe: "file_name"
+        onGet: "fileClass"
+      ]
+    "p.download":
+      observe: "file_name"
+      visible: "notCSV"
 
   initialize: ({competitor:competitor}={}) ->
     @_performances = @model.performances
-    if competitor
-      @_performances.findWhere(competitor_id: competitor.id)?.set current: true
+    if @_performances.length
+      if competitor
+        @_performances.findWhere(competitor_id: competitor.id)?.set current: true
 
   onRender: =>
     @stickit()
-    
+
+
     @_checkpoints = new FellRace.Collections.Checkpoints @model.get("checkpoints"), instance: @model
 
     splits = @model.has("checkpoints") and @model.get("checkpoints").length > 0
@@ -105,3 +120,14 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
     #     model: @model
     #     collection: @_performances
     #   chart.render()
+
+
+  fileUrl: (path) =>
+    "http://api.fr.dev#{path}"
+  
+  fileClass: (filename) =>
+    if filename
+      filename.split('.').pop()
+
+  notCSV: (filename) =>
+    @fileClass(filename) isnt "csv"

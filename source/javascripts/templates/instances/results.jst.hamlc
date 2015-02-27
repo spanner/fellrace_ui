@@ -1,6 +1,10 @@
 %h2
   %a.race_name
-  :
-  %a.instance_name
+  %span.instance_name
+
+#results_file
+
+  %p.download
+    %a.file_icon
 
 %table#results_table
