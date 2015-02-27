@@ -1,5 +1,10 @@
 class FellRace.Collections.PublicInstances extends FellRace.Collection
   model: FellRace.Models.PublicInstance
+
+  initialize: ->
+    @on "reset", =>
+      @sort()
+
   comparator: (m) =>
     -m.getDate()
 

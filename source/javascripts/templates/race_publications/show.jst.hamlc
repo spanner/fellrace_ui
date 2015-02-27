@@ -48,7 +48,7 @@
 
     .future_instances
       %h3
-        Future Instances
+        Next race
       %ul.future_instances
 
     .past_instances

@@ -11,6 +11,7 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
     view = new FellRace.Views.RacePublication
       model: @model
     _fellrace.mainRegion.show view
+    $.r = @model
 
   instance: (instance_name,path) =>
     @show()

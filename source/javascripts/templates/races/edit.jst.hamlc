@@ -77,7 +77,7 @@
 
     .future_instances
       %h3
-        Future instances
+        Next race
         %a.add.add_instance
           add
       %ul.future_instances

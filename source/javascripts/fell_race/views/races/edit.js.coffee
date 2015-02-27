@@ -107,6 +107,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     new FellRace.Views.AdminFutureInstancesList(collection: @model.future_instances, el: @$el.find("ul.future_instances")).render()
     new FellRace.Views.AdminPastInstancesList(collection: @model.past_instances, el: @$el.find("ul.past_instances")).render()
 
+
   ## Flash a dom element to show that it has changed
 
   highlight: ($el, val, options) =>
