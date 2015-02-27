@@ -72,6 +72,10 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       observe: "pre_entry"
       visible: true
 
+    "span.total_count": "total_count"
+    "span.completed_count": "completed_count"
+    "span.pending_count": "pending_count"
+
   onRender: () =>
     @$el.find('.editable').editable()
     @stickit()
@@ -83,7 +87,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
     entries_table = new FellRace.Views.AdminEntriesTable
       collection: @model.entries
-      el: @$el.find(".entries")
+      el: @$el.find("table.entries")
     entries_table.render()
 
   delete: (e) =>

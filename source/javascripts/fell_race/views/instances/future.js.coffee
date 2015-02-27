@@ -68,14 +68,14 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
     "span.entry_count": "entry_count"
 
     ".entries":
-      observe: "entries"
-      visible: "any"
+      observe: ["entry_count","pre_entry"]
+      visible: "entriesAndPreEntry"
 
   onRender: =>
     @stickit()
     entries_table = new FellRace.Views.EntriesTable
       collection: @model.entries
-      el: @$el.find(".entries")
+      el: @$el.find("table.entries")
     entries_table.render()
 
   enter: =>
@@ -90,8 +90,8 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
   date: (date) =>
     moment(date).format("D MMMM YYYY") if date
 
-  any: (array) =>
-    array.length > 0
+  entriesAndPreEntry: ([entry_count,pre_entry]) =>
+    pre_entry and entry_count > 0
 
   untrue: (val) =>
     !val

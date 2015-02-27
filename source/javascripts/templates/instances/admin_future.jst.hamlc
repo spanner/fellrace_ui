@@ -59,7 +59,19 @@
         .address
           Postal Entry address
           %p.postal_entry_address.editable
-  %table.entries
+
+  .entries
+    %span.heading Current entries
+    %br
+    Total:
+    %span.total_count
+    %br
+    Completed:
+    %span.completed_count
+    %br
+    Pending:
+    %span.pending_count
+    %table.entries
 
 .extra_content_controls.controls
   %a.close X
