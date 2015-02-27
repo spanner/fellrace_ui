@@ -63,6 +63,12 @@ a.set
   white-space: nowrap
   +icon_link("set.png")
 
+a.close
+  +icon_link("close.png")
+  display: block
+  width: 32px
+  height: 32px
+
 form.bubble
   width: 320px
   input.title, textarea, select
@@ -456,7 +462,13 @@ section#extra
   left: 580px
   right: 0
   overflow: auto
-  padding: 15px 50px
+  padding: 20px 50px
+  h2
+    margin: 0
+  a.close
+    position: absolute
+    top: 20px
+    right: 20px
   
   #results_file
     position: relative
@@ -565,6 +577,7 @@ section#extra
   position: relative
   float: right
   margin: 10px
+  display: none
   .user
     a.user_icon
       position: relative
@@ -619,7 +632,6 @@ section#extra
     position: absolute
     top: 0
     left: 0
-    right: 0
     height: 60px
 
   main
@@ -668,6 +680,42 @@ section#extra
           top: 10px
           margin: 0 20px 15px 0
           font-size: 1.7em
+
+        .social
+          position: absolute
+          right: 10px
+          bottom: 10px
+          a.external
+            display: inline-block
+            overflow: hidden
+            width: 26px
+            height: 26px
+            margin-right: 5px
+            text-indent: 50px
+            line-height: 50px
+            background:
+              position: 0 0
+              image: image-url('furniture/masthead/twitface.png')
+            &.twitter
+              &:hover
+                background-position: -32px 0
+            &.facebook
+              background-position: 0 -48px
+              &:hover
+                background-position: -32px -48px
+            &.google
+              background-position: 0 -96px
+              &:hover
+                background-position: -32px -96px
+            &.pinterest
+              background-position: 0 -144px
+              &:hover
+                background-position: -32px -144px
+            &.web
+              background-position: 0 -192px
+              &:hover
+                background-position: -32px -192px
+          
 
         .title
           position: absolute
@@ -933,54 +981,7 @@ section#extra
               color: $pale
               float: right
 
-a.social, span.social
-  display: inline-block
-  vertical-align: top
-  height: 16px
-  text-indent: 20px
-  background:
-    color: transparent
-    image: image-url("site_icons.png")
-    repeat: no-repeat
 
-.organiser_address, .organiser_email, .organiser_phone, .organiser_name
-  margin-bottom: 5px
-
-span.social
-  &.fb
-    background-position: 0 0
-  &.twit
-    background-position: 0 -96px
-  &.fra
-    background-position: 0 -192px
-  &.shr
-    background-position: 0 -288px
-
-a.social, span.social.present
-  &.fb
-    background-position: 0 -32px
-    color: #3b5998
-    &:hover
-      background-position: 0 -64px
-      color: $hover
-  &.twit
-    background-position: 0 -128px
-    color: #0084b4
-    &:hover
-      background-position: 0 -160px
-      color: $hover
-  &.fra
-    background-position: 0 -224px
-    color: #a1a129
-    &:hover
-      background-position: 0 -256px
-      color: $hover
-  &.shr
-    background-position: 0 -320px
-    color: #253d8f
-    &:hover
-      background-position: 0 -352px
-      color: $hover
 
 a.file_icon
   display: inline-block

@@ -18,7 +18,7 @@
         km /
         %span.climb.editable{:data => {:placeholder => "climb"}}>
         m
-    .next_instance
+    .next_or_recent
 
   .description.editable{data: {placeholder: "Race description"}}
   .details

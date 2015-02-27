@@ -4,6 +4,7 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
   bindings:
     ".race_name":
       observe: "race_name"
+    "a.race_name, a.close":
       attributes: [
         name: "href"
         observe: "race_slug"
@@ -40,7 +41,7 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
 
   onRender: =>
     @stickit()
-
+    
 
     @_checkpoints = new FellRace.Collections.Checkpoints @model.get("checkpoints"), instance: @model
 

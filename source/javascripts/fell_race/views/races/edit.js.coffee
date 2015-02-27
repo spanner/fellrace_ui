@@ -97,8 +97,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     @$el.find('.editable').editable()
     @stickit()
 
-    new FellRace.Views.NextRaceInstance(model:@model,el:@$el.find(".next_instance")).render()
-
+    new FellRace.Views.NextRaceInstance(model:@model,el:@$el.find(".next_or_recent")).render()
     new FellRace.Views.Picture(model: @model, el: @$el.find(".picture")).render()
     new FellRace.Views.AdminAttachmentsList(collection: @model.attachments, el: @$el.find("ul.attachments")).render()
     new FellRace.Views.AdminLinksList(collection: @model.links, el: @$el.find("ul.links")).render()
@@ -106,7 +105,6 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     new FellRace.Views.AdminRecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
     new FellRace.Views.AdminFutureInstancesList(collection: @model.future_instances, el: @$el.find("ul.future_instances")).render()
     new FellRace.Views.AdminPastInstancesList(collection: @model.past_instances, el: @$el.find("ul.past_instances")).render()
-
 
   ## Flash a dom element to show that it has changed
 
