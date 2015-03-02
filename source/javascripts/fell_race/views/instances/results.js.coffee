@@ -25,89 +25,54 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
         onGet: "fileClass"
       ]
 
+    "table#results_table":
+      attributes: [
+        observe: "show_splits"
+        name: "class"
+        onGet: (show) =>
+          "simple" unless show
+      ]
 
-  initialize: ({competitor:competitor}={}) ->
-    @_performances = @model.performances
-    if @_performances.length
-      if competitor
-        @_performances.findWhere(competitor_id: competitor.id)?.set current: true
+    "a.show_splits":
+      observe: ["checkpoints","show_splits"]
+      visible: ([cps,show]=[]) =>
+        cps and cps.length and !show
+      attributes: [
+        observe: ["race_slug","name"]
+        name: "href"
+        onGet: ([slug,name]=[]) =>
+          "/races/#{slug}/#{name}/splits"
+      ]
+
+    "a.simple":
+      observe: "show_splits"
+      visible: true
+      attributes: [
+        observe: ["race_slug","name"]
+        name: "href"
+        onGet: ([slug,name]=[]) =>
+          "/races/#{slug}/#{name}"
+      ]
+
+  initialize: ({competitor:@_competitor}={}) ->
+    #
 
   onRender: =>
     @stickit()
-    
-
-    @_checkpoints = new FellRace.Collections.Checkpoints @model.get("checkpoints"), instance: @model
-
-    splits = @model.has("checkpoints") and @model.get("checkpoints").length > 0
-
-    grid_columns = [
-      name: 'position'
-      sortable: true
-      cell: "string"
-      editable: false
-    ,
-      name: 'name'
-      sortable: true
-      cell: FellRace.Views.NameCell
-      editable: false
-    ,
-      name: 'club'
-      sortable: true
-      cell: "string"
-      editable: false
-    ,
-      name: 'cat'
-      sortable: true
-      cell: "string"
-      editable: false
-    ,
-      name: 'time'
-      sortable: true
-      cell: FellRace.Views.TimeCell
-      editable: false
-      sortValue: (model, sortkey) =>
-        time = model.get sortkey
-        if time is 0 or time is null then 99999999 else time
-    ]
-
-    select_col = {
-      name: ""
-      cell: "select-row"
-      headerCell: "select-all"
-    }
-
-    if splits
-      grid_columns.splice(0,0,select_col)
-    else
-      $('.chart_select').hide()
-
-    checkpoints = _.without(@_checkpoints.pluck('name'), 'Start')
-
-    _.each checkpoints, (name) ->
-      grid_columns.push
-        name: name
-        sortable: true
-        cell: Backgrid.SplitCell
-        sortValue: (model, sortkey) =>
-          if model.has sortkey
-            model.get(sortkey).split_position
-          else
-            99999999
-        editable: false
+    @_performances = @model.performances
+    if @_performances.length
+      if @_competitor
+        @_performances.findWhere(competitor_id: @_competitor.id)?.set current: true
 
     # Results.search.show new Results.Views.PerformancesFilter
     #   collection: @_performances
 
     table = new FellRace.Views.ResultsTable
       collection: @_performances
-      columns: grid_columns
-      row: FellRace.Views.ResultRow
+      model: @model
       el: @$el.find("#results_table")
 
     table.render()
-
-
-      # row: FellRace.Views.ResultRow
 
     # if d3? and splits
     #   chart = new FellRace.Views.PerformancesChart

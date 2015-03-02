@@ -1,0 +1,12 @@
+%td.pos
+  %span.pos
+%td.name
+  %span.name
+  %a.name
+%td.club
+  %span.club
+  %a.club
+%td.cat
+  %span.cat
+%td.time
+  %span.time

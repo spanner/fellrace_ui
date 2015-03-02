@@ -8,4 +8,7 @@
   %p.download
     %a.file_icon
 
+%a.show_splits splits
+%a.simple simple
+
 %table#results_table

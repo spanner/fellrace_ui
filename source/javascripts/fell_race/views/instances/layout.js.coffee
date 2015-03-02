@@ -1,25 +1,21 @@
 class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
   routes: () =>
-    "(/)": @results
-    "entry(/)": @entry
+    "(/)": @default
+    "splits(/)": @splits
 
-  initialize: ->
-    @model.fetch()
-    super
-
-  results: =>
-    view = new FellRace.Views.InstanceResults
-      model: @model
+  default: =>
+    if @model.inFuture()
+      view = new FellRace.Views.FutureInstance
+        model: @model
+    else
+      @model.set show_splits: false
+      view = new FellRace.Views.InstanceResults
+        model: @model
     _fellrace.extraContentRegion.show view
 
-  edit: =>
-    #TODO check for permission
-    # if not permitted, redirect and warn
-    # else show edit view
-    # view = new FellRace.Views.CompetitorEdit
-    #   el: @$el.find "#competitor"
-
-  entry: (path) =>    
-    view = new FellRace.Views.InstanceEntry
+  splits: (path) =>
+    @model.set show_splits: true
+    _fellrace.content.addClass "collapsed"
+    view = new FellRace.Views.InstanceResults
       model: @model
     _fellrace.extraContentRegion.show view

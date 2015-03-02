@@ -1,17 +1,49 @@
-class FellRace.Views.ResultRow extends Backgrid.Row
+class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
+  template: "performances/result_row"
+  tagName: "tr"
   bindings:
+
     ":el":
       attributes: [
-        observe: "current"
+        observe: "cat"
         name: "class"
-        onGet: (current) =>
-          "current" if current
+        onGet: (cat) =>
+          "female" if cat?.match /[lfw]/i
       ]
 
-  initialize: ->
-    super
-    if @model.get("cat")?.match /[lfw]/i
-      @$el.addClass "female"
+    "span.pos": "position"
+    "span.club": "club"
+    "span.cat": "cat"
+
+    "span.name":
+      observe: ["competitor_id","forename","middlename","surname"]
+      onGet: "perfFullName"
+
+    "a.name":
+      observe: ["competitor_id","competitor_forename","competitor_middlename","competitor_surname"]
+      onGet: "compFullName"
+      attributes: [
+        {
+          name: "href"
+          observe: ["competitor_id","race_slug","instance_name"]
+          onGet: "compUrl"
+        },
+        {
+          observe: "current"
+          name: "class"
+          onGet: (current) =>
+            "current" if current
+        }
+      ]
+
+    "span.time":
+      observe: "time"
+      onGet: "time"
+
+  time: (seconds) =>
+    _fellrace.secondsToString seconds
+
+  initialize: ({checkpoints:@_checkpoints}) ->
     @$el.on "mouseenter", =>
       @model.trigger "hover"
     @$el.on "mouseleave", =>
@@ -25,57 +57,12 @@ class FellRace.Views.ResultRow extends Backgrid.Row
   unhighlight: =>
     @$el.removeClass "hover"
 
-  render: =>
-    super
-    @stickit()
-    @$el.find(".select-row-cell").css
-      background: @model.colour
-    @
-
-class FellRace.Views.ResultsTable extends Backgrid.Grid
-  tagName: 'table'
-  className: 'backgrid'
-
-class FellRace.Views.TimeCell extends Backbone.Marionette.ItemView
-  template: "performances/time_cell"
-  className: "time"
-  tagName: "td"
-
-  bindings:
-    ".time":
-      observe: "time"
-      onGet: "time"
-
   onRender: =>
     @stickit()
-
-  time: (seconds) =>
-    _fellrace.secondsToString seconds
-
-class FellRace.Views.NameCell extends Backbone.Marionette.ItemView
-  template: "performances/name_cell"
-  className: "runner"
-  tagName: "td"
-
-  bindings:
-    "span.name":
-      observe: ["competitor_id","forename","middlename","surname"]
-      onGet: "perfFullName"
-
-    "a.name":
-      observe: ["competitor_id","competitor_forename","competitor_middlename","competitor_surname"]
-      onGet: "compFullName"
-      attributes: [
-        {
-          name: "href"
-          observe: ["competitor_id","race_slug","instance_name"]
-          onGet: "url"
-        }
-      ]
-
-  onRender: =>
-    @_instance = @model.instance
-    @stickit()
+    _.each @_checkpoints, (cp) =>
+      view = new FellRace.Views.CheckpointCell
+        model: new Backbone.Model @model.get("checkpoints")?[cp]
+      @$el.append view.render().$el
 
   compFullName: ([id,first,middle,last]=[]) =>
     @fullName([first,middle,last]) if id
@@ -88,5 +75,41 @@ class FellRace.Views.NameCell extends Backbone.Marionette.ItemView
     name = "#{name} #{middle}" if middle
     "#{name} #{last}"
 
-  url: ([id,race_slug,instance_name]=[]) =>
+  compUrl: ([id,race_slug,instance_name]=[]) =>
     "/runners/#{id}/#{race_slug}/#{instance_name}"
+
+  
+
+class FellRace.Views.ResultsTable extends Backbone.Marionette.CompositeView
+  template: "performances/results_table"
+  itemView: FellRace.Views.ResultRow
+  itemViewContainer: "tbody"
+
+  itemViewOptions: =>
+    checkpoints: @_checkpoints
+
+  initialize: ->
+    @_checkpoints = _.without(@model.checkpoints.pluck('name'), 'Start')
+
+  onRender: =>
+    _.each @_checkpoints, (cp) =>
+      @$el.find("thead tr").append "<th class='checkpoint'>#{cp}</th>"
+
+class FellRace.Views.CheckpointCell extends Backbone.Marionette.ItemView
+  template: "performances/checkpoint_cell"
+  tagName: "td"
+  className: "checkpoint"
+
+  bindings:
+    "span.elapsed":
+      observe: ["elapsed_time","position"]
+      onGet: "timeAndPos"
+    "span.split":
+      observe: ["interval","split_position"]
+      onGet: "timeAndPos"
+
+  timeAndPos: ([time,pos]=[]) ->
+    "#{_fellrace.secondsToString(time)} (#{pos})" if pos
+
+  onRender: =>
+    @stickit()

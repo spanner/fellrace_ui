@@ -920,6 +920,9 @@ section#extra
   #results_table
     margin-top: 20px
     margin-left: -6px
+    &.simple
+      td.checkpoint, th.checkpoint
+        display: none
     thead
       th
         text-align: left
@@ -928,9 +931,6 @@ section#extra
     tbody
       overflow: auto
       tr
-        &.current
-          font-weight: bold
-          +glow($brightgreen) //TODO de-uglify
         &:hover
           background: rgba(189,189,189,0.25)
         &.female
@@ -941,15 +941,20 @@ section#extra
         vertical-align: top
         text-align: left
         padding: 4px 10px
+        a.name
+          &.current
+            font-weight: bold
+            +glow($brightgreen) //TODO de-uglify
         &.time
           font-weight: bold
         &.checkpoint
           span
+            white-space: nowrap
+            display: block
             &.elapsed
-              display: block
+              font-size: 0.85em
             &.split
-              display: block
-              font-size: 0.75em
+              font-size: 0.7em
               color: $pale
 
 #content.collapsed
