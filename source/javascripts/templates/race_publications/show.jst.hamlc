@@ -22,9 +22,6 @@
         %span.climb
         m
     .next_or_recent
-      %span.date
-      at
-      %span.time
 
   .description
   .details

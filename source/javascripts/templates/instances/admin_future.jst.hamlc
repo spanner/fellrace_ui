@@ -1,76 +1,83 @@
 %a.close
 
+%h2
+  %a.race_name
+  %span.instance_name.editable
+
 .basic_details
-  %h3.date
-  Start time
-  %span.time.editable{data: {placeholder: "hh:mm"}}
+  %h3
+    %span.calendar
+    %span.date.editable{data: {placeholder: "dd-mm-yyyy"}}
+    %br
+    %span.clock
+    %span.time.editable{data: {placeholder: "hh:mm"}}
 
-.limit
-  Entry limit
-  %span.entry_limit.editable{data: {placeholder: "e.g. 500"}}
+  %p.limit
+    Entry limit
+    %span.entry_limit.editable{data: {placeholder: "e.g. 500"}}
 
-.eod
-  %label.heading{for: "eod"} Entry on the day?
-  %input#eod{type: "checkbox"}
+  .eod
+    %p
+      %input#eod{type: "checkbox"}
+      %label.heading{for: "eod"} Entry on the day?
 
-  #eod_details
-    .fee
-      Fee
+  .eod_details
+    %p.fee
+      Fee on the day
       %span.eod_fee.currency.editable{data: {placeholder: "0.00"}}
 
-.pre_entry
-  %label.heading{for: "pre_entry"} Pre entry?
-  %input#pre_entry{type: "checkbox"}
-
-  #pre_entry_details
-
-    .online
-      %label.heading{for: "online_entry"} Online entry?
+  .online
+    %p
       %input#online_entry{type: "checkbox"}
+      %label.heading{for: "online_entry"} Online entry?
 
-      #online_entry_details
-        .fee
-          Fee
-          %span.online_entry_fee.currency.editable{data: {placeholder: "0.00"}}
-          %span.info.fee_details
-            We will take
-            %span.admin_charge.currency
-            from each entry.
-        .opening
-          Opening
-          %span.online_entry_opening.editable{data: {placeholder: "dd-mm-yyyy"}}
-        .closing
-          Closing
-          %span.online_entry_closing.editable{data: {placeholder: "dd-mm-yyyy"}}
+  .online_details
+    %p.fee
+      Online entry fee
+      %span.online_entry_fee.currency.editable{data: {placeholder: "0.00"}}
+      %span.info.fee_details
+        We will take
+        %span.admin_charge.currency
+        from each entry.
+    %p.dates
+      Opening
+      %span.online_entry_opening.editable{data: {placeholder: "dd-mm-yyyy"}}
+      Closing
+      %span.note
+        at the start of the day
+      %span.online_entry_closing.editable{data: {placeholder: "dd-mm-yyyy"}}
+      %span.note
+        at the end of the day
 
-    .postal
-      %label.heading{for: "postal_entry"} Postal entry?
-      %input#postal_entry{type: "checkbox"}
+  .postal
+    %input#postal_entry{type: "checkbox"}
+    %label.heading{for: "postal_entry"} Postal entry?
 
-      #postal_entry_details
-        .fee
-          Fee
-          %span.postal_entry_fee.currency.editable{data: {placeholder: "0.00"}}
-        .opening
-          Opening
-          %span.postal_entry_opening.editable{data: {placeholder: "dd-mm-yyyy"}}
-        .closing
-          Closing
-          %span.postal_entry_closing.editable{data: {placeholder: "dd-mm-yyyy"}}
-        .entry_form
-        .address
-          Postal Entry address
-          %p.postal_entry_address.editable
+  .postal_details
+    %p.fee
+      Postal entry fee
+      %span.postal_entry_fee.currency.editable{data: {placeholder: "0.00"}}
+    %p.dates
+      Opening
+      %span.postal_entry_opening.editable{data: {placeholder: "dd-mm-yyyy"}}
+      Closing
+      %span.postal_entry_closing.editable{data: {placeholder: "dd-mm-yyyy"}}
 
-  .entries
-    %span.heading Current entries
-    %br
-    Total:
-    %span.total_count
-    %br
-    Completed:
-    %span.completed_count
-    %br
-    Pending:
-    %span.pending_count
-    %table.entries
+    %p.entry_form
+
+    %p.address
+      Postal Entry address
+      %span.postal_entry_address.editable
+
+.entries
+  %span.heading Current entries
+  %br
+  Total:
+  %span.total_count
+  %br
+  Completed:
+  %span.completed_count
+  %br
+  Pending:
+  %span.pending_count
+  %table.entries

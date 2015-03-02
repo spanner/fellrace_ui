@@ -2,17 +2,18 @@ class FellRace.Views.NextRaceInstance extends Backbone.Marionette.ItemView
   template: "races/next_instance"
 
   bindings:
-    "a.date":
-      observe: "date"
-      onGet: "date"
+    "a":
       attributes: [
         name: "href"
-        observe: ["race_slug","name"]
+        observe: ["race_slug", "name"]
         onGet: "url"
       ]
+    "a.date":
+      observe: "date"
+      onGet: "onDate"
     ".time":
       observe: "time"
-      onGet: "time"
+      onGet: "atTime"
 
   onRender: =>
     @stickit @getInstance(), @bindings
@@ -25,12 +26,11 @@ class FellRace.Views.NextRaceInstance extends Backbone.Marionette.ItemView
   getInstance: =>
     @model.nextOrRecentInstance()
 
-  time: (time) =>
-    console.debug "time", time
+  atTime: (time) =>
     "at #{time}" if time and time isnt ""
 
-  url: ([race_slug,name]=[]) =>
+  url: ([race_slug, name]=[]) =>
     "/admin/races/#{race_slug}/#{name}"
 
-  date: (date) =>
+  onDate: (date) =>
     moment(date).format("D MMMM YYYY") if date

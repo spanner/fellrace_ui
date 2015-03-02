@@ -68,6 +68,15 @@ a.close
   width: 32px
   height: 32px
 
+a.config
+  +icon_link("linksprite.png", -96px)
+  color: $pale
+  +hover
+
+a.enter_online
+  +icon_link("linksprite.png", -288px)
+  font-weight: bold
+
 form.bubble
   width: 320px
   input.title, textarea, select
@@ -870,7 +879,9 @@ section#extra
           color: $red
     &.future
       .heading
-        font-weight: bold
+        +light
+        font-weight: normal
+        font-size: 1.5em
       .eod, .pre_entry
         margin-top: 20px
       .eod
@@ -882,7 +893,9 @@ section#extra
         .online, .postal
           float: left
           width: 50%
-        table.entries
+      .entries
+        margin-top: 3em
+        table
           +clear
           tr
             .complete

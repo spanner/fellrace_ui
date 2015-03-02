@@ -61,3 +61,8 @@ class FellRace.Models.RacePublication extends Backbone.Model
   fetchPermissions: =>
     $.getJSON "#{@url()}/permissions", (data) =>
       @set data
+
+  nextOrRecentInstance: =>
+    instance = @future_instances.next()
+    instance ?= @past_instances.mostRecent()
+    instance

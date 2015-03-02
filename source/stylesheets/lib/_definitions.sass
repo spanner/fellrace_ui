@@ -130,7 +130,7 @@ $error: #cc3333
   &.waiting
     +opacity(0.25)
 
-=icon_link($url)
+=icon_link($url, $offset: 0, $hover_offset: -32px)
   display: inline-block
   text-indent: 18px
   margin-top: 0
@@ -138,11 +138,11 @@ $error: #cc3333
   min-height: 16px
   background:
     color: transparent
-    position: 0 0
+    position: 0 $offset
     repeat: no-repeat
     image: image-url($url)
   &:hover
-    background-position: 0 -32px
+    background-position: 0 $offset + $hover_offset
   &.minimal
     width: 16px
     height: 16px

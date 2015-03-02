@@ -6,7 +6,16 @@ class FellRace.Collections.PublicInstances extends FellRace.Collection
 class FellRace.Collections.PublicFutureInstances extends FellRace.Collections.PublicInstances
   comparator: (m) ->
     m.getDate()
+  
+  next: =>
+    @sort()
+    @filter((instance)->instance.getDate())[0]
+
 
 class FellRace.Collections.PublicPastInstances extends FellRace.Collections.PublicInstances
   comparator: (m) ->
     -m.getDate()
+
+  mostRecent: =>
+    @sort()
+    @filter((instance)->instance.getDate())[0]

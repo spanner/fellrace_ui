@@ -1,7 +1,13 @@
 %a.close.big
 
+%h2
+  %a.race_name
+  %span.instance_name
+
 .basic_details
+
   %h3.date
+
   Start time
   %span.time
 

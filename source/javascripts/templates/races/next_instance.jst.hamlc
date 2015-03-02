@@ -1,3 +1,5 @@
 %a.date
 %span.date
 %span.time
+%a.config
+  Dates and entries

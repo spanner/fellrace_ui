@@ -74,6 +74,18 @@
           add
       %ul.records
 
+    .links
+      %h3 
+        Links
+        %a.add.add_link
+          add
+      %ul.links
+      %ul.autolinks
+        %li
+          %span.social.shr.editable{:data => {:placeholder => "SHR race id"}}
+        %li
+          %span.social.twit.editable{:data => {:placeholder => "Twitter name"}}
+
   .moredetails
 
     .future_instances
@@ -103,14 +115,12 @@
         %li
           %p.organiser_address.editable{:data => {:placeholder => "address"}}
 
-    .links
-      %h3 
-        Links
-        %a.add.add_link
-          add
-      %ul.links
-      %ul.autolinks
-        %li
-          %span.social.shr.editable{:data => {:placeholder => "SHR race id"}}
-        %li
-          %span.social.twit.editable{:data => {:placeholder => "Twitter name"}}
+
+  .conclusion
+    %p
+      fellrace.org.uk is built by fell runners who ought to be doing their real work,
+      and it has been known to fall over or go the wrong way. We are notified automatically when something breaks, 
+      but please 
+      let us know
+      anyway, and if you have any other suggestions or comments, please send them to Will.
+      

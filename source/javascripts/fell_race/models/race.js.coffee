@@ -131,7 +131,7 @@ class FellRace.Models.Race extends FellRace.Model
 
   nextOrRecentInstance: =>
     instance = @future_instances.next()
-    instance = @past_instances.mostRecent() unless instance
+    instance ?= @past_instances.mostRecent()
     instance
 
   select: =>

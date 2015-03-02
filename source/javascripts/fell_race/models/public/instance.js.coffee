@@ -1,5 +1,10 @@
 class FellRace.Models.PublicInstance extends Backbone.Model
+
   initialize: (opts) ->
+    if opening_datestring = @get("online_entry_opening")
+      @set "online_entry_opening", Date.parse(opening_datestring)
+    if closing_datestring = @get("online_entry_closing")
+      @set "online_entry_closing", Date.parse(closing_datestring)
     @build()
 
   build: =>
