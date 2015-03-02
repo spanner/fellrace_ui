@@ -7,6 +7,7 @@ class FellRace.Models.PublicInstance extends Backbone.Model
   build: =>
     @entries = new FellRace.Collections.Entries(@get("entries"),instance:@)
     @performances = new FellRace.Collections.Performances @get("performances"), instance: @
+    @checkpoints = new FellRace.Collections.Checkpoints @get("checkpoints")
     @rootPerformances()
 
     for att in ["date", "postal_entry_opening", "postal_entry_closing", "online_entry_opening", "online_entry_closing"]
@@ -16,7 +17,7 @@ class FellRace.Models.PublicInstance extends Backbone.Model
     @entries.on "add remove reset", () =>
       @set total_entries: @entries.length
 
-    _.each ["performances","entries"], (collection) =>
+    _.each ["performances","entries","checkpoints"], (collection) =>
       @on "change:#{collection}", (model,data) =>
         @[collection].reset data
         if collection is "performances"

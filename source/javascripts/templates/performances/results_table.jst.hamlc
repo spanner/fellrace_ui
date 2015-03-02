@@ -1,0 +1,8 @@
+%thead
+  %tr.columns
+    %th.pos
+    %th.name Name
+    %th.club Club
+    %th.cat Category
+    %th.time Time
+%tbody
