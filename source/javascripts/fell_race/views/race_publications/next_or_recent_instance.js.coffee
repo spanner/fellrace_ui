@@ -31,7 +31,7 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
     atall and (start < new Date < end)
 
   url: ([race_slug, name]=[]) =>
-    "/admin/races/#{race_slug}/#{name}"
+    "/races/#{race_slug}/#{name}"
 
   niceTime: (time) =>
     time

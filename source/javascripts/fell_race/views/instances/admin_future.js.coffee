@@ -17,6 +17,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".eod_details":
       observe: "eod"
       visible: true
+      visibleFn: "quickSlide"
     "span.eod_fee":
       observe: "eod_fee"
       onGet: "currency"
@@ -25,6 +26,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".online_details":
       observe: "online_entry"
       visible: true
+      visibleFn: "quickSlide"
     "span.online_entry_fee":
       observe: "online_entry_fee"
       onGet: "currency"
@@ -38,12 +40,13 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".postal_details":
       observe: "postal_entry"
       visible: true
+      visibleFn: "quickSlide"
     "span.postal_entry_fee":
       observe: "postal_entry_fee"
       onGet: "currency"
     "span.postal_entry_closing": "postal_entry_closing"
     "span.postal_entry_opening": "postal_entry_opening"    
-    "p.postal_entry_address": "postal_entry_address"
+    "span.postal_entry_address": "postal_entry_address"
     "input.accept_cheque": "accept_cheque"
     "input.cheque_paid_to": "cheque_paid_to"
     "input.accept_cash": "accept_cash"
@@ -99,3 +102,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   currency: (amount) ->
     amount?.toFixed(2)
+
+  quickSlide: ($el, isVisible, options) =>
+    if (isVisible) then $el.slideDown('fast') else $el.slideUp('fast')

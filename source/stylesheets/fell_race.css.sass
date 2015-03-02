@@ -77,6 +77,9 @@ a.enter_online
   +icon_link("linksprite.png", -288px)
   font-weight: bold
 
+.note
+  +quiet
+
 form.bubble
   width: 320px
   input.title, textarea, select
@@ -260,6 +263,17 @@ p.haserror
 
 .placeheld
   color: $pale
+  
+label.heading
+  +light
+  font-weight: normal
+  font-size: 1.5em
+  color: $mid
+
+input:checked
+  &+label.heading
+    color: $dark
+
 
 // -------------------------------------LAYOUT----------------------------------- //
 
@@ -514,8 +528,7 @@ $shadow: 1px 3px 8px #333
         .picture
           position: relative
           width: 100%
-          max-height: 360px
-          min-height: 70px
+          height: 360px
           overflow: hidden
           img
             opacity: 0.95
@@ -630,10 +643,6 @@ $shadow: 1px 3px 8px #333
             margin-top: 2px
             &.editable
               min-height: 40px
-          p.note, li.note
-            +quiet
-          span.note
-            color: $mid
 
         .conclusion
           clear: both
@@ -868,6 +877,7 @@ section#extra
 
   &:empty
     display: none
+
   .instance
     &.new
       .save
@@ -878,15 +888,12 @@ section#extra
         &.notready
           color: $red
     &.future
-      .heading
-        +light
-        font-weight: normal
-        font-size: 1.5em
-      .eod, .pre_entry
+      .eod, .online, .postal
         margin-top: 20px
-      .eod
-        #eod_details
-          padding: 20px
+        p
+          margin: 0
+      .eod_details, .postal_details, .online_details
+        padding: 0 24px
       .pre_entry
         #pre_entry_details
           padding: 20px
@@ -1016,17 +1023,13 @@ a.file_name
   .save, .merge
     +button($rubine)
   .publish
+    +button($green)
+  .setmap
+    +button($blue)
+  .enter
     +button($rubine)
   .cancel
     +button($pale)
-  .setmap
-    +button($blue)
-    overflow: hidden
-  .enter
-    +button($rubine)
-    overflow: hidden
-  .cancel, .close
-    +button($mid)
   .settings
     +button($mid)
     width: 10px

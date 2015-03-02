@@ -7,6 +7,11 @@ class FellRace.Views.AdminPastInstance extends Backbone.Marionette.ItemView
     'click a.delete': "delete"
 
   bindings:
+    ".race_name": "race_name"
+    ".instance_name": "name"
+    "span.date": "date"
+    "span.time": "time"
+
     "h3.date":
       observe: "date"
       onGet: "date"

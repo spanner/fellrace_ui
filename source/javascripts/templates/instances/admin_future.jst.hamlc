@@ -8,7 +8,7 @@
   %h3
     %span.calendar
     %span.date.editable{data: {placeholder: "dd-mm-yyyy"}}
-    %br
+    at
     %span.clock
     %span.time.editable{data: {placeholder: "hh:mm"}}
 
@@ -19,7 +19,7 @@
   .eod
     %p
       %input#eod{type: "checkbox"}
-      %label.heading{for: "eod"} Entry on the day?
+      %label.heading{for: "eod"} Entry on the day
 
   .eod_details
     %p.fee
@@ -29,29 +29,31 @@
   .online
     %p
       %input#online_entry{type: "checkbox"}
-      %label.heading{for: "online_entry"} Online entry?
+      %label.heading{for: "online_entry"} Online entry
+      %a.note{href:"/online_entries", target: "_blank"}
+        How it works
 
   .online_details
     %p.fee
       Online entry fee
       %span.online_entry_fee.currency.editable{data: {placeholder: "0.00"}}
-      %span.info.fee_details
-        We will take
+      %span.note.fee_details
+        Transaction charge
         %span.admin_charge.currency
-        from each entry.
     %p.dates
       Opening
       %span.online_entry_opening.editable{data: {placeholder: "dd-mm-yyyy"}}
-      Closing
       %span.note
         at the start of the day
+      %br
+      Closing
       %span.online_entry_closing.editable{data: {placeholder: "dd-mm-yyyy"}}
       %span.note
         at the end of the day
 
   .postal
     %input#postal_entry{type: "checkbox"}
-    %label.heading{for: "postal_entry"} Postal entry?
+    %label.heading{for: "postal_entry"} Postal entry
 
   .postal_details
     %p.fee
@@ -60,17 +62,22 @@
     %p.dates
       Opening
       %span.postal_entry_opening.editable{data: {placeholder: "dd-mm-yyyy"}}
+      %span.note
+        at the start of the day
+      %br
       Closing
       %span.postal_entry_closing.editable{data: {placeholder: "dd-mm-yyyy"}}
+      %span.note
+        at the end of the day
 
     %p.entry_form
 
     %p.address
       Postal Entry address
-      %span.postal_entry_address.editable
+      %span.postal_entry_address.editable{data: {placeholder: "Full address including postcode"}}
 
 .entries
-  %span.heading Current entries
+  %span.heading Entries list
   %br
   Total:
   %span.total_count

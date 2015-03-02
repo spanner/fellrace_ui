@@ -1,12 +1,17 @@
 .race_head
   .picture
+    %label.pick{for: "picker"}
+      picture
   .title
     %h2.name.editable{:data => {:placeholder => "Race name"}}
   .controls
-    %label.pick{for: "picker"}
-      picture
-    %a.cancel &laquo; exit
-    %a.publish publish &raquo;
+    %a.cancel x exit
+    %a.publish publish &#9656;
+  .social
+    %a.fb facebook
+    %a.twit twitter
+    %a.shr SHR
+    %a.fra FRA
 
 .race_body
   .summary
@@ -80,11 +85,6 @@
         %a.add.add_link
           add
       %ul.links
-      %ul.autolinks
-        %li
-          %span.social.shr.editable{:data => {:placeholder => "SHR race id"}}
-        %li
-          %span.social.twit.editable{:data => {:placeholder => "Twitter name"}}
 
   .moredetails
 
