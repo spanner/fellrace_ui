@@ -142,12 +142,14 @@ class FellRace.Application extends Backbone.Marionette.Application
   showRace: (race) =>
     @mapView.showRace race
 
-  publicView: =>
-    @mapView.showRacePublications()
-    @mapView.removeRace()
+  indexMapView: =>
+    @mapView.indexView()
 
-  adminView: =>
-    @mapView.hideRacePublications()
+  publicMapView: =>
+    @mapView.publicView()
+
+  adminMapView: =>
+    @mapView.adminView()
 
   isPortrait: =>
     @aspect_ratio > 1
@@ -237,3 +239,6 @@ class FellRace.Application extends Backbone.Marionette.Application
   sendAuthenticationHeader: (e, request) =>
     if token = @session?.authToken()
       request.setRequestHeader("Authorization", "Token token=#{token}")
+
+  slugify: (string) =>
+    string?.trim().replace(/[^a-zA-Z0-9-\s]/g,'').replace(/[^a-zA-Z0-9-]/g,'-').toLowerCase()

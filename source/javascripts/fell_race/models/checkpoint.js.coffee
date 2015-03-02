@@ -1,4 +1,6 @@
 class FellRace.Models.Checkpoint extends FellRace.Model
+  isPoint: true
+
   initialize: ->
     super
     unless @isNew()
@@ -7,6 +9,10 @@ class FellRace.Models.Checkpoint extends FellRace.Model
     @on "change:lat", (model, val, opts) =>
       @placed()
       @setGridrefFromLatLng(opts)
+
+    @on "change:name", (model, val, opts) =>
+      @set slug: _fellrace.slugify(val),
+        opts
 
     if @race = @collection.race
       @set
@@ -48,6 +54,9 @@ class FellRace.Models.Checkpoint extends FellRace.Model
     else
       @collection.getColour()
 
+  getSlug: =>
+    @get("slug") || _fellrace.slugify(@get("name"))
+
   jsonForPublication: =>
     pos: @get("pos")
     name: @get("name")
@@ -56,3 +65,4 @@ class FellRace.Models.Checkpoint extends FellRace.Model
     gridref: @get("gridref")
     fixed: @get("fixed")
     colour: @getColour()
+    slug: @getSlug()

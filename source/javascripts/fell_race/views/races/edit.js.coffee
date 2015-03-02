@@ -27,12 +27,12 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
             "publishing" if publishing
         }
       ]
-    "a.close":
+    "a.cancel":
       attributes: [
         name: "href"
-        observe: "race_slug"
-        onGet: (race_slug) =>
-          "/races/#{race_slug}"
+        observe: "slug"
+        onGet: (slug) =>
+          "/races/#{slug}"
       ]
     "label.pick":
       observe: 'picture'
