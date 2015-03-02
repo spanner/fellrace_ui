@@ -1,3 +1,5 @@
+%a.close
+
 .basic_details
   %h3.date
   Start time
@@ -72,6 +74,3 @@
     Pending:
     %span.pending_count
     %table.entries
-
-.extra_content_controls.controls
-  %a.close X

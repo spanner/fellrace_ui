@@ -70,3 +70,12 @@
       %h3
         Results
       %ul.past_instances
+
+  .conclusion
+    %p
+      fellrace.org.uk is built by fell runners who ought to be doing their real work,
+      and it has been known to fall over or go the wrong way. We are notified automatically when something breaks, 
+      but please 
+      let us know
+      anyway, and if you have any other suggestions or comments, please send them to Will.
+      

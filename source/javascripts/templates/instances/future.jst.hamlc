@@ -1,3 +1,5 @@
+%a.close.big
+
 .basic_details
   %h3.date
   Start time
@@ -55,7 +57,3 @@
   %span.heading Current entries
   %span.entry_count
   %table.entries
-
-.extra_content_controls.controls
-  %a.edit edit
-  %a.close X

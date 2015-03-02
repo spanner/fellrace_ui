@@ -26,7 +26,6 @@ body
   right: 0
   bottom: 0
   left: 0
-  overflow: hidden
 
 a
   text-decoration: none
@@ -263,12 +262,8 @@ $widewidth: 960px
 $padding_x: 20px
 $shadow: 1px 3px 8px #333
 
-#view_toggle
-  position: absolute
-  background-color: $translucent
-  cursor: pointer
-
 .gmap
+  z-index: 10
   .map_holder
     background-color: $mid
     position: fixed !important
@@ -404,170 +399,7 @@ $shadow: 1px 3px 8px #333
           &:first-child
             margin-right: 6px
 
-@media screen
-  #main_content
-    bottom: 5px
-    left: 10px
-    right: 5px
 
-@media not screen
-  #main_content
-    bottom: 20px
-    left: 20px
-    right: 10px
-
-@media (orientation:landscape)
-  #content
-    top: 0
-    #view_toggle
-      top: 40px
-      right: 0
-      margin-right: -25px
-      width: 25px
-      height: 35px
-      box-shadow: 6px 5px 10px 0 rgba(0, 0, 0, 0.25)
-      border-radius: 0 5px 5px 0    
-
-  @media (max-width:768px)
-    #content
-      width: 90%
-  @media (min-width:768px)  
-    #content
-      width: 580px
-
-@media (orientation:portrait)
-  #content
-    right: 0
-    #view_toggle
-      top: 0
-      margin-top: -25px
-      left: 30px
-      width: 35px
-      height: 25px
-      box-shadow: 6px -5px 10px 0 rgba(0, 0, 0, 0.25)
-      border-radius: 5px 5px 0 0
-
-  @media (max-height:768px)
-    #content
-      top: 40px
-  @media (min-height:768px)  
-    #content
-      top: 40%
-
-section#extra
-  box-sizing: border-box
-  height: 100%
-  position: absolute
-  background: $translucent
-  left: 580px
-  right: 0
-  overflow: auto
-  padding: 20px 50px
-  h2
-    margin: 0
-  a.close
-    position: absolute
-    top: 20px
-    right: 20px
-  
-  #results_file
-    position: relative
-    width: 90%
-    height: 90%
-    object
-      display: block
-      width: 100%
-      height: 100%
-      p
-        margin: 24px 0
-
-  &:empty
-    display: none
-  // #table
-  //   position: relative
-  //   font-size: 0.8em
-  //   height: 100%
-  //   overflow: auto
-  //   width: 100%
-  //   .loading
-  //     width: 300px
-  //     margin: 200px auto
-  //     color: $pale
-  //     font-size: 3em
-  .instance
-    &.new
-      .save
-        +button($rubine)
-      p.instructions
-        &.okay
-          color: $green
-        &.notready
-          color: $red
-    &.future
-      .extra_content_controls
-        position: absolute
-        top: 10px
-        right: 10px
-      .heading
-        font-weight: bold
-      .eod, .pre_entry
-        margin-top: 20px
-      .eod
-        #eod_details
-          padding: 20px
-      .pre_entry
-        #pre_entry_details
-          padding: 20px
-        .online, .postal
-          float: left
-          width: 50%
-        table.entries
-          +clear
-          tr
-            .complete
-              color: $green
-            .incomplete
-              color: $red
-
-    .results
-      .results_preview
-        // max-height: 250px
-        overflow: auto
-      label.pick
-        +button
-  table#results_table
-    font-size: 0.8em
-    thead
-      th
-        text-align: left
-    tbody
-      overflow: auto
-      tr
-        &.current
-          font-weight: bold
-          +glow($brightgreen) //TODO de-uglify
-        &.female
-          background: #FFF7F7
-        &:hover
-          background: #eee
-      td
-        vertical-align: top
-        text-align: left
-        &.time
-          font-weight: bold
-        &.checkpoint
-          span
-            &.elapsed
-              display: block
-            &.split
-              display: block
-              font-size: 0.75em
-              color: $pale
-
-#view_toggle
-  position: absolute
-  background-color: $translucent
-  cursor: pointer
 
 [contenteditable=true]:empty:after
   content: attr(data-placeholder)
@@ -620,14 +452,30 @@ section#extra
         bottom: 10px
 
 #content
-  position: absolute
-  bottom: 0
-  left: 0
+  position: relative
+  width: 580px
   background-color: $translucent
-  overflow-y: auto
-  overflow-x: hidden
   border-right: 1px solid $mid
-  
+  z-index: 200
+  +transition(margin-left, 0.5s, ease-out)
+  #view_toggle
+    position: absolute
+    top: 359px
+    right: 0
+    margin-right: -29px
+    width: 28px
+    height: 54px
+    border: 1px solid $mid
+    border-left: none
+    background-color: $translucent
+    cursor: pointer
+    z-index: 300
+    background:
+      position: 0 0
+      repeat: no-repeat
+      image: image-url('view_toggle.png')
+    &:hover
+      background-position: 0 -96px
   header
     position: absolute
     top: 0
@@ -635,14 +483,10 @@ section#extra
     height: 60px
 
   main
-    position: absolute
+    position: relative
     width: 100%
-    top: 0
-    bottom: 0
-    .personal
     #index
       margin: 0 15px
-
     #competitors
       .search_form
         margin-bottom: 10px
@@ -652,11 +496,8 @@ section#extra
           margin-right: 15px
         a.search
           +button($green)
-
     .race
       position: relative
-      float: left
-      clear: left
       margin: 0
       width: 100%
       .race_head
@@ -783,6 +624,9 @@ section#extra
             +quiet
           span.note
             color: $mid
+
+        .conclusion
+          clear: both
 
         .description
           &:not([contenteditable]):empty
@@ -981,6 +825,117 @@ section#extra
               color: $pale
               float: right
 
+section#extra
+  box-sizing: border-box
+  position: fixed
+  top: 0
+  left: 580px
+  right: 0
+  height: 100%
+  overflow: auto
+  padding: 20px 50px
+  background: $translucent
+  z-index: 100
+  +transition(left, 0.5s, ease-out)
+  h2
+    margin: 0
+  a.close
+    position: absolute
+    top: 20px
+    right: 20px
+  
+  #results_file
+    position: relative
+    width: 90%
+    height: 90%
+    object
+      display: block
+      width: 100%
+      height: 100%
+      p
+        margin: 24px 0
+
+  &:empty
+    display: none
+  .instance
+    &.new
+      .save
+        +button($rubine)
+      p.instructions
+        &.okay
+          color: $green
+        &.notready
+          color: $red
+    &.future
+      .heading
+        font-weight: bold
+      .eod, .pre_entry
+        margin-top: 20px
+      .eod
+        #eod_details
+          padding: 20px
+      .pre_entry
+        #pre_entry_details
+          padding: 20px
+        .online, .postal
+          float: left
+          width: 50%
+        table.entries
+          +clear
+          tr
+            .complete
+              color: $green
+            .incomplete
+              color: $red
+
+    .results
+      .results_preview
+        // max-height: 250px
+        overflow: auto
+      label.pick
+        +button
+
+  #results_table
+    font-size: 0.8em
+    thead
+      th
+        text-align: left
+    tbody
+      overflow: auto
+      tr
+        &.current
+          font-weight: bold
+          +glow($brightgreen) //TODO de-uglify
+        &:hover
+          background: rgba(189,189,189,0.25)
+        &.female
+          background: rgba(209,0,93,0.25)
+          &:hover
+            background: rgba(102,0,45,0.25)
+      td, th
+        vertical-align: top
+        text-align: left
+        padding: 4px 10px
+        &.time
+          font-weight: bold
+        &.checkpoint
+          span
+            &.elapsed
+              display: block
+            &.split
+              display: block
+              font-size: 0.75em
+              color: $pale
+
+#content.collapsed
+  margin-left: -540px
+  #view_toggle
+    background-position: 0 -48px
+    &:hover
+      background-position: 0 -144px
+  
+  &+#extra
+    left: 40px
 
 
 a.file_icon
@@ -1044,7 +999,8 @@ a.file_name
     +button($rubine)
   .publish
     +button($rubine)
-    // overflow: hidden
+  .cancel
+    +button($pale)
   .setmap
     +button($blue)
     overflow: hidden
@@ -1105,4 +1061,19 @@ ul.sortable li.over
   min-height: 20px
   background-color: $translucent
 
-@import lib/results
+
+@media screen
+  #main_content
+    bottom: 5px
+    left: 10px
+    right: 5px
+
+@media not screen
+  #main_content
+    bottom: 20px
+    left: 20px
+    right: 10px
+
+@media (max-width:768px)
+  #content
+    width: 90%

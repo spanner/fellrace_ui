@@ -99,8 +99,10 @@ class FellRace.Application extends Backbone.Marionette.Application
 
   listenToToggle: =>
     $("#view_toggle").on "click", =>
-      @open_drawer = !@open_drawer
-      @resizeContent(animate:true)
+      if @content.hasClass("collapsed")
+        @content.removeClass("collapsed")
+      else
+        @content.addClass("collapsed")
 
   secondsToString: (totalSeconds) =>
     if totalSeconds
@@ -146,18 +148,6 @@ class FellRace.Application extends Backbone.Marionette.Application
 
   adminView: =>
     @mapView.hideRacePublications()
-
-  resizeContent: ({animate:animate}={}) =>
-    # TODO .animate then .css when animate==true
-    css =
-      top: ''
-      left: ''
-    unless @open_drawer
-      if @isPortrait()
-        css.top = $(window).height() - 10
-      else
-        css.left = - (@content.width() - 10)
-    @content.css css
 
   isPortrait: =>
     @aspect_ratio > 1

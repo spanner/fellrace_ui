@@ -4,7 +4,8 @@
     %h2.name.editable{:data => {:placeholder => "Race name"}}
   .controls
     %label.pick{for: "picker"}
-      Choose picture
+      picture
+    %a.cancel &laquo; exit
     %a.publish publish &raquo;
 
 .race_body

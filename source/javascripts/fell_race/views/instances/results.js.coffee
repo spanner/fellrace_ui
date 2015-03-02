@@ -11,14 +11,9 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
         onGet: (race_slug) =>
           "/races/#{race_slug}"
       ]
-    ".instance_name":
-      observe: "name"
-      attributes: [
-        name: "href"
-        observe: ["race_slug","name"]
-        onGet: ([race_slug,name]=[]) =>
-          "/races/#{race_slug}/#{name}"
-      ]
+    "p.download":
+      observe: "file_name"
+      visible: "notCSV"
     "a.file_icon":
       observe: "file_name"
       attributes: [
@@ -29,9 +24,7 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
         observe: "file_name"
         onGet: "fileClass"
       ]
-    "p.download":
-      observe: "file_name"
-      visible: "notCSV"
+
 
   initialize: ({competitor:competitor}={}) ->
     @_performances = @model.performances

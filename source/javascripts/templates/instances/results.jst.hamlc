@@ -5,7 +5,6 @@
   %span.instance_name
 
 #results_file
-
   %p.download
     %a.file_icon
 
