@@ -28,6 +28,14 @@ body
   bottom: 0
   left: 0
 
+h1,h2,h3,h4
+  font-weight: bold
+  margin-bottom: 0.2em
+  &+p
+    margin-top: 0.2em
+  .addendum
+    font-weight: normal
+    font-size: 65%
 a
   text-decoration: none
   color: $link
@@ -475,6 +483,7 @@ $shadow: 1px 3px 8px #333
 #content
   position: relative
   width: 580px
+  height: 100%
   background-color: $translucent
   border-right: 1px solid $mid
   z-index: 200
@@ -936,8 +945,19 @@ section#extra
           font-weight: bold
       p.entry_form
         label.pick
-          color: $red
+          display: inline-block
+          color: #df0f00
           cursor: pointer
+          &.pdf
+            background-image: image-url('icons.png')
+            margin-left: -25px
+            text-indent: 25px
+            line-height: 26px
+            color: #df0f00
+            background: 
+              repeat: no-repeat
+              position: 0 0
+              position: 0 -200px
         input[type="file"]
           display: none
 

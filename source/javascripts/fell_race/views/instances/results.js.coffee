@@ -48,7 +48,7 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
           url = "#{url}/#{slug}/#{name}/splits"
       ]
 
-    "a.simple":
+    "a.hide_splits":
       observe: "show_splits"
       visible: true
       attributes: [

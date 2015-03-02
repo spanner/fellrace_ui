@@ -3,12 +3,13 @@
 %h2
   %a.race_name
   %span.instance_name
-
+  %a.addendum.show_splits 
+    show splits
+  %a.addendum.hide_splits
+    hide splits
+  
 #results_file
   %p.download
     %a.file_icon
-
-%a.show_splits splits
-%a.simple simple
 
 %table#results_table

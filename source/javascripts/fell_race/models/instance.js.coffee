@@ -5,11 +5,6 @@ class FellRace.Models.Instance extends FellRace.Model
     "postal_entry_closing","eod","eod_fee"
   ]
 
-  toJSON: =>
-    json = super
-    delete json.instance["file"] unless @get("file_changed")?
-    json
-
   initialize: (opts) ->
     super
     @build()
@@ -73,11 +68,12 @@ class FellRace.Models.Instance extends FellRace.Model
   formdata: () =>
     formdata = new FormData()
     _.each @attributes, (value, key, list) =>
-      formdata.append("instance[#{key}]", value)
+      unless (key is "file" and not @get("file_changed")) or (key is "entry_form" and not @get("entry_form_changed"))
+        formdata.append("instance[#{key}]", value)
     formdata
 
   sync: (method, model, options) =>
-    return super unless @get("file_changed")?
+    return super unless @get("file_changed")? or @get("entry_form_changed")?
     options.data = @formdata()
     options.contentType = false
     options.processData = false
@@ -101,11 +97,11 @@ class FellRace.Models.Instance extends FellRace.Model
 
   upload_end: () =>
     $.notify "finish:progress"
-    @set({file: null,performances_count: "processing"}, quiet:true)
+    @set({file_changed: false, entry_form_changed: false}, {silent: true})
     @trigger "thaw"
 
   upload_error: (model, xhr, options) =>
-    $.notify "error", "upload failed for #{@filename}"
+    $.notify "error", "upload failed"
 
   getPerformancesCount: =>
     @get "performances_count"
@@ -120,7 +116,3 @@ class FellRace.Models.Instance extends FellRace.Model
   inPast: =>
     if date = @getDate()
       date < Date.now()
-
-  onlineEntryReady: =>
-    #TODO !!
-  

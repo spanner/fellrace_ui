@@ -59,11 +59,7 @@
       Postal entry fee
       %span.postal_entry_fee.currency.editable{data: {placeholder: "0.00"}}
 
-
     %p.entry_form
-
-    %p.address
-      %span.postal_entry_address.editable{data: {placeholder: "Full address including postcode"}}
 
 %section.entries
   %h2 Entries list
