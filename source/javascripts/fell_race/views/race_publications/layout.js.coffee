@@ -11,6 +11,8 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
 
   default: =>
     _fellrace.closeRight()
+    @_previous =
+      route: "default"
 
   showRacePublication: =>
     view = new FellRace.Views.RacePublication
@@ -37,7 +39,10 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
         $.notify "error", "This instance doesn't exist. Redirecting to the race page."
         _fellrace.navigate "/races/#{@model.get("slug")}"
 
-  checkpoint: (checkpoint_slug,path) =>
-    if cp = @model.checkpoints.findWhere(slug: checkpoint_slug)
+  checkpoint: (slug,path) =>
+    if cp = @model.checkpoints.findWhere(slug: slug)
       _fellrace.closeRight()
       _fellrace.moveMapTo cp
+    @_previous =
+      route: "checkpoint"
+      param: slug

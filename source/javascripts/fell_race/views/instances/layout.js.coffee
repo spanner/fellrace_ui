@@ -3,19 +3,33 @@ class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
     "(/)": @default
     "splits(/)": @splits
 
-  default: =>
-    if @model.inFuture()
-      view = new FellRace.Views.FutureInstance
-        model: @model
-    else
-      @model.set show_splits: false
-      view = new FellRace.Views.InstanceResults
-        model: @model
-    _fellrace.extraContentRegion.show view
+  initialize: (opts) ->
+    @_competitor = opts.competitor
+    super
 
-  splits: (path) =>
+  default: =>
+    if @_previous.route is "splits"
+      @model.set show_splits: false
+      _fellrace.content.removeClass "collapsed"
+    else
+      if @model.inFuture()
+        view = new FellRace.Views.FutureInstance
+          model: @model
+      else
+        view = new FellRace.Views.InstanceResults
+          model: @model
+          competitor: @_competitor
+      _fellrace.extraContentRegion.show view
+    @_previous =
+      route: "default"
+
+  splits: =>
     @model.set show_splits: true
     _fellrace.content.addClass "collapsed"
-    view = new FellRace.Views.InstanceResults
-      model: @model
-    _fellrace.extraContentRegion.show view
+    unless @_previous.route is "default"
+      view = new FellRace.Views.InstanceResults
+        model: @model
+        competitor: @_competitor
+      _fellrace.extraContentRegion.show view
+    @_previous =
+      route: "splits"
