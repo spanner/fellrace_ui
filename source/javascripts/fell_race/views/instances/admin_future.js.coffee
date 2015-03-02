@@ -84,7 +84,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
         showShortcuts: false
         singleDate: true
         setValue: (s) =>
-          @model.set att, s, {silent: true}
+          @model.set att, s
         getValue: () =>
           @showDate(@model.get(att)) if @model.get(att)?
 
@@ -100,8 +100,8 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
         showShortcuts: false
         setValue: (s, start, end) =>
           console.log "setValue", s, start, end
-          @model.set start_att, start#, {silent: true}
-          @model.set end_att, end#, {silent: true}
+          @model.set start_att, start
+          @model.set end_att, end
         getValue: () =>
           @simpleDateRangeString(@model.get(start_att), @model.get(end_att))
       
@@ -140,7 +140,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     amount?.toFixed(2)
 
   quickSlide: ($el, isVisible, options) =>
-    console.log "quickSlide", $el, isVisible
     if (isVisible) then $el.slideDown('fast') else $el.slideUp('fast')
 
   showDate: (date) =>
@@ -156,7 +155,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       "#{start.format(@date_format)} to #{end.format(@date_format)}"
 
   dateRangeString: (start, end) =>
-    console.log "dateRangeString", start, end
     if start? and end?
       start = moment(start)
       end = moment(end)

@@ -4,6 +4,10 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
     "new_instance": @newInstance
     ":instance_name(/*path)": @instance
 
+  initialize: ->
+    @edit()
+    super
+
   edit: =>
     view = new FellRace.Views.Race
       model: @model
@@ -11,10 +15,8 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
 
   default: =>
     _fellrace.closeRight()
-    @edit()
 
   instance: (instance_name,path) =>
-    @edit()
     if instance = @model.past_instances.findWhere(name: instance_name)
       view = new FellRace.Views.AdminPastInstance
         model: instance
@@ -30,7 +32,6 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
       _fellrace.navigate "/admin/races/#{@model.get("slug")}"
 
   newInstance: =>
-    @edit()
     model = new FellRace.Models.Instance(race_slug:@model.get("slug"))
     model.urlRoot = "#{@model.url()}/instances"
     view = new FellRace.Views.NewInstance

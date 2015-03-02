@@ -1,3 +1,4 @@
 %span.file_name
-%input#picker.file{type: "file", accept: ".pdf .docx .doc"}
+%input#picker.file{type: "file", accept: "application/pdf"}
 %label.pick{for: "picker"} Upload entry form
+%span.note PDFs only please

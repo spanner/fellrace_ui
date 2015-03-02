@@ -1,7 +1,5 @@
 .race_head
   .picture
-    %label.pick{for: "picker"}
-      picture
   .title
     %h2.name.editable{:data => {:placeholder => "Race name"}}
   .controls
@@ -26,7 +24,7 @@
         m
     .next_or_recent
 
-  .description.editable{data: {placeholder: "Race description"}}
+  .description.editable{data: {placeholder: "Race description", :toolbar => true}}
   .details
     .attachments
       %h3

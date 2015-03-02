@@ -18,6 +18,10 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
       observe: ['online_entry', 'online_entry_opening', 'online_entry_closing']
       visible: "entryActive"
       visibleFn: "visibleBlock"
+    'a.enter_postal':
+      observe: ['postal_entry', 'postal_entry_opening', 'postal_entry_closing']
+      visible: "entryActive"
+      visibleFn: "visibleBlock"
     'a.results':
       observe: 'file'
       visible: true

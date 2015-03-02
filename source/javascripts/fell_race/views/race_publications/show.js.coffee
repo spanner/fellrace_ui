@@ -158,6 +158,7 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
 
   onRender: =>
     @stickit()
+    @model.trigger("select")
     new FellRace.Views.AttachmentsList(collection: @model.attachments, el: @$el.find("ul.attachments")).render()
     new FellRace.Views.LinksList(collection: @model.links, el: @$el.find("ul.links")).render()
     new FellRace.Views.CheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints"), race_slug: @model.get('slug')).render()

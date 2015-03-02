@@ -25,7 +25,7 @@ class FellRace.Models.Instance extends FellRace.Model
   buildDates: =>
     for attribute in ["date", "postal_entry_opening", "postal_entry_closing", "online_entry_opening", "online_entry_closing"]
       if date = @get(attribute)
-        @set "attribute", Date.parse(date)
+        @set attribute, Date.parse(date)
 
   buildEntries: =>
     @entries = new FellRace.Collections.Entries @get("entries"), instance: @
@@ -104,8 +104,7 @@ class FellRace.Models.Instance extends FellRace.Model
     @get "performances_count"
 
   getDate: =>
-    if date = @get("date")
-      Date.parse(date)
+    @get("date")
 
   inFuture: =>
     if date = @getDate()

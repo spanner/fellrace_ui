@@ -14,11 +14,11 @@ class FellRace.Views.Picture extends Backbone.Marionette.ItemView
     "click a.help": "showHelp"
 
   bindings: 
-    "img.preview":
+    ":el":
       attributes: [
-        name: "src"
+        name: "style"
         observe: 'picture'
-        onGet: "pictureUrl"
+        onGet: "backgroundImageUrl"
       ]
     "a.detach":
       observe: 'picture'
@@ -178,3 +178,10 @@ class FellRace.Views.Picture extends Backbone.Marionette.ItemView
         url
       else
         "#{_fellrace.apiUrl()}/#{url}"
+
+  backgroundImageUrl: (url) =>
+    if url
+      if url.match(/data:image/)
+        "background-image: url(#{url})"
+      else
+        "background-image: url(#{_fellrace.apiUrl()}/#{url})"

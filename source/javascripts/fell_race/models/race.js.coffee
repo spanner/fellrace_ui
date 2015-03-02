@@ -150,3 +150,7 @@ class FellRace.Models.Race extends FellRace.Model
 
   selected: =>
     @get "selected"
+
+  # getRequirements: () =>
+  #   req = @get("requirements")
+  #   req if $(req)[0].innerText.trim() isnt ""

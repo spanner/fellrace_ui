@@ -3,5 +3,8 @@ at
 %span.time
 %a.enter_online
   Enter online
+%a.enter_postal
+  Enter by post
+%span.eod
 %a.results
   Results available

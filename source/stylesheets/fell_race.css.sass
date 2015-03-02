@@ -48,9 +48,6 @@ span.editable
   display: inline-block
   min-width: 12px
 
-input[type="file"]
-  display: none
-
 a.add
   color: $green
   font-weight: normal
@@ -76,6 +73,10 @@ a.config
   +hover
 
 a.enter_online
+  +icon_link("linksprite.png", -288px)
+  font-weight: bold
+
+a.enter_postal
   +icon_link("linksprite.png", -288px)
   font-weight: bold
 
@@ -520,7 +521,7 @@ $shadow: 1px 3px 8px #333
           margin-right: 15px
         a.search
           +button($green)
-    .race
+    > .race
       position: relative
       margin: 0
       width: 100%
@@ -532,11 +533,23 @@ $shadow: 1px 3px 8px #333
           width: 100%
           height: 360px
           overflow: hidden
-          img
-            opacity: 0.95
-          .preview
-            position: relative
+          background:
+            position: center center
+            size: cover
+            repeat: no-repeat
+          input[type="file"]
+            display: none
+          label.pick
+            position: absolute
+            top: 100px
+            left: 0
             width: 100%
+            padding: 30px 0
+            margin: 0 auto
+            color: white
+            text-shadow: 0 0 0.3em #000,0 0 0.3em #000
+            text-align: center
+            cursor: pointer
 
         .controls
           position: absolute
@@ -716,7 +729,8 @@ $shadow: 1px 3px 8px #333
           ul.attachments
             .attachment
               input[type="file"]
-                display: none
+                position: absolute
+                left: 10000px
               span.name
                 max-width: 200px
                 vertical-align: middle
@@ -771,7 +785,8 @@ $shadow: 1px 3px 8px #333
               span.name, a.name
                 font-weight: bold
               input[type="file"]
-                display: none
+                position: absolute
+                left: 10000px
               &.frozen
                 +opacity(0.25)
           .enter_race
@@ -927,6 +942,10 @@ section#extra
         label.pick
           color: $red
           cursor: pointer
+        input[type="file"]
+          display: none
+
+        
       .entries
         table
           +clear

@@ -35,8 +35,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
       map: @_gmap
 
   showRace: (race) =>
-    @hideRacePublications()
-    @_race_poly?.hide()
+    @removeRace()
     @_race_poly = new FellRace.Views.RacePolyline
       model: race
       map: @_gmap
@@ -45,12 +44,14 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     @_race_poly?.hide()
     @_race_poly = null
 
-  showRacePublications: =>
+  indexView: =>
     _fellrace.race_publications.deselectAll()
+
+  publicView: =>
+    @removeRace()
     @_polys.show()
 
-  hideRacePublications: =>
-    # _fellrace.race_publications.deselectAll()
+  adminView: =>
     @_polys.hide()
 
   setOptions: (opts={}) =>
@@ -61,11 +62,15 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     @_gmap
 
   moveTo: (model) =>
-    bounds = model.getBounds()
-    if bounds.isEmpty()
-      @setOptions model.getMapOptions()
+    if model.isPoint
+      @_gmap.panTo model.getLatLng()
+      @_gmap.setZoom 16
     else
-      @_gmap.fitBounds model.getBounds()
+      bounds = model.getBounds()
+      if bounds.isEmpty()
+        @setOptions model.getMapOptions()
+      else
+        @_gmap.fitBounds bounds
     @_gmap.panBy _fellrace.offsetX(), 0
 
   addMapTypes: =>

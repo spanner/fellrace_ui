@@ -21,7 +21,7 @@ class FellRace.Views.Checkpoint extends Backbone.Marionette.ItemView
       observe: "name"
       attributes: [
         name: "href"
-        observe: "name"
+        observe: "slug"
         onGet: "setHref"
       ]
     'span.gridref': "gridref"
@@ -38,9 +38,8 @@ class FellRace.Views.Checkpoint extends Backbone.Marionette.ItemView
       name = "#{vals[1]}: #{name}"
     name
   
-  setHref: (name) =>
-    slug = name.toLowerCase()
-    href = "/races/#{@_race_slug}/#{slug}".replace(/\s+/, '_')
+  setHref: (slug) =>
+    href = "/races/#{@_race_slug}/checkpoints/#{slug}"
 
   setSymbol: (name) =>
     code = "\u25CB"
