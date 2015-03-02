@@ -163,3 +163,6 @@ class FellRace.AdminRouter extends FellRace.Router
             route: "race"
             param: slug
             view: view
+        error: =>
+          _fellrace.navigate "/races/#{slug}"
+

@@ -26,7 +26,7 @@
         m
     .next_or_recent
 
-  .description.editable{data: {placeholder: "Race description"}}
+  .description.editable{data: {placeholder: "Race description", :toolbar => true}}
   .details
     .attachments
       %h3

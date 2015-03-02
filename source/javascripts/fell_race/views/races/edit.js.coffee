@@ -97,7 +97,8 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
         val = null if /(\<div\>\<br\>\<\/div\>|\<br\>)/.test(val)
         val
 
-    '.requirements': "requirements"
+    '.requirements':
+      observe: "requirements"
 
     'a.add_instance':
       attributes: [

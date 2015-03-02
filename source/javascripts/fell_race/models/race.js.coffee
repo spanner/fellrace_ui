@@ -121,7 +121,7 @@ class FellRace.Models.Race extends FellRace.Model
       shr_id: @get("shr_id")
       # fb_event_id: @get("fb_event_id") #TODO FB page?
       twitter_id: @get("twitter_id")
-      requirements: @get("requirements")
+      requirements: @getRequirements()
       route_profile: @get("route_profile")
       route: @get("encoded_route")
       links: @links.map (link) -> link.jsonForPublication()
@@ -150,3 +150,7 @@ class FellRace.Models.Race extends FellRace.Model
 
   selected: =>
     @get "selected"
+
+  getRequirements: () =>
+    req = @get("requirements")
+    req if $(req)[0].innerText.trim() isnt ""
