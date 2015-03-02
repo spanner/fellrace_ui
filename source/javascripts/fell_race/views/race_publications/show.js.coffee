@@ -32,7 +32,13 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
         onGet: "pictureUrl"
       ]
 
-    '.name': 'name'
+    '.name':
+      observe: 'name'
+      attributes: [
+        name: "class"
+        observe: "picture"
+        onGet: "standOutIfPicture"
+      ]
     '.distance': 'distance'
     '.description':
       observe: 'description'
@@ -199,6 +205,9 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
 
   date: (date) =>
     moment(date).format("D MMMM YYYY")
+
+  standOutIfPicture: (picture) =>
+    "on_picture" if picture
 
 class FellRace.Views.RacePublicationsList extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.RacePublication
