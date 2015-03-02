@@ -9,18 +9,25 @@ class FellRace.Views.Checkpoint extends Backbone.Marionette.ItemView
   bindings:
     ':el':
       attributes: [
-        {
-          name: "class"
-          observe: "fixed"
-          onGet: "getClass"
-        }
+        name: "class"
+        observe: "fixed"
+        onGet: "getClass"
       ]
     'span.symbol':
       observe: "name"
       updateMethod: 'text'
       onGet: 'setSymbol'
-    '.name': "name"
+    'a.name': 
+      observe: "name"
+      attributes: [
+        name: "href"
+        observe: "name"
+        onGet: "setHref"
+      ]
     'span.gridref': "gridref"
+
+  initialize: (options) =>
+    @_race_slug = options.race_slug
 
   onRender: =>
     @stickit()
@@ -30,6 +37,10 @@ class FellRace.Views.Checkpoint extends Backbone.Marionette.ItemView
     unless vals[2]
       name = "#{vals[1]}: #{name}"
     name
+  
+  setHref: (name) =>
+    slug = name.toLowerCase()
+    href = "/races/#{@_race_slug}/#{slug}".replace(/\s+/, '_')
 
   setSymbol: (name) =>
     code = "\u25CB"
@@ -49,3 +60,9 @@ class FellRace.Views.Checkpoint extends Backbone.Marionette.ItemView
 
 class FellRace.Views.CheckpointsList extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.Checkpoint
+
+  itemViewOptions: () =>
+    race_slug: @_race_slug
+
+  initialize: (options) =>
+    @_race_slug = options.race_slug

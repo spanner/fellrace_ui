@@ -2,8 +2,8 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
   template: 'instances/results'
 
   bindings:
-    ".race_name":
-      observe: "race_name"
+    ".race_name": "race_name"
+    ".instance_name": "name"
     "a.race_name, a.close":
       attributes: [
         name: "href"
