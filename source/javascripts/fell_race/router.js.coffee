@@ -94,13 +94,16 @@ class FellRace.PublicRouter extends FellRace.Router
     if @_previous.route is "competitor" and @_previous.param is id
       @_previous.view.handle path
     else
-      view = new FellRace.Views.CompetitorLayout
-        model: new FellRace.Models.Competitor id:id
-        path: path
-      @_previous =
-        route: "competitor"
-        param: id
-        view: view
+      model = new FellRace.Models.Competitor id:id
+      model.fetch
+        success: =>
+          view = new FellRace.Views.CompetitorLayout
+            model: model
+            path: path
+          @_previous =
+            route: "competitor"
+            param: id
+            view: view
 
   racePublication: (slug,path) =>
     if @_previous.route is "racePublication" and @_previous.param is slug

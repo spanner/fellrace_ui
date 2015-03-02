@@ -38,23 +38,33 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
       visible: ([cps,show]=[]) =>
         cps and cps.length and !show
       attributes: [
-        observe: ["race_slug","name"]
+        observe: ["race_slug","name","competitor_id"]
         name: "href"
-        onGet: ([slug,name]=[]) =>
-          "/races/#{slug}/#{name}/splits"
+        onGet: ([slug,name,comp_id]=[]) =>
+          if comp_id
+            url = "/runners/#{comp_id}"
+          else
+            url = "/races"
+          url = "#{url}/#{slug}/#{name}/splits"
       ]
 
     "a.simple":
       observe: "show_splits"
       visible: true
       attributes: [
-        observe: ["race_slug","name"]
+        observe: ["race_slug","name","competitor_id"]
         name: "href"
-        onGet: ([slug,name]=[]) =>
-          "/races/#{slug}/#{name}"
+        onGet: ([slug,name,comp_id]=[]) =>
+          if comp_id
+            url = "/runners/#{comp_id}"
+          else
+            url = "/races"
+          url = "#{url}/#{slug}/#{name}"
       ]
 
   initialize: ({competitor:@_competitor}={}) ->
+    if @_competitor
+      @model.set competitor_id: @_competitor.id
     #
 
   onRender: =>
