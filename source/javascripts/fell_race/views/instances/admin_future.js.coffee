@@ -99,7 +99,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
         alwaysOpen: true
         showShortcuts: false
         setValue: (s, start, end) =>
-          console.log "setValue", s, start, end
           @model.set start_att, start
           @model.set end_att, end
         getValue: () =>

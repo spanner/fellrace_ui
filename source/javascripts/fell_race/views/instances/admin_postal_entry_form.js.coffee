@@ -1,7 +1,7 @@
 class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
   template: "instances/admin_postal_entry_form"
   size_limit: 1
-  allowed_extensions: [".doc",".docx",".pdf"]
+  allowed_extensions: [".pdf"]
 
   events: 
     "change input.file": 'getPickedFile'
@@ -9,23 +9,20 @@ class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
 
   bindings:
     "label.pick":
-      observe: 'file'
+      observe: 'entry_form_file'
       onGet: "buttonText"
     "a.detach":
-      observe: 'file'
-      visible: true
-    ".file_metadata":
-      observe: 'file'
+      observe: 'entry_form_file'
       visible: true
     ".confirmation":
-      observe: 'file'
+      observe: 'entry_form_file'
       visible: true
       visibleFn: "visibleInline"
     ".filesize":
-      observe: "file_size"
+      observe: "entry_form_file_size"
       onGet: "niceSize"
     ".filename":
-      observe: "file_name"
+      observe: "entry_form_file_name"
       onGet: "fileNameOrDefault"
 
   onRender: () =>
@@ -36,8 +33,7 @@ class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
 
   getPickedFile: (e) =>
     if files = @_filefield[0].files
-      @setFile files.item(0)
-      # @readLocalFile files[0]
+      @readLocalFile files[0]
 
   removeFile: (e) =>
     if e
@@ -45,18 +41,12 @@ class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
       e.stopPropagation()
     @model.dropFile()
 
-  # file-handling
-
   readLocalFile: (file) =>
     if file?
       if @fileOk(file.name, file.size)
-        # job = _fellrace.announce("Reading file")
         reader = new FileReader()
-        reader.onprogress = (e) ->
-          # job.setProgress(e)
         reader.onloadend = () =>
           @setFile reader.result, file.name, file.size
-          # job.complete()
         reader.readAsDataURL(file)
 
   setFile: (data, name, size) =>
@@ -98,7 +88,7 @@ class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
     if error is "toobig"
       _fellrace.notify "refusal", "Sorry: there is a limit of #{@size_limit}MB for these files and #{filename} is #{@niceSize(filesize)}."
     else if error is "wrongtype"
-      _fellrace.notify "refusal", "Sorry: #{filename} doesn't look like a '.pdf', '.doc' or '.docx' file. Please choose another, or make sure that your file has the right extension."
+      _fellrace.notify "refusal", "Sorry: #{filename} doesn't look like a PDF file. Please choose another, or make sure that your file has the right extension."
     else
       _fellrace.notify "error", "Unknown file-selection error"
 

@@ -26,7 +26,14 @@ class FellRace.Models.Instance extends FellRace.Model
     for attribute in ["date", "postal_entry_opening", "postal_entry_closing", "online_entry_opening", "online_entry_closing"]
       if date = @get(attribute)
         @set attribute, Date.parse(date)
+        @on "change:#{attribute}", @setEntryFlags
+    @setEntryFlags()
 
+  setEntryFlags: =>
+    now = new Date
+    @set "online_entry_active", @get('online_entry') and (@get("online_entry_opening") < now < @get("online_entry_closing"))
+    @set "postal_entry_active", @get('postal_entry') and @get('entry_form') and (@get("postal_entry_opening") < now < @get("postal_entry_closing"))
+    
   buildEntries: =>
     @entries = new FellRace.Collections.Entries @get("entries"), instance: @
     @on "change:entries", (model,data) =>

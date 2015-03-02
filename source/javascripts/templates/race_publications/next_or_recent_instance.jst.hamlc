@@ -1,10 +1,15 @@
 %span.date
 at
 %span.time
-%a.enter_online
-  Enter online
-%a.enter_postal
-  Enter by post
-%span.eod
-%a.results
-  Results available
+
+%p.entries
+  %a.enter_online
+    Enter online
+  %span.both
+    or
+  %a.enter_postal
+    download entry form
+
+%p.results
+  %a.results
+    Results available
