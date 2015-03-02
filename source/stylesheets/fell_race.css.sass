@@ -308,7 +308,7 @@ $shadow: 1px 3px 8px #333
       display: block
       margin: 0
       margin: -5px 0 0 1px
-      font-size: 60%
+      font-size: 66%
       font-weight: bold
 
 #action
@@ -523,48 +523,48 @@ $shadow: 1px 3px 8px #333
 
         .social
           position: absolute
-          right: 10px
-          bottom: 10px
-          a.external
-            display: inline-block
+          right: 14px
+          bottom: 14px
+          height: 26px
+          a
+            display: block
+            float: right
             overflow: hidden
             width: 26px
             height: 26px
-            margin-right: 5px
+            margin-left: 5px
             text-indent: 50px
             line-height: 50px
+            &:last-child
+              margin-left: 0
             background:
               position: 0 0
-              image: image-url('furniture/masthead/twitface.png')
-            &.twitter
+              image: image-url('externals.png')
+            &.twit
               &:hover
                 background-position: -32px 0
-            &.facebook
+            &.fb
               background-position: 0 -48px
               &:hover
                 background-position: -32px -48px
-            &.google
-              background-position: 0 -96px
-              &:hover
-                background-position: -32px -96px
-            &.pinterest
-              background-position: 0 -144px
-              &:hover
-                background-position: -32px -144px
-            &.web
+            &.fra
               background-position: 0 -192px
               &:hover
                 background-position: -32px -192px
+            &.shr
+              background-position: 0 -240px
+              &:hover
+                background-position: -32px -240px
           
 
         .title
           position: absolute
           bottom: 0
           left: 0
-          margin: 0 0 15px 28px
+          margin: 0 0 8px 28px
           h2.name
             margin: 0
-            font-size: 1.5em
+            font-size: 2em
             &.on_picture
               text-shadow: 0 0 0.3em #000,0 0 0.3em #000
               color: white
@@ -629,6 +629,7 @@ $shadow: 1px 3px 8px #333
 
         .conclusion
           clear: both
+          color: $pale
 
         .description
           &:not([contenteditable]):empty

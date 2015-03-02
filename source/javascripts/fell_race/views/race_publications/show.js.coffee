@@ -46,34 +46,42 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     '.climb': "climb"
     '.cat': 'cat'
 
-    # external event ids
+    # social and other external links
 
     'a.twit':
       observe: 'twitter_id'
-      updateView: false
       visible: true
       visibleFn: "visibleBlock"
       attributes: [
-        {
-          name: "href"
-          observe: "twitter_id"
-          onGet: (val) =>
-            "http://www.twitter.com/#{val}" if val
-        }
+        name: "href"
+        onGet: (val) => "http://www.twitter.com/#{val}"
+      ]
+
+    'a.fb':
+      observe: 'fb_event_id'
+      visible: true
+      visibleFn: "visibleBlock"
+      attributes: [
+        name: "href"
+        onGet: (val) => "https://www.facebook.com/events/#{val}"
       ]
 
     'a.shr':
       observe: 'shr_id'
-      updateView: false
       visible: true
       visibleFn: "visibleBlock"
       attributes: [
-        {
-          name: "href"
-          observe: "shr_id"
-          onGet: (val) =>
-            "http://www.scottishhillracing.co.uk/RaceDetails.aspx?RaceID=RA-#{val}" if val
-        }
+        name: "href"
+        onGet: (val) => "http://www.scottishhillracing.co.uk/RaceDetails.aspx?RaceID=RA-#{val}"
+      ]
+
+    'a.fra':
+      observe: 'fra_id'
+      visible: true
+      visibleFn: "visibleBlock"
+      attributes: [
+        name: "href"
+        onGet: (val) => "http://fellrunner.org.uk/races.php?id=#{val}"
       ]
 
     'span.age_limit': 

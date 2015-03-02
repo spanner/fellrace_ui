@@ -6,8 +6,10 @@
   .controls
     %a.edit edit
   .social
-    %a.social.fb facebook
-    %a.social.twit twitter
+    %a.fb facebook
+    %a.twit twitter
+    %a.shr SHR
+    %a.fra FRA
 
 .race_body
   .summary
