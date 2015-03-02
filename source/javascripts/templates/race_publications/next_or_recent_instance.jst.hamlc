@@ -1,0 +1,7 @@
+%span.date
+at
+%span.time
+%a.enter_online
+  Enter online
+%a.results
+  Results available

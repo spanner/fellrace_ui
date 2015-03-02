@@ -6,6 +6,9 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
     "click a.enter": "enter"
 
   bindings:
+    ".race_name": "race_name"
+    ".instance_name": "name"
+
     "a.close":
       attributes: [
         observe: "race_slug"

@@ -31,8 +31,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
       attributes: [
         name: "href"
         observe: "slug"
-        onGet: (slug) =>
-          "/races/#{slug}"
+        onGet: (slug) => "/races/#{slug}"
       ]
     "label.pick":
       observe: 'picture'
@@ -49,6 +48,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     '.description':
       observe: 'description'
       updateMethod: 'html'
+
     '.distance': 'distance'
     '.climb': "climb"
     '.cat': 'cat'

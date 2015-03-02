@@ -1,11 +1,21 @@
 %a.close.big
 
-%h3.date
-Start time
-%span.time.editable{data: {placeholder: "hh:mm"}}
+%h2
+  %a.race_name
+  %span.instance_name.editable
+
+%h3
+  %span.calendar
+  %span.date.editable{data: {placeholder: "dd-mm-yyyy"}}
+  at
+  %span.clock
+  %span.time.editable{data: {placeholder: "hh:mm"}}
+
 .report
-  %h3 Report
-  %p.report.editable{data: {placeholder: "Anything to say?"}}
+  %h3 Race report
+  %p.report.editable{data: {placeholder: "Please give a report of up to 200 words. This will appear at the top of your results list."}}
+  %p.note
+    (This is a good place to prepare your report for the Fellrunner)
 .results
   %h3 Results
   .results_file

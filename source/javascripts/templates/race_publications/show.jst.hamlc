@@ -4,7 +4,7 @@
   .title
     %h2.name
   .controls
-    %a.edit edit
+    %a.edit edit &#9656;
   .social
     %a.fb facebook
     %a.twit twitter
@@ -22,9 +22,6 @@
         %span.climb
         m
     .next_or_recent
-      %span.date
-      at
-      %span.time
 
   .description
   .details

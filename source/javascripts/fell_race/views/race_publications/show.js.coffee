@@ -10,6 +10,7 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
       observe: "permissions"
       visible: ({can_edit:can_edit}={}) ->
         can_edit
+
     'a.edit':
       attributes: [
         observe: ["slug","permissions"]
@@ -106,15 +107,13 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
           val = "@"
         val
       attributes: [
-        {
-          name: "href"
-          observe: "organiser_email"
-          onGet: (val) =>
-            if val
-              "mailto:#{val}"
-            else
-              null
-        }
+        name: "href"
+        observe: "organiser_email"
+        onGet: (val) =>
+          if val
+            "mailto:#{val}"
+          else
+            null
       ]
     '.organiser_phone': "organiser_phone"
     '.organiser_address':
@@ -152,7 +151,7 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     '.checkpoints':
       observe: "checkpoints"
       visible: "hasAny"
-
+    
 
   quickSlide: ($el, isVisible, options) =>
     if (isVisible) then $el.slideDown('fast') else $el.slideUp('fast')
@@ -165,6 +164,7 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     new FellRace.Views.CheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints"), race_slug: @model.get('slug')).render()
     new FellRace.Views.RecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
     new FellRace.Views.PastInstancesList(collection: @model.past_instances, el: @$el.find("ul.past_instances")).render()
+    new FellRace.Views.NextOrRecentInstance(model: @model.nextOrRecentInstance(), el: @$el.find(".next_or_recent")).render()
 
   showPresence: (e) =>
     el = $(e.currentTarget)
