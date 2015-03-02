@@ -1,4 +1,5 @@
-@import vendor/medium-editor
+@import lib/jquery.daterangepicker
+@import lib/medium-editor
 @import lib/definitions
 @import lib/notifications
 @import lib/fonts
@@ -38,6 +39,7 @@ a
 
 [contentEditable]
   color: $mid
+  cursor: text
 
 .hidden
   display: none
@@ -888,20 +890,44 @@ section#extra
         &.notready
           color: $red
     &.future
-      .eod, .online, .postal
-        margin-top: 20px
+      .datepicker
+        display: block
+        float: right
+        width: 550px
+        margin-top: -45px
+        padding-bottom: 5px
+        overflow: hidden
+      .daterangepicker
+        display: block
+        float: right
+        width: 550px
+        margin-top: -45px
+        padding-bottom: 20px
+        overflow: hidden
+      section
+        padding-bottom: 20px
+        border-top: 1px dotted $pale
+        padding-top: 20px
+        clear: both
+        +transition('height', 0.5s, ease-out)
         p
           margin: 0
-      .eod_details, .postal_details, .online_details
-        padding: 0 24px
-      .pre_entry
-        #pre_entry_details
-          padding: 20px
-        .online, .postal
-          float: left
-          width: 50%
+        &.basics
+          border-top: none
+      .eod
+        margin-top: 24px
+      .eod_details
+        padding: 0 0 0 24px
+      .postal_details, .online_details
+        padding: 0 0 0 24px
+        clear: both
+        span.daterange, span.currency, span.date
+          font-weight: bold
+      p.entry_form
+        label.pick
+          color: $red
+          cursor: pointer
       .entries
-        margin-top: 3em
         table
           +clear
           tr

@@ -55,7 +55,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
 
   setOptions: (opts={}) =>
     @_gmap.setOptions _.extend(_.clone(@mapConfig), opts)
-    @_gmap.panBy _fellrace.offsetX(), _fellrace.offsetY()
+    @_gmap.panBy _fellrace.offsetX(),0
 
   getMap: =>
     @_gmap
@@ -66,7 +66,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
       @setOptions model.getMapOptions()
     else
       @_gmap.fitBounds model.getBounds()
-    @_gmap.panBy _fellrace.offsetX(), _fellrace.offsetY()
+    @_gmap.panBy _fellrace.offsetX(), 0
 
   addMapTypes: =>
     

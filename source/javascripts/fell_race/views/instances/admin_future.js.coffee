@@ -2,6 +2,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
   template: 'instances/admin_future'
   className: "instance future admin"
   tagName: "section"
+  date_format: "YYYY-MM-D"
 
   events:
     'click a.delete': "delete"
@@ -9,7 +10,9 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
   bindings:
     ".race_name": "race_name"
     ".instance_name": "name"
-    "span.date": "date"
+    "span.date": 
+      observe: "date"
+      onGet: "showDate"
     "span.time": "time"
     "span.entry_limit": "entry_limit"
 
@@ -17,7 +20,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".eod_details":
       observe: "eod"
       visible: true
-      visibleFn: "quickSlide"
     "span.eod_fee":
       observe: "eod_fee"
       onGet: "currency"
@@ -33,8 +35,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     "span.admin_charge":
       observe: "online_entry_fee"
       onGet: "adminCharge"
-    "span.online_entry_closing": "online_entry_closing"
-    "span.online_entry_opening": "online_entry_opening"    
 
     "input#postal_entry": "postal_entry"
     ".postal_details":
@@ -44,8 +44,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     "span.postal_entry_fee":
       observe: "postal_entry_fee"
       onGet: "currency"
-    "span.postal_entry_closing": "postal_entry_closing"
-    "span.postal_entry_opening": "postal_entry_opening"    
     "span.postal_entry_address": "postal_entry_address"
     "input.accept_cheque": "accept_cheque"
     "input.cheque_paid_to": "cheque_paid_to"
@@ -62,11 +60,51 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
         onGet: "raceUrl"
       ]
 
+    "span.postal_dates":
+      observe: ['postal_entry_opening', 'postal_entry_closing']
+      onGet: "showDates"
+
+    "span.online_dates":
+      observe: ['online_entry_opening', 'online_entry_closing']
+      onGet: "showDates"
 
   onRender: () =>
     @$el.find('.editable').editable()
     @stickit()
+    
+    @$el.find('span.date').each (i, el) =>
+      field = $(el)
+      att = field.data('attribute') ? "date"
+      container = $('<div class="datepicker" />').prependTo(field.parents('div').first())
+      field.dateRangePicker
+        inline: true
+        container: container.get(0)
+        format: @date_format
+        alwaysOpen: true
+        showShortcuts: false
+        singleDate: true
+        setValue: (s) =>
+          @model.set att, s, {silent: true}
+        getValue: () =>
+          @showDate(@model.get(att)) if @model.get(att)?
 
+    @$el.find('span.daterange').each (i, el) =>
+      field = $(el)
+      [start_att, end_att] = field.data('attributes').split(',')
+      container = $('<div class="daterangepicker" />').prependTo(field.parents('div').first())
+      field.dateRangePicker
+        inline: true
+        container: container.get(0)
+        format: @date_format
+        alwaysOpen: true
+        showShortcuts: false
+        setValue: (s, start, end) =>
+          console.log "setValue", s, start, end
+          @model.set start_att, start#, {silent: true}
+          @model.set end_att, end#, {silent: true}
+        getValue: () =>
+          @simpleDateRangeString(@model.get(start_att), @model.get(end_att))
+      
     entry_form = new FellRace.Views.AdminPostalEntryForm
       model: @model
       el: @$el.find(".entry_form")
@@ -76,6 +114,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       collection: @model.entries
       el: @$el.find("table.entries")
     entries_table.render()
+
 
   delete: (e) =>
     e.preventDefault() if e
@@ -94,9 +133,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       charge = (fee * ratio + fixed).toFixed(4)
     @currency (Math.ceil(charge * 100) / 100)
 
-  date: (date) ->
-    moment(date).format("D MMMM YYYY") if date
-
   raceUrl: (slug) ->
     "/admin/races/#{slug}"
 
@@ -104,4 +140,35 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     amount?.toFixed(2)
 
   quickSlide: ($el, isVisible, options) =>
+    console.log "quickSlide", $el, isVisible
     if (isVisible) then $el.slideDown('fast') else $el.slideUp('fast')
+
+  showDate: (date) =>
+    moment(date).format(@date_format)
+
+  showDates: ([start,end]=[]) =>
+    @dateRangeString(start, end)
+
+  simpleDateRangeString: (start, end) =>
+    if start? and end?
+      start = moment(start)
+      end = moment(end)
+      "#{start.format(@date_format)} to #{end.format(@date_format)}"
+
+  dateRangeString: (start, end) =>
+    console.log "dateRangeString", start, end
+    if start? and end?
+      start = moment(start)
+      end = moment(end)
+      if start.year() is end.year() 
+        if start.month() is end.month()
+          start_format = "Do"
+          end_format = "Do MMM YYYY"
+        else
+          start_format = "Do MMM"
+          end_format = "Do MMM YYYY"
+      else
+        start_format = end_format = "Do MMM YYYY"
+      "#{start.format(start_format)} to #{end.format(end_format)}"
+    else
+      "Please choose dates"

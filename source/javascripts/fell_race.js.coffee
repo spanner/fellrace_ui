@@ -6,6 +6,7 @@
 #= require vendor/jquery.peity
 #= require vendor/jquery.cookie
 #= require vendor/jquery.complexify
+#= require vendor/jquery.daterangepicker
 #= require vendor/tinycolor
 #= require vendor/markerwithlabel
 #= require vendor/underscore

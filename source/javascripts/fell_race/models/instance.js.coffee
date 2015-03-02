@@ -15,11 +15,17 @@ class FellRace.Models.Instance extends FellRace.Model
     @build()
 
   build: =>
+    @buildDates()
     if @inFuture()
       @buildEntries()
     else
       @buildPerformances()
     @buildWinner()
+  
+  buildDates: =>
+    for attribute in ["date", "postal_entry_opening", "postal_entry_closing", "online_entry_opening", "online_entry_closing"]
+      if date = @get(attribute)
+        @set "attribute", Date.parse(date)
 
   buildEntries: =>
     @entries = new FellRace.Collections.Entries @get("entries"), instance: @
