@@ -5,6 +5,7 @@ class FellRace.Views.ResultsPreview extends Backbone.Marionette.ItemView
     @_performances = @model.performances
 
   onRender: =>
+    console.log @model
     @_checkpoints = new FellRace.Collections.Checkpoints @model.get("checkpoints"), instance: @model
     grid_columns = [
       name: 'position'
@@ -52,8 +53,7 @@ class FellRace.Views.ResultsPreview extends Backbone.Marionette.ItemView
 
     table = new FellRace.Views.ResultsTable
       collection: @_performances
-      columns: grid_columns
-      row: FellRace.Views.ResultRow
+      model: @model
       el: @$el.find("#results_table")
 
     table.render()
