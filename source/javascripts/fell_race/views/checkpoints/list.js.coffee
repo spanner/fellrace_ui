@@ -8,6 +8,8 @@ class FellRace.Views.Checkpoint extends Backbone.Marionette.ItemView
 
   bindings:
     ':el':
+      observe: ["lat","lng"]
+      visible: "latAndLng"
       attributes: [
         name: "class"
         observe: "fixed"
@@ -56,6 +58,8 @@ class FellRace.Views.Checkpoint extends Backbone.Marionette.ItemView
   goTo: =>
     @model.trigger "go_to"
 
+  latAndLng: ([lat,lng]=[]) =>
+    lat and lng
 
 class FellRace.Views.CheckpointsList extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.Checkpoint

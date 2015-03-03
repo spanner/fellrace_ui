@@ -151,7 +151,6 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     '.checkpoints':
       observe: "checkpoints"
       visible: "hasAny"
-    
 
   quickSlide: ($el, isVisible, options) =>
     if (isVisible) then $el.slideDown('fast') else $el.slideUp('fast')
