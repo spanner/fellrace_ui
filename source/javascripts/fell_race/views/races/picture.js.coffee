@@ -183,5 +183,8 @@ class FellRace.Views.Picture extends Backbone.Marionette.ItemView
     if url
       if url.match(/data:image/)
         "background-image: url(#{url})"
-      else
+      else if url.match(/^\//)
         "background-image: url(#{_fellrace.apiUrl()}/#{url})"
+      else
+        "background-image: url(#{url})"
+  
