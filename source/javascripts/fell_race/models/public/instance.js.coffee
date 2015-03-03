@@ -47,11 +47,11 @@ class FellRace.Models.PublicInstance extends Backbone.Model
     @set "postal_entry_active", @get('postal_entry') and !!@get('entry_form') and @get("postal_entry_opening") and @get("postal_entry_closing")  and (@get("postal_entry_opening") < now < @get("postal_entry_closing"))
 
   inFuture: =>
-    if date = @get("date")
+    if date = Date.parse(@get("date"))
       date > Date.now()
 
   inPast: =>
-    if date = @get("date")
+    if date = Date.parse(@get("date"))
       date < Date.now()
 
   getDate: =>

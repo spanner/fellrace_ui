@@ -12,6 +12,7 @@ class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
       @model.set show_splits: false
       _fellrace.content.removeClass "collapsed"
     else
+      console.log @model
       if @model.inFuture()
         view = new FellRace.Views.FutureInstance
           model: @model
