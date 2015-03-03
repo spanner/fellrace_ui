@@ -322,9 +322,11 @@ $shadow: 1px 3px 8px #333
   display: none
 
 #banner
-  position: absolute
-  top: 10px
-  left: 10px
+  position: relative
+  margin:
+    top: 10px
+    left: 10px
+  float: left
   +opacity(0.4)
   &:hover
     +opacity(1)
@@ -439,49 +441,51 @@ $shadow: 1px 3px 8px #333
 
 #user_controls
   position: relative
-  float: right
-  margin: 10px
-  display: none
-  .user
-    a.user_icon
-      position: relative
-      img
-        width: 36px
-        height: 36px
-        border-radius: 24px
-        background-color: white
-    .pointer
-      border-color: transparent
-      border-bottom-color: $verypale
-      border-style: dashed dashed solid
-      border-width: 0 8px 8px
-      position: absolute
-      right: 10px
-      top: -8px
-      z-index: 1
-      height: 0
-      width: 0
-    .user_controls
-      position: absolute
-      top: 50px
-      right: 0
-      width: 120px
-      height: 100px
-      z-index: 999
-      background: $translucent
-      border: 1px solid $verypale
-      border-radius: 0 0 0 5px
-      &.closed
-        display: none
-      a.me
-        position: absolute
-        top: 10px
-        right: 10px
-        background: $blue
-      a.sign_out
-        position: absolute
-        right: 10px
-        bottom: 10px
+  float: left
+  margin:
+    top: 12px
+    left: 10px
+  // display: none
+  // .user
+  //   a.user_icon
+  //     position: relative
+  //     img
+  //       width: 36px
+  //       height: 36px
+  //       border-radius: 24px
+  //       background-color: white
+  //   .pointer
+  //     border-color: transparent
+  //     border-bottom-color: $verypale
+  //     border-style: dashed dashed solid
+  //     border-width: 0 8px 8px
+  //     position: absolute
+  //     right: 10px
+  //     top: -8px
+  //     z-index: 1
+  //     height: 0
+  //     width: 0
+  //   .user_controls
+  //     position: absolute
+  //     top: 50px
+  //     right: 0
+  //     width: 120px
+  //     height: 100px
+  //     z-index: 999
+  //     background: $translucent
+  //     border: 1px solid $verypale
+  //     border-radius: 0 0 0 5px
+  //     &.closed
+  //       display: none
+  //     a.me
+  //       position: absolute
+  //       top: 10px
+  //       right: 10px
+  //       background: $blue
+  //     a.sign_out
+  //       position: absolute
+  //       right: 10px
+  //       bottom: 10px
 .apology
   width: 400px
   
@@ -1004,6 +1008,7 @@ section#extra
         +button
 
   #results_table
+    font-size: 0.8em
     margin-top: 20px
     margin-left: -6px
     &.simple
@@ -1037,9 +1042,8 @@ section#extra
             white-space: nowrap
             display: block
             &.elapsed
-              font-size: 0.85em
             &.split
-              font-size: 0.7em
+              font-size: 0.95em
               color: $pale
 
 #content.collapsed

@@ -164,7 +164,8 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     new FellRace.Views.CheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints"), race_slug: @model.get('slug')).render()
     new FellRace.Views.RecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
     new FellRace.Views.PastInstancesList(collection: @model.past_instances, el: @$el.find("ul.past_instances")).render()
-    new FellRace.Views.NextOrRecentInstance(model: @model.nextOrRecentInstance(), el: @$el.find(".next_or_recent")).render()
+    if instance = @model.nextOrRecentInstance()
+      new FellRace.Views.NextOrRecentInstance(model: instance, el: @$el.find(".next_or_recent")).render()
 
   showPresence: (e) =>
     el = $(e.currentTarget)

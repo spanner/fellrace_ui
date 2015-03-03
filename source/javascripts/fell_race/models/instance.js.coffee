@@ -14,6 +14,7 @@ class FellRace.Models.Instance extends FellRace.Model
     if @inFuture()
       @buildEntries()
     else
+      @buildCheckpoints()
       @buildPerformances()
     @buildWinner()
   
@@ -29,6 +30,11 @@ class FellRace.Models.Instance extends FellRace.Model
     @set "online_entry_active", @get('online_entry') and (@get("online_entry_opening") < now < @get("online_entry_closing"))
     @set "postal_entry_active", @get('postal_entry') and @get('entry_form') and (@get("postal_entry_opening") < now < @get("postal_entry_closing"))
     
+  buildCheckpoints: =>
+    @checkpoints = new FellRace.Collections.Checkpoints @get("checkpoints")
+    @on "change:checkpoints", (model,data) =>
+      @entries.reset data
+
   buildEntries: =>
     @entries = new FellRace.Collections.Entries @get("entries"), instance: @
     @on "change:entries", (model,data) =>

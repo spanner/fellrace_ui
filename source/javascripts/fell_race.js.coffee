@@ -2,13 +2,13 @@
 #= require vendor/jquery
 #= require vendor/modernizr
 #= require vendor/moment
-#= require vendor/jquery.animate-colors
+# require vendor/jquery.animate-colors
 #= require vendor/jquery.peity
 #= require vendor/jquery.cookie
 #= require vendor/jquery.complexify
 #= require vendor/jquery.daterangepicker
 #= require vendor/tinycolor
-#= require vendor/markerwithlabel
+# require vendor/markerwithlabel
 #= require vendor/underscore
 #= require vendor/underscore.string
 #= require vendor/backbone
@@ -16,8 +16,6 @@
 #= require vendor/backbone.stickit
 #= require vendor/backbone.notifications
 #= require vendor/backbone.mapstick
-#= require vendor/backgrid
-#= require vendor/moment-with-locales
 #= require vendor/medium-editor
 #= require vendor/coordtransform
 #= require vendor/latlon

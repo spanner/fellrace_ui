@@ -18,6 +18,9 @@ class FellRace.Views.RacePublicationPolyline extends MapStick.Polyline
     visible:
       attributes: ["route","selected"]
       modelChanged: "visible"
+    clickable:
+      attribute: "selected"
+      modelChanged: "unclickable"
 
   overlayEvents:
     click: "select"
@@ -68,6 +71,9 @@ class FellRace.Views.RacePublicationPolyline extends MapStick.Polyline
   show: =>
     super
     @checkpoints.show()
+
+  unclickable: ({selected:selected}={}) =>
+    !selected
 
 class FellRace.Views.RacePublicationPolylines extends MapStick.OverlayCollection
   itemView: FellRace.Views.RacePublicationPolyline

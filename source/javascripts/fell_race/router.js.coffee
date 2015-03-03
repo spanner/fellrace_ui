@@ -121,6 +121,14 @@ class FellRace.PublicRouter extends FellRace.Router
             route: "racePublication"
             param: slug
             view: layout
+        error: (model,response) =>
+          $.getJSON "#{_fellrace.apiUrl()}/races/#{slug}/permissions", (data) =>
+            if data.permissions.can_edit
+              $.notify('error', "This race needs to be published.")
+              _fellrace.navigate "/admin/races/#{slug}"
+            else
+              $.notify('error', "#{slug}.fellrace.org.uk does not exist.")
+              _fellrace.navigate "/"
 
   clubs: =>
     layout = new FellRace.Views.ClubsLayout
