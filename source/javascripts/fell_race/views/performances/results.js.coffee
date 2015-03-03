@@ -23,11 +23,11 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
       observe: ["competitor_id","competitor_forename","competitor_middlename","competitor_surname"]
       onGet: "compFullName"
       attributes: [
-        {
-          name: "href"
-          observe: ["competitor_id","race_slug","instance_name"]
-          onGet: "compUrl"
-        },
+        # {
+        #   name: "href"
+        #   observe: ["competitor_id","race_slug","instance_name"]
+        #   onGet: "compUrl"
+        # },
         {
           observe: "current"
           name: "class"
@@ -78,7 +78,6 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
   compUrl: ([id,race_slug,instance_name]=[]) =>
     "/runners/#{id}/#{race_slug}/#{instance_name}"
 
-  
 
 class FellRace.Views.ResultsTable extends Backbone.Marionette.CompositeView
   template: "performances/results_table"
@@ -94,6 +93,7 @@ class FellRace.Views.ResultsTable extends Backbone.Marionette.CompositeView
   onRender: =>
     _.each @_checkpoints, (cp) =>
       @$el.find("thead tr").append "<th class='checkpoint'>#{cp}</th>"
+
 
 class FellRace.Views.CheckpointCell extends Backbone.Marionette.ItemView
   template: "performances/checkpoint_cell"

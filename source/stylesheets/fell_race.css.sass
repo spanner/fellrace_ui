@@ -482,7 +482,9 @@ $shadow: 1px 3px 8px #333
         position: absolute
         right: 10px
         bottom: 10px
-
+.apology
+  width: 400px
+  
 a.race_link
   color: $dark
   +hover
@@ -501,7 +503,7 @@ a.race_link
 #content
   position: relative
   width: 580px
-  height: 100%
+  min-height: 100%
   background-color: $translucent
   border-right: 1px solid $mid
   z-index: 200
@@ -602,8 +604,6 @@ a.race_link
             background-position: 0 -240px
             &:hover
               background-position: -32px -240px
-        
-
       .title
         position: absolute
         bottom: 0
@@ -612,11 +612,8 @@ a.race_link
         h2.name
           margin: 0
           font-size: 2em
-          &.on_picture
-            text-shadow: 0 0 0.3em #000,0 0 0.3em #000
-            color: white
-            &.editable
-              color: $verypale
+          text-shadow: 0 0 0.3em #000,0 0 0.3em #000
+          color: white
     #index
       .welcome
         position: relative

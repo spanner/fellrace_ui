@@ -39,16 +39,12 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
       observe: "eod"
       visible: "untrue"
 
-    ".pre_entry":
-      observe: "pre_entry"
-      visible: true
-
     ".online":
-      observe: "online_entry"
+      observe: "online_entry_active"
       visible: true
 
     ".postal":
-      observe: "postal_entry"
+      observe: "postal_entry_active"
       visible: true
 
     #online details

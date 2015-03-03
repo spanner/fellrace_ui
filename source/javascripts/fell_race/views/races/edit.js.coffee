@@ -182,15 +182,16 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
         clearInterval(checkExist)
         $el.text value
         $el.peity("line")
-        @old_peify()
+        @old_peify($el)
     , 100)
 
-  old_peify: () =>
-    @$el.find('span.race_profile').peity "line",
+  old_peify: ($el) =>
+    holder = $el.parent()
+    $el.peity "line",
       fill: "#e2e1dd"
       stroke: "#d6d6d4"
-      width: @$el.find(".profile").width()
-      height: 50
+      width: holder.width()
+      height: 64
 
   buttonText: (image) =>
     if image

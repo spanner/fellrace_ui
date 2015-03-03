@@ -2,6 +2,7 @@ class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
   routes: () =>
     "(/)": @default
     "splits(/)": @splits
+    "enter(/)": @enter
 
   initialize: (opts) ->
     @_competitor = opts.competitor
@@ -33,3 +34,8 @@ class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
       _fellrace.extraContentRegion.show view
     @_previous =
       route: "splits"
+
+  enter: =>
+    view = new FellRace.Views.InstanceEnter
+      model: @model
+    _fellrace.extraContentRegion.show view

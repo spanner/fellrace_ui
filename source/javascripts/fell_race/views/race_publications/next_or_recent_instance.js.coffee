@@ -15,7 +15,7 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
       attributes: [
         name: "href"
         observe: ["race_slug", "name"]
-        onGet: "instanceHref"
+        onGet: "enterOnlineHref"
       ]
     'a.enter_postal':
       observe: 'postal_entry_active'
@@ -44,8 +44,8 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
   entryActiveAndFormAvailable: ([atall, start, end, url]=[]) =>
     atall and url and (start < new Date < end)
 
-  instanceHref: ([race_slug, name]=[]) =>
-    "/races/#{race_slug}/#{name}"
+  enterOnlineHref: ([race_slug, name]=[]) =>
+    "/races/#{race_slug}/#{name}/enter"
 
   niceTime: (time) =>
     time

@@ -50,6 +50,7 @@ class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
         @model.set
           entry_form: file
           entry_form_changed: true
+          entry_form_name: file.name
           entry_form_type: file.type
           entry_form_size: file.size
         , 
@@ -111,5 +112,5 @@ class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
       "Upload entry form"
   
   buttonClass: (filename) =>
-    ext = filename.split('.').pop()
+    ext = filename?.split('.').pop()
     "pick #{ext}"
