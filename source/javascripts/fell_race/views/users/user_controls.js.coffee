@@ -18,29 +18,17 @@ class FellRace.Views.UserControls extends Backbone.Marionette.ItemView
         val is FellRace.Models.UserSession.confirmedState
       visibleFn: "inlineBlock"
 
-    # ".user":
-    #   observe: "state"
-    #   visible: (val) ->
-    #     val is FellRace.Models.UserSession.confirmedState
-    #   visibleFn: "inlineBlock"
-    #
-    # "a.me":
-    #   observe: "state"
-    #   visible: (val) ->
-    #     val is FellRace.Models.UserSession.confirmedState
-    #   visibleFn: "inlineBlock"
+    "a.me":
+      observe: "state"
+      visible: (val) ->
+        val is FellRace.Models.UserSession.confirmedState
+      visibleFn: "inlineBlock"
 
   initialize: ->
     @model = _fellrace.session
 
   onRender: =>
     @stickit()
-    # @user_controls = @$el.find(".user_controls")
-    # @$el.find("a.user_icon").click =>
-    #   if @user_controls.hasClass "closed"
-    #     @user_controls.removeClass "closed"
-    #   else
-    #     @user_controls.addClass "closed"
 
   signOut: =>
     _fellrace.session.reset()
