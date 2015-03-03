@@ -51,9 +51,10 @@ class FellRace.Views.ResultsPreview extends Backbone.Marionette.ItemView
             99999999
         editable: false
 
-    table = new FellRace.Views.ResultsTable
-      collection: @_performances
-      model: @model
-      el: @$el.find("#results_table")
-
-    table.render()
+    # table = new FellRace.Views.ResultsTable
+    #   collection: @_performances
+    #   columns: grid_columns
+    #   row: FellRace.Views.ResultRow
+    #   el: @$el.find("#results_table")
+    #
+    # table.render()

@@ -33,3 +33,7 @@ class FellRace.Views.Attachment extends Backbone.Marionette.ItemView
 
   onRender: =>
     @stickit()
+
+
+class FellRace.Views.AttachmentsList extends Backbone.Marionette.CollectionView
+  itemView: FellRace.Views.Attachment

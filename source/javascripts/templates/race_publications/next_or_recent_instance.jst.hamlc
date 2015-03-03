@@ -5,6 +5,7 @@ at
 %p.entries
   %a.enter_online
     Enter online
+    (not yet!)
   %span.both
     or
   %a.enter_postal

@@ -29,11 +29,11 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
       observe: ["competitor_id","competitor_forename","competitor_middlename","competitor_surname"]
       onGet: "compFullName"
       attributes: [
-        {
-          name: "href"
-          observe: ["competitor_id","race_slug","instance_name"]
-          onGet: "compUrl"
-        },
+        # {
+        #   name: "href"
+        #   observe: ["competitor_id","race_slug","instance_name"]
+        #   onGet: "compUrl"
+        # },
         {
           observe: "current"
           name: "class"

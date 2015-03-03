@@ -24,10 +24,11 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
       @_previous.view.handle path
     else
       instance = @model.past_instances.findWhere(name: instance_name)
-      instance = @model.future_instances.findWhere(name: instance_name) unless instance
+      instance ?= @model.future_instances.findWhere(name: instance_name)
       if instance
         instance.fetch
           success: =>
+            instance.build()
             view = new FellRace.Views.InstanceLayout
               model: instance
               path: path

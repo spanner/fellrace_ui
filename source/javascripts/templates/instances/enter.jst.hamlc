@@ -1,0 +1,20 @@
+%a.close.big
+
+%h2
+  %a.race_name
+  %span.instance_name
+
+.apology
+  %p
+    Well, this is embarrassing. 
+    Online entries are supposed to be open now but the payment system hasn't docked with the bank yet and we can't take your money.
+  %p
+    If you're in a hurry, please feel free to use the
+    %a.enter_postal.file_icon.pdf
+      postal entry form. 
+    You will arrive in the same entry list as everyone else and we will create an account for you here so that you can manage your entry 
+    and find your results.
+  %p
+    The Duddon is not likely to fill up for a few weeks yet, and we are sure this will all be connected by Wednesday (4th), so you could just 
+    come back then.
+    
