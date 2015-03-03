@@ -66,11 +66,11 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
       @_gmap.panTo model.getLatLng()
       @_gmap.setZoom 16
     else
-      bounds = model.getBounds()
-      if bounds.isEmpty()
-        @setOptions model.getMapOptions()
-      else
-        @_gmap.fitBounds bounds
+      if bounds = model.getBounds()
+        if bounds.isEmpty()
+          @setOptions model.getMapOptions()
+        else
+          @_gmap.fitBounds bounds
     @_gmap.panBy _fellrace.offsetX(), 0
 
   addMapTypes: =>
