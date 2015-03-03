@@ -211,7 +211,11 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     window.open e.currentTarget.href
 
   pictureUrl: (url) =>
-    "#{_fellrace.apiUrl()}/#{url}" if url
+    if url
+      if url.match(/^\//)
+        "#{_fellrace.apiUrl()}/#{url}"
+      else
+        url
 
   date: (date) =>
     moment(date).format("D MMMM YYYY")

@@ -174,7 +174,7 @@ class FellRace.Views.Picture extends Backbone.Marionette.ItemView
 
   pictureUrl: (url) =>
     if url
-      if url.match(/data:image/)
+      if url.match(/data:image/) and not url.match(/^\//)
         url
       else
         "#{_fellrace.apiUrl()}/#{url}"

@@ -5,10 +5,7 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
     ":instance_name(/*path)": @instance
 
   initialize: ->
-    @edit()
     super
-
-  edit: =>
     view = new FellRace.Views.Race
       model: @model
     _fellrace.mainRegion.show view
@@ -46,17 +43,16 @@ class FellRace.Views.RacesLayout extends FellRace.Views.LayoutView
     if @_previous.route is "race" and @_previous.param is slug
       @_previous.view.handle path
     else
-      race = new FellRace.Models.Race
-        slug: slug
-      _fellrace.showRace race
-      race.fetch
+      model = new FellRace.Models.Race slug: slug
+      _fellrace.showRace model
+      model.fetch
         success: =>
           view = new FellRace.Views.RaceLayout
-            model: race
+            model: model
             path: path
           @_previous =
             route: "race"
-            param: slug
+            param: model
             view: view
         error: =>
           _fellrace.navigate "/races/#{slug}"
