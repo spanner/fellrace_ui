@@ -44,9 +44,9 @@ class FellRace.Views.RacesLayout extends FellRace.Views.LayoutView
       @_previous.view.handle path
     else
       model = new FellRace.Models.Race slug: slug
-      _fellrace.showRace model
       model.fetch
         success: =>
+          _fellrace.showRace model
           view = new FellRace.Views.RaceLayout
             model: model
             path: path

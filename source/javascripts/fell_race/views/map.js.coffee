@@ -39,6 +39,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     @_race_poly = new FellRace.Views.RacePolyline
       model: race
       map: @_gmap
+    @moveTo race
 
   removeRace: =>
     @_race_poly?.hide()

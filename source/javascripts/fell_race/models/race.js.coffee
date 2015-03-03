@@ -151,6 +151,16 @@ class FellRace.Models.Race extends FellRace.Model
   selected: =>
     @get "selected"
 
+  getRoute: =>
+    @get("encoded_route") || @get("encoded_checkpoint_route")
+
+  getBounds: =>
+    if route = @getRoute()
+      bounds = new google.maps.LatLngBounds()
+      _.each MapStick.decodePathString(route), (point) =>
+        bounds.extend point
+      bounds
+
   # getRequirements: () =>
   #   req = @get("requirements")
   #   req if $(req)[0].innerText.trim() isnt ""
