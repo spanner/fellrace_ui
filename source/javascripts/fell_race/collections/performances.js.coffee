@@ -24,3 +24,9 @@ class FellRace.Collections.Performances extends FellRace.Collection
 
   timeDesc: (m) ->
     -m.getSortTime()
+
+  catAsc: (a,b) ->
+    a.get("cat").localeCompare(b.get("cat"))
+
+  catDesc: (a,b) ->
+    -a.get("cat").localeCompare(b.get("cat"))
