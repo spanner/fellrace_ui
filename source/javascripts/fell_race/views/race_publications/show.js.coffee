@@ -150,7 +150,7 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
 
     '.checkpoints':
       observe: "checkpoints"
-      visible: "hasAny"
+      visible: "hasAnyWithLocation"
 
   quickSlide: ($el, isVisible, options) =>
     if (isVisible) then $el.slideDown('fast') else $el.slideUp('fast')
@@ -201,6 +201,9 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
 
   hasAny: (array) =>
     array.length > 0
+
+  hasAnyWithLocation: (cps) =>
+    _.filter(cps, (cp) -> cp.lat and cp.lng).length > 0
 
   moreThanOne: (array) =>
     array.length > 1
