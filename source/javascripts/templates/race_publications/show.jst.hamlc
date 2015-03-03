@@ -1,6 +1,5 @@
-.race_head
+.head
   .picture
-    %img
   .title
     %h2.name
   .controls

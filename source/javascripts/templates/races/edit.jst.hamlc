@@ -1,4 +1,4 @@
-.race_head
+.head
   .picture
   .title
     %h2.name.editable{:data => {:placeholder => "Race name"}}

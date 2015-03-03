@@ -1,5 +1,4 @@
 %a.race_link
   %span.profile
   %span.race_name
-%span.date
-.entry_count
+  %span.date

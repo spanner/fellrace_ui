@@ -3,7 +3,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
   className: 'gmap'
   mapConfig:
     center: new google.maps.LatLng 54.4098399744, -2.9730033900
-    zoom: 10
+    zoom: 11
     mapTypeId: "OS"
     # scrollwheel: false
     zoomControlOptions:

@@ -26,11 +26,11 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
 
     ".time": "time"
 
-    '.picture img':
+    ".picture":
       attributes: [
-        name: "src"
-        observe: "picture"
-        onGet: "pictureUrl"
+        name: "style"
+        observe: 'picture'
+        onGet: "backgroundImageUrl"
       ]
 
     '.name':
@@ -217,6 +217,13 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
 
   standOutIfPicture: (picture) =>
     "on_picture" if picture
+
+  backgroundImageUrl: (url) =>
+    if url
+      if url.match(/data:image/)
+        "background-image: url(#{url})"
+      else
+        "background-image: url(#{_fellrace.apiUrl()}/#{url})"
 
 class FellRace.Views.RacePublicationsList extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.RacePublication

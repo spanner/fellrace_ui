@@ -1,22 +1,32 @@
-#instances
-  %h2 Upcoming
-  #future_instances
-  %h2 Recent
-  #past_instances
-
-.personal
-
-  .getting_started
-    %h3
+.head
+  .picture.home
+  .title
+    %h2.name.on_picture
       Welcome!
-    %p
-      %strong
-        fellrace.org.uk
-      offers free sites for fell races.
-      Each race gets an address like
-      %a.sample{href: "http://caw.fellrace.org.uk/"} caw.fellrace.org.uk
-      and a set of modern editing tools that will get you up and running in a few minutes. 
-      It&rsquo;s built purely for fell races, by fell runners and race organisers who are trying to avoid doing their real work.
-      %p
-        %a.sign_up_for_event Get yours here
-  .confirm
+
+.welcome
+  %p
+    %strong
+      fellrace.org.uk
+    provides free sites for fell races.
+    Each race gets an address like
+    %a.sample{href: "http://caw.fellrace.org.uk/"} caw.fellrace.org.uk
+    and a set of editing and map-drawing tools that will get you up and running in a few minutes.
+    It&rsquo;s built purely for fell races, by fell runners who like maps and are trying to avoid 
+    doing their real work.
+
+  %p
+    %a.sign_up_for_event 
+      Get your race page here
+      &#9656;
+
+  #instances
+    %h2 Coming up
+    #future_instances
+    %h2 Recent
+    #past_instances
+
+  %p.warning
+    This week we are rolling out a big site update including redesigned race pages, new editing tools, 
+    quicker navigation and (at last) online entries. Please try not to click on anything.
+  
