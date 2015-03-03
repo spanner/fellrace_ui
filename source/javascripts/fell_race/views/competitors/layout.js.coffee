@@ -29,3 +29,30 @@ class FellRace.Views.CompetitorLayout extends FellRace.Views.LayoutView
             route: "race"
             param: race_slug
             view: view
+
+
+class FellRace.Views.CompetitorsLayout extends FellRace.Views.LayoutView
+  routes: () =>
+    "(/)": @default
+    ":id(/*path)": @competitor
+
+  default: =>
+    _fellrace.closeRight()
+    $.notify "error", "no 'runners' page yet"
+    @_previous =
+      route: "default"
+
+  competitor: (id,path) =>
+    if @_previous.route is "competitor" and @_previous.param is id
+      @_previous.view.handle path
+    else
+      model = new FellRace.Models.Competitor id:id
+      model.fetch
+        success: =>
+          view = new FellRace.Views.CompetitorLayout
+            model: model
+            path: path
+          @_previous =
+            route: "competitor"
+            param: id
+            view: view

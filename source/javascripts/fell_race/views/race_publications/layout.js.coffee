@@ -47,3 +47,38 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
     @_previous =
       route: "checkpoint"
       param: slug
+
+class FellRace.Views.RacePublicationsLayout extends FellRace.Views.LayoutView
+  routes: () =>
+    "(/)": @default
+    ":slug(/*path)": @racePublication
+
+  default: =>
+    _fellrace.closeRight()
+    @_previous =
+      route: "default"
+
+  racePublication: (slug,path) =>
+    if @_previous.route is "racePublication" and @_previous.param is slug
+      @_previous.view.handle path
+    else
+      model = _fellrace.race_publications.add(slug: slug)
+      model.fetch
+        success: =>
+          _fellrace.vent.on 'login:changed', =>
+            model.fetchPermissions()
+          layout = new FellRace.Views.RacePublicationLayout
+            model: model
+            path: path
+          @_previous =
+            route: "racePublication"
+            param: slug
+            view: layout
+        error: (model,response) =>
+          $.getJSON "#{_fellrace.apiUrl()}/races/#{slug}/permissions", (data) =>
+            if data.permissions.can_edit
+              $.notify('error', "This race needs to be published.")
+              _fellrace.navigate "/admin/races/#{slug}"
+            else
+              $.notify('error', "#{slug}.fellrace.org.uk does not exist.")
+              _fellrace.navigate "/"

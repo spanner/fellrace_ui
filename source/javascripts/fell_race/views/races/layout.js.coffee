@@ -37,3 +37,26 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
     view = new FellRace.Views.NewInstance
       model: model
     _fellrace.extraContentRegion.show view
+
+class FellRace.Views.RacesLayout extends FellRace.Views.LayoutView
+  routes: =>
+    ":slug(/*path)": @race
+
+  race: (slug,path) =>
+    if @_previous.route is "race" and @_previous.param is slug
+      @_previous.view.handle path
+    else
+      race = new FellRace.Models.Race
+        slug: slug
+      _fellrace.showRace race
+      race.fetch
+        success: =>
+          view = new FellRace.Views.RaceLayout
+            model: race
+            path: path
+          @_previous =
+            route: "race"
+            param: slug
+            view: view
+        error: =>
+          _fellrace.navigate "/races/#{slug}"

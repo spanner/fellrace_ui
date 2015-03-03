@@ -62,11 +62,10 @@ class FellRace.BaseRouter extends Backbone.Router
 class FellRace.PublicRouter extends FellRace.Router
   routes:
     "(/)": "index"
-    "runners(/)": "competitors"
-    "runners/:id(/*path)": "competitor"
-    "races/:slug(/*path)": "racePublication"
-    "clubs(/)": "clubs"
-    "clubs/:id(/*path)": "club"
+    "races(/*path)": "racePublications"
+    "runners(/*path)": "competitors"
+    "clubs(/*path)": "clubs"
+    "users(/*path)": "users"
     "confirm/:uid/:token(/)": "confirmUser"
     "*path": "index"
 
@@ -84,67 +83,44 @@ class FellRace.PublicRouter extends FellRace.Router
       @_previous =
         route: "index"
 
-  competitors: =>
-    unless @_previous.route is "competitors"
-      layout = new FellRace.Views.CompetitorsLayout
-      @_previous =
-        route: "competitors"
-
-  competitor: (id,path) =>
-    if @_previous.route is "competitor" and @_previous.param is id
+  racePublications: (path) =>
+    if @_previous.route is "race_publications"
       @_previous.view.handle path
     else
-      model = new FellRace.Models.Competitor id:id
-      model.fetch
-        success: =>
-          view = new FellRace.Views.CompetitorLayout
-            model: model
-            path: path
-          @_previous =
-            route: "competitor"
-            param: id
-            view: view
-
-  racePublication: (slug,path) =>
-    if @_previous.route is "racePublication" and @_previous.param is slug
-      @_previous.view.handle path
-    else
-      model = _fellrace.race_publications.add(slug: slug)
-      model.fetch
-        success: =>
-          _fellrace.vent.on 'login:changed', =>
-            model.fetchPermissions()
-          layout = new FellRace.Views.RacePublicationLayout
-            model: model
-            path: path
-          @_previous =
-            route: "racePublication"
-            param: slug
-            view: layout
-        error: (model,response) =>
-          $.getJSON "#{_fellrace.apiUrl()}/races/#{slug}/permissions", (data) =>
-            if data.permissions.can_edit
-              $.notify('error', "This race needs to be published.")
-              _fellrace.navigate "/admin/races/#{slug}"
-            else
-              $.notify('error', "#{slug}.fellrace.org.uk does not exist.")
-              _fellrace.navigate "/"
-
-  clubs: =>
-    layout = new FellRace.Views.ClubsLayout
-    @_previous =
-      route: "clubs"
-
-  club: (id,path) =>
-    if @_previous.route is "club" and @_previous.param is id
-      @_previous.view.handle path
-    else
-      view = new FellRace.Views.ClubLayout
-        model: new FellRace.Models.Club id:id
+      view = new FellRace.Views.RacePublicationsLayout
         path: path
       @_previous =
-        route: "club"
-        param: id
+        route: "race_publications"
+        view: view
+
+  competitors: (path) =>
+    if @_previous.route is "competitors"
+      @_previous.view.handle path
+    else
+      view = new FellRace.Views.CompetitorsLayout
+        path: path
+      @_previous =
+        route: "competitors"
+        view: view
+
+  clubs: (path) =>
+    if @_previous.route is "clubs"
+      @_previous.view.handle path
+    else
+      view = new FellRace.Views.ClubsLayout
+        path: path
+      @_previous =
+        route: "clubs"
+        view: view
+
+  users: (path) =>
+    if @_previous.route is "users"
+      @_previous.view.handle path
+    else
+      view = new FellRace.Views.UsersLayout
+        path: path
+      @_previous =
+        route: "users"
         view: view
 
   confirmUser: (uid,token) =>
@@ -152,28 +128,18 @@ class FellRace.PublicRouter extends FellRace.Router
 
 class FellRace.AdminRouter extends FellRace.Router
   routes:
-    "races/:slug(/*path)": "race"
+    "races(/*path)": "races"
 
   initialize: ->
     _fellrace.adminMapView()
     super
 
-  race: (slug,path) =>
-    if @_previous.route is "race" and @_previous.param is slug
+  races: (path) =>
+    if @_previous.route is "races"
       @_previous.view.handle path
     else
-      race = new FellRace.Models.Race
-        slug: slug
-      _fellrace.showRace race
-      race.fetch
-        success: =>
-          view = new FellRace.Views.RaceLayout
-            model: race
-            path: path
-          @_previous =
-            route: "race"
-            param: slug
-            view: view
-        error: =>
-          _fellrace.navigate "/races/#{slug}"
-
+      view = new FellRace.Views.RacesLayout
+        path: path
+      @_previous =
+        route: "races"
+        view: view
