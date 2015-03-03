@@ -41,11 +41,8 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
         observe: ["race_slug","name","competitor_id"]
         name: "href"
         onGet: ([slug,name,comp_id]=[]) =>
-          if comp_id
-            url = "/runners/#{comp_id}"
-          else
-            url = "/races"
-          url = "#{url}/#{slug}/#{name}/splits"
+          stem = if comp_id then "/runners/#{comp_id}" else "/races"
+          url = "#{stem}/#{slug}/#{name}/splits"
       ]
 
     "a.simple":
@@ -55,17 +52,12 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
         observe: ["race_slug","name","competitor_id"]
         name: "href"
         onGet: ([slug,name,comp_id]=[]) =>
-          if comp_id
-            url = "/runners/#{comp_id}"
-          else
-            url = "/races"
-          url = "#{url}/#{slug}/#{name}"
+          stem = if comp_id then "/runners/#{comp_id}" else "/races"
+          url = "#{stem}/#{slug}/#{name}"
       ]
 
   initialize: ({competitor:@_competitor}={}) ->
-    if @_competitor
-      @model.set competitor_id: @_competitor.id
-    #
+    @model.set(competitor_id: @_competitor.id) if @_competitor
 
   onRender: =>
     @stickit()
@@ -73,9 +65,6 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
     if @_performances.length
       if @_competitor
         @_performances.findWhere(competitor_id: @_competitor.id)?.set current: true
-
-    # Results.search.show new Results.Views.PerformancesFilter
-    #   collection: @_performances
 
     table = new FellRace.Views.ResultsTable
       collection: @_performances

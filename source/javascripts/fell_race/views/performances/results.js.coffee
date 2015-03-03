@@ -1,8 +1,8 @@
 class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
   template: "performances/result_row"
   tagName: "tr"
-  bindings:
 
+  bindings:
     ":el":
       attributes: [
         observe: "cat"
@@ -11,7 +11,13 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
           "female" if cat?.match /[lfw]/i
       ]
 
-    "span.pos": "position"
+    "span.pos":
+      observe: ["position","status"]
+      onGet: ([pos,status]=[]) =>
+        if status.id != 100
+          status.name
+        else
+          pos
     "span.club": "club"
     "span.cat": "cat"
 
@@ -65,10 +71,10 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
       @$el.append view.render().$el
 
   compFullName: ([id,first,middle,last]=[]) =>
-    @fullName([first,middle,last]) if id
+    # @fullName([first,middle,last]) if id
 
   perfFullName: ([id,first,middle,last]=[]) =>
-    @fullName([first,middle,last]) unless id
+    @fullName([first,middle,last])# unless id
 
   fullName: ([first,middle,last]=[]) =>
     name = first
@@ -78,12 +84,18 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
   compUrl: ([id,race_slug,instance_name]=[]) =>
     "/runners/#{id}/#{race_slug}/#{instance_name}"
 
-  
+
 
 class FellRace.Views.ResultsTable extends Backbone.Marionette.CompositeView
   template: "performances/results_table"
   itemView: FellRace.Views.ResultRow
   itemViewContainer: "tbody"
+
+  collectionEvents:
+    sort: "sort"
+
+  events:
+    "click th a": "sortByColumn"
 
   itemViewOptions: =>
     checkpoints: @_checkpoints
@@ -94,6 +106,21 @@ class FellRace.Views.ResultsTable extends Backbone.Marionette.CompositeView
   onRender: =>
     _.each @_checkpoints, (cp) =>
       @$el.find("thead tr").append "<th class='checkpoint'>#{cp}</th>"
+
+  sortByColumn: (e) =>
+    if attr = e.target.getAttribute("data-sort")
+      if @_sort?.attr is attr and @_sort.order is "Asc"
+        order = "Desc"
+      else
+        order = "Asc"
+      @collection.comparator = @collection["#{attr}#{order}"] # e.g. "posAsc"
+      @collection.sort()
+      @_sort =
+        attr: attr
+        order: order
+
+  sort: =>
+    @render()
 
 class FellRace.Views.CheckpointCell extends Backbone.Marionette.ItemView
   template: "performances/checkpoint_cell"

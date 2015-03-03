@@ -1,8 +1,13 @@
 class FellRace.Models.Performance extends FellRace.Model
-  initialize: ->
-    super
-    @collection?.on "sort", =>
-      @set odd_or_even: if @collection.indexOf(@) % 2 then "odd" else "even"
+  getSortName: =>
+    @get("competitor_surname") or @get("surname")
 
-  getRace: =>
-    @instance.race
+  getSortPos: =>
+    pos = @get("position")
+    pos = 9999999999 if pos is 0
+    pos
+
+  getSortTime: =>
+    time = @get("time")
+    time = 9999999999 if time is 0
+    time
