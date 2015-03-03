@@ -5,20 +5,21 @@
       Welcome!
 
 .welcome
-  %p
-    %strong
-      fellrace.org.uk
-    provides free sites for fell races.
-    Each race gets an address like
-    %a.sample{href: "http://caw.fellrace.org.uk/"} caw.fellrace.org.uk
-    and a set of editing and map-drawing tools that will get you up and running in a few minutes.
-    It&rsquo;s built purely for fell races, by fell runners who like maps and are trying to avoid 
-    doing their real work.
+  .getting_started
+    %p
+      %strong
+        fellrace.org.uk
+      provides free sites for fell races.
+      Each race gets an address like
+      %a.sample{href: "http://caw.fellrace.org.uk/"} caw.fellrace.org.uk
+      and a set of editing and map-drawing tools that will get you up and running in a few minutes.
+      It&rsquo;s built purely for fell races, by fell runners who like maps and are trying to avoid 
+      doing their real work.
 
-  %p
-    %a.sign_up_for_event 
-      Get your race page here
-      &#9656;
+    %p
+      %a.sign_up_for_event 
+        Get your race page here
+        &#9656;
 
   #instances
     %h2 Coming up
