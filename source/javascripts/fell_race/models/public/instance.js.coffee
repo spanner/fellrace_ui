@@ -1,10 +1,6 @@
 class FellRace.Models.PublicInstance extends Backbone.Model
 
   initialize: (opts) ->
-    if opening_datestring = @get("online_entry_opening")
-      @set "online_entry_opening", Date.parse(opening_datestring)
-    if closing_datestring = @get("online_entry_closing")
-      @set "online_entry_closing", Date.parse(closing_datestring)
     @build()
 
   build: =>
@@ -12,6 +8,11 @@ class FellRace.Models.PublicInstance extends Backbone.Model
     @performances = new FellRace.Collections.Performances @get("performances"), instance: @
     @checkpoints = new FellRace.Collections.Checkpoints @get("checkpoints")
     @rootPerformances()
+
+    for att in ["date", "postal_entry_opening", "postal_entry_closing", "online_entry_opening", "online_entry_closing"]
+      date = @get(att)
+      @set(att, Date.parse(date)) if date?
+      @on "change:#{att}", @setEntryFlags
 
     @entries.on "add remove reset", () =>
       @set total_entries: @entries.length
@@ -22,6 +23,7 @@ class FellRace.Models.PublicInstance extends Backbone.Model
         if collection is "performances"
           @rootPerformances()
 
+    @setEntryFlags()
     @buildWinner()
 
   rootPerformances: =>
@@ -39,14 +41,18 @@ class FellRace.Models.PublicInstance extends Backbone.Model
   getPerformancesCount: =>
     @get "performances_count"
 
+  setEntryFlags: =>
+    now = new Date
+    @set "online_entry_active", @get('online_entry') and @get("online_entry_opening") and @get("online_entry_closing") and (@get("online_entry_opening") < now < @get("online_entry_closing"))
+    @set "postal_entry_active", @get('postal_entry') and !!@get('entry_form') and @get("postal_entry_opening") and @get("postal_entry_closing")  and (@get("postal_entry_opening") < now < @get("postal_entry_closing"))
+
   inFuture: =>
-    if date = @getDate()
+    if date = @get("date")
       date > Date.now()
 
   inPast: =>
-    if date = @getDate()
+    if date = @get("date")
       date < Date.now()
 
   getDate: =>
-    if date = @get("date")
-      Date.parse(date)
+    @get("date")

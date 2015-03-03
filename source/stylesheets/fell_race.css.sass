@@ -1,4 +1,5 @@
-@import vendor/medium-editor
+@import lib/jquery.daterangepicker
+@import lib/medium-editor
 @import lib/definitions
 @import lib/notifications
 @import lib/fonts
@@ -27,6 +28,14 @@ body
   bottom: 0
   left: 0
 
+h1,h2,h3,h4
+  font-weight: bold
+  margin-bottom: 0.2em
+  &+p
+    margin-top: 0.2em
+  .addendum
+    font-weight: normal
+    font-size: 65%
 a
   text-decoration: none
   color: $link
@@ -38,6 +47,7 @@ a
 
 [contentEditable]
   color: $mid
+  cursor: text
 
 .hidden
   display: none
@@ -45,9 +55,6 @@ a
 span.editable
   display: inline-block
   min-width: 12px
-
-input[type="file"]
-  display: none
 
 a.add
   color: $green
@@ -79,6 +86,9 @@ a.enter_online
 
 .note
   +quiet
+
+.warning
+  +loud
 
 form.bubble
   width: 320px
@@ -473,9 +483,25 @@ $shadow: 1px 3px 8px #333
         right: 10px
         bottom: 10px
 
+a.race_link
+  color: $dark
+  +hover
+  margin: 10px o
+  span.race_name
+    display: inline-block
+    vertical-align: bottom
+  svg
+    display: inline-block
+    vertical-align: bottom
+    &+span.race_name
+      margin-left: 4px
+  span.date
+    color: $pale
+  
 #content
   position: relative
   width: 580px
+  height: 100%
   background-color: $translucent
   border-right: 1px solid $mid
   z-index: 200
@@ -507,8 +533,100 @@ $shadow: 1px 3px 8px #333
   main
     position: relative
     width: 100%
+    .head
+      position: relative
+      min-height: 70px
+      .picture
+        position: relative
+        width: 100%
+        height: 360px
+        overflow: hidden
+        background:
+          color: $mid
+          position: center center
+          size: cover
+          repeat: no-repeat
+        &.home
+          background-image: image-url("fells.jpg")
+        input[type="file"]
+          display: none
+        label.pick
+          position: absolute
+          top: 100px
+          left: 0
+          width: 100%
+          padding: 30px 0
+          margin: 0 auto
+          color: white
+          text-shadow: 0 0 0.3em #000,0 0 0.3em #000
+          text-align: center
+          cursor: pointer
+
+      .controls
+        position: absolute
+        right: 12px
+        top: 12px
+        font-size: 1.7em
+        
+      .social
+        position: absolute
+        right: 14px
+        bottom: 14px
+        height: 26px
+        a
+          display: block
+          float: right
+          overflow: hidden
+          width: 26px
+          height: 26px
+          margin-left: 5px
+          text-indent: 50px
+          line-height: 50px
+          &:last-child
+            margin-left: 0
+          background:
+            position: 0 0
+            image: image-url('externals.png')
+          &.twit
+            &:hover
+              background-position: -32px 0
+          &.fb
+            background-position: 0 -48px
+            &:hover
+              background-position: -32px -48px
+          &.fra
+            background-position: 0 -192px
+            &:hover
+              background-position: -32px -192px
+          &.shr
+            background-position: 0 -240px
+            &:hover
+              background-position: -32px -240px
+        
+
+      .title
+        position: absolute
+        bottom: 0
+        left: 0
+        margin: 0 0 8px 28px
+        h2.name
+          margin: 0
+          font-size: 2em
+          &.on_picture
+            text-shadow: 0 0 0.3em #000,0 0 0.3em #000
+            color: white
+            &.editable
+              color: $verypale
     #index
-      margin: 0 15px
+      .welcome
+        position: relative
+        margin: 20px 0
+        width: 100%
+        position: relative
+        box-sizing: border-box
+        padding: 0 24px 20px 32px
+        a.sign_up_for_event
+          font-weight: bold
     #competitors
       .search_form
         margin-bottom: 10px
@@ -522,76 +640,6 @@ $shadow: 1px 3px 8px #333
       position: relative
       margin: 0
       width: 100%
-      .race_head
-        position: relative
-        min-height: 70px
-        .picture
-          position: relative
-          width: 100%
-          height: 360px
-          overflow: hidden
-          img
-            opacity: 0.95
-          .preview
-            position: relative
-            width: 100%
-
-        .controls
-          position: absolute
-          right: 12px
-          top: 12px
-          font-size: 1.7em
-          
-        .social
-          position: absolute
-          right: 14px
-          bottom: 14px
-          height: 26px
-          a
-            display: block
-            float: right
-            overflow: hidden
-            width: 26px
-            height: 26px
-            margin-left: 5px
-            text-indent: 50px
-            line-height: 50px
-            &:last-child
-              margin-left: 0
-            background:
-              position: 0 0
-              image: image-url('externals.png')
-            &.twit
-              &:hover
-                background-position: -32px 0
-            &.fb
-              background-position: 0 -48px
-              &:hover
-                background-position: -32px -48px
-            &.fra
-              background-position: 0 -192px
-              &:hover
-                background-position: -32px -192px
-            &.shr
-              background-position: 0 -240px
-              &:hover
-                background-position: -32px -240px
-          
-
-        .title
-          position: absolute
-          bottom: 0
-          left: 0
-          margin: 0 0 8px 28px
-          h2.name
-            margin: 0
-            font-size: 2em
-            &.on_picture
-              text-shadow: 0 0 0.3em #000,0 0 0.3em #000
-              color: white
-              &.editable
-                color: $verypale
-
       .race_body
         position: relative
         box-sizing: border-box
@@ -608,7 +656,7 @@ $shadow: 1px 3px 8px #333
           .profile
             position: relative
             .basic_details
-              margin-top: -2em
+              margin-top: -1.8em
               font-weight: bold
               text-align: center
           .next_or_recent
@@ -714,7 +762,8 @@ $shadow: 1px 3px 8px #333
           ul.attachments
             .attachment
               input[type="file"]
-                display: none
+                position: absolute
+                left: 10000px
               span.name
                 max-width: 200px
                 vertical-align: middle
@@ -769,7 +818,8 @@ $shadow: 1px 3px 8px #333
               span.name, a.name
                 font-weight: bold
               input[type="file"]
-                display: none
+                position: absolute
+                left: 10000px
               &.frozen
                 +opacity(0.25)
           .enter_race
@@ -888,20 +938,59 @@ section#extra
         &.notready
           color: $red
     &.future
-      .eod, .online, .postal
-        margin-top: 20px
+      .datepicker
+        display: block
+        float: right
+        width: 550px
+        margin-top: -45px
+        padding-bottom: 5px
+        overflow: hidden
+      .daterangepicker
+        display: block
+        float: right
+        width: 550px
+        margin-top: -45px
+        padding-bottom: 20px
+        overflow: hidden
+      section
+        padding-bottom: 20px
+        border-top: 1px dotted $pale
+        padding-top: 20px
+        clear: both
+        +transition('height', 0.5s, ease-out)
         p
           margin: 0
-      .eod_details, .postal_details, .online_details
-        padding: 0 24px
-      .pre_entry
-        #pre_entry_details
-          padding: 20px
-        .online, .postal
-          float: left
-          width: 50%
+        &.basics
+          border-top: none
+      .eod
+        margin-top: 24px
+      .eod_details
+        padding: 0 0 0 24px
+      .postal_details, .online_details
+        padding: 0 0 0 24px
+        clear: both
+        span.daterange, span.currency, span.date
+          font-weight: bold
+      p.entry_form
+        label.pick
+          display: inline-block
+          color: #df0f00
+          cursor: pointer
+          &.pdf
+            background-image: image-url('icons.png')
+            margin-left: -25px
+            text-indent: 25px
+            line-height: 26px
+            color: #df0f00
+            background: 
+              repeat: no-repeat
+              position: 0 0
+              position: 0 -200px
+        input[type="file"]
+          display: none
+
+        
       .entries
-        margin-top: 3em
         table
           +clear
           tr

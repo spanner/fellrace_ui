@@ -31,8 +31,10 @@ class FellRace.Views.IndexInstance extends Backbone.Marionette.ItemView
 
   peify: =>
     @$el.find('span.profile').peity "line",
+      fill: "#e2e1dd"
+      stroke: "#d6d6d4"
       width: 40
-      height: 20
+      height: 24
 
   raceUrl: (slug) =>
     "/races/#{slug}"

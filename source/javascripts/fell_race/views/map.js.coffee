@@ -3,7 +3,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
   className: 'gmap'
   mapConfig:
     center: new google.maps.LatLng 54.4098399744, -2.9730033900
-    zoom: 10
+    zoom: 11
     mapTypeId: "OS"
     # scrollwheel: false
     zoomControlOptions:
@@ -56,7 +56,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
 
   setOptions: (opts={}) =>
     @_gmap.setOptions _.extend(_.clone(@mapConfig), opts)
-    @_gmap.panBy _fellrace.offsetX(), _fellrace.offsetY()
+    @_gmap.panBy _fellrace.offsetX(),0
 
   getMap: =>
     @_gmap
@@ -71,7 +71,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
         @setOptions model.getMapOptions()
       else
         @_gmap.fitBounds bounds
-    @_gmap.panBy _fellrace.offsetX(), _fellrace.offsetY()
+    @_gmap.panBy _fellrace.offsetX(), 0
 
   addMapTypes: =>
     

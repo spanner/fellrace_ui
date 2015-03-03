@@ -2,12 +2,6 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
   template: "race_publications/next_or_recent_instance"
 
   bindings:
-    "a":
-      attributes: [
-        name: "href"
-        observe: ["race_slug", "name"]
-        onGet: "url"
-      ]
     ".date":
       observe: "date"
       onGet: "niceDate"
@@ -15,22 +9,42 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
       observe: "time"
       onGet: "niceTime"
     'a.enter_online':
-      observe: ['online_entry', 'online_entry_opening', 'online_entry_closing']
-      visible: "entryActive"
+      observe: 'online_entry_active'
+      visible: true
       visibleFn: "visibleBlock"
+      attributes: [
+        name: "href"
+        observe: ["race_slug", "name"]
+        onGet: "instanceHref"
+      ]
+    'a.enter_postal':
+      observe: 'postal_entry_active'
+      visible: true
+      visibleFn: "visibleBlock"
+      attributes: [
+        name: "href"
+        observe: "entry_form"
+      ,
+        name: "class"
+        observe: "entry_form_type"
+      ]
+    'span.both':
+      observe: ["online_entry_active", "postal_entry_active"]
+      visible: ([a,b]=[]) -> a and b
     'a.results':
       observe: 'file'
       visible: true
 
   onRender: =>
-    console.log "nori render", @model.attributes
     @stickit()
   
   entryActive: ([atall, start, end]=[]) =>
-    console.log "entryActive", arguments
     atall and (start < new Date < end)
 
-  url: ([race_slug, name]=[]) =>
+  entryActiveAndFormAvailable: ([atall, start, end, url]=[]) =>
+    atall and url and (start < new Date < end)
+
+  instanceHref: ([race_slug, name]=[]) =>
     "/races/#{race_slug}/#{name}"
 
   niceTime: (time) =>

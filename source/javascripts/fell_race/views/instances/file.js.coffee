@@ -67,7 +67,8 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
     @model.set
       file: data
       file_changed: true
-    , {persistChange:true}
+    , 
+      persistChange: true
 
   fileOk: (filename, filesize) =>
     @fileNameOk(filename, filesize) and @fileSizeOk(filename, filesize)

@@ -67,10 +67,6 @@ class FellRace.Application extends Backbone.Marionette.Application
 
     @content = $('#content')
     view = $(window)
-    @aspect_ratio = view.height() / view.width()
-    view.on "resize", =>
-      @aspect_ratio = view.height() / view.width()
-      @resizeContent()
 
     Backbone.history.start
       pushState: true
@@ -122,19 +118,10 @@ class FellRace.Application extends Backbone.Marionette.Application
       seconds = (parseInt(s,10)||0) + 60 * (parseInt(m,10)||0) + 3600 * (parseInt(h,10)||0)
 
   offsetX: =>
-    if @isPortrait()
-      0
+    if @open_drawer
+      -(@content.width() - 10) / 2
     else
-      if @open_drawer
-        -(@content.width() - 10) / 2
-      else
-        -10 / 2
-
-  offsetY: =>
-    if @isPortrait()
-      @content.height() / 2        
-    else
-      0
+      -10 / 2
 
   moveMapTo: (model) =>
     @mapView.moveTo model
@@ -150,9 +137,6 @@ class FellRace.Application extends Backbone.Marionette.Application
 
   adminMapView: =>
     @mapView.adminView()
-
-  isPortrait: =>
-    @aspect_ratio > 1
 
   actionRegionSetup: =>
     @actionRegion

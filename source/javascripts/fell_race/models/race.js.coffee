@@ -106,7 +106,6 @@ class FellRace.Models.Race extends FellRace.Model
       id: @id
       date: next_instance?.get("date")
       time: next_instance?.get("time")
-      online_entry: next_instance?.onlineEntryReady()
       name: @get("name")
       slug: @get("slug")
       cat: @get("cat")
@@ -119,9 +118,10 @@ class FellRace.Models.Race extends FellRace.Model
       organiser_address: @get("organiser_address")
       organiser_phone: @get("organiser_phone")
       shr_id: @get("shr_id")
-      # fb_event_id: @get("fb_event_id") #TODO FB page?
+      fb_event_id: @get("fb_event_id")
       twitter_id: @get("twitter_id")
-      requirements: @getRequirements()
+      fra_id: @get("fra_id")
+      requirements: @get("requirements")
       route_profile: @get("route_profile")
       route: @get("encoded_route")
       links: @links.map (link) -> link.jsonForPublication()
@@ -151,6 +151,6 @@ class FellRace.Models.Race extends FellRace.Model
   selected: =>
     @get "selected"
 
-  getRequirements: () =>
-    req = @get("requirements")
-    req if $(req)[0].innerText.trim() isnt ""
+  # getRequirements: () =>
+  #   req = @get("requirements")
+  #   req if $(req)[0].innerText.trim() isnt ""

@@ -1,7 +1,7 @@
 class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
   template: "instances/admin_postal_entry_form"
   size_limit: 1
-  allowed_extensions: [".doc",".docx",".pdf"]
+  allowed_extensions: [".pdf"]
 
   events: 
     "change input.file": 'getPickedFile'
@@ -9,24 +9,24 @@ class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
 
   bindings:
     "label.pick":
-      observe: 'file'
+      observe: ['entry_form', 'entry_form_name']
       onGet: "buttonText"
+      attributes: [
+        name: "class"
+        observe: 'entry_form_name'
+        onGet: "buttonClass"
+      ]
     "a.detach":
-      observe: 'file'
-      visible: true
-    ".file_metadata":
-      observe: 'file'
+      observe: 'entry_form'
       visible: true
     ".confirmation":
-      observe: 'file'
+      observe: 'entry_form'
       visible: true
       visibleFn: "visibleInline"
-    ".filesize":
-      observe: "file_size"
+    "span.note":
+      observe: "entry_form_size"
       onGet: "niceSize"
-    ".filename":
-      observe: "file_name"
-      onGet: "fileNameOrDefault"
+      
 
   onRender: () =>
     @_filefield = @$el.find('input.file')
@@ -36,34 +36,24 @@ class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
 
   getPickedFile: (e) =>
     if files = @_filefield[0].files
-      @setFile files.item(0)
-      # @readLocalFile files[0]
-
+      @readLocalFile files[0]
+      
   removeFile: (e) =>
     if e
       e.preventDefault()
       e.stopPropagation()
     @model.dropFile()
 
-  # file-handling
-
   readLocalFile: (file) =>
     if file?
       if @fileOk(file.name, file.size)
-        # job = _fellrace.announce("Reading file")
-        reader = new FileReader()
-        reader.onprogress = (e) ->
-          # job.setProgress(e)
-        reader.onloadend = () =>
-          @setFile reader.result, file.name, file.size
-          # job.complete()
-        reader.readAsDataURL(file)
-
-  setFile: (data, name, size) =>
-    @model.set
-      file: data
-      file_changed: true
-    , {persistChange:true}
+        @model.set
+          entry_form: file
+          entry_form_changed: true
+          entry_form_type: file.type
+          entry_form_size: file.size
+        , 
+          persistChange: true
 
   fileOk: (filename, filesize) =>
     @fileNameOk(filename, filesize) and @fileSizeOk(filename, filesize)
@@ -87,18 +77,18 @@ class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
     if value
       if value > 1048576
         mb = Math.floor(value / 10485.76) / 100
-        "#{mb}MB, "
+        "#{mb}MB"
       else
         kb = Math.floor(value / 1024)
-        "#{kb}KB, "
+        "#{kb}KB"
     else
-      ""
+      "PDF files only, please"
     
   complain: (error, filename, filesize) =>
     if error is "toobig"
       _fellrace.notify "refusal", "Sorry: there is a limit of #{@size_limit}MB for these files and #{filename} is #{@niceSize(filesize)}."
     else if error is "wrongtype"
-      _fellrace.notify "refusal", "Sorry: #{filename} doesn't look like a '.pdf', '.doc' or '.docx' file. Please choose another, or make sure that your file has the right extension."
+      _fellrace.notify "refusal", "Sorry: #{filename} doesn't look like a PDF file. Please choose another, or make sure that your file has the right extension."
     else
       _fellrace.notify "error", "Unknown file-selection error"
 
@@ -114,9 +104,12 @@ class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
     else
       $el.css "display", "none"
 
-  buttonText: (file) =>
+  buttonText: ([file, file_name]=[]) =>
     if file
-      "Replace entry form"
+      file_name
     else
       "Upload entry form"
   
+  buttonClass: (filename) =>
+    ext = filename.split('.').pop()
+    "pick #{ext}"

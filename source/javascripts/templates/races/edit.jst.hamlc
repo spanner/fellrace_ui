@@ -1,7 +1,5 @@
-.race_head
+.head
   .picture
-    %label.pick{for: "picker"}
-      picture
   .title
     %h2.name.editable{:data => {:placeholder => "Race name"}}
   .controls
