@@ -62,6 +62,8 @@ class FellRace.Views.PastIndexInstance extends FellRace.Views.IndexInstance
       observe: "performances_count"
       visible: true
     "a.results_link":
+      observe: "has_results"
+      visible: true
       attributes: [
         {
           observe: ["name","race_slug"]
