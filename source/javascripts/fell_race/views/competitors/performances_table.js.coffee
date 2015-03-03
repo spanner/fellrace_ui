@@ -1,4 +1,4 @@
-class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
+class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemView
   template: "competitors/performance"
   tagName: "tr"
 
@@ -71,5 +71,5 @@ class FellRace.Views.CompetitorPerformance extends Backbone.Marionette.ItemView
 
 class FellRace.Views.CompetitorPerformancesTable extends Backbone.Marionette.CompositeView
   template: "competitors/performances"
-  itemView: FellRace.Views.CompetitorPerformance
+  itemView: FellRace.Views.CompetitorPerformanceRow
   itemViewContainer: 'tbody'

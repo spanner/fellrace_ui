@@ -1,0 +1,6 @@
+%thead
+  %tr
+    %th.date date
+    %th.race_name race
+
+%tbody

@@ -1,7 +1,6 @@
-%p.name
-  forename:
-  %span.forename{data: {placeholder: "forename"}}
-  middlename:
-  %span.middlename{data: {placeholder: "middlename"}}
-  surname:
-  %span.surname{data: {placeholder: "surname"}}
+%td.date
+  %span.date
+%td.race
+  %a.race
+%td.paid
+  %span.paid

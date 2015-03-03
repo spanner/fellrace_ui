@@ -136,9 +136,9 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
       visible: "hasAny"
 
     '.links':
-      observe: ["links","fra_id","shr_id","fb_event_id","twitter_id"]
-      visible: (vals) =>
-        vals[0].length > 0 or vals[1] or vals[2] or vals[3] or vals[4]
+      observe: "links"
+      visible: (links) ->
+        links.length > 0
 
     '.past_instances':
       observe: "past_instances"

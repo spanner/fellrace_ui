@@ -838,45 +838,23 @@ a.race_link
         font-size: 90%
 
     #competitor
-      margin-left: 10px
-      margin-right: 10px
-      position: relative
+      .head
+        .middlename
+          display: none
+      .body
+        position: relative
+        box-sizing: border-box
+        margin: 20px 0
+        padding: 0 24px 20px 32px
+        width: 100%
 
-      #competitor_head
-        display: table
-        margin: 0 auto
-        .picture
-          float: left
-        .details
-          float: left
-          .name
-            margin: 0
-
-      .summary
-        display: table
-        margin: 10px auto 0
-        .attribute
-          display: inline-block
-          margin: 0 5px
-          &.empty
-            display: none
-          .value
-            width: 100%
-            float: left
-            text-align: center
-            border-bottom: 1px dotted $pale
-          .key
-            width: 100%
-            float: left
-            clear: left
-            text-align: center
-            color: $pale
-
-      table.performances
+      table.entries
+      
+      table.results
         tr
           th
           th, td
-            padding: 5px
+            padding: 2px 5px
             &:last-child
               padding-right: 0
             &:first-child

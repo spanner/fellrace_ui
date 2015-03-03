@@ -7,48 +7,9 @@ class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
     'click a.disown': "disown"
 
   bindings:
-    ".name": 
-      observe: ["forename","surname"]
-      onGet: "fullName"
-
-    "p.description": "description"
-
-    "span.category": "cat"
-
-    ".cat":
-      observe: ["dob", "gender"]
-      visible: "any"
-      visibleFn: "inlineBlock"
-
-    ".cat .value":
-      observe: ["dob","gender"]
-      onGet: "category"
-
-    ".age":
-      observe: "dob"
-      visible: true
-      visibleFn: "inlineBlock"
-
-    ".age .value":
-      observe: "dob"
-      onGet: "age"
-
-    ".performances_count .value": "performances_count"
-    ".years_racing .value": "years_racing"
-
-    ".lives_in":
-      observe: "location"
-      visible: true
-      visibleFn: "inlineBlock"
-
-    ".lives_in .value": "location"
-
-    ".born_in":
-      observe: "birth_location"
-      visible: true
-      visibleFn: "inlineBlock"
-
-    ".born_in .value": "birth_location"
+    "span.forename": "forename"
+    "span.middlename": "middlename"
+    "span.surname": "surname"
 
     # "a.strava":
     #   observe: "strava_id"
@@ -100,39 +61,18 @@ class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
     #   ]
     #   visibleFn: "inlineBlock"
 
-  club_bindings:
-    "a.club":
-      observe: "name"
-      attributes:[
-        name: "href"
-        observe: "id"
-        onGet: (id) ->
-          "/clubs/#{id}"
-      ]
-
   onRender: =>
     @stickit()
-    @stickit @model.club, @club_bindings
     performances_view = new FellRace.Views.CompetitorPerformancesTable
       collection: @model.performances
       competitor: @model
-      el: @$el.find "table.performances"
+      el: @$el.find "table.results"
     performances_view.render()
 
-  any: (array) =>
-    _.any array
-
-  age: (dob) =>
-    if dob and moment(dob, "YYYY-MM-DD").isValid()
-      moment().diff(moment(dob, "YYYY-MM-DD"),"years")
-
-  category: ([dob,gender]=[]) =>
-    cat = if gender then gender else ""
-    cat = "#{cat}#{@age dob}" if dob
-    "Senior"
-
-  fullName: ([first,last]=[]) =>
-    "#{first} #{last}"
+    entries_view = new FellRace.Views.CompetitorEntriesTable
+      collection: @model.entries
+      el: @$el.find "table.entries"
+    entries_view.render()
 
   inlineBlock: ($el, isVisible, options) =>
     if isVisible
