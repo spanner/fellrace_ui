@@ -437,59 +437,10 @@ $shadow: 1px 3px 8px #333
           &:first-child
             margin-right: 6px
 
-
-
 [contenteditable=true]:empty:after
   content: attr(data-placeholder)
   color: #999
 
-#user_controls
-  position: relative
-  float: left
-  margin:
-    top: 15px
-    left: 10px
-  // display: none
-  // .user
-  //   a.user_icon
-  //     position: relative
-  //     img
-  //       width: 36px
-  //       height: 36px
-  //       border-radius: 24px
-  //       background-color: white
-  //   .pointer
-  //     border-color: transparent
-  //     border-bottom-color: $verypale
-  //     border-style: dashed dashed solid
-  //     border-width: 0 8px 8px
-  //     position: absolute
-  //     right: 10px
-  //     top: -8px
-  //     z-index: 1
-  //     height: 0
-  //     width: 0
-  //   .user_controls
-  //     position: absolute
-  //     top: 50px
-  //     right: 0
-  //     width: 120px
-  //     height: 100px
-  //     z-index: 999
-  //     background: $translucent
-  //     border: 1px solid $verypale
-  //     border-radius: 0 0 0 5px
-  //     &.closed
-  //       display: none
-  //     a.me
-  //       position: absolute
-  //       top: 10px
-  //       right: 10px
-  //       background: $blue
-  //     a.sign_out
-  //       position: absolute
-  //       right: 10px
-  //       bottom: 10px
 .apology
   width: 400px
   
@@ -507,25 +458,38 @@ a.race_link
       margin-left: 4px
   span.date
     color: $pale
-  
+
+#user_controls
+  box-sizing: border-box
+  position: absolute
+  left: 500px
+  top: 0
+  width: 300px
+  z-index: 400
+  a.avatar
+    +big_icon("avatar.png")
+    margin: 10px 15px
+  .user
+    display: none
+
 #content
   position: relative
   width: 580px
   min-height: 100%
-  background-color: $translucent
-  border-right: 1px solid $mid
+  background-color: white
+  border-right: 2px solid $dark
   z-index: 200
   +transition(margin-left, 0.5s, ease-out)
   #view_toggle
     position: absolute
-    top: 359px
+    top: 358px
     right: 0
-    margin-right: -29px
+    margin-right: -30px
     width: 28px
     height: 54px
-    border: 1px solid $mid
+    border: 2px solid $dark
     border-left: none
-    background-color: $translucent
+    background-color: white
     cursor: pointer
     z-index: 300
     background:
@@ -622,6 +586,21 @@ a.race_link
           font-size: 2em
           text-shadow: 0 0 0.3em #000,0 0 0.3em #000
           color: white
+          display: inline-block
+          float: left
+          vertical-align: bottom
+        .owner
+          display: inline-block
+          float: left
+          vertical-align: bottom
+          margin-left: 8px
+          a.edit
+            +microbutton($green)
+          a.cancel
+            +microbutton($pale)
+          a.publish
+            +microbutton($green)
+            
     #index
       .welcome
         position: relative

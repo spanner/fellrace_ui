@@ -2,8 +2,9 @@
   .picture
   .title
     %h2.name
-  .controls
-    %a.edit edit &#9656;
+    .owner
+      %a.edit edit
+
   .social
     %a.fb facebook
     %a.twit twitter

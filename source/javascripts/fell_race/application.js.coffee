@@ -12,7 +12,6 @@ class FellRace.Application extends Backbone.Marionette.Application
     gmapRegion: '#gmap'
     contentRegion: '#content'
     mainRegion: 'main'
-    user_controlsRegion: '#user_controls'
     noticeRegion: '#notice'
     actionRegion: '#action'
     extraContentRegion: 'section#extra'

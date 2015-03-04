@@ -2,9 +2,9 @@
   .picture
   .title
     %h2.name.editable{:data => {:placeholder => "Race name"}}
-  .controls
-    %a.cancel x exit
-    %a.publish publish &#9656;
+    .owner
+      %a.cancel exit
+      %a.publish publish
   .social
     %a.fb facebook
     %a.twit twitter

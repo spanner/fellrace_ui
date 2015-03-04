@@ -83,6 +83,19 @@ $error: #cc3333
   &:hover
     background-position: 0 -32px
 
+=big_icon($url)
+  display: inline-block
+  padding-left: 50px
+  height: 48px
+  line-height: 48px
+  background:
+    color: transparent
+    position: 0 0
+    repeat: no-repeat
+    image: image-url($url)
+  &:hover
+    background-position: 0 -48px
+
 =quiet
   font-weight: lighter
   font-size: 85%
@@ -101,6 +114,23 @@ $error: #cc3333
 
 =spaced
   letter-spacing: 0.04em
+
+=microbutton($color: $green, $textcolor: white)
+  +book
+  +spaced
+  display: inline-block
+  position: relative
+  outline: none
+  cursor: pointer
+  text-align: center
+  text-decoration: none
+  font-size: 0.65rem
+  padding: 3px 6px
+  line-height: 12px
+  +border-radius(3px)
+  background-color: $color
+  color: $textcolor
+
 
 =button($color: $mid, $textcolor: white)
   +light

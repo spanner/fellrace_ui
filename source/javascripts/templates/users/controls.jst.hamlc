@@ -1,9 +1,0 @@
-/ .user
-/   %a.user_icon
-/     %img
-/   .user_controls.closed
-/     .pointer
-/     %a.button.me{href: "/me"} My profile
-%a.button.sign_out Sign out
-%a.button.sign_in Sign in
-%a.button.me{href: "/users/me"} Me
