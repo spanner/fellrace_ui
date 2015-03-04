@@ -4,6 +4,7 @@ class FellRace.Views.CheckpointMarker extends MapStick.Marker
     labelClass: "label"
     labelAnchor: new google.maps.Point(-17, 10)
     opacity: 0.8
+    clickable: false
 
   # buildOverlay: (options) =>
   #   new MarkerWithLabel(options)

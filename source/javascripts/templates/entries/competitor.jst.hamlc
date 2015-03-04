@@ -1,0 +1,4 @@
+%p.name
+  %input.forename{placeholder: "forename"}
+  %input.middlename{placeholder: "middlename"}
+  %input.surname{placeholder: "surname"}
