@@ -83,6 +83,13 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
       observe: 'online_entry_active'
       visible: true
 
+    "a.enter":
+      attributes: [
+        name: "href"
+        observe: ["race_slug","name"]
+        onGet: "entryUrl"
+      ]
+
     #postal details
     "span.postal_entry_fee":
       observe: "postal_entry_fee"
@@ -136,6 +143,9 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
 
   racePublicationUrl: (slug) =>
     "/races/#{slug}"
+
+  entryUrl: ([slug,name]) =>
+    "/races/#{slug}/#{name}/enter"
 
   adminUrl: ([slug,name]) =>
     "/admin/races/#{slug}/#{name}"

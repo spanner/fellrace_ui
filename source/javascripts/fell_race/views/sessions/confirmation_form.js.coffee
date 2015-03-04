@@ -10,7 +10,10 @@ class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemVie
     "#last_name": "last_name"
     "#password": "password"
     "#password_confirmation": "password_confirmation"
-    ".domain": 
+    "p.outcome":
+      observe: "desired_slug"
+      visible: true
+    ".domain":
       observe: "desired_slug"
       onGet: "showDomain"
     ".password_confirmation":
@@ -58,6 +61,7 @@ class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemVie
     e.preventDefault() if e
     @$el.find('.error').remove()
     slug = @model.get "desired_slug"
+    url = @model.get "destination_url"
     @model.save @model.attributes,
       error: @fail
       success: (json) =>
@@ -65,6 +69,8 @@ class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemVie
         _fellrace.session.setUser(json)
         if slug
           _fellrace.navigate "/admin/races/#{slug}"
+        else if url
+          _fellrace.navigate url
         #TODO: show friendly starter message, set status to 'new user' somehow
 
   fail: (err) =>

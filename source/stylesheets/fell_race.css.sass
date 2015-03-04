@@ -102,7 +102,7 @@ form.bubble
     font-size: 1em
 
 input[type="submit"]
-  +button($green)
+  +button(white,$green)
   &.unavailable
     background-color: $mid
     +opacity(0.5)
@@ -346,6 +346,9 @@ $shadow: 1px 3px 8px #333
       font-size: 66%
       font-weight: bold
 
+.notifications
+  z-index: 900
+
 #action
   h3
     margin: 0
@@ -360,6 +363,7 @@ $shadow: 1px 3px 8px #333
   right: 20px
   top: 20px
   overflow: scroll
+  z-index: 800
 .signin
   span.email
     font-weight: bold

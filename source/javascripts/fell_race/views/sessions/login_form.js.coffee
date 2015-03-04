@@ -11,7 +11,8 @@ class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
     "#email": "email"
     "#password": "password"
 
-  initialize: () ->
+  initialize: (opts={}) ->
+    @opts = opts
     @model = _fellrace.session
     _fellrace.vent.on "auth.change", @render
 
@@ -54,7 +55,7 @@ class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
     _fellrace.user_actions().reconfirm()
 
   signUp: =>
-    _fellrace.user_actions().signUp()
+    _fellrace.user_actions().signUp(@opts)
 
   submit: =>
     @login()

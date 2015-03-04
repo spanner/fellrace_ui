@@ -11,7 +11,8 @@ class FellRace.Views.UserSignupForm extends Backbone.Marionette.ItemView
       observe: "email"
       update: "checkValidity"
     
-  initialize: () ->
+  initialize: (opts={}) ->
+    @_opts = opts
     @model = _fellrace.currentUser()
     _fellrace.vent.on "auth.change", @observeState
 
@@ -59,7 +60,8 @@ class FellRace.Views.UserSignupForm extends Backbone.Marionette.ItemView
     # are set automatically by the response. Interface state is updated in
     # response to auth.* events triggered by the session.
     #
-    @model.save @model.attributes,
+    attrs = _.extend @model.attributes, @_opts
+    @model.save attrs,
       success: (model, data) =>
         _fellrace.session.setUser(data)
         _fellrace.actionRegion.close()
@@ -71,4 +73,4 @@ class FellRace.Views.UserSignupForm extends Backbone.Marionette.ItemView
         @$el.find('input[type="submit"]').val('Sign up').removeClass('unavailable')
 
   signIn: =>
-    _fellrace.user_actions().signIn()
+    _fellrace.user_actions().signIn(@_opts)

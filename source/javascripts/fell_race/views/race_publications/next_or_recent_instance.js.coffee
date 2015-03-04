@@ -2,9 +2,14 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
   template: "race_publications/next_or_recent_instance"
 
   bindings:
-    ".date":
+    "a.date":
       observe: "date"
       onGet: "niceDate"
+      attributes: [
+        observe: ["race_slug", "name"]
+        name: "href"
+        onGet: "url"
+      ]
     ".time":
       observe: "time"
       onGet: "niceTime"
@@ -43,6 +48,9 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
 
   entryActiveAndFormAvailable: ([atall, start, end, url]=[]) =>
     atall and url and (start < new Date < end)
+
+  url: ([race_slug, name]=[]) =>
+    "/races/#{race_slug}/#{name}"
 
   enterOnlineHref: ([race_slug, name]=[]) =>
     "/races/#{race_slug}/#{name}/enter"

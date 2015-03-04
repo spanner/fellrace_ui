@@ -12,17 +12,13 @@ class FellRace.Views.InstanceEnter extends Backbone.Marionette.ItemView
         onGet: "racePublicationUrl"
       ]
 
-    'a.enter_postal':
-      observe: 'postal_entry_active'
-      visible: true
-      visibleFn: "visibleBlock"
-      attributes: [
-        name: "href"
-        observe: "entry_form"
-      ,
-        name: "class"
-        observe: "entry_form_type"
-      ]
+  initialize: ->
+    if _fellrace.userSignedIn()
+      @_competitor = _fellrace.getCurrentCompetitor()
+      console.log "@_competitor", @_competitor
+    else
+      $.notify "flash","Please sign in first."
+      _fellrace.user_actions().signIn(destination_url:"/races/#{@model.get("race_slug")}/#{@model.get("name")}/enter")
 
   onRender: () =>
     @stickit()
@@ -30,12 +26,3 @@ class FellRace.Views.InstanceEnter extends Backbone.Marionette.ItemView
   racePublicationUrl: (slug) =>
     "/races/#{slug}"
 
-  adminUrl: ([slug,name]) =>
-    "/admin/races/#{slug}/#{name}"
-
-  visibleBlock: ($el, isVisible, options) =>
-    if isVisible
-      $el.css display: "inline-block"
-    else
-      $el.hide()
-    

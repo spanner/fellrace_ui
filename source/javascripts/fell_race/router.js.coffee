@@ -124,6 +124,7 @@ class FellRace.PublicRouter extends FellRace.Router
         view: view
 
   confirmUser: (uid,token) =>
+    @index()
     _fellrace.actionRegion.show(new FellRace.Views.SessionConfirmationForm({uid: uid, token: token}))
 
 class FellRace.AdminRouter extends FellRace.Router
