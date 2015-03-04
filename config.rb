@@ -73,6 +73,7 @@ end
 
 require 'rack/rewrite'
 use Rack::Rewrite do
+  rewrite %r{^(\/.+)?\/robots\.txt}, '/robots.txt'
   rewrite %r{^\/admin(\/.+)?}, '/index.html'
   rewrite %r{^\/races(\/.+)?}, '/index.html'
   rewrite %r{^\/runners(\/.+)?}, '/index.html'

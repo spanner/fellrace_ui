@@ -1,7 +1,7 @@
 class FellRace.Views.RacePublicationPolyline extends MapStick.Polyline
   defaultOptions:
     strokeWeight: 4
-    strokeOpacity: 0.4
+    strokeOpacity: 0.3
     strokeColor: "#d1005d"
     zIndex: 1
 
