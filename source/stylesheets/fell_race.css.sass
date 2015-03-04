@@ -102,12 +102,12 @@ form.bubble
     font-size: 1em
 
 input[type="submit"]
-  +button(white,$green)
-  &.unavailable
-    background-color: $mid
-    +opacity(0.5)
-    &:hover
-      background-color: $mid
+  +reverse_button($green)
+  // &.unavailable
+  //   background-color: $mid
+  //   +opacity(0.5)
+  //   &:hover
+  //     background-color: $mid
 
 h3.robot
   padding-left: 22px
@@ -1095,9 +1095,13 @@ a.file_name
   white-space: nowrap
 
 .button
-  +button
-  &.enter
-    +button(white,$rubine)
+  +reverse_button
+  &.enter, &.create
+    +reverse_button($rubine)
+.head, header
+  .button
+    +button
+
 
 #controls, .controls
   .edit, .accept, .pick

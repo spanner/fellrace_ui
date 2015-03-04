@@ -101,7 +101,7 @@ $error: #cc3333
 
 =spaced
   letter-spacing: 0.04em
-  
+
 =button($color: $mid, $textcolor: white)
   +light
   +spaced
@@ -132,6 +132,24 @@ $error: #cc3333
     top: 0
   &.waiting
     +opacity(0.25)
+
+=reverse_button($color1:$mid, $color2: white)
+  +button($color2,$color1)
+  &:hover
+    text-decoration: none
+    color: $color2
+    background-color: $color1
+    opacity: 1
+  &.unavailable, &[disabled]
+    cursor: default
+    opacity: 0.5
+    color: $color1
+    top: 0
+    &:active
+      box-shadow: none
+    &:hover
+      text-decoration: none
+      background-color: transparent
 
 =icon_link($url, $offset: 0, $hover_offset: -32px)
   display: inline-block

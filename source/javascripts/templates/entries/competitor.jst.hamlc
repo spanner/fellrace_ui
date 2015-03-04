@@ -1,7 +1,7 @@
 %p.name
-  %input.forename{placeholder: "forename"}
-  %input.middlename{placeholder: "middlename"}
-  %input.surname{placeholder: "surname"}
+  %span.forename.editable{data: {placeholder: "forename"}}
+  %span.middlename.editable{data: {placeholder: "middlename"}}
+  %span.surname.editable{data: {placeholder: "surname"}}
 %p
   %label{for: "male"} Male
   %input#male{name: "gender", type: "radio", value: "m"}
@@ -9,5 +9,8 @@
   %input#female{name: "gender", type: "radio", value: "f"}
 %p
   Dob
-  %span.dob
+  %span.dob.editable{data: {placeholder: "dd-mm-yyyy"}}
 
+%p
+  Club
+  %span.club.editable{data: {placeholder: "club name"}}
