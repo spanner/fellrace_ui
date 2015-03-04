@@ -1033,6 +1033,11 @@ section#extra
             &.split
               font-size: 0.95em
               color: $pale
+  section.entry
+    section
+      margin-bottom: 20px
+    p
+      margin: 2px 0
 
 #content.collapsed
   margin-left: -540px
@@ -1096,8 +1101,10 @@ a.file_name
 
 .button
   +reverse_button
-  &.enter, &.create
+  &.enter, &.create, &.save
     +reverse_button($rubine)
+  &.edit
+    +reverse_button($green)
 .head, header
   .button
     +button

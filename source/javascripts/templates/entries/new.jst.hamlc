@@ -1,2 +1,6 @@
 %section.competitor
-%a.button.create Confirm and pay
+
+%section.payment_details
+
+%p
+  %a.button.create Confirm and pay

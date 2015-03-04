@@ -1,0 +1,57 @@
+%section
+  %p
+    %label{for: "forename"} Forename
+    %input#forename
+  %p
+    %label{for: "middlename"} Middlename
+    %input#middlename
+  %p
+    %label{for: "surname"} Surname
+    %input#surname
+
+  %p.editing
+    Gender:
+    %label{for: "male"} Male
+    %input#male{name: "gender", type: "radio", value: "m"}
+    %label{for: "female"} Female
+    %input#female{name: "gender", type: "radio", value: "f"}
+
+  %p
+    %label{for: "dob"} Dob:
+    %input#dob{type: "date"}
+
+  %p
+    %span.label{for: "club"} Club:
+    %input#club
+
+%section
+  Address
+  %p
+    %label{for: "postal_address_line_1"} Line 1:
+    %input#postal_address_line_1
+  %p
+    %label{for: "postal_address_line_2"} Line 2:
+    %input#postal_address_line_2
+  %p
+    %label{for: "postal_town"} Town:
+    %input#postal_town
+  %p
+    %label{for: "postal_county"} County:
+    %input#postal_county
+  %p
+    %label{for: "postcode"} Postcode:
+    %input#postcode
+  %p
+    %label{for: "postal_country"} Country:
+    %input#postal_country
+
+%section
+  %p
+    %label{for: "email"} email:
+    %input#email
+  %p
+    %label{for: "phone"} Phone:
+    %input#phone
+  %p
+    %label{for: "mobile"} Mobile:
+    %input#mobile
