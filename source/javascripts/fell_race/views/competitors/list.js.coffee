@@ -7,12 +7,10 @@ class FellRace.Views.CompetitorListItem extends Backbone.Marionette.ItemView
       observe: ["forename", "surname"]
       onGet: "name"
       attributes: [
-        {
-          name: "href"
-          observe: "id"
-          onGet: (val) ->
-            "/runners/#{val}"
-        }
+        name: "href"
+        observe: "id"
+        onGet: (val) ->
+          "/runners/#{val}"
       ]
 
   onRender: =>

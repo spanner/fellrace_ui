@@ -6,5 +6,7 @@ class FellRace.Views.EntryCompetitor extends Backbone.Marionette.ItemView
     "input.middlename": "middlename"
     "input.surname": "surname"
 
+    "input[name='gender']": "gender"
+
   onRender: =>
     @stickit()
