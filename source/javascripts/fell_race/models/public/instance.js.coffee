@@ -44,7 +44,7 @@ class FellRace.Models.PublicInstance extends Backbone.Model
   setEntryFlags: =>
     now = new Date
     @set "online_entry_active", @get('online_entry') and @get("online_entry_opening") and @get("online_entry_closing") and (@get("online_entry_opening") < now < @get("online_entry_closing"))
-    @set "postal_entry_active", @get('postal_entry') and !!@get('entry_form') and @get("postal_entry_opening") and @get("postal_entry_closing")  and (@get("postal_entry_opening") < now < @get("postal_entry_closing"))
+    @set "postal_entry_active", @get('postal_entry') and !!@get('entry_form') and @get("postal_entry_opening") and @get("postal_entry_closing") and (@get("postal_entry_opening") < now < @get("postal_entry_closing"))
 
   inFuture: =>
     if date = @getDate()

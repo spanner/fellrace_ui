@@ -4,19 +4,19 @@
 %section.basics
   %h2
     %a.race_name
-    %span.instance_name.editable
+    %span.instance_name
 
   .date_and_time
     %p
-      Race date
+      Race date:
       %span.calendar
       %span.date{data: {attributes: 'date'}}}
       at
       %span.clock
-      %span.time{data: {attributes: 'time'}}
+      %span.time.editable{data: {attributes: 'time',placeholder: "hh:mm"}}
 
   %p.limit
-    Entry limit
+    Entry limit:
     %span.entry_limit.editable{data: {placeholder: "e.g. 500"}}
 
   %p.eod
@@ -24,7 +24,7 @@
     %label.heading{for: "eod"} Entry on the day
 
   %p.eod_details
-    Fee on the day
+    Fee on the day:
     %span.eod_fee.currency.editable{data: {placeholder: "0.00"}}
   
 %section.online
@@ -40,7 +40,7 @@
       %span.online_dates.daterange{data: {attributes: 'online_entry_opening,online_entry_closing'}}
 
     %p
-      Online entry fee
+      Online entry fee:
       %span.online_entry_fee.currency.editable{data: {placeholder: "0.00"}}
       %span.note.fee_details
         Transaction charge
@@ -56,10 +56,13 @@
       %span.postal_dates.daterange{data: {attributes: 'postal_entry_opening,postal_entry_closing'}}
 
     %p.fee
-      Postal entry fee
+      Postal entry fee:
       %span.postal_entry_fee.currency.editable{data: {placeholder: "0.00"}}
 
     %p.entry_form
+    %p.postal_entry_address
+      Post to address:
+      %span.postal_entry_address.editable{data: {placeholder: "Buckingham Palace, London, SW1A 1AA"}}
 
 %section.entries
   %h2 Entries list

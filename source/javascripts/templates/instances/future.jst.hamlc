@@ -6,50 +6,59 @@
 
 .basic_details
 
-  %h3.date
-
-  Start time
+  %span.date
+  at
   %span.time
 
 .limit
   Entry limit
   %span.entry_limit
+  runners
 
-.no_eod
-  %span.no_eod
-    No entry on the day
+%p.full
+  %span.unavailable The race is full, sorry. Better luck next year.
 
-.eod
-  Entry on the day
-  %span.eod_fee.currency
+%p.nearly_full
+  %span.warning The race is nearly full. Get your entry in!
 
-.online
-  %span.heading online
-  #online_entry_details
-    .fee
-      Fee:
+.not_full
+  .no_eod
+    %span.unavailable No entry on the day
+  .no_online
+    %span.unavailable No online entry
+  .no_postal
+    %span.unavailable No postal entry
+
+  %section.eod
+    %span.heading Entry on the day
+    %p
+      Fee on the day
+      %span.eod_fee.currency
+
+  %section.online
+    %span.heading Online entry
+    %p
+      Fee
       %span.online_entry_fee.currency
-    .opening
-      Opening:
-      %span.online_entry_opening
-    .closing
-      Closing:
-      %span.online_entry_closing
-    .controls
-      %a.enter enter
+    %p
+      Available
+      %span.online_dates.daterange
+    %p.enter
+      %a.button.reverse.enter enter
 
-.postal
-  %span.heading by post
-  #postal_entry_details
-    .fee
-      Fee:
+  %section.postal
+    %span.heading Postal entry
+    %p
+      Fee
       %span.postal_entry_fee.currency
-    .opening
-      accepted from:
-      %span.postal_entry_opening
-    .closing
-      accepted until:
-      %span.postal_entry_closing
+    %p
+      Accepted
+      %span.postal_dates.daterange
+    %p.postal_form
+      %a.postal_form.file_icon.pdf Postal entry form
+    %p.postal_entry_address
+      Send to
+      %span.postal_entry_address
 
 .entries
   %span.heading Current entries

@@ -215,7 +215,7 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
   pictureUrl: (url) =>
     if url
       if url.match(/^\//)
-        "#{_fellrace.apiUrl()}/#{url}"
+        "#{_fellrace.apiUrl()}#{url}"
       else
         url
 
@@ -230,7 +230,7 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
       if url.match(/data:image/)
         "background-image: url(#{url})"
       else if url.match(/^\//)
-        "background-image: url(#{_fellrace.apiUrl()}/#{url})"
+        "background-image: url(#{_fellrace.apiUrl()}#{url})"
       else
         "background-image: url(#{url})"
         
