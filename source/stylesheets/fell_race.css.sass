@@ -1046,10 +1046,31 @@ section#extra
   section.entry
     width: 480px
     .payment
-      input.month, input.year
+      input#expiry_month, input#expiry_year
         width: 32px
-      input.cvc
+      input#cvc
         width: 50px
+      span.card
+        display: inline-block
+        vertical-align: top
+        float: right
+        width: 40px
+        height: 24px
+        margin-left: 5px
+        margin-right: 1px
+        margin-top: -8px
+        opacity: 0.6
+        background:
+          position: 0 -80px
+          image: image-url('cards.png')
+          repeat: no-repeat
+        &.visa
+          background-position: 0 0
+        &.mastercard
+          background-position: 0 -30px
+        &.amex
+          background-position: 0 -60px
+          
 
 p.onecol, p.twocol, p.threecol, p.fourcol
   margin: 0.5em 0
@@ -1066,9 +1087,10 @@ p.onecol, p.twocol, p.threecol, p.fourcol
     &[disabled]
       color: $mid
       background-color: $coolgrey0
-  span.note
+  span.summary
     display: block
-    margin-bottom: 1em
+    margin-top: 1em
+    line-height: 1.25
 
 p.onecol
   span.col

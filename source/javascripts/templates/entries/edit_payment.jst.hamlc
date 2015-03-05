@@ -1,11 +1,15 @@
-%h3
+%h3.padlock
   Payment details
 
 %p.onecol
   %span.col
-    %label{for: "card_number"} Credit card number
+    %label{for: "card_number"} 
+      Credit card number
+      %span.card.amex
+      %span.card.mastercard
+      %span.card.visa
     %input#card_number{type: "text", placeholder: "Just the numbers, please"}
-    
+
 %p.threecol
   %span.col
     %label{for: "expiry_month"} Expires
@@ -15,6 +19,7 @@
     %label{for: "cvc"} CVC
     %input.cvc#cvc{name: "cvc", type: "text", limit: 3, placeholder: "123"}
   %span.col
-    Your card will be charged a total of
-    %strong
-      %span#amount.currency
+    %span.summary
+      Your card will be charged a total of
+      %strong
+        %span#amount.currency

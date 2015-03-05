@@ -29,10 +29,12 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     
     @_edit_competitor_view.render()
     @_edit_payment_view.render()
+    
     @_stumbit = @$el.find("a.create")
     @setReadiness()
 
   setReadiness: () =>
+    console.log "setReadiness", @model.isValid(true), @_competitor.isValid(true), @_payment.isValid(true)
     if @isReady()
       @_stumbit.removeClass('unavailable')
     else
