@@ -49,6 +49,7 @@ class FellRace.Application extends Backbone.Marionette.Application
 
     @session = new FellRace.Models.UserSession()
     @race_publications = new FellRace.Collections.RacePublications([])
+    @race_publications.fetch(remove: false)
     @clubs ?= new FellRace.Collections.Clubs([])
     @competitors ?= new FellRace.Collections.Competitors([])
     @mapView = new FellRace.Views.Map()

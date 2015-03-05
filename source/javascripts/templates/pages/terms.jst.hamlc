@@ -1,0 +1,5 @@
+.head
+  .picture.home
+  .title
+    %h2.name.on_picture
+      Terms

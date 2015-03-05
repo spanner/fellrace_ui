@@ -6,7 +6,7 @@ class FellRace.Router extends Backbone.Router
     @handlers = []
     super
 
-  handle: (fragment) =>
+  handle: (fragment="/") =>
     _.any @handlers, (handler) ->
       if handler.route.test(fragment)
         handler.callback(fragment)
@@ -72,7 +72,7 @@ class FellRace.PublicRouter extends FellRace.Router
     "clubs(/*path)": "clubs"
     "users(/*path)": "users"
     "confirm/:uid/:token(/)": "confirmUser"
-    "about(/*path)": "about"
+    ":page_name(/)": "page"
     "*path": "index"
 
   initialize: ->
@@ -82,7 +82,6 @@ class FellRace.PublicRouter extends FellRace.Router
   index: =>
     unless @_previous.route is "index"
       _fellrace.indexMapView()
-      _fellrace.race_publications.fetch()
       view = new FellRace.Views.IndexView
       _fellrace.mainRegion.show view
       _fellrace.closeRight()
@@ -142,11 +141,12 @@ class FellRace.PublicRouter extends FellRace.Router
     @index()
     _fellrace.actionRegion.show(new FellRace.Views.SessionConfirmationForm({uid: uid, token: token}))
 
-  about: (path) =>
-    $.notify "error", "TODO"
-    @_previous =
-      route: "about"
-    
+  page: (page_name) =>
+    view = new FellRace.Views.Page
+      template: "pages/#{page_name}"
+    _fellrace.indexMapView()
+    _fellrace.mainRegion.show view
+    _fellrace.closeRight()
 
 class FellRace.AdminRouter extends FellRace.Router
   routes:

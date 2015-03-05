@@ -10,12 +10,12 @@
       %label{for: "last_name"} Surname
       %input#last_name{type: "text"}
 
-  %p.email.onecol
+  %p.email.twocol
     %span.col
       %label{for: "email"} Email
       %input#email{type: "email"}
 
-  %p.password.onecol
+  %p.password.onecol.hide
     %span.col
       %label{for: "password"} Password
       %input#password{type: "password"}

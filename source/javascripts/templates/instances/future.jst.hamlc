@@ -60,7 +60,7 @@
       Send to
       %span.postal_entry_address
 
-.entries
+%section.entries
   %span.heading Current entries
   %span.entry_count
   %table.entries

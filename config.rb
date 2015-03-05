@@ -82,6 +82,7 @@ use Rack::Rewrite do
   rewrite %r{^\/users(\/.+)?}, '/index.html'
   rewrite %r{^\/me(\/.+)?}, '/index.html'
   rewrite %r{^\/about(\/.+)?}, '/index.html'
+  rewrite %r{^\/terms(\/.+)?}, '/index.html'
 end
 
 activate :deploy do |deploy|
