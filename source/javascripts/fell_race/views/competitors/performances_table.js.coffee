@@ -7,16 +7,9 @@ class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemVi
     "span.time":
       observe: "time"
       onGet: "secondsToString"
-    "a.date":
+    "span.date":
       observe: "instance_date"
       onGet: "date"
-      attributes: [
-        {
-          name: "href"
-          observe: ["competitor_id","instance_name","race_slug"]
-          onGet: "instanceUrl"
-        }
-      ]
     "span.total_competitors":
       observe: "performances_count"
       onGet: "totalCompetitors"
@@ -24,22 +17,19 @@ class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemVi
     "a.race_name":
       observe: "race_name"
       attributes: [
-        {
-          name: "href"
-          observe: ["competitor_id","race_slug"]
-          onGet: "raceUrl"
-        }
+        name: "href"
+        observe: ["competitor_id","race_slug","instance_name"]
+        onGet: "instanceUrl"
       ]
 
     "a.winner":
       observe: "winner_name"
       attributes: [
-        {
-          name: "href"
-          onGet: "winnerUrl"
-          observe: ["winner_id","race_slug","instance_name"]
-        }
+        name: "href"
+        onGet: "winnerUrl"
+        observe: ["winner_id","race_slug","instance_name"]
       ]
+
     "span.winning_time":
       observe: "winning_time"
       onGet: "secondsToString"
@@ -51,7 +41,7 @@ class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemVi
     "/races/#{race_slug}" #TODO change when a competitor race view is completed
     # "/runners/#{competitor_id}/#{race_slug}"
 
-  instanceUrl: ([competitor_id,name,race_slug]=[]) =>
+  instanceUrl: ([competitor_id,race_slug,name]=[]) =>
     "/runners/#{competitor_id}/#{race_slug}/#{name}"
 
   totalCompetitors: (count) =>

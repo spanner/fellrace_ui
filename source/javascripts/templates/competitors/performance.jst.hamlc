@@ -1,5 +1,5 @@
 %td.date
-  %a.date
+  %span.date
 %td.race
   %a.race_name
 %td.time
