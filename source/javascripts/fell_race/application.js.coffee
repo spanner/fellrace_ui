@@ -214,7 +214,6 @@ class FellRace.Application extends Backbone.Marionette.Application
     @session.signedIn()
 
   getCurrentCompetitor: =>
-    #TODO: repopulate competitor before entry process begins.
     @currentUser()?.getCompetitor()
 
   navigate: (route, {trigger:trigger,replace:replace}={}) =>

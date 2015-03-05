@@ -23,6 +23,7 @@ class FellRace.Models.User extends Backbone.Model
       user: super
 
   getCompetitor: =>
+    #TODO: reup competitor attributes before entry process begins.
     @_competitor
 
   hasCompetitor: =>
