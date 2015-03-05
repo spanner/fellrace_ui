@@ -1046,6 +1046,8 @@ section#extra
   section.entry
     width: 480px
     .payment
+      input.error
+        border-color: $red
       h3.secure
         padding-left: 28px
         padding-top: 5px
@@ -1078,6 +1080,8 @@ section#extra
           background-position: 0 -30px
         &.amex
           background-position: 0 -60px
+      span.error_message
+        color: $red
       a.create
         float: right
     p.footnote

@@ -3,11 +3,11 @@ class FellRace.Models.Payment extends FellRace.Model
     card_number:
       required: true
       fn: "validateCardNumber"
-    expiry_month:
+    exp_month:
       required: true
       pattern: "digits"
       length: 2
-    expiry_year:
+    exp_year:
       required: true
       pattern: "digits"
       length: 2

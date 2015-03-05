@@ -5,16 +5,42 @@ class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
     "click a.create": "prepareTransaction"
 
   bindings:
-    "input#card_number": "card_number"
-    "input#expiry_year": "expiry_year"
-    "input#expiry_month": "expiry_month"
-    "input#cvc": "cvc"
+    "input#card_number":
+      observe: "card_number"
+      attributes: [
+        name: "class"
+        observe: "error_param"
+        onGet: (param) -> "error" if param is "card_number"
+      ]
+    "input#expiry_year":
+      observe: "exp_year"
+      attributes: [
+        name: "class"
+        observe: "error_param"
+        onGet: (param) -> "error" if param is "exp_year"
+      ]
+    "input#expiry_month":
+      observe: "exp_month"
+      attributes: [
+        name: "class"
+        observe: "error_param"
+        onGet: (param) -> "error" if param is "exp_month"
+      ]
+    "input#cvc":
+      observe: "cvc"
+      attributes: [
+        name: "class"
+        observe: "error_param"
+        onGet: (param) -> "error" if param is "cvc"
+      ]
     "span.card":
       observe: "card_type"
       update: "dimUnlessMatchy"
+    "span.error_message": "error_message"
 
   initialize: () ->
     Backbone.Validation.bind(@)
+    @model.on "change:error_message change:error_param", @stopWorking
 
   onRender: =>
     @stickit()
@@ -37,21 +63,27 @@ class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
   disable: () =>
     @_stumbit.addClass('unavailable')
 
+  stopWorking: =>
+    @_stumbit.removeClass "working"
+
   prepareTransaction: (e) =>
+    @model.set(error_param: null, error_message: null)
     unless @_stumbit.hasClass('unavailable')
       @_stumbit.addClass "working"
       
       Stripe.card.createToken
         number: @model.get('card_number')
         cvc: @model.get('cvc')
-        exp_month: @model.get('expiry_month')
-        exp_year: @model.get('expiry_year')
+        exp_month: @model.get('exp_month')
+        exp_year: @model.get('exp_year')
       , @captureStripeToken
 
   captureStripeToken: (status, response) =>
     if status < 400
       @model.set("stripeToken", response.id)
     else if 400 <= status < 500
-      $.notify "error", "something wrong with your card details"
+      @model.set
+        error_param: response.error.param
+        error_message: response.error.message
     else
-      $.notify "error", "Stripe server error"
+      @model.set(error_message: "Server error, please try again.")

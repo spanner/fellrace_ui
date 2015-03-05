@@ -21,3 +21,5 @@
   %span.col
     %br
     %a.button.create Save and pay
+%p
+  %span.error_message
