@@ -25,6 +25,8 @@ class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
     #   @$el.show()
     # else
     #   @$el.hide()
+    if @opts.heading
+      @$el.find('h3').text(@opts.heading)
     @stickit()
 
   login: (e) =>

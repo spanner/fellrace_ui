@@ -1,6 +1,5 @@
 .signin
-  %a.close
-  
+  %a.close.big
   %a.avatar.hide
   %h3
     Sign in here
@@ -22,13 +21,7 @@
         %span.note
           or
           %a.cancel cancel
-      %p
-        If you have signed up but not yet confirmed your account, this won't work until you do.
-        Please refer to your confirmation message. You can
-        %a.reconfirm
-          request a new one
-        if necessary.
-      %p
-        Don't have an account yet?
-        %a.sign_up Sign up
-        for one now.
+      %p.large
+        No account?
+        %a.sign_up sign up now.
+        It's free and only takes a few seconds.
