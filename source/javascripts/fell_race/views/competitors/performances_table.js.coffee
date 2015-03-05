@@ -19,15 +19,15 @@ class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemVi
       attributes: [
         name: "href"
         observe: ["competitor_id","race_slug","instance_name"]
-        onGet: "instanceUrl"
+        onGet: "url"
       ]
 
     "a.winner":
       observe: "winner_name"
       attributes: [
         name: "href"
-        onGet: "winnerUrl"
         observe: ["winner_id","race_slug","instance_name"]
+        onGet: "url"
       ]
 
     "span.winning_time":
@@ -37,11 +37,7 @@ class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemVi
   onRender: =>
     @stickit()
 
-  raceUrl: ([competitor_id,race_slug]=[]) =>
-    "/races/#{race_slug}" #TODO change when a competitor race view is completed
-    # "/runners/#{competitor_id}/#{race_slug}"
-
-  instanceUrl: ([competitor_id,race_slug,name]=[]) =>
+  url: ([competitor_id,race_slug,name]=[]) =>
     "/runners/#{competitor_id}/#{race_slug}/#{name}"
 
   totalCompetitors: (count) =>
@@ -49,9 +45,6 @@ class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemVi
 
   fullName: ([first,last]=[]) =>
     "#{first} #{last}" if first and last
-
-  winnerUrl: ([winner_id,race_slug,instance_name]=[]) =>
-    "/runners/#{winner_id}/#{race_slug}/#{instance_name}"
 
   secondsToString: (seconds) =>
     _fellrace.secondsToString seconds
