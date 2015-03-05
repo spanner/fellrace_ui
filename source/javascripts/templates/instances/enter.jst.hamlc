@@ -1,7 +1,7 @@
 %a.close.big
 
 %h2
-  New entry:
+  Enter race:
   %a.race_name
   %span.instance_name
   
