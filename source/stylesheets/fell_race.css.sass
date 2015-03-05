@@ -90,6 +90,9 @@ a.config
 a.enter_online
   +icon_link("linksprite.png", -288px)
   font-weight: bold
+  color: $rubine
+  &:hover
+    color: $link
 
 .note
   +quiet
@@ -663,14 +666,16 @@ a.race_link
           .profile
             position: relative
             .basic_details
-              margin-top: -1.8em
+              margin: -30px 10px 0 40px
               font-weight: bold
-              text-align: center
           .next_or_recent
             margin-top: 5px
-            text-align: center
+            margin: 5px 20px 0 40px
             a.date
               font-weight: bold
+            p.entries
+              span.eod, span.no_eod
+                color: $mid
           .next
             margin-left: 5px
 
@@ -1037,10 +1042,42 @@ section#extra
               font-size: 0.95em
               color: $pale
   section.entry
-    section
-      margin-bottom: 20px
-    p
-      margin: 2px 0
+    width: 480px
+
+p.onecol, p.twocol, p.threecol, p.fourcol
+  margin: 0.5em 0
+  label
+    display: block
+    &.inline
+      display: inline-block
+  input[type="text"], input[type="email"], input[type="password"], input[type="date"], select
+    padding: 7px
+    border: 1px solid $pale
+    color: $dark
+    font-size: 1em
+    margin-bottom: 0.5em
+  span.note
+    display: block
+    margin-bottom: 1em
+
+p.onecol
+  span.col
+    +column(480px)
+
+p.twocol
+  span.col
+    +column(227px)
+  &.unequal
+    span.col:first-child
+      +column(140px)
+    span.col:last-child, span.col.last
+      +column(330px)
+  &.reversed
+    span.col:first-child
+      +column(330px)
+    span.col:last-child, span.col.last
+      +column(140px)
+
 
 #content.collapsed
   margin-left: -540px
@@ -1191,6 +1228,20 @@ ul.sortable li.over
     left: 20px
     right: 10px
 
+@media (max-width:1024px)
+  section#content
+    width: 480px
+    main > .race .race_body .summary
+      .profile .basic_details
+        margin: -30px 0 0 20px
+      .next_or_recent
+        margin: 5px 0 0 20px
+  section#extra
+    left: 480px
+    padding: 20px 32px
+  
+
 @media (max-width:768px)
   #content
     width: 90%
+

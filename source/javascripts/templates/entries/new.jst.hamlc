@@ -1,6 +1,30 @@
+%p
+  Please check that the details shown below are correct and fill in anything that we don't know yet.
+  All your answers will be remembered for next time.
+
 %section.competitor
+
+%section.affirmation
+  %p
+    Please read the following carefully and then check the box below to indicate your agreement
+  %ul
+    %li
+      I accept the hazards inherent in fell running and acknowledge that I am entering and running this race at my own risk. 
+    %li
+      I confirm that I am aware of the rules imposed on me by the Race Organiser and that I will comply with them. 
+    %li
+      I confirm that I have read and will comply with the 
+      %a{href: "http://fellrunner.org.uk/pdf/committee/14_Competitors_Safety_Rules_and_Equipment.pdf"}
+        Fell Running - Requirements for Runners. 
+    %li
+      I acknowledge and agree that I am responsible for determining whether I have the skills equipment and fitness to participate in this event. 
+    %li
+      I accept that neither the Race Organiser nor the Fell Runners Association shall be liable to me for any injury, loss or damage of any nature to me or my property arising out of my participation in this race (other than in respect of death or personal injury as a result of their negligence).
+%p
+  %input#affirmation{type: "checkbox"}
+  %label{for: "affirmation"} I understand and accept these terms
 
 %section.payment_details
 
 %p
-  %a.button.create Confirm and pay
+  %a.button.create Save details and pay online

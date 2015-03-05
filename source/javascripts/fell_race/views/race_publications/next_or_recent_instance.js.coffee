@@ -36,6 +36,21 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
     'span.both':
       observe: ["online_entry_active", "postal_entry_active"]
       visible: ([a,b]=[]) -> a and b
+    'span.online_entry_fee':
+      observe: 'online_entry_fee'
+      onGet: 'decimalize'
+    'span.postal_entry_fee':
+      observe: 'postal_entry_fee'
+      onGet: 'decimalize'
+    'span.eod_fee': 
+      observe: 'eod_fee'
+      onGet: 'decimalize'
+    'span.eod':
+      observe: "eod"
+      visible: true
+    'span.no_eod':
+      observe: "eod"
+      visible: "untrue"
     'a.results':
       observe: 'file'
       visible: true
@@ -66,4 +81,9 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
       $el.css display: "inline-block"
     else
       $el.hide()
+  
+  untrue: (value) =>
+    not value
     
+  decimalize: (value) =>
+    value.toFixed(2)

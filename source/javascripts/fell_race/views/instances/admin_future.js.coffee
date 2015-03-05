@@ -44,7 +44,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     "span.postal_entry_fee":
       observe: "postal_entry_fee"
       onGet: "currency"
-    "span.postal_entry_address": "postal_entry_address"
     "input.accept_cheque": "accept_cheque"
     "input.cheque_paid_to": "cheque_paid_to"
     "input.accept_cash": "accept_cash"

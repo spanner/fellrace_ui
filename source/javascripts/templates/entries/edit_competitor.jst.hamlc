@@ -1,57 +1,63 @@
-%section
-  %p
+%p.name.twocol
+  %span.col
     %label{for: "forename"} Forename
-    %input#forename
-  %p
-    %label{for: "middlename"} Middlename
-    %input#middlename
-  %p
+    %input#forename{type: "text"}
+  %span.col.last
     %label{for: "surname"} Surname
-    %input#surname
+    %input#surname{type: "text"}
 
-  %p.editing
-    Gender:
-    %label{for: "male"} Male
+%p.cat.twocol
+  %span.col
+    %label
+      Gender
     %input#male{name: "gender", type: "radio", value: "m"}
-    %label{for: "female"} Female
+    %label.inline{for: "male"} Male
     %input#female{name: "gender", type: "radio", value: "f"}
+    %label.inline{for: "female"} Female
+    %br
 
-  %p
-    %label{for: "dob"} Dob:
-    %input#dob{type: "date"}
+  %span.col.last
+    %label{for: "dob"} Date of birth
+    %input#dob{type: "text"}
 
-  %p
-    %span.label{for: "club"} Club:
-    %input#club
+  %span.note
+    Race category will be based on your gender and age.
 
-%section
-  Address
-  %p
-    %label{for: "postal_address_line_1"} Line 1:
-    %input#postal_address_line_1
-  %p
-    %label{for: "postal_address_line_2"} Line 2:
-    %input#postal_address_line_2
-  %p
-    %label{for: "postal_town"} Town:
-    %input#postal_town
-  %p
-    %label{for: "postal_county"} County:
-    %input#postal_county
-  %p
-    %label{for: "postcode"} Postcode:
-    %input#postcode
-  %p
-    %label{for: "postal_country"} Country:
-    %input#postal_country
+%p.club.onecol
+  %span.col
+    %label{for: "club"} Club
+    %input#club{type: "text"}
+  %span.note
+    Most clubs you can choose from the list that will appear when you start typing. 
+    If yours is not there, please type the full name.
 
-%section
-  %p
-    %label{for: "email"} email:
-    %input#email
-  %p
-    %label{for: "phone"} Phone:
-    %input#phone
-  %p
-    %label{for: "mobile"} Mobile:
-    %input#mobile
+%p.contacts.twocol
+  %span.col
+    %label{for: "postal_address_line_1"} Address
+    %input#postal_address_line_1{type: "text", placeholder: "Line 1"}
+    %input#postal_address_line_2{type: "text", placeholder: "Line 2"}
+    %input#postal_town{type: "text", placeholder: "Post town"}
+    %input#postcode{type: "text", placeholder: "Postcode"}
+    %select#postal_county
+    %select#postal_country
+
+  %span.col
+    %span.field
+      %label{for: "email"} Email
+      %input#email{type: "email"}
+
+    %span.field
+      %label{for: "phone"} Phone
+      %input#phone{type: "text"}
+
+    %span.field
+      %label{for: "mobile"} Mobile
+      %input#mobile{type: "text"}
+
+%p.emergency.twocol
+  %span.col
+    %label{for: "emergency_contact"} Emergency contact
+    %input#emergency_contact{type: "text"}
+  %span.col.last
+    %label{for: "emergency_contact_phone"} and phone number
+    %input#emergency_contact_phone{type: "text"}

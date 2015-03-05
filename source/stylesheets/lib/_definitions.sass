@@ -100,7 +100,7 @@ $error: #cc3333
   font-weight: lighter
   font-size: 85%
   color: $pale
-  line-height: 1.4
+  line-height: 1.25
   text-shadow: none
 
 =loud
@@ -209,3 +209,27 @@ $error: #cc3333
     min-height: 26px
     &:hover
       background-position: 0 -48px
+
+=column($width: 300px, $margin: 20px)
+  display: inline-block
+  vertical-align: top
+  width: $width
+  margin-right: $margin
+  input[type="text"], input[type="email"], input[type="date"], input[type="password"], textarea
+    width: $width - 18px
+  select
+    width: $width - 2px
+  &:last-child, &.last
+    margin-right: 0
+  span.subcol
+    display: inline-block
+    vertical-align: top
+    $subwidth: $width/2 - 5px
+    width: $subwidth
+    margin-right: $margin / 2
+    input[type="text"], input[type="email"], input[type="date"], input[type="password"], textarea
+      width: $subwidth - 18px
+    select
+      width: $subwidth - 2px
+    &:last-child, &.last
+      margin-right: 0

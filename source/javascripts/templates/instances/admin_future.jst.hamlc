@@ -60,9 +60,6 @@
       %span.postal_entry_fee.currency.editable{data: {placeholder: "0.00"}}
 
     %p.entry_form
-    %p.postal_entry_address
-      Post to address:
-      %span.postal_entry_address.editable{data: {placeholder: "Buckingham Palace, London, SW1A 1AA"}}
 
 %section.entries
   %h2 Entries list

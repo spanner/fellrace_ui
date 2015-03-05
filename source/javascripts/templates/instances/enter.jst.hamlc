@@ -1,7 +1,8 @@
 %a.close.big
 
 %h2
+  New entry:
   %a.race_name
   %span.instance_name
-
+  
 %section.entry

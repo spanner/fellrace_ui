@@ -4,13 +4,17 @@ at
 
 %p.entries
   %a.enter_online
-    Enter online
-    (not yet!)
-  %span.both
-    or
-  %a.enter_postal
-    download entry form
-
+    Enter online: 
+    %span.online_entry_fee.currency
+  %a.enter_postal{target: "_blank"}
+    Download entry form
+  %span.eod
+    %br
+    Entry on the day:
+    %span.eod_fee
+  %span.no_eod
+    %br
+    No entry on the day
 %p.results
   %a.results
     Results available
