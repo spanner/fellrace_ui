@@ -1,0 +1,31 @@
+.head
+  .picture.home
+
+.body
+  %p.name.twocol
+    %span.col
+      %label{for: "first_name"} Forename
+      %input#first_name{type: "text"}
+    %span.col.last
+      %label{for: "last_name"} Surname
+      %input#last_name{type: "text"}
+
+  %p.email.onecol
+    %span.col
+      %label{for: "email"} Email
+      %input#email{type: "email"}
+
+  %p.password.onecol
+    %span.col
+      %label{for: "password"} Password
+      %input#password{type: "password"}
+
+  %p.new_password.twocol.hide
+    %span.col
+      %label{for: "new_password"} New password
+      %input#new_password{type: "password"}
+
+    %span.col.last
+      %label{for: "new_password_confirmation"} New password confirmation
+      %input#new_password_confirmation{type: "password"}
+

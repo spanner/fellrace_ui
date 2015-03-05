@@ -6,12 +6,9 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     'click a.social': 'openTab'
 
   bindings:
-    '.controls':
-      observe: "permissions"
-      visible: ({can_edit:can_edit}={}) ->
-        can_edit
-
     'a.edit':
+      observe: "permissions"
+      visible: "canEdit"
       attributes: [
         observe: ["slug","permissions"]
         name: "href"
@@ -233,6 +230,9 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
         "background-image: url(#{_fellrace.apiUrl()}#{url})"
       else
         "background-image: url(#{url})"
-        
+
+  canEdit: ({can_edit:can_edit}={}) =>
+    can_edit
+
 class FellRace.Views.RacePublicationsList extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.RacePublication

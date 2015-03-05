@@ -3,10 +3,10 @@
 %h3.name
 %ul.actions
   %li
-    %a.me
+    %a.me{href: "/users/me"}
       Your page
   %li
-    %a.prefs
+    %a.prefs{href: "/users/me/preferences"}
       Account preferences
   %li
     %a.signout

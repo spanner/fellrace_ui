@@ -29,6 +29,7 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
       attributes: [
         name: "href"
         observe: "entry_form"
+        onGet: "entryFormUrl"
       ,
         name: "class"
         observe: "entry_form_type"
@@ -86,4 +87,11 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
     not value
     
   decimalize: (value) =>
-    value.toFixed(2)
+    value?.toFixed(2)
+
+  entryFormUrl: (url) =>
+    if url
+      if url.match(/^\//)
+        "#{_fellrace.apiUrl()}#{url}"
+      else
+        url
