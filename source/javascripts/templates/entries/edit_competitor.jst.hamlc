@@ -28,7 +28,7 @@
     %label{for: "club"} Club
     %input#club{name: "club", type: "text"}
   %span.note
-    Uusally your club will appear in the list of suggestions when you start typing.
+    Your club should appear in the list of suggestions when you start typing.
     If yours is not there, please give its full name. Choose 'Unattached' if no club.
 
 %p.contacts.twocol

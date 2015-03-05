@@ -1,0 +1,10 @@
+.signin
+  %form.password
+    %a.avatar.hide
+    %h3
+      Awaiting confirmation
+
+    %p
+      Thank you for signing up. We have sent a confirmation message to
+      %span#email
+      Please click on its large friendly button to complete the process.

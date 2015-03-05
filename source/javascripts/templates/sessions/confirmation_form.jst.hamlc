@@ -1,5 +1,4 @@
 .confirm
-  %a.avatar.hide
 
   %p.waiter
     Please wait while we check your confirmation token.
@@ -12,6 +11,7 @@
     Please make sure you're using the whole link.
 
   %form
+    %a.avatar.hide
     %h3
       Welcome back 
 

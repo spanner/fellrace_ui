@@ -17,9 +17,6 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     @model.set("cost", @model.collection.instance.get("online_entry_fee"))
     @_payment = new FellRace.Models.Payment
       amount: @model.get("cost")
-    @_competitor.on "change", @setReadiness
-    @_payment.on "change", @setReadiness
-    @model.on "change", @setReadiness
     
     @_payment.on "change:stripeToken", @performTransaction
     Backbone.Validation.bind(@)
@@ -36,6 +33,9 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     @_edit_competitor_view.render()
     @_edit_payment_view.render()
     @setReadiness()
+    @_competitor.on "change", @setReadiness
+    @_payment.on "change", @setReadiness
+    @model.on "change", @setReadiness
 
   setReadiness: () =>
     if @isReady()

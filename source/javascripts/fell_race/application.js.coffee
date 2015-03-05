@@ -172,6 +172,8 @@ class FellRace.Application extends Backbone.Marionette.Application
       ""
 
   user_actions: =>
+    #TODO: intervene whenever someone is signed in but not confirmed.
+    
     resetPassword: (uid, token) =>
       @actionRegion.show(new FellRace.Views.SessionPasswordForm({uid: uid, token: token}))
     requestReset: =>
@@ -189,6 +191,8 @@ class FellRace.Application extends Backbone.Marionette.Application
       @actionRegion.show(new FellRace.Views.SessionConfirmationForm({uid: uid, token: token}))
     reconfirm: =>
       @actionRegion.show(new FellRace.Views.SessionReconfirmationForm())
+    requestConfirmation: =>
+      @actionRegion.show(new FellRace.Views.ConfirmationRequired())
     signedUp: =>
       $.notify "success", "User account created"
       @actionRegion.close()
@@ -208,6 +212,9 @@ class FellRace.Application extends Backbone.Marionette.Application
 
   userSignedIn: =>
     @session.signedIn()
+
+  userConfirmed: =>
+    @session.confirmed()
 
   authPending: =>
     @session.authPending()

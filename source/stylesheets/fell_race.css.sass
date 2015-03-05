@@ -1197,11 +1197,14 @@ a.file_name
   &.edit
     +reverse_button($green)
   &.working
-    text-indent: 1000px
+    color: $pale
+    border-color: $pale
+    background-color: white
+    padding-left: 32px
+    pointer-events: none
     background:
-      color: white
       image: image-url('spinner.gif')
-      position: center center
+      position: 8px 10px
       repeat: no-repeat
 .head, header
   .button

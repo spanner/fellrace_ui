@@ -62,6 +62,9 @@ class FellRace.Models.UserSession extends Backbone.Model
   signedIn: () =>
     @user and not @user.isNew()
 
+  confirmed: () =>
+    @user?.get("confirmed")
+
   # All our user-specific views call getState on render.
   #
   getState: () =>
