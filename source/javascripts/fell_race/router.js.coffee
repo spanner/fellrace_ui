@@ -36,7 +36,7 @@ class FellRace.BaseRouter extends Backbone.Router
   _previous: {}
 
   public: (path) =>
-    _fellrace.vent.off "login:changed"
+    # _fellrace.vent.off "login:changed"
     if @_previous.route is "public"
       router = @_previous.router
     else
