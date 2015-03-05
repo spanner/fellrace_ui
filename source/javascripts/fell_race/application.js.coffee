@@ -129,6 +129,9 @@ class FellRace.Application extends Backbone.Marionette.Application
   adminMapView: =>
     @mapView.adminView()
 
+  toPublicOrHome: =>
+    _fellrace.navigate Backbone.history.fragment.match(/admin(.+)/)?[1] || "/"
+
   #TODO: This should be in a subclass of Region
   #
   actionRegionSetup: =>

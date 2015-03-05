@@ -47,28 +47,22 @@ class FellRace.BaseRouter extends Backbone.Router
     router.handle path
 
   admin: (path) =>
-    if @_previous.route is "admin"
-      @_previous.router.handle path
-    else
-      publicOrHome = =>
-        if match = Backbone.history.fragment.match(/admin(.+)/)
-          _fellrace.navigate match[1]
-        else
-          _fellrace.navigate "/"
-      if _fellrace.userSignedIn()
+    if _fellrace.userSignedIn()
+      if @_previous.route is "admin"
+        @_previous.router.handle path
+      else
         router = new FellRace.AdminRouter
         router.handle path
         @_previous =
           route: "admin"
           router: router
-        _fellrace.vent.once "login:changed", =>
-          publicOrHome()
-      else
-        if _fellrace.authPending()
-          _fellrace.vent.once "login:changed", =>
-            @admin path
-        else
-          publicOrHome()
+      _fellrace.vent.once "login:changed", =>
+        _fellrace.toPublicOrHome()
+    else if _fellrace.authPending()
+      _fellrace.vent.once "login:changed", =>
+        @admin path
+    else
+      _fellrace.toPublicOrHome()
 
 class FellRace.PublicRouter extends FellRace.Router
   routes:
@@ -78,6 +72,7 @@ class FellRace.PublicRouter extends FellRace.Router
     "clubs(/*path)": "clubs"
     "users(/*path)": "users"
     "confirm/:uid/:token(/)": "confirmUser"
+    "about(/*path)": "about"
     "*path": "index"
 
   initialize: ->
@@ -125,27 +120,33 @@ class FellRace.PublicRouter extends FellRace.Router
         view: view
 
   users: (path) =>      
-    if @_previous.route is "users"
-      @_previous.view.handle path
-    else
-      if _fellrace.userSignedIn()
+    if _fellrace.userSignedIn()
+      if @_previous.route is "users"
+        @_previous.view.handle path
+      else
         view = new FellRace.Views.UsersLayout
           path: path
         @_previous =
           route: "users"
           view: view
-        _fellrace.vent.on "login:changed", =>
-          _fellrace.navigate "/"
+      _fellrace.vent.on "login:changed", =>
+        _fellrace.navigate "/"
+    else
+      if _fellrace.authPending()
+        _fellrace.vent.once "login:changed", =>
+          @users path
       else
-        if _fellrace.authPending()
-          _fellrace.vent.once "login:changed", =>
-            @users path
-        else
-          _fellrace.navigate "/"
+        _fellrace.navigate "/"
 
   confirmUser: (uid,token) =>
     @index()
     _fellrace.actionRegion.show(new FellRace.Views.SessionConfirmationForm({uid: uid, token: token}))
+
+  about: (path) =>
+    $.notify "error", "TODO"
+    @_previous =
+      route: "about"
+    
 
 class FellRace.AdminRouter extends FellRace.Router
   routes:
