@@ -16,6 +16,7 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
       onGet: "calculateCharge"
 
   initialize: ->
+    Stripe.setPublishableKey(_fellrace.config("stripe_publishable_key"))
     @_competitor = _fellrace.getCurrentCompetitor()
     @model.set("cost", @model.collection.instance.get("online_entry_fee"))
     @_payment = new FellRace.Models.Payment
@@ -65,4 +66,26 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
   performTransaction: (e) =>
     if @isReady()
       $.notify "flash", "Right you are then."
+      Stripe.card.createToken({
+        number: @_payment.get("card_number"),
+        cvc: @_payment.get("cvc"),
+        exp_month: @_payment.get("expiry_month"),
+        exp_year: @_payment.get("expiry_year")
+      }, @tokenCreated);
 
+  tokenCreated: (status, token) =>
+    if status and status < 400
+      @model.save
+        stripe_token: token.id
+        competitor_id: @_competitor.id
+      ,
+        success: =>
+          if @model.get("paid")
+            $.notify "success", "payment successful"
+          else
+            $.notify "error", "payment failed"
+
+    else if status >= 400 and status < 500
+      console.debug $.notify "error", "something wrong with your card details"
+    else if status >= 500
+      console.debug $.notify "error", "server error"
