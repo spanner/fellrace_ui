@@ -3,6 +3,7 @@ class FellRace.Views.UserActionMenu extends Backbone.Marionette.ItemView
 
   events:
     "click a.signout": "signout"
+    "click a": "closeMenu"
 
   bindings: 
     ".name": 
@@ -20,5 +21,6 @@ class FellRace.Views.UserActionMenu extends Backbone.Marionette.ItemView
   
   signout: () =>
     _fellrace.user_actions().signOut()
+
+  closeMenu: =>
     _fellrace.user_actions().hideAction()
-    

@@ -81,6 +81,7 @@ use Rack::Rewrite do
   rewrite %r{^\/confirm(\/.+)?}, '/index.html'
   rewrite %r{^\/users(\/.+)?}, '/index.html'
   rewrite %r{^\/me(\/.+)?}, '/index.html'
+  rewrite %r{^\/about(\/.+)?}, '/index.html'
 end
 
 activate :deploy do |deploy|

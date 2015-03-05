@@ -41,6 +41,7 @@ class FellRace.Models.UserSession extends Backbone.Model
   #
   load: () =>
     if @authToken()
+      @set state: FellRace.Models.UserSession.pendingState
       $.getJSON("#{_fellrace.apiUrl()}/users/me").done(@setUser) #.fail(@unsetCookie)
 
   reset: () =>
@@ -80,6 +81,8 @@ class FellRace.Models.UserSession extends Backbone.Model
   changedState: (model, value, options) =>
     _fellrace.vent.trigger('auth.change', model, value)
 
+  authPending: =>
+    @getState() is FellRace.Models.UserSession.pendingState
 
   ## API authentication
   #

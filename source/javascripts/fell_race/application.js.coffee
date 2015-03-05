@@ -133,6 +133,9 @@ class FellRace.Application extends Backbone.Marionette.Application
   adminMapView: =>
     @mapView.adminView()
 
+  toPublicOrHome: =>
+    _fellrace.navigate Backbone.history.fragment.match(/admin(.+)/)?[1] || "/"
+
   #TODO: This should be in a subclass of Region
   #
   actionRegionSetup: =>
@@ -208,7 +211,11 @@ class FellRace.Application extends Backbone.Marionette.Application
   userSignedIn: =>
     @session.signedIn()
 
+  authPending: =>
+    @session.authPending()
+
   getCurrentCompetitor: =>
+    #TODO: repopulate competitor before entry process begins.
     @currentUser()?.getCompetitor()
 
   navigate: (route, {trigger:trigger,replace:replace}={}) =>
