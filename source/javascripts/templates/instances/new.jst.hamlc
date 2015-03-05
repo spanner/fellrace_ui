@@ -7,6 +7,6 @@ Date
 
 %p.instructions
 
-.controls
-  %a.cancel Cancel
-  %a.save Save and continue
+%p
+  %a.button.cancel Cancel
+  %a.button.save Save and continue
