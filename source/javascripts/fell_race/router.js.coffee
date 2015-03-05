@@ -36,6 +36,7 @@ class FellRace.BaseRouter extends Backbone.Router
   _previous: {}
 
   public: (path) =>
+    _fellrace.vent.off "login:changed"
     if @_previous.route is "public"
       router = @_previous.router
     else
@@ -47,17 +48,27 @@ class FellRace.BaseRouter extends Backbone.Router
 
   admin: (path) =>
     if @_previous.route is "admin"
-      router = @_previous.router
+      @_previous.router.handle path
     else
-      _fellrace.vent.once "login:changed", (a, b, c) =>
+      publicOrHome = =>
         if match = Backbone.history.fragment.match(/admin(.+)/)
-          if !_fellrace.userSignedIn()
-            _fellrace.navigate match[1]
-      router = new FellRace.AdminRouter
-    @_previous =
-      route: "admin"
-      router: router
-    router.handle path
+          _fellrace.navigate match[1]
+        else
+          _fellrace.navigate "/"
+      if _fellrace.userSignedIn()
+        router = new FellRace.AdminRouter
+        router.handle path
+        @_previous =
+          route: "admin"
+          router: router
+        _fellrace.vent.once "login:changed", =>
+          publicOrHome()
+      else
+        if _fellrace.authPending()
+          _fellrace.vent.once "login:changed", =>
+            @admin path
+        else
+          publicOrHome()
 
 class FellRace.PublicRouter extends FellRace.Router
   routes:
@@ -123,11 +134,14 @@ class FellRace.PublicRouter extends FellRace.Router
         @_previous =
           route: "users"
           view: view
-        _fellrace.vent.once "login:changed", =>
+        _fellrace.vent.on "login:changed", =>
           _fellrace.navigate "/"
       else
-        _fellrace.vent.once "login:changed", =>
-          @users path
+        if _fellrace.authPending()
+          _fellrace.vent.once "login:changed", =>
+            @users path
+        else
+          _fellrace.navigate "/"
 
   confirmUser: (uid,token) =>
     @index()
