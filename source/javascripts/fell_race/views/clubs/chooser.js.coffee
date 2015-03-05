@@ -53,7 +53,7 @@ class FellRace.Views.ClubChooser extends Backbone.Marionette.CollectionView
   tagName: "ul"
   className: "chooser"
   itemView: FellRace.Views.ClubSuggestion
-  
+
   initialize: (options = {}) ->
     @_search_box = options.input
     @_source_collection = _fellrace.clubs
@@ -166,6 +166,7 @@ class FellRace.Views.ClubChooser extends Backbone.Marionette.CollectionView
   select: (club) =>
     if club
       @_search_box.val(club.get("name"))
+      @trigger "chosen"
       @hide()
 
   clearSearch: =>
