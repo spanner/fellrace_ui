@@ -15,7 +15,7 @@
         I confirm that I am aware of the rules imposed on me by the Race Organiser and that I will comply with them. 
       %li
         I confirm that I have read and will comply with the 
-        %a{href: "http://fellrunner.org.uk/pdf/committee/14_Competitors_Safety_Rules_and_Equipment.pdf"}
+        %a{href: "http://fellrunner.org.uk/pdf/committee/14_Competitors_Safety_Rules_and_Equipment.pdf", target: "_blank"}
           Fell Running - Requirements for Runners. 
       %li
         I acknowledge and agree that I am responsible for determining whether I have the skills equipment and fitness to participate in this event. 
@@ -29,7 +29,7 @@
     %p.emergency.twocol
       %span.col
         %label{for: "emergency_contact"} Emergency contact on the day
-        %input#emergency_contact{type: "text"}
+        %input#emergency_contact_name{type: "text"}
       %span.col.last
         %label{for: "emergency_contact_phone"} Phone number
         %input#emergency_contact_phone{type: "text"}

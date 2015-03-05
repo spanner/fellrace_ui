@@ -500,7 +500,7 @@ a.race_link
   z-index: 200
   +transition(margin-left, 0.5s, ease-out)
   #user_controls
-    position: absolute
+    position: fixed
     left: 580px
     top: 0
     z-index: 90
@@ -1058,6 +1058,9 @@ p.onecol, p.twocol, p.threecol, p.fourcol
     color: $dark
     font-size: 1em
     margin-bottom: 0.5em
+    &[disabled]
+      color: $mid
+      background-color: $coolgrey0
   span.note
     display: block
     margin-bottom: 1em

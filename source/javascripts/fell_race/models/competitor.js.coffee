@@ -1,4 +1,18 @@
 class FellRace.Models.Competitor extends FellRace.Model
+  validation:
+    forename:
+      required: true
+    surname:
+      required: true
+    postal_address_line_1:
+      required: true
+    postal_town:
+      required: true
+    postcode:
+      required: true
+    phone:
+      required: true
+  
   urlRoot: =>
     "#{_fellrace.apiUrl()}/competitors"
 
