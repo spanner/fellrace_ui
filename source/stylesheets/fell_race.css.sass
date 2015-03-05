@@ -1231,6 +1231,10 @@ ul.sortable li.over
 @media (max-width:1024px)
   section#content
     width: 480px
+    &.collapsed
+      margin-left: -450px
+    #user_controls
+      left: 480px
     main > .race .race_body .summary
       .profile .basic_details
         margin: -30px 0 0 20px
@@ -1239,6 +1243,8 @@ ul.sortable li.over
   section#extra
     left: 480px
     padding: 20px 32px
+  #action
+    left: 480px
   
 
 @media (max-width:768px)
