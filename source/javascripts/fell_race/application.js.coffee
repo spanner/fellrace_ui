@@ -47,24 +47,15 @@ class FellRace.Application extends Backbone.Marionette.Application
     @_domain = @config("domain")
     @session = new FellRace.Models.UserSession()
     @race_publications = new FellRace.Collections.RacePublications([])
-
-    # ???
     @clubs ?= new FellRace.Collections.Clubs([])
     @competitors ?= new FellRace.Collections.Competitors([])
-
     @mapView = new FellRace.Views.Map()
     @gmapRegion.show @mapView
-
     @user_controlsRegion.show new FellRace.Views.UserControls()
-
     @listenToToggle()
-
     @noticeRegion.show new Notifier model: @vent, wait: 4000
-
     @session.load()
-
     @router = new FellRace.BaseRouter
-
     @content = $('#content')
     view = $(window)
 

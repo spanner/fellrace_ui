@@ -16,6 +16,7 @@
 #= require vendor/backbone.stickit
 #= require vendor/backbone.notifications
 #= require vendor/backbone.mapstick
+#= require vendor/backbone.validation
 #= require vendor/medium-editor
 #= require vendor/coordtransform
 #= require vendor/latlon

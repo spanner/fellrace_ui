@@ -364,7 +364,7 @@
   %span.col
     %span.field
       %label{for: "email"} Email
-      %input#email{name: "email", type: "email"}
+      %input#email{name: "email", type: "email", disabled: "disabled"}
 
     %span.field
       %label{for: "phone"} Phone

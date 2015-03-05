@@ -21,16 +21,12 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
       observe: "postal_country"
 
   initialize: ->
-    @setValid()
     @model.updateable()
-    @model.on "change", @setValid
+    Backbone.Validation.bind(@)
 
   onRender: =>
     # $.getJSON "#{_fellrace.apiUrl()}/clubs", (data) =>
     #   console.debug "#{data.length} clubs", data
     @model.set("postal_country", "GB") unless @model.get("postal_country")
     @stickit()
-
-  setValid: =>
-    valid = @model.get("forename") and @model.get("surname") and @model.get("dob") and @model.get("gender") and @model.get("email")
-    @model.set valid: valid
+    
