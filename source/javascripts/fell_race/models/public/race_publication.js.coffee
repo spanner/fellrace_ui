@@ -1,4 +1,6 @@
 class FellRace.Models.RacePublication extends Backbone.Model
+  idAttribute: "slug"
+
   url: =>
     "#{_fellrace.apiUrl()}/race_publications/#{@get("slug")}"
 
