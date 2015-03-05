@@ -22,6 +22,7 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
       model: @_competitor
       el: @$el.find("section.competitor")
     edit_competitor_view.render()
+    @setReadiness()
 
   setReadiness: () =>
     console.log "setReadiness", @model.isValid(true), @_competitor.isValid(true)
