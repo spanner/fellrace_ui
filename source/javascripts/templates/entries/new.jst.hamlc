@@ -7,7 +7,7 @@
 
   %section.affirmation
     %p
-      Please read the following carefully and then check the box below to indicate your agreement
+      Please read the following carefully and then check the box below to indicate your agreement:
     %ul
       %li
         I accept the hazards inherent in fell running and acknowledge that I am entering and running this race at my own risk. 
@@ -23,7 +23,7 @@
         I accept that neither the Race Organiser nor the Fell Runners Association shall be liable to me for any injury, loss or damage of any nature to me or my property arising out of my participation in this race (other than in respect of death or personal injury as a result of their negligence).
   %p
     %input#terms_accepted{type: "checkbox"}
-    %label{for: "terms_accepted"} I understand and accept these terms
+    %label.warning{for: "terms_accepted"} I understand and accept these terms
 
   %section.contact
     %p.emergency.twocol
@@ -34,7 +34,8 @@
         %label{for: "emergency_contact_phone"} Phone number
         %input#emergency_contact_phone{type: "text"}
 
-  %section.payment_details
+  %section.payment
+
 
   %p
     %a.button.create Save details and pay online

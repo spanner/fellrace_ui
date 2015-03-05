@@ -1,0 +1,20 @@
+%h3
+  Payment details
+
+%p.onecol
+  %span.col
+    %label{for: "card_number"} Credit card number
+    %input#card_number{type: "text", placeholder: "Just the numbers, please"}
+    
+%p.threecol
+  %span.col
+    %label{for: "expiry_month"} Expires
+    %input.month#expiry_month{name: "expiry-month", type: "text", limit: 2, placeholder: "MM"}
+    %input.year#expiry_year{name: "expiry-year", type: "text", limit: 4, placeholder: "YY"}
+  %span.col
+    %label{for: "cvc"} CVC
+    %input.cvc#cvc{name: "cvc", type: "text", limit: 3, placeholder: "123"}
+  %span.col
+    Your card will be charged a total of
+    %strong
+      %span#amount.currency

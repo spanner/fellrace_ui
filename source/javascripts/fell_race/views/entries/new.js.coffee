@@ -11,28 +11,35 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
 
   initialize: ->
     @_competitor = _fellrace.getCurrentCompetitor()
-    @model.on "change", @setReadiness
+    @_payment = new FellRace.Models.Payment
+      amount: @model.collection.instance.get("online_entry_fee")
     @_competitor.on "change", @setReadiness
+    @_payment.on "change", @setReadiness
+    @model.on "change", @setReadiness
     Backbone.Validation.bind(@)
 
   onRender: =>
     @stickit()
-    @_stumbit = @$el.find('a.create')
-    edit_competitor_view = new FellRace.Views.EditEntryCompetitor
+    @_edit_competitor_view = new FellRace.Views.EditEntryCompetitor
       model: @_competitor
       el: @$el.find("section.competitor")
-    edit_competitor_view.render()
+    @_edit_payment_view = new FellRace.Views.EditEntryPayment
+      model: @_payment
+      el: @$el.find("section.payment")
+    
+    @_edit_competitor_view.render()
+    @_edit_payment_view.render()
+    @_stumbit = @$el.find("a.create")
     @setReadiness()
 
   setReadiness: () =>
-    console.log "setReadiness", @model.isValid(true), @_competitor.isValid(true)
     if @isReady()
-      @_stumbit.removeClass("unavailable")
+      @_stumbit.removeClass('unavailable')
     else
-      @_stumbit.addClass("unavailable")
+      @_stumbit.addClass('unavailable')
   
   isReady: =>
-    @model.isValid(true) and @_competitor.isValid(true)
+    @model.isValid(true) and @_competitor.isValid(true) and @_payment.isValid(true)
 
   createEntry: (e) =>
     if @isReady()

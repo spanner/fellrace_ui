@@ -15,10 +15,8 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
     "input#phone": "phone"
     "input#mobile": "mobile"
     "input#club": "club"
-    "select#postal_county": 
-      observe: "postal_county"
-    "select#postal_country": 
-      observe: "postal_country"
+    "select#postal_county": "postal_county"
+    "select#postal_country": "postal_country"
 
   initialize: ->
     @model.updateable()

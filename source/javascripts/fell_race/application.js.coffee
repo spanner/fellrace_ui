@@ -45,6 +45,10 @@ class FellRace.Application extends Backbone.Marionette.Application
     @_config = new FellRace.Config(options.config)
     @_api_url = @config("api_url")
     @_domain = @config("domain")
+    Stripe.setPublishableKey @config("stripe_key")
+
+
+
     @session = new FellRace.Models.UserSession()
     @race_publications = new FellRace.Collections.RacePublications([])
     @clubs ?= new FellRace.Collections.Clubs([])

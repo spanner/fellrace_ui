@@ -1045,6 +1045,11 @@ section#extra
               color: $pale
   section.entry
     width: 480px
+    .payment
+      input.month, input.year
+        width: 32px
+      input.cvc
+        width: 50px
 
 p.onecol, p.twocol, p.threecol, p.fourcol
   margin: 0.5em 0
@@ -1082,6 +1087,14 @@ p.twocol
       +column(330px)
     span.col:last-child, span.col.last
       +column(140px)
+
+p.threecol
+  span.col
+    +column(70px)
+  span.col:first-child, span.col.first
+    +column(130px)
+  span.col:last-child, span.col.last
+    +column(230px)
 
 
 #content.collapsed

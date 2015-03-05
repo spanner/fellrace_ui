@@ -23,10 +23,12 @@ class FellRace.Config
   defaults: 
     api_url: "http://api.fellrace.org.uk"
     domain: "fellrace.org.uk"
+    stripe_publishable_key: "pk_live_dOxGZ6LC5I1womT8MgsDn3jB"
 
   development:
     api_url: "http://api.fr.dev"
     domain: "fr.dev"
+    stripe_publishable_key: "pk_test_orOZm4kTjBQOf5XB3RM01q0U"
 
   constructor: (options={}) ->
     options.environment ?= @guessEnvironment()
