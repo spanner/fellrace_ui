@@ -5,16 +5,17 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     "click a.create": "createEntry"
 
   bindings:
+    "input.emergency_contact_name": "emergency_contact_name"
+    "input.emergency_contact_phone": "emergency_contact_phone"
     "a.create":
       attributes: [
-        observe: ["competitor_valid","payment_ready","emergency_contact","emergency_contact_number"]
+        observe: ["competitor_valid", "payment_ready", "emergency_contact_name", "emergency_contact_phone"]
         name: "class"
         onGet: "readyClass"
       ]
 
   initialize: ->
     @_competitor = _fellrace.getCurrentCompetitor()
-      
     @_competitor.on "change:valid", (model, value) =>
       @model.set competitor_valid: value
 
@@ -25,15 +26,13 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
       el: @$el.find("section.competitor")
     edit_competitor_view.render()
 
-    #TODO payment_details_view
-
-  readyClass: ([competitor,payment,contact,contact_no]=[]) ->
-    unless competitor# and payment and contact and contact_no
+  readyClass: ([competitor_valid, contact, contact_no]=[]) ->
+    unless competitor_valid and contact and contact_no
       "unavailable"
-
+  
   isReady: =>
-    @model.get("competitor_valid")# and @model.get("payment_ready") and @model.get("emergency_contact") and @model.get("emergency_contact_number")
+    @model.get("competitor_valid") and @model.get("emergency_contact_name") and @model.get("emergency_contact_phone")
 
   createEntry: (e) =>
-    if @isReady() and confirm("Create entry and pay.")
+    if @isReady()
       $.notify "flash", "well, nearly..."

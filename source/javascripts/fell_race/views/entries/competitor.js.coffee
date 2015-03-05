@@ -10,13 +10,15 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
     "input#postal_address_line_1": "postal_address_line_1"
     "input#postal_address_line_2": "postal_address_line_2"
     "input#postal_town": "postal_town"
-    "input#postal_county": "postal_county"
     "input#postcode": "postcode"
-    "input#postal_country": "postal_country"
     "input#email": "email"
     "input#phone": "phone"
     "input#mobile": "mobile"
     "input#club": "club"
+    "select#postal_county": 
+      observe: "postal_county"
+    "select#postal_country": 
+      observe: "postal_country"
 
   initialize: ->
     @setValid()
@@ -26,11 +28,9 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
   onRender: =>
     # $.getJSON "#{_fellrace.apiUrl()}/clubs", (data) =>
     #   console.debug "#{data.length} clubs", data
+    @model.set("postal_country", "GB") unless @model.get("postal_country")
     @stickit()
 
   setValid: =>
-    valid = false
-    c = @model
-    if c.get("forename") and c.get("surname") and c.get("dob") and c.get("gender") and c.get("email")
-      valid = true
+    valid = @model.get("forename") and @model.get("surname") and @model.get("dob") and @model.get("gender") and @model.get("email")
     @model.set valid: valid
