@@ -113,15 +113,21 @@ class FellRace.PublicRouter extends FellRace.Router
         route: "clubs"
         view: view
 
-  users: (path) =>
+  users: (path) =>      
     if @_previous.route is "users"
       @_previous.view.handle path
     else
-      view = new FellRace.Views.UsersLayout
-        path: path
-      @_previous =
-        route: "users"
-        view: view
+      if _fellrace.userSignedIn()
+        view = new FellRace.Views.UsersLayout
+          path: path
+        @_previous =
+          route: "users"
+          view: view
+        _fellrace.vent.once "login:changed", =>
+          _fellrace.navigate "/"
+      else
+        _fellrace.vent.once "login:changed", =>
+          @users path
 
   confirmUser: (uid,token) =>
     @index()

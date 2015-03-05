@@ -1,44 +1,45 @@
 class FellRace.Views.UserLayout extends FellRace.Views.LayoutView
-  initialize: ->
-    super
+  routes: () =>
+    "(/)": @default
+    "preferences(/*path)": @prefs
+
+  default: =>
     view = new FellRace.Views.User
       model: @model
     _fellrace.mainRegion.show view
-
-  default: =>
     _fellrace.closeRight()
-    @_previous =
-      route: "default"
+
+  prefs: =>
+    view = new FellRace.Views.UserPrefs
+      model: @model
+    _fellrace.mainRegion.show view
+    _fellrace.closeRight()
+
 
 class FellRace.Views.UsersLayout extends FellRace.Views.LayoutView
   routes: () =>
-    "(/)": @default
+    # "(/)": @index
     "me(/*path)": @me
     ":id(/*path)": @user
 
-  default: =>
-    _fellrace.closeRight()
-    $.notify "error", "no 'users' page yet"
-    @_previous =
-      route: "default"
+  # index: =>
+  #   _fellrace.closeRight()
+  #   @_previous =
+  #     route: "index"
 
   me: (path) =>
-    if _fellrace.userSignedIn()
-      if @_previous.route is "me"
-        @_previous.view.handle path
-      else
-        model = _fellrace.currentUser()
-        model.fetch
-          success: =>
-            view = new FellRace.Views.UserLayout
-              model: model
-              path: path
-            @_previous =
-              route: "me"
-              view: view
+    if @_previous.route is "me"
+      @_previous.view.handle path
     else
-      _fellrace.vent.once "login:changed", =>
-        @me path
+      model = _fellrace.currentUser()
+      model.fetch
+        success: =>
+          view = new FellRace.Views.UserLayout
+            model: model
+            path: path
+          @_previous =
+            route: "me"
+            view: view
 
   user: (id,path) =>
     if @_previous.route is "user" and @_previous.param is id

@@ -173,7 +173,7 @@ class FellRace.Application extends Backbone.Marionette.Application
       @actionRegion.show(new FellRace.Views.SessionResetForm())
     signOut: =>
       @session.reset()
-      @navigate('/', trigger:true)
+      # @navigate('/', trigger:true)
     signUp: (opts) =>
       @actionRegion.show(new FellRace.Views.UserSignupForm(opts))
     signUpForEvent: =>

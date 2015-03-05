@@ -11,7 +11,7 @@ at
   %span.eod
     %br
     Entry on the day:
-    %span.eod_fee
+    %span.eod_fee.currency
   %span.no_eod
     %br
     No entry on the day
