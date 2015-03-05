@@ -49,7 +49,9 @@ class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
       , @captureStripeToken
 
   captureStripeToken: (status, response) =>
-    if status is 200
+    if status < 400
       @model.set("stripeToken", response.id)
+    else if 400 <= status < 500
+      $.notify "error", "something wrong with your card details"
     else
-      #TODO: report validation errors
+      $.notify "error", "Stripe server error"

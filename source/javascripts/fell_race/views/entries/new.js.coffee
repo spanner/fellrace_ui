@@ -58,5 +58,11 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     @decimalize(fee * (merchant_ratio + fr_ratio) + merchant_fixed + fr_fixed) + "."
 
   performTransaction: (payment, token) =>
-    @set "stripe_token", token
-    @save()
+    @model.set 
+      stripe_token: token
+      competitor_id: @_competitor.id
+    @model.save().done () =>
+      if @model.get("paid")
+        $.notify "success", "payment successful"
+      else
+        $.notify "error", "payment failed"

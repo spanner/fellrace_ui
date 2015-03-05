@@ -18,7 +18,8 @@ class FellRace.Views.InstanceEnter extends Backbone.Marionette.ItemView
   onRender: () =>
     @stickit()
     if _fellrace.userSignedIn()
-      @_entry = @model.entries.add({})
+      @model.entries.url = "#{_fellrace.apiUrl()}/entries"
+      @_entry = @model.entries.add(instance_id: @model.id)
       @_entry_view = new FellRace.Views.NewEntry
         model: @_entry
         el: @$el.find("section.entry")
