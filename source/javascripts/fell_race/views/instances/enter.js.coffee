@@ -17,18 +17,15 @@ class FellRace.Views.InstanceEnter extends Backbone.Marionette.ItemView
 
   onRender: () =>
     @stickit()
-    if _fellrace.userSignedIn()
-      if _fellrace.userConfirmed()
-        @model.entries.url = "#{_fellrace.apiUrl()}/entries"
-        @_entry = @model.entries.add(instance_id: @model.id)
-        @_entry_view = new FellRace.Views.NewEntry
-          model: @_entry
-          el: @$el.find("section.entry")
-        @_entry_view.render()
-      else
-        _fellrace.user_actions().requestConfirmation()
+    if _fellrace.userConfirmed()
+      @model.entries.url = "#{_fellrace.apiUrl()}/entries"
+      @_entry = @model.entries.add(instance_id: @model.id)
+      @_entry_view = new FellRace.Views.NewEntry
+        model: @_entry
+        el: @$el.find("section.entry")
+      @_entry_view.render()
     else
-      _fellrace.user_actions().signIn(destination_url:"/races/#{@model.get("race_slug")}/#{@model.get("name")}/enter", heading: "Sign in to enter race")
-    
+      _fellrace.user_actions().requestConfirmation()
+
   racePublicationUrl: (slug) =>
     "/races/#{slug}"

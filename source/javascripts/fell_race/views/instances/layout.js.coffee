@@ -3,6 +3,10 @@ class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
     "(/)": @default
     "splits(/)": @splits
     "enter(/)": @enter
+    "my_entry(/)": @myEntry
+
+  defaultUrl: =>
+    "/races/#{@model.get("race_slug")}/#{@model.get("name")}"
 
   initialize: (opts) ->
     @_competitor = opts.competitor
@@ -13,7 +17,6 @@ class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
       @model.set show_splits: false
       _fellrace.content.removeClass "collapsed"
     else
-      console.log @model
       if @model.inFuture()
         view = new FellRace.Views.FutureInstance
           model: @model
@@ -36,7 +39,30 @@ class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
     @_previous =
       route: "splits"
 
+  myEntry: =>
+    if _fellrace.userSignedIn() and entry = _fellrace.getCurrentCompetitor().entries.findWhere(instance_id: @model.id)
+      view = new FellRace.Views.MyEntry
+        model: entry
+      _fellrace.extraContentRegion.show view
+      @_previous =
+        route: "myEntry"
+      _fellrace.vent.once "login:changed", =>
+        _fellrace.navigate @defaultUrl()
+    else if _fellrace.authPending()
+      _fellrace.vent.once "login:changed", =>
+        @myEntry()
+    else
+      _fellrace.navigate @defaultUrl()
+
   enter: =>
-    view = new FellRace.Views.InstanceEnter
-      model: @model
-    _fellrace.extraContentRegion.show view
+    if _fellrace.userSignedIn()
+      if entry = _fellrace.getCurrentCompetitor().entries.findWhere(instance_id: @model.id)
+        _fellrace.navigate "#{@defaultUrl()}/my_entry"
+      else
+        view = new FellRace.Views.InstanceEnter
+          model: @model
+        _fellrace.extraContentRegion.show view
+        @_previous =
+          route: "enter"
+    else
+      _fellrace.user_actions().signIn(destination_url:"#{@defaultUrl()}/enter", heading: "Sign in to enter race")

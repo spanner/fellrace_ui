@@ -44,7 +44,6 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
       @_edit_payment_view.disable()
   
   isReady: =>
-    console.debug @model.isValid(true), @_competitor.isValid(true), @_payment.isValid(true)
     @model.isValid(true) and @_competitor.isValid(true) and @_payment.isValid(true)
 
   decimalize: (value) =>
@@ -66,7 +65,8 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     @model.save().done () =>
       if @model.get("paid")
         $.notify "success", "payment successful"
-        # go to confirmation page
+        @_competitor.entries.add @model
+        _fellrace.navigate "/races/#{@model.get("race_slug")}/#{@model.get("instance_name")}/my_entry"
       else
         @_payment.set
           error_param: @model.get("error").param

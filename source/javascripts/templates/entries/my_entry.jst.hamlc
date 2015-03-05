@@ -1,0 +1,14 @@
+%a.close.big
+
+%h2
+  My entry:
+  %a.race_name
+  %span.instance_name
+  
+%p
+  You have successfully entered for
+  %span.race_name
+  %span.instance_name
+  \. You can see yourself in the entry list
+  %a.entry_list here
+  \.
