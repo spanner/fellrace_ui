@@ -12,3 +12,4 @@ class FellRace.Views.LayoutView extends Backbone.Marionette.Layout
   handle: (path) ->
     path ?= "/"
     @_router.handle(path)
+

@@ -1,0 +1,13 @@
+%a.close.big
+%a.avatar.hide
+%h3.name
+%ul.actions
+  %li
+    %a.me
+      Your page
+  %li
+    %a.prefs
+      Account preferences
+  %li
+    %a.signout
+      Sign out

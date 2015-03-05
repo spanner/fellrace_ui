@@ -1,18 +1,8 @@
-/ %h3
-/   Welcome!
-/ %p
-/   %strong
-/     fellrace.org.uk
-/   offers free sites for fell races.
-/   Each race gets an address like
-/   %a.sample{href: "http://caw.fellrace.org.uk/"} caw.fellrace.org.uk
-/   and a set of modern editing tools that will get you up and running in a few minutes. 
-/   It&rsquo;s built purely for fell races, by fell runners and race organisers who are trying to avoid doing their real work.
-
 .check
 .register
   %form.signup
     %fieldset.race
+      %a.avatar.hide
       %p.availability
       %input#desired_slug{name: "slug", type: "text", required: "required"}
       %span.domain

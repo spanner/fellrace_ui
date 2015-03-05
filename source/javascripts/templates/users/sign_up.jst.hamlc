@@ -1,5 +1,8 @@
+%a.avatar.hide
+
 %h3
   Welcome!
+
 .register
   %form.signup
     %fieldset.user
@@ -13,4 +16,4 @@
   %p
     Already got an account? Please
     %a.sign_in
-      sign in first.
+      sign in instead.

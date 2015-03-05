@@ -1,5 +1,8 @@
 .signin
-  %h3.robot
+  %a.close
+  
+  %a.avatar.hide
+  %h3
     Sign in here
 
   %form
@@ -20,7 +23,8 @@
           or
           %a.cancel cancel
       %p
-        If you have signed up but not yet confirmed your account, this won't work. Please refer to your confirmation message. You can
+        If you have signed up but not yet confirmed your account, this won't work until you do.
+        Please refer to your confirmation message. You can
         %a.reconfirm
           request a new one
         if necessary.

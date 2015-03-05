@@ -1,3 +1,4 @@
+%a.avatar.hide
 %h3
   Hello 
   %span.first_name

@@ -75,6 +75,9 @@ a.close
   width: 32px
   height: 32px
 
+a.avatar
+  +big_icon("avatar.png")
+
 a.config
   +icon_link("linksprite.png", -96px)
   color: $pale
@@ -350,20 +353,41 @@ $shadow: 1px 3px 8px #333
   z-index: 900
 
 #action
-  h3
-    margin: 0
+  left: 580px
+  top: 0
+  overflow: scroll
+  z-index: 800
   position: fixed
   width: 280px
   max-height: 450px
-  padding: 10px
+  padding: 24px 30px 10px 24px
   display: none
-  border-radius: 3px
-  box-shadow: 5px 5px 15px #bbb
-  background-color: $translucent
-  right: 20px
-  top: 20px
-  overflow: scroll
-  z-index: 800
+  background-color: white
+  border: 2px solid $dark
+  border-left: none
+  border-top: none
+  a.avatar
+    position: absolute
+    top: 12px
+    left: 16px
+    &+h3
+      margin: 0 0 10px 54px
+    &+p
+      margin-top: 50px
+  a.close
+    position: absolute
+    top: 16px
+    right: 16px
+  ul.actions
+    padding-left: 50px
+    list-style: none
+    li
+      a
+        display: block
+        +light
+        padding: 6px
+      
+
 .signin
   span.email
     font-weight: bold
@@ -443,7 +467,7 @@ $shadow: 1px 3px 8px #333
 
 .apology
   width: 400px
-  
+
 a.race_link
   color: $dark
   +hover
@@ -459,18 +483,6 @@ a.race_link
   span.date
     color: $pale
 
-#user_controls
-  box-sizing: border-box
-  position: absolute
-  left: 500px
-  top: 0
-  width: 300px
-  z-index: 400
-  a.avatar
-    +big_icon("avatar.png")
-    margin: 10px 15px
-  .user
-    display: none
 
 #content
   position: relative
@@ -480,6 +492,13 @@ a.race_link
   border-right: 2px solid $dark
   z-index: 200
   +transition(margin-left, 0.5s, ease-out)
+  #user_controls
+    position: absolute
+    left: 580px
+    top: 0
+    z-index: 90
+    a.avatar
+      margin: 12px 16px
   #view_toggle
     position: absolute
     top: 358px

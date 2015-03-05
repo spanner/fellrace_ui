@@ -12,6 +12,7 @@ class FellRace.Application extends Backbone.Marionette.Application
     gmapRegion: '#gmap'
     contentRegion: '#content'
     mainRegion: 'main'
+    user_controlsRegion: '#user_controls'
     noticeRegion: '#notice'
     actionRegion: '#action'
     extraContentRegion: 'section#extra'
@@ -137,11 +138,13 @@ class FellRace.Application extends Backbone.Marionette.Application
   adminMapView: =>
     @mapView.adminView()
 
+  #TODO: This should be in a subclass of Region
+  #
   actionRegionSetup: =>
     @actionRegion
       .on "show", (view) ->
         @$el.show()
-        @$el.find("a.cancel").on "click", =>
+        @$el.find("a.close, a.hide, a.cancel").on "click", =>
           @trigger "close"
       .on "hide", (view) ->
         @$el.hide()
@@ -195,6 +198,8 @@ class FellRace.Application extends Backbone.Marionette.Application
       @actionRegion.close()
     hideAction: =>
       @actionRegion.close()
+    menu: =>
+      @actionRegion.show(new FellRace.Views.UserActionMenu())
 
   getMap: =>
     @mapView?.getMap()
