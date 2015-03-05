@@ -118,8 +118,6 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
         observe: "entry_form_type"
       ]
       
-    "span.entry_count": "entry_count"
-
     ".entries":
       observe: "entry_count"
       visible: "some"
@@ -161,7 +159,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
 
   showDates: ([start,end]=[]) =>
     @dateRangeString(start, end)
-
+      
   simpleDateRangeString: (start, end) =>
     if start? and end?
       start = moment(start)

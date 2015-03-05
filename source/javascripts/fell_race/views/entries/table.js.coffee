@@ -23,15 +23,8 @@ class FellRace.Views.EntryRow extends Backbone.Marionette.ItemView
     "span.fore": "forename"
     "span.middle": "middlename"
     "span.sur": "surname"
-
-    "span.cat": "category"
-    "a.club":
-      observe: "club_name"
-      attributes: [
-        observe: "club_id"
-        name: "href"
-        onGet: "clubUrl"
-      ]
+    "td.cat": "category"
+    "td.club": "club_name"
 
   onRender: =>
     @stickit()

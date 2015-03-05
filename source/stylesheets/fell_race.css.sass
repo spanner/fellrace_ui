@@ -923,6 +923,8 @@ section#extra
 
   .instance
     &.new
+      .save
+        +button($rubine)
       p.instructions
         &.okay
           color: $green
@@ -945,7 +947,6 @@ section#extra
         overflow: hidden
       section
         padding-bottom: 20px
-        border-top: 1px dotted $pale
         padding-top: 20px
         clear: both
         +transition('height', 0.5s, ease-out)

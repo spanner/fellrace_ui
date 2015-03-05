@@ -6,7 +6,7 @@
   %span.instance_name
   
 %p
-  You have successfully entered for
+  You have entered
   %span.race_name
   %span.instance_name
   \. You can see yourself in the entry list

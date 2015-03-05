@@ -68,9 +68,9 @@ class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
 
   prepareTransaction: (e) =>
     @model.set(error_param: null, error_message: null)
+    #TODO be more direct, less interferable with
     unless @_stumbit.hasClass('unavailable')
       @_stumbit.addClass "working"
-
       Stripe.card.createToken
         number: @model.get('card_number')
         cvc: @model.get('cvc')

@@ -15,52 +15,6 @@
   %span.entry_limit
   runners
 
-%p.full
-  %span.unavailable The race is full, sorry. Better luck next year.
-
-%p.nearly_full
-  %span.warning The race is nearly full. Get your entry in!
-
-.not_full
-  .no_eod
-    %span.unavailable No entry on the day
-  .no_online
-    %span.unavailable No online entry
-  .no_postal
-    %span.unavailable No postal entry
-
-  %section.eod
-    %span.heading Entry on the day
-    %p
-      Fee on the day
-      %span.eod_fee.currency
-
-  %section.online
-    %span.heading Online entry
-    %p
-      Fee
-      %span.online_entry_fee.currency
-    %p
-      Available
-      %span.online_dates.daterange
-    %p.enter
-      %a.button.reverse.enter enter
-
-  %section.postal
-    %span.heading Postal entry
-    %p
-      Fee
-      %span.postal_entry_fee.currency
-    %p
-      Accepted
-      %span.postal_dates.daterange
-    %p.postal_form
-      %a.postal_form.file_icon.pdf Postal entry form
-    %p.postal_entry_address
-      Send to
-      %span.postal_entry_address
-
 %section.entries
-  %span.heading Current entries
-  %span.entry_count
+  %h3 Entries
   %table.entries

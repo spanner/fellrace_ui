@@ -6,11 +6,7 @@ class FellRace.Models.Competitor extends FellRace.Model
       required: true
     postal_address_line_1:
       required: true
-    postal_town:
-      required: true
     postcode:
-      required: true
-    phone:
       required: true
   
   urlRoot: =>
