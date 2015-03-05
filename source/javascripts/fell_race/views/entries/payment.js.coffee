@@ -6,9 +6,6 @@ class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
     "input#expiry_year": "expiry_year"
     "input#expiry_month": "expiry_month"
     "input#cvc": "cvc"
-    "span#amount": 
-      observe: "amount"
-      onGet: "decimalize"
     "span.card":
       observe: "card_type"
       update: "dimUnlessMatchy"
@@ -18,9 +15,6 @@ class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
 
   onRender: =>
     @stickit()
-
-  decimalize: (value) =>
-    value?.toFixed(2)
 
   dimUnlessMatchy: ($el, val, model, options) =>
     if !val

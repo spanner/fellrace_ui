@@ -21,6 +21,10 @@
         I acknowledge and agree that I am responsible for determining whether I have the skills equipment and fitness to participate in this event. 
       %li
         I accept that neither the Race Organiser nor the Fell Runners Association shall be liable to me for any injury, loss or damage of any nature to me or my property arising out of my participation in this race (other than in respect of death or personal injury as a result of their negligence).
+
+  %p
+    Please also note that purchases on fellrace.org.uk are not refundable except at the discretion of the race organiser.
+
   %p
     %input#terms_accepted{type: "checkbox"}
     %label.warning{for: "terms_accepted"} I understand and accept these terms
@@ -36,6 +40,13 @@
 
   %section.payment
 
+  %p.footnote
+    Your card will be charged a total of
+    %strong
+      %span#amount.currency
+    which includes a processing fee of 
+    %span#deduction.currency
+    See the
+    %a{href: "/terms"} online payments page
+    for details of where that goes.
 
-  %p
-    %a.button.create Save details and pay

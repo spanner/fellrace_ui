@@ -19,7 +19,5 @@
     %label{for: "cvc"} CVC
     %input.cvc#cvc{name: "cvc", type: "text", limit: 3, placeholder: "123"}
   %span.col
-    %span.summary
-      Your card will be charged a total of
-      %strong
-        %span#amount.currency
+    %br
+    %a.button.create Save and pay
