@@ -1089,6 +1089,7 @@ section#extra
       +quiet
 
 p.onecol, p.twocol, p.threecol, p.fourcol
+  position: relative
   margin: 0.5em 0
   label
     display: block
@@ -1099,7 +1100,7 @@ p.onecol, p.twocol, p.threecol, p.fourcol
     border: 1px solid $pale
     color: $dark
     font-size: 1em
-    margin-bottom: 0.5em
+    outline: none
     &[disabled]
       color: $mid
       background-color: $coolgrey0
@@ -1110,6 +1111,9 @@ p.onecol, p.twocol, p.threecol, p.fourcol
 p.onecol
   span.col
     +column(480px)
+    ul.chooser
+      width: 478px
+      margin-top: -1px
 
 p.twocol
   span.col
@@ -1280,6 +1284,35 @@ ul.sortable li.over
   min-height: 20px
   background-color: $translucent
 
+ul.chooser
+  position: absolute
+  display: none
+  box-sizing: border-box
+  background-color: white
+  width: 480px
+  max-height: 300px
+  margin: 0
+  border: 1px solid $pale
+  border-top: none
+  overflow-y: auto
+  overflow-x: hidden
+  z-index: 900
+  list-style: none
+  padding: 0
+  li.suggestion
+    box-sizing: border-box
+    cursor: pointer
+    width: 100%
+    padding: 6px 6px 4px 6px
+    color: $mid
+    &:last-child
+      padding-bottom: 10px
+    &.current
+      background: $link
+      color: white
+    &.active, &:active
+      background: $rubine
+      color: white
 
 @media screen
   #main_content

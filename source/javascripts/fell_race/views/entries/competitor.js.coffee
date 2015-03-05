@@ -14,7 +14,6 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
     "input#email": "email"
     "input#phone": "phone"
     "input#mobile": "mobile"
-    "input#club": "club"
     "select#postal_county": "postal_county"
     "select#postal_country": "postal_country"
 
@@ -23,8 +22,11 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
     Backbone.Validation.bind(@)
 
   onRender: =>
-    # $.getJSON "#{_fellrace.apiUrl()}/clubs", (data) =>
-    #   console.debug "#{data.length} clubs", data
     @model.set("postal_country", "GB") unless @model.get("postal_country")
+    #TODO ensure email present on competitor as well as user
     @stickit()
     
+    @_club_chooser = new FellRace.Views.ClubChooser
+      model: @model
+      input: @$el.find("input#club_name")
+    @_club_chooser.render()
