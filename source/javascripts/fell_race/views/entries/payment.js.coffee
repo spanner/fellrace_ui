@@ -1,6 +1,9 @@
 class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
   template: 'entries/edit_payment'
 
+  events: 
+    "click a.create": "prepareTransaction"
+
   bindings:
     "input#card_number": "card_number"
     "input#expiry_year": "expiry_year"
@@ -15,6 +18,7 @@ class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
 
   onRender: =>
     @stickit()
+    @_stumbit = @$el.find("a.create")
 
   dimUnlessMatchy: ($el, val, model, options) =>
     if !val
@@ -26,3 +30,26 @@ class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
           $thisel.fadeTo(200, 1.0)
         else
           $thisel.fadeTo(200, 0.2)
+
+  enable: () =>
+    @_stumbit.removeClass('unavailable')
+
+  disable: () =>
+    @_stumbit.addClass('unavailable')
+
+  prepareTransaction: (e) =>
+    unless @_stumbit.hasClass('unavailable')
+      @_stumbit.addClass "working"
+      
+      Stripe.card.createToken
+        number: @model.get('card_number')
+        cvc: @model.get('cvc')
+        exp_month: @model.get('expiry_month')
+        exp_year: @model.get('expiry_year')
+      , @captureStripeToken
+
+  captureStripeToken: (status, response) =>
+    if status is 200
+      @model.set("stripeToken", response.id)
+    else
+      #TODO: report validation errors

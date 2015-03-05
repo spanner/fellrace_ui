@@ -25,7 +25,6 @@ class FellRace.Views.InstanceEnter extends Backbone.Marionette.ItemView
       @_entry_view.render()
     else
       _fellrace.user_actions().signIn(destination_url:"/races/#{@model.get("race_slug")}/#{@model.get("name")}/enter", heading: "Sign in to enter race")
-    
 
   racePublicationUrl: (slug) =>
     "/races/#{slug}"

@@ -1,9 +1,6 @@
 class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
   template: 'entries/new'
 
-  events:
-    "click a.create": "performTransaction"
-
   bindings:
     "input#emergency_contact_name": "emergency_contact_name"
     "input#emergency_contact_phone": "emergency_contact_phone"
@@ -23,6 +20,8 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     @_competitor.on "change", @setReadiness
     @_payment.on "change", @setReadiness
     @model.on "change", @setReadiness
+    
+    @_payment.on "change:stripeToken", @performTransaction
     Backbone.Validation.bind(@)
 
   onRender: =>
@@ -36,16 +35,13 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     
     @_edit_competitor_view.render()
     @_edit_payment_view.render()
-    
-    @_stumbit = @$el.find("a.create")
     @setReadiness()
 
   setReadiness: () =>
-    console.log "setReadiness", @model.isValid(true), @_competitor.isValid(true), @_payment.isValid(true)
     if @isReady()
-      @_stumbit.removeClass('unavailable')
+      @_edit_payment_view.enable()
     else
-      @_stumbit.addClass('unavailable')
+      @_edit_payment_view.disable()
   
   isReady: =>
     @model.isValid(true) and @_competitor.isValid(true) and @_payment.isValid(true)
@@ -55,14 +51,12 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
 
   calculateCharge: (value) =>
     fee = parseFloat(value)
-    console.log "calculateCharge", fee
     merchant_ratio = 0.024
     merchant_fixed = 0.2
     fr_ratio = 0.025
     fr_fixed = 0
     @decimalize(fee * (merchant_ratio + fr_ratio) + merchant_fixed + fr_fixed) + "."
 
-  performTransaction: (e) =>
-    if @isReady()
-      $.notify "flash", "Right you are then."
-
+  performTransaction: (payment, token) =>
+    @set "stripe_token", token
+    @save()

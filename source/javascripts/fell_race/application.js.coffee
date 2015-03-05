@@ -45,9 +45,7 @@ class FellRace.Application extends Backbone.Marionette.Application
     @_config = new FellRace.Config(options.config)
     @_api_url = @config("api_url")
     @_domain = @config("domain")
-    Stripe.setPublishableKey @config("stripe_key")
-
-
+    Stripe.setPublishableKey @config("stripe_publishable_key")
 
     @session = new FellRace.Models.UserSession()
     @race_publications = new FellRace.Collections.RacePublications([])
@@ -218,7 +216,7 @@ class FellRace.Application extends Backbone.Marionette.Application
     #TODO: repopulate competitor before entry process begins.
     @currentUser()?.getCompetitor()
 
-  navigate: (route, {trigger:trigger,replace:replace}={}) =>
+  navigate: (route, {trigger:trigger, replace:replace}={}) =>
     trigger ?= true
     replace ?= false
     @vent.off "login:changed"
