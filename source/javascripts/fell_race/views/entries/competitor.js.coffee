@@ -16,6 +16,9 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
     "input#mobile": "mobile"
     "select#postal_county": "postal_county"
     "select#postal_country": "postal_country"
+    "input#club_name": 
+      observe: "club_name"
+      updateModel: false
 
   initialize: ->
     @model.updateable()
@@ -25,8 +28,12 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
     @model.set("postal_country", "GB") unless @model.get("postal_country")
     #TODO ensure email present on competitor as well as user
     @stickit()
-    
     @_club_chooser = new FellRace.Views.ClubChooser
       model: @model
       input: @$el.find("input#club_name")
     @_club_chooser.render()
+    @_club_chooser.on "chosen", @setClubName
+
+  setClubName: =>
+    console.log "setClubName"
+    @model.set({"club_name": @$el.find("input#club_name").val()}, {persistChange: true})
