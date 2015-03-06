@@ -53,3 +53,7 @@
     %a{href: "/faq/online_payments"} online payments page
     for details of where that goes.
 
+  %p
+    This is all carefully tested but it's brand new, so if anything goes wrong or could be improved, please
+    %a{href:"mailto:will@spanner.org"} let Will know 
+    right away.
