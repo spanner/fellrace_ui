@@ -2,11 +2,11 @@
 
 %h2
   %a.race_name
-  %span.instance_name.editable
+  %span.instance_name
 
 %h3
   %span.calendar
-  %span.date.editable{data: {placeholder: "dd-mm-yyyy"}}
+  %span.date
   at
   %span.clock
   %span.time.editable{data: {placeholder: "hh:mm"}}

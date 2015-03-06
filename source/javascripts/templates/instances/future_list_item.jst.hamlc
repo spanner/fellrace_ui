@@ -1,3 +1,4 @@
-%a.date
+%a.name
+%span.date
 %span.time
 %span.total.note

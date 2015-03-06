@@ -18,14 +18,16 @@ class FellRace.Views.AdminListedInstance extends Backbone.Marionette.ItemView
 class FellRace.Views.AdminFutureListedInstance extends FellRace.Views.AdminListedInstance
   template: 'instances/admin_future_list_item'
   bindings:
-    "a.date":
-      observe: "date"
-      onGet: "date"
+    "a.name":
+      observe: "name"
       attributes: [
         observe: ["race_slug","name"]
         name: "href"
         onGet: "url"
       ]
+    "span.date":
+      observe: "date"
+      onGet: "date"
     "span.time":
       observe: "time"
       onGet: "time"

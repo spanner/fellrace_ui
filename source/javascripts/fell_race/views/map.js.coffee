@@ -1,5 +1,5 @@
 class FellRace.Views.Map extends Backbone.Marionette.ItemView
-  template: 'events/map'
+  template: 'map'
   className: 'gmap'
   mapConfig:
     center: new google.maps.LatLng 54.4098399744, -2.9730033900

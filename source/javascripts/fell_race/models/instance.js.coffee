@@ -5,6 +5,12 @@ class FellRace.Models.Instance extends FellRace.Model
     "postal_entry_closing","postal_entry_address","eod","eod_fee"
   ]
 
+  validation:
+    date:
+      required: true
+    name:
+      required: true
+
   initialize: (opts) ->
     super
     @build()

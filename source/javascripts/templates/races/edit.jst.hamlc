@@ -37,7 +37,7 @@
       %h3
         Requirements
       .show_requirements
-        %p.requirements.editable{:data => {:toolbar => true, :placeholder => "Required kit and other instructions"}}
+        %p.requirements.editable{:data => {:placeholder => "Required kit and other instructions"}}
 
     .checkpoints
       %h3

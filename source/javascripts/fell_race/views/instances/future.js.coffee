@@ -3,7 +3,14 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
   className: "instance future"
 
   bindings:
-    ".race_name": "race_name"
+    ".race_name":
+      observe: "race_name"
+      attributes: [
+        observe: "race_slug"
+        name: "href"
+        onGet: "racePublicationUrl"
+      ]
+
     ".instance_name": "name"
 
     "a.close":

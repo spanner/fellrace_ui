@@ -10,7 +10,7 @@
     %p
       Race date:
       %span.calendar
-      %span.date.race_date
+      %span.race_date
       at
       %span.clock
       %span.time.editable{data: {attributes: 'time',placeholder: "hh:mm"}}

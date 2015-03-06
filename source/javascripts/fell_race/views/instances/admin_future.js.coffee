@@ -10,7 +10,9 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   bindings:
     ".race_name": "race_name"
-    ".instance_name": "name"
+    ".instance_name":
+      observe: "name"
+      onGet: "deSlugify"
     "span.race_date": 
       observe: "date"
       onSet: "dateForStorage"
@@ -135,3 +137,9 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   dateForStorage: (string) =>
     new moment(string, @display_date_format).toDate()
+
+  deSlugify: (string) ->
+    string.split("-").map((w) -> _.str.capitalize(w)).join(" ") if string
+
+  onClose: =>
+    $(".pika-single").remove()

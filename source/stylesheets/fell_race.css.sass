@@ -294,6 +294,9 @@ input:checked
   &+label.heading
     color: $dark
 
+.error_message
+  color: $red
+
 
 // -------------------------------------LAYOUT----------------------------------- //
 
@@ -926,14 +929,6 @@ section#extra
     display: none
 
   .instance
-    &.new
-      .save
-        +button($rubine)
-      p.instructions
-        &.okay
-          color: $green
-        &.notready
-          color: $red
     &.future
       .datepicker
         display: block
@@ -1083,8 +1078,6 @@ section#extra
           background-position: 0 -30px
         &.amex
           background-position: 0 -60px
-      span.error_message
-        color: $red
       a.create
         float: right
     p.footnote
@@ -1201,6 +1194,11 @@ a.file_name
   font-size: 16px
   text-align: center
   white-space: nowrap
+
+.loading
+  &:before
+    content: image-url('spinner.gif')
+    margin-left: -16px
 
 .button
   +reverse_button

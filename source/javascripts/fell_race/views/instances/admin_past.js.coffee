@@ -8,7 +8,9 @@ class FellRace.Views.AdminPastInstance extends Backbone.Marionette.ItemView
 
   bindings:
     ".race_name": "race_name"
-    ".instance_name": "name"
+    ".instance_name":
+      observe: "name"
+      onGet: "deSlugify"
     "span.date": "date"
     "span.time": "time"
 
@@ -47,3 +49,6 @@ class FellRace.Views.AdminPastInstance extends Backbone.Marionette.ItemView
 
   date: (date) =>
     moment(date).format("D MMMM YYYY") if date
+
+  deSlugify: (string) ->
+    string.split("-").map((w) -> _.str.capitalize(w)).join(" ") if string

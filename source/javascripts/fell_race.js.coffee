@@ -1,5 +1,5 @@
 #= require hamlcoffee
-#= require vendor/jquery
+# require vendor/jquery
 #= require vendor/modernizr
 #= require vendor/moment
 #= require vendor/jquery.peity
