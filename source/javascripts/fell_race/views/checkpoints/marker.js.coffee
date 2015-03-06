@@ -4,13 +4,13 @@ class FellRace.Views.CheckpointMarker extends MapStick.Marker
     labelClass: "label"
     labelAnchor: new google.maps.Point(-17, 10)
     opacity: 0.8
-    clickable: false
+    # clickable: false
 
   # buildOverlay: (options) =>
   #   new MarkerWithLabel(options)
 
-  # overlayEvents:
-  #   "click": "click"
+  overlayEvents:
+    "click": "click"
 
   bindings:
     labelVisible:
@@ -67,8 +67,8 @@ class FellRace.Views.CheckpointMarker extends MapStick.Marker
   visible: ({selected:selected}={}) =>
     selected is true
 
-  # click: =>
-  #   _fellrace.navigate "/races/#{@model.race_publication.get("slug")}/checkpoints/#{@model.get("slug")}"
+  click: =>
+    _fellrace.navigate "/races/#{@model.race_publication.get("slug")}/checkpoints/#{@model.get("slug")}"
 
 class FellRace.Views.CheckpointMarkers extends MapStick.OverlayCollection
   itemView: FellRace.Views.CheckpointMarker

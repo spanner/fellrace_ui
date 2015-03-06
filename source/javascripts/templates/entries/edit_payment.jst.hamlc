@@ -4,7 +4,7 @@
 %p.onecol
   %span.col
     %label{for: "card_number"} 
-      Credit card number
+      Card number
       %span.card.amex
       %span.card.mastercard
       %span.card.visa

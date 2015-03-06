@@ -9,11 +9,9 @@ at
   %a.enter_postal{target: "_blank"}
     Download entry form
   %span.eod
-    %br
     Entry on the day:
     %span.eod_fee.currency
   %span.no_eod
-    %br
     No entry on the day
 %p.results
   %a.results
