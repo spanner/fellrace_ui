@@ -85,7 +85,6 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
     "/runners/#{id}/#{race_slug}/#{instance_name}"
 
 
-
 class FellRace.Views.ResultsTable extends Backbone.Marionette.CompositeView
   template: "performances/results_table"
   itemView: FellRace.Views.ResultRow

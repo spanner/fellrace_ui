@@ -52,6 +52,11 @@ class FellRace.Views.PastListedInstance extends Backbone.Marionette.ItemView
         observe: ["race_slug", "name"]
         onGet: (vals) =>
           "/races/#{vals[0]}/#{vals[1]}"
+      ,
+        name: "class"
+        observe: "fetching"
+        onGet: (fetching) ->
+          "loading" if fetching
       ]
     "span.total": 
       observe: "performances_count"

@@ -1198,6 +1198,11 @@ a.file_name
   text-align: center
   white-space: nowrap
 
+.loading
+  &:before
+    content: image-url('spinner.gif')
+    margin-left: -16px
+
 .button
   +reverse_button
   &.enter, &.create, &.save

@@ -9,6 +9,9 @@ class FellRace.Views.CheckpointMarker extends MapStick.Marker
   # buildOverlay: (options) =>
   #   new MarkerWithLabel(options)
 
+  # overlayEvents:
+  #   "click": "click"
+
   bindings:
     labelVisible:
       attribute: "name"
@@ -63,6 +66,9 @@ class FellRace.Views.CheckpointMarker extends MapStick.Marker
 
   visible: ({selected:selected}={}) =>
     selected is true
+
+  # click: =>
+  #   _fellrace.navigate "/races/#{@model.race_publication.get("slug")}/checkpoints/#{@model.get("slug")}"
 
 class FellRace.Views.CheckpointMarkers extends MapStick.OverlayCollection
   itemView: FellRace.Views.CheckpointMarker
