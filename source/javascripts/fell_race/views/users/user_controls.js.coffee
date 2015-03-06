@@ -14,7 +14,10 @@ class FellRace.Views.UserControls extends Backbone.Marionette.ItemView
     
   showAction: =>
     if @model.signedIn()
-      _fellrace.user_actions().menu()
+      if @model.confirmed()
+        _fellrace.user_actions().menu()
+      else
+        _fellrace.user_actions().requestConfirmation()
     else
       _fellrace.user_actions().signIn()
 

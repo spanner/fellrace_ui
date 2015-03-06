@@ -2,10 +2,15 @@ class FellRace.Views.ConfirmationRequired extends Backbone.Marionette.ItemView
   template: 'sessions/confirmation_required'
   bindings:
     "#email": "email"
-    "span.email": 
+    "span.email":
       observe: "email"
       update: "checkValidity"
 
+  initialize: ->
+    @model = _fellrace.currentUser()
+
+  onRender: =>
+    @stickit()
 
 class FellRace.Views.SessionReconfirmationForm extends Backbone.Marionette.ItemView
   template: 'sessions/reconfirmation_form'
