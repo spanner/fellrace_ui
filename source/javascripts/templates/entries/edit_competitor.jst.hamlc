@@ -18,7 +18,7 @@
 
   %span.col.last
     %label{for: "dob"} Date of birth
-    %input#dob{name: "dob", type: "text"}
+    %input#dob{name: "dob", type: "text", placeholder: "YYYY-MM-DD"}
 
   %span.note
     Race category will be based on your gender and age.
