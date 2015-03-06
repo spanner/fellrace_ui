@@ -24,6 +24,9 @@
 
   %p
     Please also note that purchases on fellrace.org.uk are not refundable except at the discretion of the race organiser.
+    See our 
+    %a{href: "/faq/terms"} terms and conditions 
+    for more information.
 
   %p
     %input#terms_accepted{type: "checkbox"}
@@ -47,6 +50,6 @@
     which includes a processing fee of 
     %span#deduction.currency
     See the
-    %a{href: "/terms"} online payments page
+    %a{href: "/faq/online_payments"} online payments page
     for details of where that goes.
 
