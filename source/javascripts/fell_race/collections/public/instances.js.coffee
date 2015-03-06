@@ -4,6 +4,9 @@ class FellRace.Collections.PublicInstances extends FellRace.Collection
     -m.getDate()
 
 class FellRace.Collections.PublicFutureInstances extends FellRace.Collections.PublicInstances
+  url: ->
+    "#{_fellrace.apiUrl()}/instances/future"
+
   comparator: (m) ->
     m.getDate()
   
@@ -13,6 +16,9 @@ class FellRace.Collections.PublicFutureInstances extends FellRace.Collections.Pu
 
 
 class FellRace.Collections.PublicPastInstances extends FellRace.Collections.PublicInstances
+  url: ->
+    "#{_fellrace.apiUrl()}/instances/past"
+
   comparator: (m) ->
     -m.getDate()
 
