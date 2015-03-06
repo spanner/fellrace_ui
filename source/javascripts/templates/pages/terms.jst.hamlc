@@ -7,7 +7,7 @@
 .body
   .page
     %p
-      By using this site and by entering a race an order you will be deemed to have accepted these terms.
+      By using this site and by entering a race you will be deemed to have accepted these terms.
 
     %h3
       Online entries
@@ -43,5 +43,7 @@
       %li
         or from any other injury, inconvenience or death that arises from trying to follow our routes or do what it says on our pages.
         You are responsible for scrutinising the information provided here, assessing your own ability and preparedness and attending to your own safety.
-
+      %li
+        The maps appearing on this site are copyright Ordnance Survey, or other providers as marked on the map.
+      
 
