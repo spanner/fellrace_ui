@@ -28,7 +28,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".online_details":
       observe: "online_entry"
       visible: true
-      visibleFn: "quickSlide"
+      # visibleFn: "quickSlide"
     "span.online_entry_fee":
       observe: "online_entry_fee"
       onGet: "currency"
@@ -40,7 +40,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".postal_details":
       observe: "postal_entry"
       visible: true
-      visibleFn: "quickSlide"
+      # visibleFn: "quickSlide"
     "span.postal_entry_fee":
       observe: "postal_entry_fee"
       onGet: "currency"
