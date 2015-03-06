@@ -4,6 +4,11 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
     "checkpoints/:checkpoint_slug(/*path)": @checkpoint
     ":instance_name(/*path)": @instance
 
+  handle: =>
+    super
+    _fellrace.vent.on 'login:changed', =>
+      @model.fetchPermissions()
+
   initialize: ->
     @showRacePublication()
     $.r = @model
@@ -65,8 +70,6 @@ class FellRace.Views.RacePublicationsLayout extends FellRace.Views.LayoutView
       model = _fellrace.race_publications.add(slug: slug)
       model.fetch
         success: =>
-          _fellrace.vent.on 'login:changed', =>
-            model.fetchPermissions()
           layout = new FellRace.Views.RacePublicationLayout
             model: model
             path: path
