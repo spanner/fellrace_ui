@@ -1,5 +1,5 @@
 class FellRace.Views.IndexInstance extends Backbone.Marionette.ItemView
-  class: "instance"
+  className: "instance"
 
   bindings:
     ".date":
