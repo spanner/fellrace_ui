@@ -118,3 +118,6 @@ class FellRace.Views.NewInstance extends Backbone.Marionette.ItemView
 
   slugify: (string) ->
     _.str.slugify(string.trim()) if string
+
+  onClose: =>
+    $(".pika-single").remove()

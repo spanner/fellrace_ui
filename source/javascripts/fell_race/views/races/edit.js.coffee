@@ -37,13 +37,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
       observe: 'picture'
       onGet: "buttonText"
 
-    '.name':
-      observe: 'name'
-      attributes: [
-        name: "class"
-        observe: "picture"
-        onGet: "standOutIfPicture"
-      ]
+    '.name': 'name'
 
     '.description':
       observe: 'description'
@@ -202,5 +196,5 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
   date: (date) =>
     moment(date).format("D MMMM YYYY") if date
 
-  standOutIfPicture: (picture) =>
-    "on_picture" if picture
+  onClose: =>
+    $(".medium-editor-toolbar, .medium-editor-anchor-preview").remove()

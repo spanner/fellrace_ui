@@ -103,7 +103,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       el: @$el.find("table.entries")
     entries_table.render()
 
-
   delete: (e) =>
     e.preventDefault() if e
     @model.destroy()
@@ -140,3 +139,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   deSlugify: (string) ->
     string.split("-").map((w) -> _.str.capitalize(w)).join(" ") if string
+
+  onClose: =>
+    $(".pika-single").remove()
