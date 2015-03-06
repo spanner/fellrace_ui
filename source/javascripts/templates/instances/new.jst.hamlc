@@ -1,12 +1,26 @@
-Date
-%span.day.editable{data: {placeholder: "dd"}}
-\-
-%span.month.editable{data: {placeholder: "mm"}}
-\-
-%span.year.editable{data: {placeholder: "yyyy"}}
+%a.close
 
-%p.instructions
+%h2
+  %span.race_name
+
+%p.twocol
+  %span.col.date
+    %label{for: "date"} Date
+    %input#date.date{type: "text", name: "date",placeholder: "DD MMM YYYY"}
+
+  %span.col.name
+    %label{for: "name"} Name
+    %input#name{type: "text", name: "name", placeholder: "name"}
+
+%p.onecol.name
+  %span.col
+    %span.taken.error_message There is already a race with this name.
+    %span.name_info.info
+      %span Please enter a name for the race. The year
+      %span.year
+      will probably do.
 
 %p
   %a.button.cancel Cancel
   %a.button.save Save and continue
+%p.club

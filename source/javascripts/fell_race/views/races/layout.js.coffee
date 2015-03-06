@@ -29,7 +29,7 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
       _fellrace.navigate "/admin/races/#{@model.get("slug")}"
 
   newInstance: =>
-    model = new FellRace.Models.Instance(race_slug:@model.get("slug"))
+    model = new FellRace.Models.Instance(race_slug:@model.get("slug"),race_name:@model.get("name"))
     model.urlRoot = "#{@model.url()}/instances"
     view = new FellRace.Views.NewInstance
       model: model
