@@ -65,12 +65,12 @@ class FellRace.Views.RacePublicationsLayout extends FellRace.Views.LayoutView
       route: "default"
 
   racePublication: (slug,path) =>
-    if @_previous.route is "racePublication" and @_previous.param is slug
-      @_previous.view.handle path
-    else
-      model = _fellrace.race_publications.add(slug: slug)
-      model.fetch
-        success: =>
+    model = _fellrace.race_publications.add(slug: slug)
+    model.fetch
+      success: =>
+        if @_previous.route is "racePublication" and @_previous.param is slug
+          @_previous.view.handle path
+        else          
           layout = new FellRace.Views.RacePublicationLayout
             model: model
             path: path
@@ -78,11 +78,11 @@ class FellRace.Views.RacePublicationsLayout extends FellRace.Views.LayoutView
             route: "racePublication"
             param: slug
             view: layout
-        error: (model,response) =>
-          $.getJSON "#{_fellrace.apiUrl()}/races/#{slug}/permissions", (data) =>
-            if data.permissions.can_edit
-              $.notify('error', "This race needs to be published.")
-              _fellrace.navigate "/admin/races/#{slug}"
-            else
-              $.notify('error', "#{slug}.fellrace.org.uk does not exist.")
-              _fellrace.navigate "/"
+      error: (model,response) =>
+        $.getJSON "#{_fellrace.apiUrl()}/races/#{slug}/permissions", (data) =>
+          if data.permissions.can_edit
+            $.notify('error', "This race needs to be published.")
+            _fellrace.navigate "/admin/races/#{slug}"
+          else
+            $.notify('error', "#{slug}.fellrace.org.uk does not exist.")
+            _fellrace.navigate "/"
