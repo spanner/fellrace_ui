@@ -55,7 +55,7 @@ class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
         if $thisel.hasClass(val)
           $thisel.fadeTo(200, 1.0)
         else
-          $thisel.fadeTo(200, 0.2)
+          $thisel.fadeTo(200, 0.1)
 
   enable: () =>
     @_stumbit.removeClass('unavailable')
@@ -68,7 +68,6 @@ class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
 
   prepareTransaction: (e) =>
     @model.set(error_param: null, error_message: null)
-    #TODO be more direct, less interferable with
     unless @_stumbit.hasClass('unavailable')
       @_stumbit.addClass "working"
       Stripe.card.createToken

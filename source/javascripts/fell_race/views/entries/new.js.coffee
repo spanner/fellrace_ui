@@ -14,7 +14,8 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
 
   initialize: ->
     @_competitor = _fellrace.getCurrentCompetitor()
-    @model.set("cost", @model.collection.instance.get("online_entry_fee"))
+    @_instance = @model.collection.instance
+    @model.set("cost", @_instance.get("online_entry_fee"))
     @_payment = new FellRace.Models.Payment
       amount: @model.get("cost")
     @_payment.on "change:stripeToken", @performTransaction
@@ -64,6 +65,7 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
       if @model.get("paid")
         $.notify "success", "payment successful"
         @_competitor.entries.add @model
+        @_instance.entries.add @model
         _fellrace.navigate "/races/#{@model.get("race_slug")}/#{@model.get("instance_name")}/my_entry"
       else
         @_payment.set

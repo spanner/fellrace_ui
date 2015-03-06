@@ -123,7 +123,6 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
       visible: "some"
 
   onRender: =>
-    $.instance = @model
     @stickit()
     entries_table = new FellRace.Views.EntriesTable
       collection: @model.entries
