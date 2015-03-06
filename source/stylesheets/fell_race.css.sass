@@ -294,9 +294,6 @@ input:checked
   &+label.heading
     color: $dark
 
-.error_message
-  color: $red
-
 
 // -------------------------------------LAYOUT----------------------------------- //
 
@@ -479,17 +476,20 @@ $shadow: 1px 3px 8px #333
   width: 400px
 
 a.race_link
+  display: block
   color: $dark
   +hover
-  margin: 10px o
+  margin: 10px 0
   span.race_name
     display: inline-block
     vertical-align: bottom
+  span.profile
+    display: none
   svg
     display: inline-block
     vertical-align: bottom
     &+span.race_name
-      margin-left: 4px
+      margin-left: 2px
   span.date
     color: $pale
 
@@ -929,6 +929,14 @@ section#extra
     display: none
 
   .instance
+    &.new
+      .save
+        +button($rubine)
+      p.instructions
+        &.okay
+          color: $green
+        &.notready
+          color: $red
     &.future
       .datepicker
         display: block
@@ -1078,6 +1086,8 @@ section#extra
           background-position: 0 -30px
         &.amex
           background-position: 0 -60px
+      span.error_message
+        color: $red
       a.create
         float: right
     p.footnote
@@ -1194,11 +1204,6 @@ a.file_name
   font-size: 16px
   text-align: center
   white-space: nowrap
-
-.loading
-  &:before
-    content: image-url('spinner.gif')
-    margin-left: -16px
 
 .button
   +reverse_button
