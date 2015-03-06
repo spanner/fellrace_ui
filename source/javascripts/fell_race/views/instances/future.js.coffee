@@ -11,7 +11,9 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
         onGet: "racePublicationUrl"
       ]
 
-    ".instance_name": "name"
+    ".instance_name":
+      observe: "name"
+      onGet: "deSlugify"
 
     "a.close":
       attributes: [
@@ -195,3 +197,6 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
         "#{_fellrace.apiUrl()}#{url}"
       else
         url
+
+  deSlugify: (string) ->
+    string.split("-").map((w) -> _.str.capitalize(w)).join(" ") if string
