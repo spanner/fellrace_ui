@@ -47,6 +47,6 @@
     which includes a processing fee of 
     %span#deduction.currency
     See the
-    %a{href: "/terms"} online payments page
+    %a{href: "/faq/online_entries"} online payments page
     for details of where that goes.
 
