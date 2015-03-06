@@ -21,7 +21,7 @@ Modernizr.addTest 'ios6plus', ->
 #
 class FellRace.Config
   defaults: 
-    api_url: "http://api.fellrace.org.uk"
+    api_url: "//api.fellrace.org.uk"
     domain: "fellrace.org.uk"
     stripe_publishable_key: "pk_live_dOxGZ6LC5I1womT8MgsDn3jB"
 

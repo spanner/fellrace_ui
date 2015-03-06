@@ -19,14 +19,14 @@ class FellRace.Models.Payment extends FellRace.Model
   validateCardNumber: (value, attr, computedState) =>
     return false if /[^0-9-\s]+/.test(value)
     if @luhnCheck(value)
-      type = @getCardType(value)
+      type = @cardType(value)
       @set "card_type", type
       null
     else
       @set "card_type", null
       "Not a valid credit card number."
 
-  getCardType: (value) =>
+  cardType: (value) =>
     if /^5[1-5]/.test(value)
       "mastercard"
     else if /^4/.test(value)

@@ -10,7 +10,7 @@
     %p
       Race date:
       %span.calendar
-      %span.date{data: {attributes: 'date'}}}
+      %span.date.race_date
       at
       %span.clock
       %span.time.editable{data: {attributes: 'time',placeholder: "hh:mm"}}
@@ -36,9 +36,10 @@
 
   .online_details
     %p
-      Availability:
-      %span.online_dates.daterange{data: {attributes: 'online_entry_opening,online_entry_closing'}}
-
+      Available from:
+      %span.online_entry_opening.date
+      to:
+      %span.online_entry_closing.date
     %p
       Online entry fee:
       %span.online_entry_fee.currency.editable{data: {placeholder: "0.00"}}
@@ -52,8 +53,10 @@
 
   .postal_details
     %p
-      Availability:
-      %span.postal_dates.daterange{data: {attributes: 'postal_entry_opening,postal_entry_closing'}}
+      Available from:
+      %span.date.postal_entry_opening
+      to:
+      %span.postal_entry_closing.date
 
     %p.fee
       Postal entry fee:

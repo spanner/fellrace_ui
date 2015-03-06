@@ -2,7 +2,8 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
   template: 'instances/admin_future'
   className: "instance future admin"
   tagName: "section"
-  date_format: "YYYY-MM-D"
+  storage_date_format: "YYYY-MM-DD"
+  display_date_format: "Do MMM YYYY"
 
   events:
     'click a.delete': "delete"
@@ -10,9 +11,10 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
   bindings:
     ".race_name": "race_name"
     ".instance_name": "name"
-    "span.date": 
+    "span.race_date": 
       observe: "date"
-      onGet: "showDate"
+      onSet: "dateForStorage"
+      onGet: "dateForDisplay"
     "span.time": "time"
     "span.entry_limit": "entry_limit"
 
@@ -29,6 +31,14 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       observe: "online_entry"
       visible: true
       # visibleFn: "quickSlide"
+    "span.online_entry_opening": 
+      observe: "online_entry_opening"
+      onSet: "dateForStorage"
+      onGet: "dateForDisplay"
+    "span.online_entry_closing": 
+      observe: "online_entry_closing"
+      onSet: "dateForStorage"
+      onGet: "dateForDisplay"
     "span.online_entry_fee":
       observe: "online_entry_fee"
       onGet: "currency"
@@ -41,9 +51,18 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       observe: "postal_entry"
       visible: true
       # visibleFn: "quickSlide"
+    "span.postal_entry_opening": 
+      observe: "postal_entry_opening"
+      onSet: "dateForStorage"
+      onGet: "dateForDisplay"
+    "span.postal_entry_closing": 
+      observe: "postal_entry_closing"
+      onSet: "dateForStorage"
+      onGet: "dateForDisplay"
     "span.postal_entry_fee":
       observe: "postal_entry_fee"
       onGet: "currency"
+
     "input.accept_cheque": "accept_cheque"
     "input.cheque_paid_to": "cheque_paid_to"
     "input.accept_cash": "accept_cash"
@@ -59,50 +78,19 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
         onGet: "raceUrl"
       ]
 
-    "span.postal_dates":
-      observe: ['postal_entry_opening', 'postal_entry_closing']
-      onGet: "showDates"
-
-    "span.online_dates":
-      observe: ['online_entry_opening', 'online_entry_closing']
-      onGet: "showDates"
-
   onRender: () =>
     @$el.find('.editable').editable()
     @stickit()
     
     @$el.find('span.date').each (i, el) =>
-      field = $(el)
-      att = field.data('attribute') ? "date"
-      container = $('<div class="datepicker" />').prependTo(field.parents('div').first())
-      field.dateRangePicker
-        inline: true
-        container: container.get(0)
-        format: @date_format
-        alwaysOpen: true
-        showShortcuts: false
-        singleDate: true
-        setValue: (s) =>
-          @model.set att, s
-        getValue: () =>
-          @showDate(@model.get(att)) if @model.get(att)?
+      picker = $(el)
+      picker.attr('contenteditable', 'true')
+      new Pikaday
+        field: el
+        format: @display_date_format
+        onSelect: () ->
+          picker.text this.getMoment().format(@_o.format)
 
-    @$el.find('span.daterange').each (i, el) =>
-      field = $(el)
-      [start_att, end_att] = field.data('attributes').split(',')
-      container = $('<div class="daterangepicker" />').prependTo(field.parents('div').first())
-      field.dateRangePicker
-        inline: true
-        container: container.get(0)
-        format: @date_format
-        alwaysOpen: true
-        showShortcuts: false
-        setValue: (s, start, end) =>
-          @model.set start_att, start
-          @model.set end_att, end
-        getValue: () =>
-          @simpleDateRangeString(@model.get(start_att), @model.get(end_att))
-      
     entry_form = new FellRace.Views.AdminPostalEntryForm
       model: @model
       el: @$el.find(".entry_form")
@@ -140,31 +128,10 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
   quickSlide: ($el, isVisible, options) =>
     if (isVisible) then $el.slideDown('fast') else $el.slideUp('fast')
 
-  showDate: (date) =>
-    moment(date).format(@date_format)
+  # dates are displayed in a nicer format than they are stored.
 
-  showDates: ([start,end]=[]) =>
-    @dateRangeString(start, end)
+  dateForDisplay: (string) =>
+    new moment(string, @storage_date_format).format(@display_date_format)
 
-  simpleDateRangeString: (start, end) =>
-    if start? and end?
-      start = moment(start)
-      end = moment(end)
-      "#{start.format(@date_format)} to #{end.format(@date_format)}"
-
-  dateRangeString: (start, end) =>
-    if start? and end?
-      start = moment(start)
-      end = moment(end)
-      if start.year() is end.year() 
-        if start.month() is end.month()
-          start_format = "Do"
-          end_format = "Do MMM YYYY"
-        else
-          start_format = "Do MMM"
-          end_format = "Do MMM YYYY"
-      else
-        start_format = end_format = "Do MMM YYYY"
-      "#{start.format(start_format)} to #{end.format(end_format)}"
-    else
-      "Please choose dates"
+  dateForStorage: (string) =>
+    new moment(string, @display_date_format).toDate()
