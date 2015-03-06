@@ -31,7 +31,7 @@
   %p
     %input#online_entry{type: "checkbox",disabled:true}
     %label.heading{for: "online_entry"} Online entry
-    %a.note{href:"/online_entries", target: "_blank"}
+    %a.note{href:"/faq/online_entries"}
       How it works
 
   .online_details

@@ -2,4 +2,35 @@
   .picture.home
   .title
     %h2.name.on_picture
-      About
+      About fellrace
+
+.body
+  .page
+    %p
+      Fellrace.org.uk is the creation of 
+      %a{href: "/runners/9765"} Will, 
+      %a{href: "/runners/1404"} Mike
+      and
+      %a{href: "/runners/469"} Anna
+      at 
+      %a{href: "http://spanner.org"} Spanner.
+      Our real work is making esoteric web machinery for academic, scientific and charity clients
+      all over the world, but we're all devoted fell runners and this is the nice side 
+      project where we get to work on what we love and try out new stuff.*
+
+    %p
+      We all run for 
+      %a{href: "http://bcrunners.org.uk"} Black Combe,
+      the most serious and widely-envied of fell clubs, 
+      and we also think it's important that we do what we can for the less fortunate fell runner.
+
+    %p
+      Spanner is based in a small barn in the South Lakes and the office always contains as many dogs as people.
+      If you need a really nice simple machine, or a collation engine for a million concurrent mobile clients, come and see us.
+
+    %p
+      %br
+      %br
+      * The new stuff sometimes breaks. We are notified automatically of any major failure, but please 
+      %a{href: "mailto:fellrace@spanner.org"} let us know
+      anyway.

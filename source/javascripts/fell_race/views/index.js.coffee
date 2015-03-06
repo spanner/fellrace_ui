@@ -6,7 +6,7 @@ class FellRace.Views.IndexView extends Backbone.Marionette.Layout
     "click a.sign_up_for_event": "signUpForEvent"
 
   bindings:
-    ".getting_started":
+    ".get_yours":
       observe: "state"
       visible: (val) =>
         val is FellRace.Models.UserSession.unknownState

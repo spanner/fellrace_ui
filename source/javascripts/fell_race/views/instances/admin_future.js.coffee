@@ -22,6 +22,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".eod_details":
       observe: "eod"
       visible: true
+      visibleFn: "quickSlide"
     "span.eod_fee":
       observe: "eod_fee"
       onGet: "currency"
@@ -30,7 +31,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".online_details":
       observe: "online_entry"
       visible: true
-      # visibleFn: "quickSlide"
+      visibleFn: "quickSlide"
     "span.online_entry_opening": 
       observe: "online_entry_opening"
       onSet: "dateForStorage"
@@ -50,7 +51,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".postal_details":
       observe: "postal_entry"
       visible: true
-      # visibleFn: "quickSlide"
+      visibleFn: "quickSlide"
     "span.postal_entry_opening": 
       observe: "postal_entry_opening"
       onSet: "dateForStorage"
@@ -100,7 +101,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       collection: @model.entries
       el: @$el.find("table.entries")
     entries_table.render()
-
 
   delete: (e) =>
     e.preventDefault() if e

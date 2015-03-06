@@ -3,3 +3,86 @@
   .title
     %h2.name.on_picture
       Online entries
+.body
+  %p
+    Any race can be enabled for online entries. 
+    All you have to do is visit the page for this year's race, tick the 'online entries' box and give a start and end date.
+    The dates will default to 'today' and 'about a week before the race', so you can probably start receiving online entries in two or three clicks.
+  %p
+    You can also add entries manually and take entries on the day, and you can set different entry fees for each channel.
+
+  %h3
+    Stripe
+  %p
+    Credit card transactions are handled for us by 
+    %a{href: "https://stripe.com"} stripe.com. 
+  %p
+    In the basic setup, entry fees flow into our holding account and we pass them on by bank transfer just after the closing date for online entries.
+    It is also possible, and very easy, to set up your own stripe account. In that case we can send the money straight to you.
+    It takes about seven days to get through.
+
+  %h3
+    Fees and deductions
+  %p
+    Stripe takes 2.4% of the total charge plus a 20p flat fee. Fellrace.org.uk (that is, Spanner Ltd, the company that makes the site) takes 2.5%. 
+    It works out like this:
+    
+  %table
+    %thead
+      %tr
+        %th
+          Race fee
+        %th
+          to stripe
+        %th
+          to fellrace
+        %th
+          to organiser
+    %tbody
+      %tr
+        %td
+          £3.00
+        %td
+          27p
+        %td
+          8p
+        %td
+          £2.65
+      %tr
+        %td
+          £7.00
+        %td
+          37p
+        %td
+          18p
+        %td
+          £6.45
+      %tr
+        %td
+          £15.00
+        %td
+          56p
+        %td
+          38p
+        %td
+          £14.07
+      %tr
+        %td
+          £35.00
+        %td
+          £1.04
+        %td
+          88p
+        %td
+          £33.09
+
+  %p
+    We're not going to become immensely rich but it might help to offset the cost of running the site.
+  
+  %p
+    Please refer to the 
+    %a{href: "/faq/terms"} terms and conditions
+    that will apply to race entries bought through this site. 
+    The short version is that there are no refunds unless you, the organiser, decide to make one. 
+    In that case you probably want to refund only the part that comes to you.
+    

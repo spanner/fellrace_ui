@@ -2,4 +2,46 @@
   .picture.home
   .title
     %h2.name.on_picture
-      Terms
+      Terms and Conditions
+
+.body
+  .page
+    %p
+      By using this site and by entering a race an order you will be deemed to have accepted these terms.
+
+    %h3
+      Online entries
+
+    %ul
+      %li
+        When you enter a race, fellrace.org.uk is acting as an agent for the organiser.
+      %li
+        Race entries are not refundable except at the discretion of the race organiser.
+      %li
+        Race entries are not transferrable unless the race organiser decides to permit it, 
+        and may only be transferrable within a club.
+      %li
+        All race entry forms include the current standard FRA disclaimers and warnings. 
+        By entering a race through fellrace.org.uk you affirm your acceptance of those conditions.
+
+    %h3
+      Race sites
+  
+    %ul
+      %li
+        All text, images, routes and other information uploaded to fellrace.org.uk is deemed to have been released 
+        under the
+        %a{href: "http://creativecommons.org/licenses/by-sa/4.0/"} Attribution-ShareAlike 4.0 International
+        creative commons license. Basically, people can do whatever they like with your information 
+        but they are supposed to credit fellrace.org.uk when they do it, and they are not allowed to prevent other people from sharing it.
+      %li
+        fellrace.org.uk is acting as a publishing intermediary for the fell race organiser. 
+        We accept no liability for any libellous, scandalous or mischievious remarks.
+        We do not scrutinise race pages for accuracy, usefulness or legality.
+      %li
+        fellrace.org.uk accepts no liability for your navigational errors either
+      %li
+        or from any other injury, inconvenience or death that arises from trying to follow our routes or do what it says on our pages.
+        You are responsible for scrutinising the information provided here, assessing your own ability and preparedness and attending to your own safety.
+
+

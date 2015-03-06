@@ -71,7 +71,7 @@ class FellRace.PublicRouter extends FellRace.Router
     "clubs(/*path)": "clubs"
     "users(/*path)": "users"
     "confirm/:uid/:token(/)": "confirmUser"
-    ":page_name(/)": "page"
+    "faq/:page_name(/)": "page"
     "*path": "index"
 
   initialize: ->
