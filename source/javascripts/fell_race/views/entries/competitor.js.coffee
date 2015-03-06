@@ -34,6 +34,10 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
     @_club_chooser.render()
     @_club_chooser.on "chosen", @setClubName
 
+    @_dob_picker = new Pikaday
+      field: @$el.find('input#dob')[0]
+      format: 'YYYY-MM-D'
+
+
   setClubName: =>
-    console.log "setClubName"
     @model.set({"club_name": @$el.find("input#club_name").val()}, {persistChange: true})
