@@ -9,13 +9,18 @@ class FellRace.Models.Payment extends FellRace.Model
       length: 2
     exp_year:
       required: true
-      pattern: "digits"
-      length: 2
+      fn: "validateYear"
     cvc:
       required: true
       pattern: "digits"
       length: 3
 
+  validateYear: (value, attr, computedState) =>
+    if !value
+      "Year is required"
+    else if !(/^\d+$/.test(value) and value.length is 2 or value.length is 4)
+      "Year should contain two or four digits"
+    
   validateCardNumber: (value, attr, computedState) =>
     return false if /[^0-9-\s]+/.test(value)
     if @luhnCheck(value)

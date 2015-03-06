@@ -20,6 +20,6 @@
     %input.cvc#cvc{name: "cvc", type: "text", limit: 3, placeholder: "123"}
   %span.col
     %br
-    %a.button.create Save and pay
+    %a.button.create Enter race
 %p
   %span.error_message

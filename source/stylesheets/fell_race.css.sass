@@ -1,4 +1,4 @@
-@import lib/pikaday
+@import lib/jquery.daterangepicker
 @import lib/medium-editor
 @import lib/definitions
 @import lib/notifications
@@ -31,7 +31,7 @@ body
 h1,h2,h3,h4
   font-weight: bold
   margin-bottom: 0.2em
-  &+p, &+ul
+  &+p
     margin-top: 0.2em
   .addendum
     font-weight: normal
@@ -66,9 +66,6 @@ a.add
   // white-space: nowrap
   +icon_link("add.png")
   cursor: pointer
-
-span.profile
-  display: none
 
 a.set
   color: $blue
@@ -365,15 +362,15 @@ $shadow: 1px 3px 8px #333
 #action
   left: 580px
   top: 0
-  overflow: scroll
-  z-index: 800
   position: fixed
+  overflow: auto
+  z-index: 800
   width: 280px
   max-height: 450px
   padding: 24px 30px 10px 24px
   display: none
   background-color: white
-  border: 1px solid $dark
+  border: 2px solid $dark
   border-left: none
   border-top: none
   a.avatar
@@ -478,25 +475,18 @@ $shadow: 1px 3px 8px #333
 .apology
   width: 400px
 
-#instances
-  .instance
-    margin: 7px 0
-
 a.race_link
-  // display: block
   color: $dark
   +hover
-  margin: 10px 0
+  margin: 10px o
   span.race_name
     display: inline-block
     vertical-align: bottom
-  span.profile
-    display: none
   svg
     display: inline-block
     vertical-align: bottom
     &+span.race_name
-      margin-left: 2px
+      margin-left: 4px
   span.date
     color: $pale
 
@@ -506,7 +496,7 @@ a.race_link
   width: 580px
   min-height: 100%
   background-color: white
-  border-right: 1px solid $dark
+  border-right: 2px solid $dark
   z-index: 200
   +transition(margin-left, 0.5s, ease-out)
   #user_controls
@@ -520,10 +510,10 @@ a.race_link
     position: absolute
     top: 358px
     right: 0
-    margin-right: -29px
+    margin-right: -30px
     width: 28px
     height: 54px
-    border: 1px solid $dark
+    border: 2px solid $dark
     border-left: none
     background-color: white
     cursor: pointer
@@ -637,6 +627,7 @@ a.race_link
           a.publish
             +microbutton($green)
     .body
+      margin: 20px
       padding: 0 24px 20px 32px
     #index
       .welcome
@@ -657,11 +648,6 @@ a.race_link
           margin-right: 15px
         a.search
           +button($green)
-    .page
-      ul
-        list-style: square
-        padding-left: 1.1em
-        +light
     > .race
       position: relative
       margin: 0
@@ -682,17 +668,16 @@ a.race_link
           .profile
             position: relative
             .basic_details
-              margin: -30px 0 0 32px
+              margin: -30px 10px 0 40px
               font-weight: bold
           .next_or_recent
             margin-top: 5px
-            margin: 5px 20px 0 32px
+            margin: 5px 20px 0 35px
             a.date
               font-weight: bold
             p.entries
               span.eod, span.no_eod
                 color: $mid
-                display: block
           .next
             margin-left: 5px
 
@@ -872,7 +857,7 @@ a.race_link
       .body
         position: relative
         box-sizing: border-box
-        margin: 20px 0 0
+        margin: 20px 0
         padding: 0 24px 20px 32px
         width: 100%
 
@@ -912,7 +897,7 @@ section#extra
   overflow: auto
   padding: 20px 50px
   background: white
-  border-left: 1px solid $dark
+  border-left: 2px solid $dark
   z-index: 300
   +transition(left, 0.5s, ease-out)
   h2
