@@ -37,6 +37,10 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
 
     "span.entry_limit": "entry_limit"
 
+    ".limit":
+      observe: "entry_limit"
+      visible: true
+
     "p.full":
       observe: ["entry_limit","entries_count"]
       onGet: "full"
