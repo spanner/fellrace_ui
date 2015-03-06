@@ -55,6 +55,11 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
     'a.results':
       observe: 'file'
       visible: true
+      attributes: [
+        observe: ["race_slug", "name"]
+        name: "href"
+        onGet: "url"
+      ]
 
   onRender: =>
     @stickit()
