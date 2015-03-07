@@ -5,8 +5,6 @@
       %span.forename
       %span.middlename
       %span.surname
-  .controls
-    %a.edit edit &#9656;
   .social
     %a.fb facebook
     %a.twit twitter
