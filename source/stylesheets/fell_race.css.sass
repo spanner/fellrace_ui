@@ -360,10 +360,11 @@ $shadow: 1px 3px 8px #333
   z-index: 900
 
 #action
-  left: 580px
+  left: 0
   top: 0
-  position: fixed
+  position: absolute
   overflow: auto
+  pointer-events: auto
   z-index: 250
   width: 280px
   max-height: 450px
@@ -885,20 +886,24 @@ a.race_link
             span.total_competitors
               color: $pale
               float: right
-
-section#extra
-  box-sizing: border-box
+#more
   position: fixed
   top: 0
   left: 580px
   right: 0
+  +transition(left, 0.5s, ease-out)
   height: 100%
+  pointer-events: none
+
+section#extra
+  box-sizing: border-box
+  pointer-events: auto
   overflow: auto
+  height: 100%
   padding: 20px 50px
   background: white
   border-left: 1px solid white
   z-index: 200
-  +transition(left, 0.5s, ease-out)
   h2
     margin: 0
   a.close
@@ -1144,7 +1149,7 @@ p.threecol
     &:hover
       background-position: 0 -144px
   
-  &+#extra
+  &+#more
     left: 40px
 
 

@@ -99,7 +99,7 @@ class FellRace.Application extends Backbone.Marionette.Application
         @content.removeClass("collapsed")
       else
         @content.addClass("collapsed")
-        @user_actions().hideAction()
+        # @user_actions().hideAction()
         
 
   secondsToString: (totalSeconds) =>
