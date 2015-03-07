@@ -99,6 +99,8 @@ class FellRace.Application extends Backbone.Marionette.Application
         @content.removeClass("collapsed")
       else
         @content.addClass("collapsed")
+        @user_actions().hideAction()
+        
 
   secondsToString: (totalSeconds) =>
     if totalSeconds
@@ -180,7 +182,6 @@ class FellRace.Application extends Backbone.Marionette.Application
 
   user_actions: =>
     #TODO: intervene whenever someone is signed in but not confirmed.
-    
     resetPassword: (uid, token) =>
       @actionRegion.show(new FellRace.Views.SessionPasswordForm({uid: uid, token: token}))
     requestReset: =>
