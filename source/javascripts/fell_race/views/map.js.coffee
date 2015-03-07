@@ -86,14 +86,14 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     
     @_gmap.mapTypes.set "Open", new google.maps.ImageMapType
       getTileUrl: (coord, zoom) ->
-        return "http://tile.opencyclemap.org/landscape/" + zoom + "/" + coord.x + "/" + coord.y + ".png"
+        return "https://tile.opencyclemap.org/landscape/" + zoom + "/" + coord.x + "/" + coord.y + ".png"
       tileSize: new google.maps.Size(256, 256)
       name: "OSM"
       maxZoom: 18
 
     @_gmap.mapTypes.set "OS", new google.maps.ImageMapType
       getTileUrl: (coord, zoom) =>
-        "http://ecn.t#{"0123".charAt(Math.floor(Math.random() * 3))}.tiles.virtualearth.net/tiles/r#{@tileXYToQuadKey(coord.x,coord.y,zoom)}?g=1567&lbl=l1&productSet=mmOS"
+        "https://ecn.t#{"0123".charAt(Math.floor(Math.random() * 3))}.tiles.virtualearth.net/tiles/r#{@tileXYToQuadKey(coord.x,coord.y,zoom)}?g=1567&lbl=l1&productSet=mmOS"
       tileSize: new google.maps.Size(256, 256)
       name: "OS"
       maxZoom: 17
@@ -101,7 +101,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
 
     shadow = new google.maps.ImageMapType
       getTileUrl: (coord, zoom) ->
-        "http://toolserver.org/~cmarqu/hill/#{zoom}/#{coord.x}/#{coord.y}.png"
+        "https://toolserver.org/~cmarqu/hill/#{zoom}/#{coord.x}/#{coord.y}.png"
       tileSize: new google.maps.Size(256, 256)
       name: "OS"
       maxZoom: 17

@@ -1,6 +1,5 @@
 .signin
   %a.close.big
-  %a.avatar.hide
   %h3
     Sign in here
 
