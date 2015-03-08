@@ -2,9 +2,10 @@ class FellRace.Model extends Backbone.Model
 
   initialize: ->
     @_class_name = @constructor.name
-      unless @_class_name
-        results = (/function\s([^(]{1,})\(/).exec(@constructor.toString())
-        @_class_name if (results and results.length > 1) then results[1].trim() else ""
+    unless @_class_name
+      results = (/function\s([^(]{1,})\(/).exec(@constructor.toString())
+      @_class_name = if (results and results.length > 1) then results[1].trim() else ""
+
     @on "sync", =>
       @set saving:false
     if @isNew()
