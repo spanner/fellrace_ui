@@ -66,3 +66,4 @@ class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
           route: "enter"
     else
       _fellrace.user_actions().signIn(destination_url:"#{@defaultUrl()}/enter", heading: "Sign in to enter race")
+      _fellrace.navigate @defaultUrl(), replace:true

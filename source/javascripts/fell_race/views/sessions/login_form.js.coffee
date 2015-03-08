@@ -45,6 +45,7 @@ class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
   succeed: (json) =>
     _fellrace.actionRegion.close()
     $.notify "success", "Sign in successful"
+    _fellrace.navigate(@opts.destination_url, replace:true) if @opts.destination_url
     @model.setUser(json)
 
   fail: (err) =>
