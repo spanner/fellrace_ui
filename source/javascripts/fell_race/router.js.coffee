@@ -66,6 +66,7 @@ class FellRace.BaseRouter extends Backbone.Router
 class FellRace.PublicRouter extends FellRace.Router
   routes:
     "(/)": "index"
+    "events(/*path)": "events"
     "races(/*path)": "racePublications"
     "runners(/*path)": "competitors"
     "clubs(/*path)": "clubs"
@@ -86,6 +87,9 @@ class FellRace.PublicRouter extends FellRace.Router
       _fellrace.closeRight()
       @_previous =
         route: "index"
+
+  events: (path) =>
+    _fellrace.navigate "/races/#{path}", replace: true
 
   racePublications: (path) =>
     if @_previous.route is "race_publications"
