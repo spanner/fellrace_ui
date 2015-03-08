@@ -11,7 +11,7 @@
         fellrace.org.uk
       provides free sites for fell races.
       Each race gets an address like
-      %a.sample{href: "https://caw.fellrace.org.uk/"} caw.fellrace.org.uk
+      %a.sample{href: "/races/caw"} caw.fellrace.org.uk
       and a set of editing and map-drawing tools that will get you up and running in a few minutes.
       It&rsquo;s built purely for fell races, by 
       %a{href: "/faq/about"} three fell runners

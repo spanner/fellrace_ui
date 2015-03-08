@@ -44,7 +44,7 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
             @instance instance_name,path
       else
         $.notify "error", "This instance doesn't exist. Redirecting to the race page."
-        _fellrace.navigate "/races/#{@model.get("slug")}"
+        _fellrace.navigate "/races/#{@model.get("slug")}", replace:true
 
   checkpoint: (slug,path) =>
     if cp = @model.checkpoints.findWhere(slug: slug)
@@ -82,7 +82,7 @@ class FellRace.Views.RacePublicationsLayout extends FellRace.Views.LayoutView
         $.getJSON "#{_fellrace.apiUrl()}/races/#{slug}/permissions", (data) =>
           if data.permissions.can_edit
             $.notify('error', "This race needs to be published.")
-            _fellrace.navigate "/admin/races/#{slug}"
+            _fellrace.navigate "/admin/races/#{slug}", replace:true
           else
             $.notify('error', "#{slug}.fellrace.org.uk does not exist.")
-            _fellrace.navigate "/"
+            _fellrace.navigate "/", replace:true
