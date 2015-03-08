@@ -63,7 +63,6 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
 
     @model.save().done () =>
       if @model.get("paid")
-        # $.notify "success", "payment successful"
         @_competitor.entries.add @model
         @_instance.entries.add @model
         _fellrace.navigate "/races/#{@model.get("race_slug")}/#{@model.get("instance_name")}/my_entry"

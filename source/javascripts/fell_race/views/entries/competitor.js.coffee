@@ -28,11 +28,15 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
     @model.set("postal_country", "GB") unless @model.get("postal_country")
     #TODO ensure email present on competitor as well as user
     @stickit()
+    @_club_input = @$el.find("input#club_name")
     @_club_chooser = new FellRace.Views.ClubChooser
       model: @model
-      input: @$el.find("input#club_name")
+      input: @_club_input
     @_club_chooser.render()
     @_club_chooser.on "chosen", @setClubName
+    #
+    # @_club_input.on "blur", (e) =>
+    #   console.log $(e.currentTarget).val()
 
     @_dob_picker = new Pikaday
       field: @$el.find('input#dob')[0]

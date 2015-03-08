@@ -57,7 +57,7 @@ class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
   enter: =>
     if _fellrace.userSignedIn()
       if entry = _fellrace.getCurrentCompetitor().entries.findWhere(instance_id: @model.id)
-        _fellrace.navigate "#{@defaultUrl()}/my_entry"
+        _fellrace.navigate "#{@defaultUrl()}/my_entry", replace:true
       else
         view = new FellRace.Views.InstanceEnter
           model: @model
