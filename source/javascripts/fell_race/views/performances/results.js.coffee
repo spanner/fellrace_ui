@@ -29,11 +29,11 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
       observe: ["competitor_id","competitor_forename","competitor_middlename","competitor_surname"]
       onGet: "compFullName"
       attributes: [
-        # {
-        #   name: "href"
-        #   observe: ["competitor_id","race_slug","instance_name"]
-        #   onGet: "compUrl"
-        # },
+        {
+          name: "href"
+          observe: ["competitor_id","race_slug","instance_name"]
+          onGet: "compUrl"
+        },
         {
           observe: "current"
           name: "class"
@@ -71,10 +71,10 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
       @$el.append view.render().$el
 
   compFullName: ([id,first,middle,last]=[]) =>
-    # @fullName([first,middle,last]) if id
+    @fullName([first,middle,last]) if id
 
   perfFullName: ([id,first,middle,last]=[]) =>
-    @fullName([first,middle,last])# unless id
+    @fullName([first,middle,last]) unless id
 
   fullName: ([first,middle,last]=[]) =>
     name = first
@@ -83,7 +83,6 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
 
   compUrl: ([id,race_slug,instance_name]=[]) =>
     "/runners/#{id}/#{race_slug}/#{instance_name}"
-
 
 class FellRace.Views.ResultsTable extends Backbone.Marionette.CompositeView
   template: "performances/results_table"

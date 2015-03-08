@@ -1,6 +1,6 @@
 %span.file_name
-%input#picker.file{type: "file", accept: ".csv"}
-%label.pick{for: "picker"}
+%input#picker.file{type: "file", accept: ".csv", style:"display:none;"}
+%label.button.pick{for: "picker"}
   Upload CSV results file
 
 .confirmation

@@ -86,7 +86,7 @@ class FellRace.Models.Instance extends FellRace.Model
     formdata
 
   sync: (method, model, options) =>
-    return super unless @get("file_changed")? or @get("entry_form_changed")?
+    return super unless @get("file_changed") or @get("entry_form_changed")
     options.data = @formdata()
     options.contentType = false
     options.processData = false
