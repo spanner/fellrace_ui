@@ -67,13 +67,15 @@
 %section.entries
   %h2 Entries list
 
+  %section.entries_import
+
   %p
     Total:
     %span.total_count
     %br
-    Completed:
-    %span.completed_count
+    Online:
+    %span.online_count
     %br
-    Pending:
-    %span.pending_count
+    Postal:
+    %span.postal_count
     %table.entries

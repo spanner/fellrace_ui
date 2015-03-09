@@ -1,11 +1,12 @@
-%td.name
+%td
   %a.name
     %span.fore
     %span.middle
     %span.sur
-%td.cat
+%td
   %span.cat
-%td.club
-  %a.club
-%td.paid_or_accepted
+%td
+  %a.club_name
+  %span.club_name
+%td
   %span.paid_or_accepted

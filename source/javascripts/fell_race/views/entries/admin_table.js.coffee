@@ -20,14 +20,22 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
       observe: "paid"
       onGet: "onlineOrPostal"
 
-    "a.club":
+    ".club_name":
       observe: "club_name"
+
+    "a.club_name":
+      observe: "club_id"
+      visible: true
       attributes: [
         observe: "club_id"
         name: "href"
         onGet: "clubUrl"
       ]
- 
+
+    "span.club_name":
+      observe: "club_id"
+      visible: "untrue"
+
     "input.accepted":
       observe: "accepted"
       attributes: [
@@ -52,6 +60,9 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
 
   clubUrl: (id) ->
     "/clubs/#{id}" if id
+
+  untrue: (val) ->
+    !val
 
 class FellRace.Views.AdminEntriesTable extends Backbone.Marionette.CompositeView
   itemView: FellRace.Views.AdminEntryRow

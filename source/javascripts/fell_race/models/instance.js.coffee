@@ -52,12 +52,10 @@ class FellRace.Models.Instance extends FellRace.Model
       @setEntryCounts()
 
   setEntryCounts: =>
-    total = @entries.length
-    pending = @entries.pendingCount()
     @set
-      total_count: total
-      completed_count: total - pending
-      pending_count: pending
+      total_count: @entries.length
+      online_count: @entries.onlineCount()
+      postal_count: @entries.postalCount()
 
   buildPerformances: =>
     @performances = new FellRace.Collections.Performances @get("performances"), instance: @

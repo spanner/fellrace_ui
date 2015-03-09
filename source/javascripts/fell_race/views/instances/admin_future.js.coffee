@@ -7,6 +7,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   events:
     'click a.delete': "delete"
+    "change input#entries_file": 'getPickedFile'
 
   bindings:
     ".race_name": "race_name"
@@ -71,8 +72,8 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     "input.accept_cash": "accept_cash"
 
     "span.total_count": "total_count"
-    "span.completed_count": "completed_count"
-    "span.pending_count": "pending_count"
+    "span.online_count": "online_count"
+    "span.postal_count": "postal_count"
 
     "a.close":
       attributes: [
@@ -98,6 +99,11 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       model: @model
       el: @$el.find(".entry_form")
     entry_form.render()
+
+    entries_import = new FellRace.Views.AdminEntriesImport
+      model: @model
+      el: @$el.find(".entries_import")
+    entries_import.render()
 
     entries_table = new FellRace.Views.AdminEntriesTable
       collection: @model.entries

@@ -1,16 +1,11 @@
 class FellRace.Collections.Entries extends FellRace.Collection
   model: FellRace.Models.Entry
 
-  paid: =>
-    @where(paid: true)
+  postalCount: =>
+    @length - @onlineCount()
 
-  paidCount: =>
-    @paid().length
+  online: =>
+    @where paid: true
 
-  pending: =>
-    @where
-      paid: false
-      accepted: false
-
-  pendingCount: =>
-    @pending().length
+  onlineCount: =>
+    @online().length
