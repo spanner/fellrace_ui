@@ -7,7 +7,5 @@
   %span.cat
 %td.club
   %a.club
-%td.accepted
-  %input.accepted{type:"checkbox"}
 %td.paid_or_accepted
   %span.paid_or_accepted

@@ -1,5 +1,9 @@
 class FellRace.Views.ConfirmationRequired extends Backbone.Marionette.ItemView
   template: 'sessions/confirmation_required'
+
+  events:
+    "click": "click"
+
   bindings:
     "#email": "email"
     "span.email":
@@ -11,6 +15,9 @@ class FellRace.Views.ConfirmationRequired extends Backbone.Marionette.ItemView
 
   onRender: =>
     @stickit()
+
+  click: =>
+    _fellrace.user_actions().reconfirm()
 
 class FellRace.Views.SessionReconfirmationForm extends Backbone.Marionette.ItemView
   template: 'sessions/reconfirmation_form'
@@ -41,7 +48,7 @@ class FellRace.Views.SessionReconfirmationForm extends Backbone.Marionette.ItemV
     @$el.find('.error').remove()
     @_form.find('input[type="submit"]').disable()
     $.ajax
-      url: "/api/users/reconfirm"
+      url: "#{_fellrace.apiUrl()}/users/reconfirm"
       type: "post"
       data:
         user:

@@ -27,7 +27,7 @@ class FellRace.Views.SessionResetForm extends Backbone.Marionette.ItemView
     @$el.find('.error').remove()
     @_form.find('input[type="submit"]').disable()
     $.ajax
-      url: "/users/password.json"
+      url: "#{_fellrace.apiUrl()}/users/password"
       type: "post"
       data:
         user:

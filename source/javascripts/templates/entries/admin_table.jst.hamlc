@@ -3,6 +3,5 @@
     %th name
     %th category
     %th club
-    %th accept
-    %th status
+    %th method
 %tbody

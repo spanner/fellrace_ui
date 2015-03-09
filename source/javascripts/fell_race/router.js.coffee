@@ -72,6 +72,7 @@ class FellRace.PublicRouter extends FellRace.Router
     "clubs(/*path)": "clubs"
     "users(/*path)": "users"
     "confirm/:uid/:token(/)": "confirmUser"
+    "reset_password/:uid/:token(/)": "resetPassword"
     "faq/:page_name(/)": "page"
     "*path": "index"
 
@@ -143,6 +144,10 @@ class FellRace.PublicRouter extends FellRace.Router
   confirmUser: (uid,token) =>
     @index()
     _fellrace.actionRegion.show(new FellRace.Views.SessionConfirmationForm({uid: uid, token: token}))
+
+  resetPassword: (uid,token) =>
+    @index()
+    _fellrace.actionRegion.show(new FellRace.Views.SessionPasswordForm({uid: uid, token: token}))
 
   page: (page_name) =>
     view = new FellRace.Views.Page

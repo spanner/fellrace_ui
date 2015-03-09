@@ -6,11 +6,9 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
   bindings:
     "a.name":
       attributes: [
-        {
-          observe: "competitor_id"
-          name: "href"
-          onGet: "competitorUrl"
-        }
+        observe: "competitor_id"
+        name: "href"
+        onGet: "competitorUrl"
       ]
     "span.fore": "forename"
     "span.middle": "middlename"
@@ -19,13 +17,8 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
     "span.cat": "category"
 
     "span.paid_or_accepted":
-      observe: ["paid","accepted"]
-      onGet: "paidOrAcceptedText"
-      attributes: [
-        observe: ["paid","accepted"]
-        name: 'class'
-        onGet: "paidOrAccepted"
-      ]
+      observe: "paid"
+      onGet: "onlineOrPostal"
 
     "a.club":
       observe: "club_name"
@@ -34,7 +27,7 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
         name: "href"
         onGet: "clubUrl"
       ]
-
+ 
     "input.accepted":
       observe: "accepted"
       attributes: [
@@ -51,19 +44,11 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
   name: ([fore,middle]=[]) ->
     if middle then "#{fore} #{middle}" else fore
 
-  paidOrAccepted: ([paid,accepted]=[]) ->
-    if paid or accepted
-      "complete"
-    else
-      "incomplete"
-
-  paidOrAcceptedText: ([paid,accepted]=[]) ->
+  onlineOrPostal: (paid) ->
     if paid
-      "paid"
-    else if accepted
-      "accepted without payment"
+      "online"
     else
-      "not paid"
+      "postal"
 
   clubUrl: (id) ->
     "/clubs/#{id}" if id

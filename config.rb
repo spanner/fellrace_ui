@@ -80,6 +80,7 @@ use Rack::Rewrite do
   rewrite %r{^\/runners(\/.+)?}, '/index.html'
   rewrite %r{^\/clubs(\/.+)?}, '/index.html'
   rewrite %r{^\/confirm(\/.+)?}, '/index.html'
+  rewrite %r{^\/reset_password(\/.+)?}, '/index.html'
   rewrite %r{^\/users(\/.+)?}, '/index.html'
   rewrite %r{^\/me(\/.+)?}, '/index.html'
   rewrite %r{^\/faq(\/.+)?}, '/index.html'

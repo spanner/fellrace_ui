@@ -6,5 +6,6 @@
 
     %p
       Thank you for signing up. We have sent a confirmation message to
-      %span#email
+      %strong#email
+    %p
       Please click on its large friendly button to complete the process.

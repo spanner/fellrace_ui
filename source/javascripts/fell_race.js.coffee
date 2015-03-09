@@ -19,6 +19,7 @@
 #= require vendor/coordtransform
 #= require vendor/latlon
 #= require vendor/gridref
+#= require vendor/papaparse
 
 #= require lib/extensions
 #= require lib/utilities
