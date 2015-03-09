@@ -1,0 +1,2 @@
+%label.button.upload{for: "entries_file"} Import entry list
+%input.file#entries_file{type: "file", style:"display:none", accept: "text/csv"}
