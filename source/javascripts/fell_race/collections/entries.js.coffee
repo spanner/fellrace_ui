@@ -2,16 +2,19 @@ class FellRace.Collections.Entries extends FellRace.Collection
   model: FellRace.Models.Entry
   comparator: "surname"
 
-  paid: =>
-    @where(paid: true)
+  postalCount: =>
+    @length - @onlineCount()
 
-  paidCount: =>
-    @paid().length
+  online: =>
+    @where paid: true
 
-  pending: =>
-    @where
-      paid: false
-      accepted: false
+  onlineCount: =>
+    @online().length
 
-  pendingCount: =>
-    @pending().length
+  present: (opts) =>
+    @filter((item) ->
+      item.get("forename")?.toLowerCase() is opts.forename?.toLowerCase() and
+      item.get("middlename")?.toLowerCase() is opts.middlename?.toLowerCase() and
+      item.get("surname")?.toLowerCase() is opts.surname?.toLowerCase() and
+      item.get("dob") is opts.dob and
+      item.get("gender") is opts.gender).length
