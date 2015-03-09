@@ -14,7 +14,7 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
     "span.middle": "middlename"
     "span.sur": "surname"
 
-    "span.cat": "category"
+    "span.cat": "category_name"
 
     "span.paid_or_accepted":
       observe: "paid"
