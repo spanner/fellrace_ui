@@ -1,4 +1,5 @@
 class FellRace.Models.Race extends FellRace.Model
+  singular_name: 'race'
   savedAttributes: ["name","description","cat","climb","distance",
     "requirements","encoded_route","route_profile","route_colour",
     "route_elevation","shr_id","organiser_name","organiser_email",

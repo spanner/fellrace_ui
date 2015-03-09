@@ -1,4 +1,5 @@
 class FellRace.Models.Record extends FellRace.Model
+  singular_name: 'record'
   defaults:
     holder: null
     year: null

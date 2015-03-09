@@ -1,4 +1,5 @@
 class FellRace.Models.Club extends FellRace.Model
+  singular_name: 'club'
   urlRoot: ->
     "#{_fellrace.apiUrl()}/clubs"
 

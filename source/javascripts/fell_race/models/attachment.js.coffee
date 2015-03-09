@@ -1,4 +1,5 @@
 class FellRace.Models.Attachment extends FellRace.Model
+  singular_name: 'attachment'
   defaults:
     name: null
     file: null

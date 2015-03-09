@@ -1,4 +1,5 @@
 class FellRace.Models.Payment extends FellRace.Model
+  singular_name: 'payment'
   validation:
     card_number:
       required: true

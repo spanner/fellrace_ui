@@ -1,4 +1,5 @@
 class FellRace.Models.Competitor extends FellRace.Model
+  singular_name: 'competitor'
   validation:
     forename:
       required: true

@@ -1,4 +1,5 @@
 class FellRace.Models.Instance extends FellRace.Model
+  singular_name: 'instance'
   savedAttributes: ["name","date","report","online_entry_opening",
     "online_entry_closing","online_entry","online_entry_fee","entry_limit",
     "time","pre_entry","postal_entry","postal_entry_fee","postal_entry_opening",

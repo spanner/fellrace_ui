@@ -1,4 +1,5 @@
 class FellRace.Models.Performance extends FellRace.Model
+  singular_name: 'performance'
   getSortName: =>
     @get("competitor_surname") or @get("surname")
 

@@ -1,4 +1,5 @@
 class FellRace.Models.Link extends FellRace.Model
+  singular_name: 'link'
   defaults:
     title: null
     url: null

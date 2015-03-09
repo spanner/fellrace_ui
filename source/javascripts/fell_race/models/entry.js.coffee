@@ -1,4 +1,5 @@
 class FellRace.Models.Entry extends FellRace.Model
+  singular_name: 'entry'
   validation:
     terms_accepted:
       acceptance: true

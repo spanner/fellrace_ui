@@ -1,4 +1,5 @@
 class FellRace.Models.Checkpoint extends FellRace.Model
+  singular_name: 'checkpoint'
   isPoint: true
 
   initialize: ->
