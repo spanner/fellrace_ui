@@ -48,3 +48,7 @@ class FellRace.Model extends Backbone.Model
   failed: () =>
     @set saving:false
     @trigger('failed')
+
+  getIndex: () =>
+    if @collection
+      @collection.indexOf(@)

@@ -5,15 +5,16 @@
   %span.instance_name
 
 .basic_details
-
   %span.date
   at
   %span.time
-
-.limit
-  Entry limit
-  %span.entry_limit
-  runners
+  %br
+  Entries:
+  %span.entry_count
+  %span.limit
+    of allowed
+    %span.entry_limit
+  
 
 %section.entries
   %h3 Entries

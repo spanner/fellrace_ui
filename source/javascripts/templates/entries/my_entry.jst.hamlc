@@ -11,4 +11,4 @@
   %span.instance_name
   \. You can see yourself in the entry list
   %a.entry_list here
-  \.
+  \, but if the entry is brand new, you may need to reload the page.

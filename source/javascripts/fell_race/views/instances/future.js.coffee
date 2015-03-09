@@ -141,6 +141,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
       collection: @model.entries
       el: @$el.find("table.entries")
     entries_table.render()
+    @$el.find('.entry_count').text(@model.entries.size())
 
   date: (date) =>
     moment(date).format("D MMMM YYYY") if date

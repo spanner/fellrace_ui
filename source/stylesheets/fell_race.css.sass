@@ -970,7 +970,7 @@ section#extra
       .postal_details, .online_details
         padding: 0 0 0 24px
         clear: both
-      span.daterange, span.currency, span.date, span.time, span.entry_limit, span.postal_entry_address
+      span.daterange, span.currency, span.date, span.time, span.entry_count, span.entry_limit, span.postal_entry_address
         font-weight: bold
       p.entry_form
         label.pick
@@ -990,15 +990,14 @@ section#extra
         input[type="file"]
           display: none
 
-        
       .entries
         table
           +clear
           tr
-            .complete
-              color: $green
-            .incomplete
+            &.incomplete
               color: $red
+              a
+                color: $red
 
     .results
       .results_preview

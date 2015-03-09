@@ -1,6 +1,6 @@
 %thead
   %tr
     %th name
-    %th category
+    %th cat
     %th club
 %tbody
