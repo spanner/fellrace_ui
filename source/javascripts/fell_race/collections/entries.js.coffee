@@ -9,3 +9,11 @@ class FellRace.Collections.Entries extends FellRace.Collection
 
   onlineCount: =>
     @online().length
+
+  present: (opts) =>
+    @filter((item) ->
+      item.get("forename")?.toLowerCase() is opts.forename?.toLowerCase() and
+      item.get("middlename")?.toLowerCase() is opts.middlename?.toLowerCase() and
+      item.get("surname")?.toLowerCase() is opts.surname?.toLowerCase() and
+      item.get("dob") is opts.dob and
+      item.get("gender") is opts.gender).length

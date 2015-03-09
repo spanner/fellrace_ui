@@ -45,12 +45,13 @@ class FellRace.Views.AdminEntriesImport extends Backbone.Marionette.ItemView
       @splitName object
     _.each @_fields, (file_attr, model_attr) =>
       model[model_attr] = object[file_attr]
-    if @_entries.findWhere(forename: model.forename, surname: model.surname, club_name: model.club_name)
+    if @_entries.present(forename: model.forename, surname: model.surname, dob: model.dob, gender: model.gender)#, club_name: model.club_name)
       console.log "#{model.forename} #{model.surname} is already entered"
     else
       model.accepted = true
       model.instance_id = @model.id
-      @_entries.add model
+      entry = @_entries.add model
+      entry.save()
 
   setFieldNames: (meta_fields) =>
     @_fields = {}
