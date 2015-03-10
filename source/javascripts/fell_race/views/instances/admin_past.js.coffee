@@ -24,6 +24,15 @@ class FellRace.Views.AdminPastInstance extends Backbone.Marionette.ItemView
       observe: "performances_count"
       onGet: "summarise"
 
+    "input#excluded": "excluded"
+
+    "a.race_name, a.close":
+      attributes: [
+        name: "href"
+        observe: "race_slug"
+        onGet: "raceUrl"
+      ]
+
   onRender: () =>
     new FellRace.Views.ResultsFile(model: @model, el: @$el.find(".results_file")).render()
     new FellRace.Views.ResultsPreview(model: @model, el: @$el.find(".results_preview")).render()
@@ -52,3 +61,6 @@ class FellRace.Views.AdminPastInstance extends Backbone.Marionette.ItemView
 
   deSlugify: (string) ->
     string.split("-").map((w) -> _.str.capitalize(w)).join(" ") if string
+
+  raceUrl: (slug) ->
+    "/admin/races/#{slug}"

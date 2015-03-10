@@ -6,7 +6,7 @@
 %td
   %span.cat
 %td
-  %a.club_name
+  / %a.club_name
   %span.club_name
 %td
   %span.paid_or_accepted

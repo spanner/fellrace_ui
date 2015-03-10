@@ -3,7 +3,7 @@ class FellRace.Models.Instance extends FellRace.Model
   savedAttributes: ["name","date","report","online_entry_opening",
     "online_entry_closing","online_entry","online_entry_fee","entry_limit",
     "time","pre_entry","postal_entry","postal_entry_fee","postal_entry_opening",
-    "postal_entry_closing","postal_entry_address","eod","eod_fee"
+    "postal_entry_closing","postal_entry_address","eod","eod_fee","excluded"
   ]
 
   validation:

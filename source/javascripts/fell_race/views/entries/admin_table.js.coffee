@@ -23,18 +23,18 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
     ".club_name":
       observe: "club_name"
 
-    "a.club_name":
-      observe: "club_id"
-      visible: true
-      attributes: [
-        observe: "club_id"
-        name: "href"
-        onGet: "clubUrl"
-      ]
-
-    "span.club_name":
-      observe: "club_id"
-      visible: "untrue"
+    # "a.club_name":
+    #   observe: "club_id"
+    #   visible: true
+    #   attributes: [
+    #     observe: "club_id"
+    #     name: "href"
+    #     onGet: "clubUrl"
+    #   ]
+    #
+    # "span.club_name":
+    #   observe: "club_id"
+    #   visible: "untrue"
 
     "input.accepted":
       observe: "accepted"
