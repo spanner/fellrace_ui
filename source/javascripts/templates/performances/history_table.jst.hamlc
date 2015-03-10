@@ -1,0 +1,13 @@
+%thead
+  %tr
+    %th.name
+      Name
+    %th.club
+      Club
+    %th.cat
+      Category
+    %th.time
+      Time
+    %th.instance
+      Year
+%tbody

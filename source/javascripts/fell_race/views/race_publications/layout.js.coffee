@@ -2,6 +2,7 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
   routes: () =>
     "(/)": @default
     "checkpoints/:checkpoint_slug(/*path)": @checkpoint
+    "history(/*path)": @history
     ":instance_name(/*path)": @instance
 
   handle: =>
@@ -53,6 +54,13 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
     @_previous =
       route: "checkpoint"
       param: slug
+
+  history: (path) =>
+    view = new FellRace.Views.RaceHistory
+      model: @model
+    _fellrace.extraContentRegion.show view
+    @_previous =
+      route: "history"
 
 class FellRace.Views.RacePublicationsLayout extends FellRace.Views.LayoutView
   routes: () =>

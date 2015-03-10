@@ -1,0 +1,13 @@
+%td.name
+  %a.name
+    %span.forename
+    %span.middlename
+    %span.surname
+%td.club
+  %span.club
+%td.cat
+  %span.cat
+%td.time
+  %span.time
+%td.instance
+  %span.instance
