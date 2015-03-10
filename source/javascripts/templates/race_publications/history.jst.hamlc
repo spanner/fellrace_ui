@@ -2,7 +2,8 @@
 
 %h2
   %a.race_name
-  All-time results
+  Results
+  %span.since
   %a.addendum.compact show runners
   %a.addendum.full show performances
 
@@ -11,12 +12,10 @@
   %span.all_runs
     %span.performances_count
     performances
-    %span.since
 
   %span.all_runners
     %span.competitors_count
     runners
-    %span.since
   %span.note
     Results from alternative (bad weather/winter) courses are excluded from this table.
 

@@ -87,7 +87,7 @@ class FellRace.Application extends Backbone.Marionette.Application
         # opts.error = ->
       @original_backbone_sync method, model, opts
 
-  apiUrl: =>      
+  apiUrl: =>
     @_api_url
 
   domain: =>
