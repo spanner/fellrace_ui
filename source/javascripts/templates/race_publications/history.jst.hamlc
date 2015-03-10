@@ -3,8 +3,15 @@
 %h2
   %a.race_name
   All-time
+  %a.addendum.compact show all runners
+  %a.addendum.full show all runs
 
-%a.compact Top runners
-%a.full Top runs
+%span.all_runs
+  All runs
+  %span.since
+
+%span.all_runners
+  All runners
+  %span.since
 
 %table.history

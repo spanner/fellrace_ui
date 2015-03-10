@@ -8,13 +8,18 @@ class FellRace.Views.RaceHistory extends Backbone.Marionette.ItemView
 
   bindings:
     ".race_name": "name"
-    "a.compact":
+    "a.compact, span.all_runs":
       observe: "compact"
       visible: "untrue"
 
-    "a.full":
+    "a.full, span.all_runners":
       observe: "compact"
       visible: true
+
+    "span.since":
+      observe: "earliest_year"
+      onGet: (year) ->
+        "(since #{year})" if year
 
     "table.history":
       attributes: [
@@ -32,15 +37,23 @@ class FellRace.Views.RaceHistory extends Backbone.Marionette.ItemView
       ]
 
   initialize: ->
-    @_comp_count = 0
     unless @model.performances
+      @_comp_count = 0
+      @_earliest_date = moment()
       @model.performances = new FellRace.Collections.Performances
       @model.performances.url = "#{@model.url()}/performances/best"
       @model.performances.fetch().done =>
         @model.performances.forEach (model) =>
           model.set p_pos: @model.performances.indexOf(model) + 1
+          date = moment(model.get("date"), "YYYY-MM-DD")
+          if date < @_earliest_date
+            @_earliest_date = date
           unless @model.performances.filter((p) -> p.get("competitor_id") is model.get("competitor_id") and p.get("p_pos")).length > 1
             model.set c_pos: @_comp_count += 1
+        @model.set
+          competitors_count: @_comp_count
+          performances_count: @model.performances.length
+          earliest_year: @_earliest_date.year()
 
   onRender: =>
     @stickit()
