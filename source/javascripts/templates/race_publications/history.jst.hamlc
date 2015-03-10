@@ -2,6 +2,9 @@
 
 %h2
   %a.race_name
-  Best all-time runs
-  
+  All-time
+
+%a.compact Top runners
+%a.full Top runs
+
 %table.history

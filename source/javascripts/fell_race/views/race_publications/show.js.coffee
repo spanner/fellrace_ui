@@ -137,6 +137,14 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
       visible: (links) ->
         links.length > 0
 
+    'a.history':
+      attributes: [
+        name: "href"
+        observe: "slug"
+        onGet: (slug) ->
+          "/races/#{slug}/history"
+      ]
+
     '.past_instances':
       observe: "past_instances"
       visible: "hasAny"

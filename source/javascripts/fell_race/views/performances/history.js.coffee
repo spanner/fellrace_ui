@@ -5,11 +5,18 @@ class FellRace.Views.HistoryRow extends Backbone.Marionette.ItemView
   bindings:
     ":el":
       attributes: [
-        observe: "cat"
+        observe: ["cat_name","c_pos"]
         name: "class"
-        onGet: (cat) =>
-          "female" if cat?.match /[lfw]/i
+        onGet: ([cat,c_pos]=[]) =>
+          klass = ""
+          klass += "female" if cat?.match /[lfw]/i
+          klass += " additional" unless c_pos
+          klass
       ]
+
+    "span.pos": "p_pos"
+
+    "span.comp_pos": "c_pos"
 
     "span.club": "club_name"
     "span.cat": "cat_name"
@@ -33,20 +40,6 @@ class FellRace.Views.HistoryRow extends Backbone.Marionette.ItemView
 
   time: (seconds) =>
     _fellrace.secondsToString seconds
-
-  initialize: ->
-    @$el.on "mouseenter", =>
-      @model.trigger "hover"
-    @$el.on "mouseleave", =>
-      @model.trigger "unhover"
-    @model.on "hover", @highlight
-    @model.on "unhover", @unhighlight
-
-  highlight: =>
-    @$el.addClass "hover"
-
-  unhighlight: =>
-    @$el.removeClass "hover"
 
   onRender: =>
     @stickit()

@@ -926,6 +926,38 @@ section#extra
   &:empty
     display: none
 
+  table.history
+    font-size: 0.8em
+    margin-top: 20px
+    margin-left: -6px
+    span.comp_pos
+      display: none
+    thead
+      th
+        text-align: left
+        vertical-align: top
+        padding: 4px 10px
+    tbody
+      overflow: auto
+      tr
+        &:hover
+          background: rgba(189,189,189,0.25)
+        &.female
+          background: rgba(209,0,93,0.25)
+          &:hover
+            background: rgba(102,0,45,0.25)
+      td
+        vertical-align: top
+        text-align: left
+        padding: 4px 10px
+    &.compact
+      span.pos
+        display: none
+      span.comp_pos
+        display: inline
+      tr.additional
+        display: none
+
   .instance
     &.new
       p.instructions
@@ -1004,7 +1036,7 @@ section#extra
         // max-height: 250px
         overflow: auto
 
-  #results_table
+  #results_table, #history_table
     font-size: 0.8em
     margin-top: 20px
     margin-left: -6px

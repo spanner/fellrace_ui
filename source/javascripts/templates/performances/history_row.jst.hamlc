@@ -1,3 +1,6 @@
+%td.pos
+  %span.pos
+  %span.comp_pos
 %td.name
   %a.name
     %span.forename

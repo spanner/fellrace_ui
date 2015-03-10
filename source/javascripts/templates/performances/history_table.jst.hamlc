@@ -1,5 +1,7 @@
 %thead
   %tr
+    %th.pos
+      Pos
     %th.name
       Name
     %th.club

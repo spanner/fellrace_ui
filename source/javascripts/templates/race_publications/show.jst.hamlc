@@ -68,6 +68,7 @@
     .past_instances
       %h3
         Results
+        %a.history.note all
       %ul.past_instances
 
   .conclusion
