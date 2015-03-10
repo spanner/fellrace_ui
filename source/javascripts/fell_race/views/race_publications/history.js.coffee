@@ -16,6 +16,9 @@ class FellRace.Views.RaceHistory extends Backbone.Marionette.ItemView
       observe: "compact"
       visible: true
 
+    "span.performances_count": "performances_count"
+    "span.competitors_count": "competitors_count"
+
     "span.since":
       observe: "earliest_year"
       onGet: (year) ->
