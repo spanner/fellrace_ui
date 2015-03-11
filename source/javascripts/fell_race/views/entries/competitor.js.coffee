@@ -27,7 +27,7 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
   onRender: =>
     @model.set("postal_country", "GB") unless @model.get("postal_country")
     #TODO ensure email present on competitor as well as user
-    @$el.find("input").checkAndTriggerAutoFillEvent()
+    @$el.checkAndTriggerAutoFillEvent()
     @stickit()
     @_club_input = @$el.find("input#club_name")
     @_club_chooser = new FellRace.Views.ClubChooser

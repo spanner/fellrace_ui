@@ -27,7 +27,8 @@ class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
     #   @$el.hide()
     if @opts.heading
       @$el.find('h3').text(@opts.heading)
-    @$el.find("input").checkAndTriggerAutoFillEvent()
+    console.log "input", @$el.find("input")
+    @$el.checkAndTriggerAutoFillEvent()
     @stickit()
 
   login: (e) =>
