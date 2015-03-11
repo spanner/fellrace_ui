@@ -20,6 +20,7 @@
 #= require vendor/latlon
 #= require vendor/gridref
 #= require vendor/papaparse
+#= require vendor/autofill-event
 
 #= require lib/extensions
 #= require lib/utilities

@@ -14,7 +14,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
       mapTypeIds: [
         "Open",
         "OS",
-        # "OOM",
+        "OOM",
         google.maps.MapTypeId.ROADMAP,
         google.maps.MapTypeId.SATELLITE
       ]
@@ -26,9 +26,9 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     throw new Error("Google maps API is not loaded.") unless google and google.maps
     @_gmap = new google.maps.Map @$el.find('.map_holder')[0], @mapConfig
     @addMapTypes()
-    @userMarker = new FellRace.Views.UserMarker
-      model: _fellrace.currentUser()
-      map: @_gmap
+    # @userMarker = new FellRace.Views.UserMarker
+    #   model: _fellrace.currentUser()
+    #   map: @_gmap
 
     @_polys = new FellRace.Views.RacePublicationPolylines
       collection: _fellrace.race_publications
@@ -78,18 +78,18 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     
     # @_gmap.mapTypes.set "OOM", new google.maps.ImageMapType
     #   getTileUrl: (coord, zoom) ->
-    #     return "http://tiler#{"123".charAt(Math.floor(Math.random() * 2))}.oobrien.com/oterrain/" + zoom + "/" + coord.x + "/" + coord.y + ".png"
+    #     return "https://tiler#{"123".charAt(Math.floor(Math.random() * 2))}.oobrien.com/oterrain/#{zoom}/#{coord.x}/#{coord.y}.png"
     #   tileSize: new google.maps.Size(256, 256)
     #   name: "OOM"
     #   maxZoom: 17
     #   minZoom: 12
-    
-    @_gmap.mapTypes.set "Open", new google.maps.ImageMapType
-      getTileUrl: (coord, zoom) ->
-        return "https://tile.opencyclemap.org/landscape/" + zoom + "/" + coord.x + "/" + coord.y + ".png"
-      tileSize: new google.maps.Size(256, 256)
-      name: "OSM"
-      maxZoom: 18
+    #
+    # @_gmap.mapTypes.set "Open", new google.maps.ImageMapType
+    #   getTileUrl: (coord, zoom) ->
+    #     return "https://tile.opencyclemap.org/landscape/#{zoom}/#{coord.x}/#{coord.y}.png"
+    #   tileSize: new google.maps.Size(256, 256)
+    #   name: "OSM"
+    #   maxZoom: 18
 
     @_gmap.mapTypes.set "OS", new google.maps.ImageMapType
       getTileUrl: (coord, zoom) =>
@@ -101,7 +101,8 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
 
     shadow = new google.maps.ImageMapType
       getTileUrl: (coord, zoom) ->
-        "https://toolserver.org/~cmarqu/hill/#{zoom}/#{coord.x}/#{coord.y}.png"
+        "https://#{"abc".charAt(Math.floor(Math.random() * 2))}.tiles.wmflabs.org/hillshading/#{zoom}/#{coord.x}/#{coord.y}.png"
+        # "https://toolserver.org/~cmarqu/hill/#{zoom}/#{coord.x}/#{coord.y}.png"
       tileSize: new google.maps.Size(256, 256)
       name: "OS"
       maxZoom: 17
@@ -111,12 +112,12 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     #   @_gmap.overlayMapTypes.insertAt(0, shadow)
     #   google.maps.event.addListener @_gmap, 'maptypeid_changed', =>
     #     type = @_gmap.getMapTypeId()
-    #     if type=="OS" || type=="roadmap"
-    #       shadow.setOpacity(0.7)
+    #     if type is "OS" or type is "roadmap" or type is "OOM"
+    #       shadow.setOpacity(0.8)
     #     else
     #       shadow.setOpacity(0)
-
-      google.maps.event.trigger @_gmap, "maptypeid_changed"
+    #
+    #   google.maps.event.trigger @_gmap, "maptypeid_changed"
 
   tileXYToQuadKey: (tileX, tileY, levelOfDetail) ->
     quadKey = ""
