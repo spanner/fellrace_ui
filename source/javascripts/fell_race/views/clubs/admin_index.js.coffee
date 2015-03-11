@@ -16,15 +16,13 @@ class FellRace.Views.AdminClubRow extends Backbone.Marionette.ItemView
         observe: "id"
       ]
     "span.name": "name"
-    "span.full_name": "full_name"
-    "span.short_name": "short_name"
+    "span.full_name": "short_name"
+    "span.short_name": "full_name"
+
     "span.alias_of":
       observe: "original_club_id"
       onGet: "aliasName"
     "a.merge_to":
-      observe: "original_club_id"
-      visible: "untrue"
-    "a.become_alias":
       observe: "original_club_id"
       visible: "untrue"
     "a.merge, a.remove_alias":

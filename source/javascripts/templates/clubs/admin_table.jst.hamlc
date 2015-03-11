@@ -2,8 +2,8 @@
   %thead
     %tr
       %th name
+      %th alias of
       %th full name
       %th short name
-      %th alias of
       %th 
   %tbody
