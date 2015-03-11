@@ -1,6 +1,8 @@
-%thead
-  %tr
-    %th.date date
-    %th.race_name race
+%h3 Entries
+%table.entries
+  %thead
+    %tr
+      %th.date date
+      %th.race_name race
 
-%tbody
+  %tbody

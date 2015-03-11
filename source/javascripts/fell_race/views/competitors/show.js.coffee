@@ -64,14 +64,15 @@ class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
   onRender: =>
     @stickit()
     performances_view = new FellRace.Views.CompetitorPerformancesTable
+      model: @model
       collection: @model.performances
-      competitor: @model
-      el: @$el.find "table.results"
+      el: @$el.find ".results"
     performances_view.render()
 
     entries_view = new FellRace.Views.CompetitorEntriesTable
+      model: @model
       collection: @model.entries
-      el: @$el.find "table.entries"
+      el: @$el.find ".entries"
     entries_view.render()
 
   inlineBlock: ($el, isVisible, options) =>

@@ -56,3 +56,14 @@ class FellRace.Views.CompetitorPerformancesTable extends Backbone.Marionette.Com
   template: "competitors/performances"
   itemView: FellRace.Views.CompetitorPerformanceRow
   itemViewContainer: 'tbody'
+
+  bindings:
+    ":el":
+      observe: "performances"
+      visible: "any"
+
+  onRender: =>
+    @stickit()
+
+  any: (array) ->
+    array?.length > 0

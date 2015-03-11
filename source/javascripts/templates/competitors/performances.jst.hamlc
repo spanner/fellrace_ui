@@ -1,9 +1,11 @@
-%thead
-  %tr
-    %th.date date
-    %th.race_name race
-    %th.time time
-    %th.pos pos
-    %th.winner winner
+%h3 Results
+%table.results
+  %thead
+    %tr
+      %th.date date
+      %th.race_name race
+      %th.time time
+      %th.pos pos
+      %th.winner winner
 
-%tbody
+  %tbody

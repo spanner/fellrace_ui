@@ -12,8 +12,4 @@
 
 .body
   .entries
-    %h3 Entries
-    %table.entries
   .results
-    %h3 Results
-    %table.results

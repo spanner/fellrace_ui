@@ -25,3 +25,14 @@ class FellRace.Views.CompetitorEntriesTable extends Backbone.Marionette.Composit
   template: "competitors/entries"
   itemView: FellRace.Views.CompetitorEntryRow
   itemViewContainer: 'tbody'
+
+  bindings:
+    ":el":
+      observe: "entries"
+      visible: "any"
+
+  onRender: =>
+    @stickit()
+
+  any: (array) ->
+    array?.length > 0
