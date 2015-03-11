@@ -28,7 +28,6 @@ class FellRace.Views.SessionPasswordForm extends Backbone.Marionette.ItemView
     @$el.find('.confirmation').hide()
     @$el.find('.refusal').hide()
     @$el.find('#password').complexify @showComplexity
-    @$el.checkAndTriggerAutoFillEvent()
     @stickit()
     $.ajax "#{_fellrace.apiUrl()}/users/password/edit.json",
       type: "GET"

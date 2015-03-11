@@ -27,13 +27,12 @@ class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
     #   @$el.hide()
     if @opts.heading
       @$el.find('h3').text(@opts.heading)
-    console.log "input", @$el.find("input")
-    @$el.checkAndTriggerAutoFillEvent()
     @stickit()
 
   login: (e) =>
     e.preventDefault() if e
     @$el.find('.error').remove()
+    @$el.find('input').change()
     $.ajax
       url: "#{_fellrace.config("api_url")}/users/sign_in.json"
       type: "post"
