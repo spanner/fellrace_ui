@@ -36,6 +36,7 @@ class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemVie
     @$el.find('.confirmation').hide()
     @$el.find('.refusal').hide()
     @$el.find('#password').complexify @showComplexity
+    @$el.find("input").checkAndTriggerAutoFillEvent()
     @stickit()
     $.ajax
       url: "#{_fellrace.apiUrl()}/users/verify"

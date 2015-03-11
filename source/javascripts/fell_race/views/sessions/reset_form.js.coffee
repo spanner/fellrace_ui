@@ -20,6 +20,7 @@ class FellRace.Views.SessionResetForm extends Backbone.Marionette.ItemView
     @_notes = @$el.find('p.note')
     @_confirmation = @$el.find('.confirmation')
     @delegateEvents(@events)
+    @$el.find("input").checkAndTriggerAutoFillEvent()
     @stickit()
 
   request_reset: (e) =>
