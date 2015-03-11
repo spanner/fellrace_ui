@@ -91,8 +91,11 @@ jQuery ($) ->
   $.fn.signal = (color, duration) ->
     color ?= "#f7f283"
     duration ?= 1000
+    returnto = $(@).css('backgroundColor')
+    returnto = "rgba(0,0,0,0)" if returnto is "transparent"
+    console.debug returnto
     @each ->
-      $(@).css('backgroundColor', color).animate({'backgroundColor': '#ffffff'}, duration)
+      $(@).css('backgroundColor', color).animate({'backgroundColor': returnto}, duration)
       
   $.fn.signal_confirmation = ->
     @signal('#c7ebb4')
@@ -124,7 +127,10 @@ jQuery ($) ->
   $.fn.editable = () ->
     @each ->
       container = $(@)
-      container.attr('contentEditable', true)
+      if container.attr('data-plain')?
+        container.attr('contentEditable', "plaintext-only")
+      else
+        container.attr('contentEditable', true)
       if container.attr('data-toolbar')?
         if container.is('div')
           buttons = ['bold', 'italic', 'underline', 'strikethrough', 'anchor', 'orderedlist', 'unorderedlist', 'header1', 'header2', 'quote']

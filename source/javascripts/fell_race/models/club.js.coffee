@@ -4,6 +4,7 @@ class FellRace.Models.Club extends FellRace.Model
     "#{_fellrace.apiUrl()}/clubs"
 
   initialize: ->
+    super
     @competitors = new FellRace.Collections.Competitors(@get("competitors")||[])
     @on "change:competitors", (model, data) =>
       @competitors.reset data

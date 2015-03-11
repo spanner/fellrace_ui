@@ -468,9 +468,9 @@ $shadow: 1px 3px 8px #333
           &:first-child
             margin-right: 6px
 
-[contenteditable=true]:empty:after
+[contenteditable=true]:empty:after, [contenteditable='plaintext-only']:empty:after
   content: attr(data-placeholder)
-  color: #999
+  color: $verypale
 
 .apology
   width: 400px
@@ -865,8 +865,8 @@ a.race_link
       table.entries
       
       table.results
+        font-size: 0.9em
         tr
-          th
           th, td
             padding: 2px 5px
             &:last-child
@@ -911,7 +911,23 @@ section#extra
     position: absolute
     top: 20px
     right: 20px
-  
+
+  table.clubs
+    font-size: 0.8em
+    tr
+      &:hover
+        background: $verypale
+      .full_name
+        font-size: 0.9em
+    .merging
+      display: none
+    &.merging
+      cursor: pointer
+      .merging
+        display: inline
+      .not_merging
+        display: none
+
   #results_file
     position: relative
     width: 90%
@@ -1229,6 +1245,13 @@ a.file_name
   font-size: 16px
   text-align: center
   white-space: nowrap
+
+.microbutton
+  +microbutton($pale)
+  &.go
+    +microbutton($green)
+  &.remove
+    +microbutton($red)
 
 .button
   +reverse_button

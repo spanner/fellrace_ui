@@ -1,0 +1,9 @@
+%table.clubs
+  %thead
+    %tr
+      %th name
+      %th full name
+      %th short name
+      %th alias of
+      %th 
+  %tbody
