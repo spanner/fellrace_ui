@@ -42,6 +42,7 @@ class FellRace.Views.SessionReconfirmationForm extends Backbone.Marionette.ItemV
     @_confirmation = @$el.find('.confirmation')
     @delegateEvents(@events)
     @stickit()
+    @$el.find("input").checkAndTriggerAutoFillEvent()
 
   request_confirmation: (e) =>
     e.preventDefault()
