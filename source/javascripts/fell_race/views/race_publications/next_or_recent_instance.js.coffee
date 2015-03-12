@@ -49,9 +49,11 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
     'span.eod':
       observe: "eod"
       visible: true
+      visibleFn: "visibleBlock"
     'span.no_eod':
       observe: "eod"
       visible: "untrue"
+      visibleFn: "visibleBlock"
     'a.results':
       observe: 'file'
       visible: true

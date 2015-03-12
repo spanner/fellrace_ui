@@ -1,6 +1,8 @@
 class FellRace.Collections.Entries extends FellRace.Collection
   model: FellRace.Models.Entry
-  comparator: "surname"
+
+  comparator: (model) ->
+    [model.get('surname'), model.get('forename')].join(' ').toLowerCase()
 
   postalCount: =>
     @length - @onlineCount()
