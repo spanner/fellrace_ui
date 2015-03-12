@@ -13,7 +13,6 @@ class FellRace.Model extends Backbone.Model
   updateable: () =>
     @updateSoon ?= _.debounce @update, 800
     @on "change", (m, options) =>
-      console.log "change", m, options
       if options.stickitChange or options.mapstickChange or options.persistChange
         @trigger('updating')
         @updateSoon()

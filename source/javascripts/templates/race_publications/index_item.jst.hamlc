@@ -1,0 +1,6 @@
+%a.race_link
+  %span.profile
+  %span.name
+.owner
+  %a.edit edit
+%p.intro

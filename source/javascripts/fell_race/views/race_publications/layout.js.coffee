@@ -64,13 +64,15 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
 
 class FellRace.Views.RacePublicationsLayout extends FellRace.Views.LayoutView
   routes: () =>
-    "(/)": @default
+    "(/)": @index
     ":slug(/*path)": @racePublication
 
-  default: =>
+  index: =>
+    _fellrace.mainRegion.show new FellRace.Views.RacePublicationsIndex
+      collection: _fellrace.race_publications
     _fellrace.closeRight()
     @_previous =
-      route: "default"
+      route: "index"
 
   racePublication: (slug,path) =>
     model = _fellrace.race_publications.add(slug: slug)

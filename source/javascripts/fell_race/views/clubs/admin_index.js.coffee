@@ -88,5 +88,3 @@ class FellRace.Views.AdminClubsTable extends Backbone.Marionette.CompositeView
     @collection = _fellrace.clubs
     @collection.fetch()
 
-  onRender: =>
-    console.log @collection
