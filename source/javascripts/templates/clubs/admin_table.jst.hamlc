@@ -1,6 +1,7 @@
 %table.clubs
   %thead
     %tr
+      %th id
       %th name
       %th alias of
       %th full name

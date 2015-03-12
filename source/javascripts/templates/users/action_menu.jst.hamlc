@@ -5,9 +5,9 @@
   %li
     %a.me{href: "/users/me"}
       Your page
-  %li
-    %a.prefs{href: "/users/me/preferences"}
-      Account preferences
+  / %li
+  /   %a.prefs{href: "/users/me/preferences"}
+  /     Account preferences
   %li
     %a.signout
       Sign out

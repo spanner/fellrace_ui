@@ -1,4 +1,6 @@
 %td
+  %span.id
+%td
   %span.name.editable{data: {placeholder: "club name",plain:true}}
 %td
   %span.alias_of
