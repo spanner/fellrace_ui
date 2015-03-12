@@ -9,6 +9,8 @@
     %a.microbutton.remove.remove_alias x
   %a.microbutton.cancel_merge cancel
 %td
+  %span.display_name.editable{data: {placeholder: "display name",plain:true}}
+%td
   %span.full_name.editable{data: {placeholder: "full name",plain:true}}
 %td
   %span.short_name.editable{data: {placeholder: "short name",plain:true}}

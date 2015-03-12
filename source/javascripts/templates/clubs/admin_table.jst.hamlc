@@ -4,6 +4,7 @@
       %th id
       %th name
       %th alias of
+      %th display name
       %th full name
       %th short name
       %th 

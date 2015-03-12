@@ -19,6 +19,7 @@ class FellRace.Views.AdminClubRow extends Backbone.Marionette.ItemView
     "span.name": "name"
     "span.full_name": "full_name"
     "span.short_name": "short_name"
+    "span.display_name": "display_name"
 
     "span.alias_of":
       observe: "original_club_id"
