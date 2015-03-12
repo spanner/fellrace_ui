@@ -1,7 +1,7 @@
 %td
   %span.id
 %td
-  %span.name.editable{data: {placeholder: "club name",plain:true}}
+  %span.name
 %td
   %span.alias_of
   %span.not_merging
