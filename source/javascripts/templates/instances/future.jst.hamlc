@@ -5,7 +5,7 @@
   %span.instance_name
 
 .basic_details
-  %span.date
+  %span.race_date.date
   at
   %span.time
   %br
@@ -14,7 +14,37 @@
   %span.limit
     of allowed
     %span.entry_limit
-  
+
+%p.full
+  %span.warning This race is full! No more entries will be accepted.
+
+.not_full
+  %p.no_eod
+    %span.warning No entry on the day
+
+  %p.eod
+    %span.heading Entry on the day:
+    %span.eod_fee.currency
+
+  %p.postal
+    %span.heading Postal entry:
+    %span.postal_entry_fee.currency
+    %span
+      from
+      %span.postal_entry_opening.date
+      to
+      %span.postal_entry_closing.date
+    %a.entry_form.file_icon.pdf{target:"_blank"} download form
+
+  %p.online
+    %span.heading Online entry:
+    %span.online_entry_fee.currency
+    %span
+      from
+      %span.online_entry_opening.date
+      to
+      %span.online_entry_closing.date
+    %a.button.enter enter
 
 %section.entries
   %h3 Entries

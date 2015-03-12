@@ -29,88 +29,74 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
         onGet: "adminUrl"
       ]
 
-    ".date":
+    ".race_date":
       observe: "date"
       onGet: "date"
-
     "span.time": "time"
 
     "span.entry_limit": "entry_limit"
-
     ".limit":
       observe: "entry_limit"
       visible: true
 
-    "p.full":
+    ".full":
       observe: ["entry_limit","entries_count"]
       onGet: "full"
       visible: true
-
-    "p.nearly_full":
-      observe: ["entry_limit","entries_count"]
-      onGet: "nearlyFull"
-      visible: true
-
     ".not_full":
       observe: ["entry_limit","entries_count"]
-      onGet: "notFull"
-      visible: true
-
-    "section.eod":
-      observe: "eod"
-      visible: true
-
-    "section.online":
-      observe: "online_entry"
-      visible: true
-
-    "section.postal":
-      observe: "postal_entry"
-      visible: true
-
-    ".no_eod":
+      onGet: "full"
+      visible: "untrue"
+    "p.no_eod":
       observe: "eod"
       visible: "untrue"
-
-    ".no_online":
+    "p.eod":
+      observe: "eod"
+      visible: true
+    "p.online":
       observe: "online_entry"
-      visible: "untrue"
-
-    ".no_postal":
+      visible: true
+    "p.postal":
       observe: "postal_entry"
-      visible: "untrue"
+      visible: true
 
     #eod details
-    ".eod_fee": "eod_fee"
+    ".eod_fee":
+      observe: "eod_fee"
+      onGet: "currency"
 
     #online details
     "span.online_entry_fee":
       observe: "online_entry_fee"
-      onGet: (fee) =>
-        fee?.toFixed(2)
-    "span.online_dates":
-      observe: ['online_entry_opening', 'online_entry_closing']
-      onGet: "showDates"
-
-    "p.enter":
-      observe: 'online_entry_active'
-      visible: true
+      onGet: "currency"
 
     "a.enter":
+      observe: ['online_entry_active',"entered"]
+      onGet: (vals) -> vals[0] and not vals[1]
+      visible: true
       attributes: [
         name: "href"
         observe: ["race_slug","name"]
         onGet: "entryUrl"
       ]
 
-    #postal details
+    "span.online_entry_opening": 
+      observe: "online_entry_opening"
+      onGet: "date"
+    "span.online_entry_closing": 
+      observe: "online_entry_closing"
+      onGet: "date"
+
+    "span.postal_entry_opening": 
+      observe: "postal_entry_opening"
+      onGet: "date"
+    "span.postal_entry_closing": 
+      observe: "postal_entry_closing"
+      onGet: "date"
+
     "span.postal_entry_fee":
       observe: "postal_entry_fee"
-      onGet: (fee) =>
-        fee?.toFixed(2)
-    "span.postal_dates":
-      observe: ['postal_entry_opening', 'postal_entry_closing']
-      onGet: "showDates"
+      onGet: "currency"
 
     "span.postal_entry_address": "postal_entry_address"
     "p.postal_entry_address":
@@ -130,13 +116,15 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
         name: "class"
         observe: "entry_form_type"
       ]
-      
+
     ".entries":
       observe: "entry_count"
       visible: "some"
 
   onRender: =>
     @stickit()
+    if _fellrace.userConfirmed() and @model.entries.findWhere(competitor_id: _fellrace.getCurrentCompetitor().id)
+      @model.set entered:true
     entries_table = new FellRace.Views.EntriesTable
       collection: @model.entries
       el: @$el.find("table.entries")
@@ -146,8 +134,8 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
   date: (date) =>
     moment(date).format("D MMMM YYYY") if date
 
-  some: (entry_count) =>
-    entry_count > 0
+  some: (val) =>
+    val > 0
 
   untrue: (val) =>
     !val
@@ -162,39 +150,10 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
     "/admin/races/#{slug}/#{name}"
 
   full: ([limit,count]=[]) ->
-    count >= limit
+    limit and count >= limit
 
-  nearlyFull: ([limit,count]=[]) ->
-    count >= limit * 0.85
-
-  notFull: ([limit,count]=[]) ->
-    count < limit
-
-  showDates: ([start,end]=[]) =>
-    @dateRangeString(start, end)
-      
-  simpleDateRangeString: (start, end) =>
-    if start? and end?
-      start = moment(start)
-      end = moment(end)
-      "#{start.format(@date_format)} to #{end.format(@date_format)}"
-
-  dateRangeString: (start, end) =>
-    if start? and end?
-      start = moment(start)
-      end = moment(end)
-      if start.year() is end.year() 
-        if start.month() is end.month()
-          start_format = "Do"
-          end_format = "Do MMM YYYY"
-        else
-          start_format = "Do MMM"
-          end_format = "Do MMM YYYY"
-      else
-        start_format = end_format = "Do MMM YYYY"
-      "#{start.format(start_format)} to #{end.format(end_format)}"
-    else
-      "Please choose dates"
+  currency: (fee) ->
+    fee?.toFixed(2)
 
   entryFormUrl: (url) =>
     if url
