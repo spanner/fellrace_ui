@@ -20,10 +20,15 @@ class FellRace.Views.AdminCompetitorsLayout extends FellRace.Views.LayoutView
       @_previous.view.handle(path)
     else
       model = new FellRace.Models.Competitor(id:id)
-      model.fetch()
-      view = new FellRace.Views.AdminCompetitorLayout
-        model: model
-      @_previous =
-        route: "competitor"
-        view: view
-        param: id
+      $.getJSON "#{model.url()}/permissions", (data) ->
+        if data.permissions?.can_edit
+          $.getJSON "#{model.url()}/edit", (data) ->
+            model.set data
+            view = new FellRace.Views.AdminCompetitorLayout
+              model: model
+            @_previous =
+              route: "competitor"
+              view: view
+              param: id
+        else
+          _fellrace.navigate "/runners/#{id}"
