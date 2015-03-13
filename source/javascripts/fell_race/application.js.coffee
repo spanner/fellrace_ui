@@ -125,8 +125,8 @@ class FellRace.Application extends Backbone.Marionette.Application
     else
       -10 / 2
 
-  moveMapTo: (model) =>
-    @mapView.moveTo model
+  moveMapTo: (model,zoom) =>
+    @mapView.moveTo model, zoom
 
   showRace: (race) =>
     @mapView.showRace race

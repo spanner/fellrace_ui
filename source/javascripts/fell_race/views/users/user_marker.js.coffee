@@ -14,6 +14,3 @@ class FellRace.Views.UserMarker extends MapStick.Marker
     position:
       lat: "lat"
       lng: "lng"
-
-  initialize: ->
-    @model.watchLocation()

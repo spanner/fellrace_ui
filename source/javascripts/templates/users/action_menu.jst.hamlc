@@ -11,3 +11,6 @@
   %li
     %a.signout
       Sign out
+
+  %li.find_me
+    %a.find_me Where am I?

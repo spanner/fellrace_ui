@@ -33,7 +33,6 @@ class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
   login: (e) =>
     e.preventDefault() if e
     @$el.find('.error').remove()
-    console.log @model.get('email'), @model.get('password')
     $.ajax
       url: "#{_fellrace.config("api_url")}/users/sign_in.json"
       type: "post"

@@ -1,9 +1,9 @@
 class FellRace.Views.Map extends Backbone.Marionette.ItemView
   template: 'map'
   className: 'gmap'
-  mapConfig:
-    center: new google.maps.LatLng 54.4098399744, -2.9730033900
-    zoom: 11
+  mapConfig: =>
+    center: new google.maps.LatLng @startLat(), @startLng()
+    zoom: @startZoom()
     mapTypeId: "OS"
     # scrollwheel: false
     zoomControlOptions:
@@ -22,13 +22,23 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
 
   _race: null
 
+  startLat: ->
+    parseFloat(localStorage["fr_lat"]) or 54.4098399744
+
+  startLng: ->
+    parseFloat(localStorage["fr_lng"]) or -2.9730033900
+
+  startZoom: ->
+    parseInt(localStorage["fr_zoom"],10) or 11
+
   onRender: () =>
     throw new Error("Google maps API is not loaded.") unless google and google.maps
-    @_gmap = new google.maps.Map @$el.find('.map_holder')[0], @mapConfig
+    @_gmap = new google.maps.Map @$el.find('.map_holder')[0], @mapConfig()
+    google.maps.event.addListener @_gmap, "dragend", @setState
     @addMapTypes()
-    # @userMarker = new FellRace.Views.UserMarker
-    #   model: _fellrace.currentUser()
-    #   map: @_gmap
+    @userMarker = new FellRace.Views.UserMarker
+      model: _fellrace.currentUser()
+      map: @_gmap
 
     @_polys = new FellRace.Views.RacePublicationPolylines
       collection: _fellrace.race_publications
@@ -57,15 +67,14 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
 
   setOptions: (opts={}) =>
     @_gmap.setOptions _.extend(_.clone(@mapConfig), opts)
-    @_gmap.panBy _fellrace.offsetX(),0
 
   getMap: =>
     @_gmap
 
-  moveTo: (model) =>
+  moveTo: (model,zoom=16) =>
     if model.isPoint
       @_gmap.panTo model.getLatLng()
-      @_gmap.setZoom 16
+      @_gmap.setZoom zoom
     else
       if bounds = model.getBounds()
         if bounds.isEmpty()
@@ -73,6 +82,11 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
         else
           @_gmap.fitBounds bounds
     @_gmap.panBy _fellrace.offsetX(), 0
+
+  setState: =>
+    localStorage["fr_lat"] = @_gmap.center.lat()
+    localStorage["fr_lng"] = @_gmap.center.lng()
+    localStorage["fr_zoom"] = @_gmap.zoom
 
   addMapTypes: =>
     
