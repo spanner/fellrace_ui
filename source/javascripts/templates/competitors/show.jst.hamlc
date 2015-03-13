@@ -5,8 +5,8 @@
       %span.forename
       %span.middlename
       %span.surname
-    .owner
-      %a.edit edit
+    / .owner
+    /   %a.edit edit
   .social
     %a.fb facebook
     %a.twit twitter
