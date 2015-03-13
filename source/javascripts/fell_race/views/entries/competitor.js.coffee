@@ -16,7 +16,7 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
     "input#mobile": "mobile"
     "select#postal_county": "postal_county"
     "select#postal_country": "postal_country"
-    "input#club_name": 
+    "input#club_name":
       observe: "club_name"
       updateModel: false
 
@@ -45,4 +45,10 @@ class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
 
 
   setClubName: =>
-    @model.set({"club_name": @$el.find("input#club_name").val()}, {persistChange: true})
+    @model.set({"club_name": @_club_input.val()}, {persistChange: true})
+
+  saveCompetitor: (callback) =>
+    if @_club_input.val() isnt @model.get("club_name")
+      @model.save(club_name: @_club_input.val()).done callback
+    else
+      callback()

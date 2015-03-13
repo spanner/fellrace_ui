@@ -60,13 +60,13 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     @model.set 
       stripe_token: token
       competitor_id: @_competitor.id
-
-    @model.save().done () =>
-      if @model.get("paid")
-        @_competitor.entries.add @model
-        @_instance.entries.add @model
-        _fellrace.navigate "/races/#{@model.get("race_slug")}/#{@model.get("instance_name")}/my_entry"
-      else
-        @_payment.set
-          error_param: @model.get("error").param
-          error_message: @model.get("error").message
+    @_edit_competitor_view.saveCompetitor =>
+      @model.save().done () =>
+        if @model.get("paid")
+          @_competitor.entries.add @model
+          @_instance.entries.add @model
+          _fellrace.navigate "/races/#{@model.get("race_slug")}/#{@model.get("instance_name")}/my_entry"
+        else
+          @_payment.set
+            error_param: @model.get("error").param
+            error_message: @model.get("error").message
