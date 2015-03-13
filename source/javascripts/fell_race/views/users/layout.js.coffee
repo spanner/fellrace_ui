@@ -31,10 +31,10 @@ class FellRace.Views.UsersLayout extends FellRace.Views.LayoutView
     if @_previous.route is "me"
       @_previous.view.handle path
     else
-      model = _fellrace.currentUser()
+      model = _fellrace.getCurrentCompetitor()
       model.fetch
         success: =>
-          view = new FellRace.Views.UserLayout
+          view = new FellRace.Views.CompetitorLayout
             model: model
             path: path
           @_previous =

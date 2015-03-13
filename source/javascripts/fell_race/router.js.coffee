@@ -160,6 +160,7 @@ class FellRace.AdminRouter extends FellRace.Router
   routes:
     "races(/*path)": "races"
     "clubs(/*path)": "clubs"
+    "runners(/*path)": "competitors"
 
   initialize: ->
     _fellrace.adminMapView()
@@ -183,4 +184,14 @@ class FellRace.AdminRouter extends FellRace.Router
         path: path
       @_previous =
         route: "clubs"
+        view: view
+
+  competitors: (path) =>
+    if @_previous.route is "competitors"
+      @_previous.view.handle path
+    else
+      view = new FellRace.Views.AdminCompetitorsLayout
+        path: path
+      @_previous =
+        route: "competitors"
         view: view

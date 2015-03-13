@@ -1,0 +1,11 @@
+.head
+  .picture
+  .title
+    %h2.name
+      %span.editable.forename{:data => {:placeholder => "forename"}}
+      %span.editable.surname{:data => {:placeholder => "surname"}}
+    .owner
+      %a.cancel exit
+
+.body
+  

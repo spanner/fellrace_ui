@@ -1,6 +1,6 @@
 class FellRace.Views.CompetitorLayout extends FellRace.Views.LayoutView
   routes: () =>
-    "(/)": @default
+    "(/)": @show
     ":race_slug(/*path)": @race
 
   initialize: ->
@@ -9,7 +9,7 @@ class FellRace.Views.CompetitorLayout extends FellRace.Views.LayoutView
       model: @model
     _fellrace.mainRegion.show view
 
-  default: =>
+  show: =>
     _fellrace.closeRight()
     @_previous =
       route: "default"

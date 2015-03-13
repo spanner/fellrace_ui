@@ -17,6 +17,11 @@ class FellRace.Models.Competitor extends FellRace.Model
     super
     @build()
 
+  toJSON: =>
+    json = super
+    delete json.competitor["picture"] unless @get("image_changed")?
+    json
+
   build: =>
     @performances = new FellRace.Collections.Performances @get("performances"), competitor: @
     @entries = new FellRace.Collections.Entries @get("entries")
@@ -26,3 +31,4 @@ class FellRace.Models.Competitor extends FellRace.Model
       @performances.reset data
     @on "change:entries", (model, data) =>
       @entries.reset data
+

@@ -7,9 +7,26 @@ class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
     'click a.disown': "disown"
 
   bindings:
+    'a.edit':
+      observe: "permissions"
+      visible: "canEdit"
+      attributes: [
+        observe: ["id","permissions"]
+        name: "href"
+        onGet: ([id,permissions]=[]) ->
+          "/admin/runners/#{id}" if permissions?.can_edit
+      ]
+
     "span.forename": "forename"
     "span.middlename": "middlename"
     "span.surname": "surname"
+
+    ".picture":
+      attributes: [
+        name: "style"
+        observe: 'picture'
+        onGet: "backgroundImageUrl"
+      ]
 
     # "a.strava":
     #   observe: "strava_id"
@@ -75,11 +92,23 @@ class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
       el: @$el.find ".entries"
     entries_view.render()
 
+  canEdit: ({can_edit:can_edit}={}) ->
+    can_edit
+
   inlineBlock: ($el, isVisible, options) =>
     if isVisible
       $el.css display: "inline-block"
     else
       $el.hide()
+
+  backgroundImageUrl: (url) =>
+    if url
+      if url.match(/data:image/)
+        "background-image: url(#{url})"
+      else if url.match(/^\//)
+        "background-image: url(#{_fellrace.apiUrl()}#{url})"
+      else
+        "background-image: url(#{url})"
 
   # claim: =>
   #   if _fellrace.userSignedIn()
