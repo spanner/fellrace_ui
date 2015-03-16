@@ -92,7 +92,7 @@ class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
       el: @$el.find ".entries"
     entries_view.render()
 
-    if _fellrace.userConfirmed()
+    if _fellrace.userConfirmed() and @model.get("permissions")?.can_edit
       match_table = new FellRace.Views.MatchTable
         model: @model
         el: @$el.find(".matches")
