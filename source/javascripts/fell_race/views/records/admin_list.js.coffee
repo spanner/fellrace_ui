@@ -10,8 +10,8 @@ class FellRace.Views.AdminRecord extends Backbone.Marionette.ItemView
     'span.label': 'label'
     'span.time':
       observe: 'elapsed_time'
-      onGet: 'secondsToString'
-      onSet: "stringToSeconds"
+      onGet: 'simplestTime'
+      onSet: "seconds"
     'span.name': 'holder'
     'span.year': 'year'
 
@@ -19,11 +19,11 @@ class FellRace.Views.AdminRecord extends Backbone.Marionette.ItemView
     @$el.find('.editable').editable()
     @stickit()
 
-  secondsToString: (seconds) =>
-    _fellrace.secondsToString seconds
+  simplestTime: (seconds) =>
+    seconds?.toSimplestTime()
 
-  stringToSeconds: (string) =>
-    _fellrace.stringToSeconds string
+  seconds: (string) =>
+    string?.toSeconds()
 
   delete: (e) =>
     e.stopPropagation() if e

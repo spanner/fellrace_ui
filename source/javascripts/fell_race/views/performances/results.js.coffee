@@ -47,21 +47,10 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
       onGet: "time"
 
   time: (seconds) =>
-    _fellrace.secondsToString seconds
+    seconds.toSimplestTime()
 
-  initialize: ({checkpoints:@_checkpoints}) ->
-    @$el.on "mouseenter", =>
-      @model.trigger "hover"
-    @$el.on "mouseleave", =>
-      @model.trigger "unhover"
-    @model.on "hover", @highlight
-    @model.on "unhover", @unhighlight
-
-  highlight: =>
-    @$el.addClass "hover"
-
-  unhighlight: =>
-    @$el.removeClass "hover"
+  initialize: ({checkpoints:@_checkpoints}={}) ->
+    #
 
   onRender: =>
     @stickit()
@@ -134,7 +123,7 @@ class FellRace.Views.CheckpointCell extends Backbone.Marionette.ItemView
       onGet: "timeAndPos"
 
   timeAndPos: ([time,pos]=[]) ->
-    "#{_fellrace.secondsToString(time)} (#{pos})" if pos
+    "#{time?.toSimplestTime()} (#{pos})" if pos
 
   onRender: =>
     @stickit()

@@ -57,7 +57,7 @@ class FellRace.Application extends Backbone.Marionette.Application
     @past_instances.fetch()
 
     @clubs = new FellRace.Collections.Clubs([])
-    # @competitors ?= new FellRace.Collections.Competitors([])
+
     @mapView = new FellRace.Views.Map()
     @gmapRegion.show @mapView
     @user_controlsRegion.show new FellRace.Views.UserControls()
@@ -100,24 +100,6 @@ class FellRace.Application extends Backbone.Marionette.Application
       else
         @content.addClass("collapsed")
         # @user_actions().hideAction()
-        
-
-  secondsToString: (totalSeconds) =>
-    if totalSeconds
-      hours = Math.floor(totalSeconds / 3600)
-      totalSeconds %= 3600
-      minutes = Math.floor(totalSeconds / 60)
-      minutes = "0#{minutes}" if minutes < 10
-      seconds = totalSeconds % 60
-      seconds = "0#{seconds}" if seconds < 10
-      string = "#{minutes}:#{seconds}"
-      string = "#{hours}:#{string}" if hours > 0
-      string
-
-  stringToSeconds: (string) =>
-    if string
-      [s,m,h] = string.split(":").reverse()
-      seconds = (parseInt(s,10)||0) + 60 * (parseInt(m,10)||0) + 3600 * (parseInt(h,10)||0)
 
   offsetX: =>
     if @open_drawer
@@ -188,7 +170,6 @@ class FellRace.Application extends Backbone.Marionette.Application
       @actionRegion.show(new FellRace.Views.SessionResetForm())
     signOut: =>
       @session.reset()
-      # @navigate('/', trigger:true)
     signUp: (opts) =>
       @actionRegion.show(new FellRace.Views.UserSignupForm(opts))
     signUpForEvent: =>
@@ -242,6 +223,3 @@ class FellRace.Application extends Backbone.Marionette.Application
   sendAuthenticationHeader: (e, request) =>
     if token = @session?.authToken()
       request.setRequestHeader("Authorization", "Token token=#{token}")
-
-  slugify: (string) =>
-    string?.trim().replace(/[^a-zA-Z0-9-\s]/g,'').replace(/[^a-zA-Z0-9-]/g,'-').toLowerCase()

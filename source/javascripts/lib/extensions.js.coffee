@@ -19,6 +19,11 @@ unless Number::toSimplestTime?
       else
         "#{date.getSeconds()}"
 
+unless String::toSeconds?
+  String::toSeconds = () ->
+    [s,m,h] = @split(":").reverse()
+    seconds = (parseInt(s,10)||0) + 60 * (parseInt(m,10)||0) + 3600 * (parseInt(h,10)||0)
+
 unless Date::round?
   Date::round = (interval) ->
     interval ?= 15

@@ -6,7 +6,7 @@ class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemVi
     "span.pos": "pos"
     "span.time":
       observe: "time"
-      onGet: "secondsToString"
+      onGet: "simplestTime"
     "span.date":
       observe: "instance_date"
       onGet: "date"
@@ -32,7 +32,7 @@ class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemVi
 
     "span.winning_time":
       observe: "winning_time"
-      onGet: "secondsToString"
+      onGet: "simplestTime"
 
   onRender: =>
     @stickit()
@@ -46,8 +46,8 @@ class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemVi
   fullName: ([first,last]=[]) =>
     "#{first} #{last}" if first and last
 
-  secondsToString: (seconds) =>
-    _fellrace.secondsToString seconds
+  simplestTime: (seconds) =>
+    seconds?.toSimplestTime()
 
   date: (date) =>
     moment(date).format("D MMM YY") if date

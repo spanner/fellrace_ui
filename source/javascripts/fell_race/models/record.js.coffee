@@ -7,7 +7,7 @@ class FellRace.Models.Record extends FellRace.Model
     elapsed_time: null
 
   jsonForPublication: =>
-    elapsed_time: _fellrace.secondsToString @get("elapsed_time")
+    elapsed_time: @get("elapsed_time")?.toSimplestTime()
     holder: @get("holder")
     label: @get("label")
     year: @get("year")

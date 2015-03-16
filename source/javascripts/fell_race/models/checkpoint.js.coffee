@@ -12,7 +12,7 @@ class FellRace.Models.Checkpoint extends FellRace.Model
       @setGridrefFromLatLng(opts)
 
     @on "change:name", (model, val, opts) =>
-      @set slug: _fellrace.slugify(val),
+      @set slug: _.str.slugify(val),
         opts
 
     if @race = @collection.race
@@ -56,7 +56,7 @@ class FellRace.Models.Checkpoint extends FellRace.Model
       @collection.getColour()
 
   getSlug: =>
-    @get("slug") || _fellrace.slugify(@get("name"))
+    @get("slug") || _.str.slugify(@get("name"))
 
   jsonForPublication: =>
     pos: @get("pos")

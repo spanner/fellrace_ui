@@ -39,7 +39,7 @@ class FellRace.Views.HistoryRow extends Backbone.Marionette.ItemView
     "span.instance": "instance_name"
 
   time: (seconds) =>
-    _fellrace.secondsToString seconds
+    seconds?.toSimplestTime()
 
   onRender: =>
     @stickit()

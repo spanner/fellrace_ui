@@ -4,13 +4,21 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
   bindings:
     ".race_name": "race_name"
     ".instance_name": "name"
-    "a.race_name, a.close":
+    "a.race_name":
       attributes: [
         name: "href"
         observe: "race_slug"
-        onGet: (race_slug) =>
+        onGet: (race_slug) ->
           "/races/#{race_slug}"
       ]
+    "a.close":
+      attributes: [
+        name: "href"
+        observe: ["race_slug","competitor_id"]
+        onGet: ([slug,id]=[]) ->
+          if id then "/runners/#{id}" else "/races/#{slug}"
+      ]
+
     "p.download":
       observe: "file_name"
       visible: "notCSV"
