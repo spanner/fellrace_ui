@@ -92,6 +92,12 @@ class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
       el: @$el.find ".entries"
     entries_view.render()
 
+    if _fellrace.userConfirmed()
+      match_table = new FellRace.Views.MatchTable
+        model: @model
+        el: @$el.find(".matches")
+      match_table.render()  
+
   canEdit: ({can_edit:can_edit}={}) ->
     can_edit
 

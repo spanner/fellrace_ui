@@ -1,7 +1,9 @@
 %td
   %a.name
+    %span.forename
+    %span.middlename
+    %span.surname
 %td
   %span.club
 %td
-  .controls
-    %a.merge Merge
+  %a.microbutton.merge Merge

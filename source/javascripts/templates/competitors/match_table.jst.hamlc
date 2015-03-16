@@ -1,2 +1,6 @@
 %h3 Matches
 %table.matches
+  %thead
+    %th name
+    %th club
+  %tbody

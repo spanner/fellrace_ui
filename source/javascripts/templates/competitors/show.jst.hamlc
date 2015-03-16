@@ -7,11 +7,12 @@
       %span.surname
     .owner
       %a.edit edit
-  .social
-    %a.fb facebook
-    %a.twit twitter
-    %a.strava strava
+  / .social
+  /   %a.fb facebook
+  /   %a.twit twitter
+  /   %a.strava strava
 
 .body
   .entries
   .results
+  .matches

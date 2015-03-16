@@ -54,7 +54,6 @@ class FellRace.Views.AdminCompetitor extends Backbone.Marionette.ItemView
       field: @$el.find('input#dob')[0]
       format: 'YYYY-MM-D'
 
-
   setClubName: =>
     @model.set({"club_name": @_club_input.val()}, {persistChange: true})
 

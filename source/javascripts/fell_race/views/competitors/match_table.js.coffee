@@ -1,4 +1,4 @@
-class FellRace.Views.CompetitorMatchRow extends Backbone.Marionette.ItemView
+class FellRace.Views.MatchRow extends Backbone.Marionette.ItemView
   template: 'competitors/match_row'
   className: "competitor"
   tagName: "tr"
@@ -8,29 +8,22 @@ class FellRace.Views.CompetitorMatchRow extends Backbone.Marionette.ItemView
 
   bindings:
     "a.name":
-      observe: ["forename","surname"]
-      onGet: "name"
       attributes: [
-        {
-          observe: "id"
-          name: "href"
-          onGet: (val) =>
-            "/runners/#{val}"
-        }
+        observe: "id"
+        name: "href"
+        onGet: (val) ->
+          "/runners/#{val}"
       ]
-  clubBindings:
-    "span.club": "name"
 
-  initialize: ->
-    @_club = new FellRace.Models.Club @model.get("club")
+    "span.forename": "forename"
+    "span.middlename": "middlename"
+    "span.surname": "surname"
+    "span.gender": "gender"
+
+    "span.club": "club_name"
 
   onRender: =>
     @stickit()
-    
-    @stickit(@_club, @clubBindings)
-
-  name: (vals) =>
-    "#{vals[0]} #{vals[1]}"
 
   merge: =>
     $.ajax
@@ -39,25 +32,30 @@ class FellRace.Views.CompetitorMatchRow extends Backbone.Marionette.ItemView
       dataType: "text"
       data:
         competitor:
-          merge_to_id: @model.get("id")
+          merge_to_id: @model.collection.competitor.id
       success: =>
         @model.collection.remove(@model)
         $.notify "success", "Merge request sent to admin"
 
-class FellRace.Views.CompetitorsMatchTable extends Backbone.Marionette.CompositeView
-  itemView: FellRace.Views.CompetitorMatchRow
-  itemViewOptions: () =>
-    {competitor:  @model}
-  itemViewContainer: '.matches'
+class FellRace.Views.MatchTable extends Backbone.Marionette.CompositeView
+  itemView: FellRace.Views.MatchRow
+  itemViewContainer: 'tbody'
   template: "competitors/match_table"
 
+  bindings:
+    ":el":
+      observe: "match_count"
+      visible: (count) ->
+        count > 0
+
+  initialize: ->
+    @stickit()
+    @collection = new FellRace.Collections.Competitors([])
+    @collection.competitor = @model
+    @model.set match_count: 0
+    $.getJSON "#{_fellrace.apiUrl()}/competitors/#{@model.id}/matches", (data) =>
+      @collection.reset data
+
   onRender: =>
-    if @collection.length > 0
-      @$el.show()
-    else
-      @$el.hide()
-    @collection.on "add remove", () =>
-      if @collection.length > 0
-        @$el.show()
-      else
-        @$el.hide()
+    @collection.on "add remove reset", =>
+      @model.set match_count: @collection.length
