@@ -10,6 +10,8 @@
   %span.club
 %td.cat
   %span.cat
+%td.race_position
+  %span.race_position
 %td.time
   %span.time
 %td.instance

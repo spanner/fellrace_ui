@@ -52,7 +52,7 @@ class FellRace.Views.MatchTable extends Backbone.Marionette.CompositeView
     @stickit()
     @collection = new FellRace.Collections.Competitors([])
     @collection.competitor = @model
-    # @model.set match_count: 0
+    @model.set match_count: 0
     $.getJSON "#{_fellrace.apiUrl()}/competitors/#{@model.id}/matches", (data) =>
       @collection.reset data
     @collection.on "add remove reset", =>

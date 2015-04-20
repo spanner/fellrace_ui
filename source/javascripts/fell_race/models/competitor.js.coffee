@@ -27,8 +27,10 @@ class FellRace.Models.Competitor extends FellRace.Model
     @entries = new FellRace.Collections.Entries @get("entries")
 
     @set performances_count: @performances.length
+
+    @performances.each (p) =>
+      
     @on "change:performances", (model, data) =>
       @performances.reset data
     @on "change:entries", (model, data) =>
       @entries.reset data
-

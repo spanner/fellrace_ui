@@ -15,6 +15,7 @@ class FellRace.Views.HistoryRow extends Backbone.Marionette.ItemView
       ]
 
     "span.pos": "p_pos"
+    "span.race_position": "position"
 
     "span.comp_pos": "c_pos"
 

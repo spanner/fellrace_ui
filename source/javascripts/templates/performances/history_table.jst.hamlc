@@ -8,6 +8,8 @@
       Club
     %th.cat
       Category
+    %th.race_position
+      Race pos
     %th.time
       Time
     %th.instance

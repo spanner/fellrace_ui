@@ -4,7 +4,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
   mapConfig: =>
     center: new google.maps.LatLng @startLat(), @startLng()
     zoom: @startZoom()
-    mapTypeId: "OS"
+    mapTypeId: "Open"
     # scrollwheel: false
     zoomControlOptions:
       position: google.maps.ControlPosition.RIGHT_TOP
@@ -98,16 +98,16 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     #   maxZoom: 17
     #   minZoom: 12
     #
-    # @_gmap.mapTypes.set "Open", new google.maps.ImageMapType
-    #   getTileUrl: (coord, zoom) ->
-    #     return "https://tile.opencyclemap.org/landscape/#{zoom}/#{coord.x}/#{coord.y}.png"
-    #   tileSize: new google.maps.Size(256, 256)
-    #   name: "OSM"
-    #   maxZoom: 18
+    @_gmap.mapTypes.set "Open", new google.maps.ImageMapType
+      getTileUrl: (coord, zoom) ->
+        return "https://#{"abc".charAt(Math.floor(Math.random() * 2))}.tile.thunderforest.com/landscape/#{zoom}/#{coord.x}/#{coord.y}.png"
+      tileSize: new google.maps.Size(256, 256)
+      name: "OSM"
+      maxZoom: 18
 
     @_gmap.mapTypes.set "OS", new google.maps.ImageMapType
       getTileUrl: (coord, zoom) =>
-        "https://ecn.t#{"0123".charAt(Math.floor(Math.random() * 3))}.tiles.virtualearth.net/tiles/r#{@tileXYToQuadKey(coord.x,coord.y,zoom)}?g=1567&lbl=l1&productSet=mmOS"
+        "https://t#{"0123".charAt(Math.floor(Math.random() * 3))}.ssl.ak.tiles.virtualearth.net/tiles/r#{@tileXYToQuadKey(coord.x,coord.y,zoom)}.png?g=3451&productSet=mmOS"
       tileSize: new google.maps.Size(256, 256)
       name: "OS"
       maxZoom: 17

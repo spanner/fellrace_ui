@@ -8,7 +8,13 @@ class FellRace.Model extends Backbone.Model
         @updateable()
     else
       @updateable()
+
+    @build()
+
     @on "publish", @publish
+
+  build: =>
+    #noop here
 
   updateable: () =>
     @updateSoon ?= _.debounce @update, 800
