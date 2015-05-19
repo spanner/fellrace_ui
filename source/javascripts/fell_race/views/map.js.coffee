@@ -107,7 +107,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
 
     @_gmap.mapTypes.set "OS", new google.maps.ImageMapType
       getTileUrl: (coord, zoom) =>
-        "https://t#{"0123".charAt(Math.floor(Math.random() * 3))}.ssl.ak.tiles.virtualearth.net/tiles/r#{@tileXYToQuadKey(coord.x,coord.y,zoom)}.png?g=3451&productSet=mmOS"
+        "https://t#{"0123".charAt(Math.floor(Math.random() * 3))}.ssl.ak.tiles.virtualearth.net/tiles/r#{@tileXYToQuadKey(coord.x,coord.y,zoom)}.png?g=3467&productSet=mmOS"
       tileSize: new google.maps.Size(256, 256)
       name: "OS"
       maxZoom: 17

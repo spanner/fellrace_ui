@@ -14,8 +14,9 @@ class FellRace.Models.PublicInstance extends Backbone.Model
       @set(att, Date.parse(date)) if date?
       @on "change:#{att}", @setEntryFlags
 
+    @entries.url = "#{@url()}/entries"
     @entries.on "add remove reset", () =>
-      @set total_entries: @entries.length
+      @set total_entries: @entries.uncancelledCount()
 
     _.each ["performances","entries","checkpoints"], (collection) =>
       @on "change:#{collection}", (model,data) =>

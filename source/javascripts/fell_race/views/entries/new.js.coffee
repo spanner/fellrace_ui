@@ -60,6 +60,7 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     @model.set 
       stripe_token: token
       competitor_id: @_competitor.id
+      user_id: _fellrace.currentUser().id
     @_edit_competitor_view.saveCompetitor =>
       @model.save().done () =>
         if @model.get("paid")

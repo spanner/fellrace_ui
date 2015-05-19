@@ -11,5 +11,5 @@ class FellRace.Models.Entry extends FellRace.Model
   initialize: ->
     super
     if @collection
-      @on "change:paid change:accepted", =>
+      @on "change:paid change:accepted change:cancelled", =>
         @collection.trigger "update_counts"

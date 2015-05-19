@@ -3,7 +3,16 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
   className: "entry"
   tagName: "tr"
 
+  events:
+    "click a.control": "toggleControls"
+    "click a.cancel": "cancelEntry"
+    "click a.reinstate": "reinstateEntry"
+
   bindings:
+    ":el":
+      classes:
+        wait: "saving"
+        cancelled: "cancelled"
     "a.name":
       attributes: [
         observe: "competitor_id"
@@ -23,18 +32,13 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
     ".club_name":
       observe: "club_name"
 
-    # "a.club_name":
-    #   observe: "club_id"
-    #   visible: true
-    #   attributes: [
-    #     observe: "club_id"
-    #     name: "href"
-    #     onGet: "clubUrl"
-    #   ]
-    #
-    # "span.club_name":
-    #   observe: "club_id"
-    #   visible: "untrue"
+    ".cancel,.edit":
+      observe: "cancelled"
+      visible: "untrue"
+
+    ".reinstate":
+      observe: "cancelled"
+      visible: true
 
     "input.accepted":
       observe: "accepted"
@@ -63,6 +67,14 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
 
   untrue: (val) ->
     !val
+
+  cancelEntry: =>
+    @model.set {cancelled: true},
+      persistChange: true
+
+  reinstateEntry: =>
+    @model.set {cancelled: false},
+      persistChange: true
 
 class FellRace.Views.AdminEntriesTable extends Backbone.Marionette.CompositeView
   itemView: FellRace.Views.AdminEntryRow

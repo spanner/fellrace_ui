@@ -5,3 +5,5 @@
     %span.sur
 %td.cat
 %td.club
+%td
+  %a.cancel x

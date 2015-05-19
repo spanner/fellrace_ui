@@ -53,7 +53,7 @@ class FellRace.Models.Instance extends FellRace.Model
 
   setEntryCounts: =>
     @set
-      total_count: @entries.length
+      total_count: @entries.uncancelledCount()#length
       online_count: @entries.onlineCount()
       postal_count: @entries.postalCount()
 

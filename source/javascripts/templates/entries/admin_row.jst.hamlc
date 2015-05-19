@@ -10,3 +10,6 @@
   %span.club_name
 %td
   %span.paid_or_accepted
+%td
+  %a.cancel cancel
+  %a.reinstate reinstate

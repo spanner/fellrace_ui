@@ -3,6 +3,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
   className: "instance future"
 
   bindings:
+    ".entry_count": "total_entries"
     ".race_name":
       observe: "race_name"
       attributes: [
@@ -118,7 +119,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
       ]
 
     ".entries":
-      observe: "entry_count"
+      observe: "total_entries"
       visible: "some"
 
   onRender: =>
@@ -129,7 +130,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
       collection: @model.entries
       el: @$el.find("table.entries")
     entries_table.render()
-    @$el.find('.entry_count').text(@model.entries.size())
+    # @$el.find('.entry_count').text(@model.entries.size())
 
   date: (date) =>
     moment(date).format("D MMMM YYYY") if date

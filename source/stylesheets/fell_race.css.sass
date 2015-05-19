@@ -1051,10 +1051,17 @@ section#extra
         table
           +clear
           tr
-            &.incomplete
+            &.cancelled
+              background: rgba(255,10,20,0.2)
+            a.reinstate
+              color: $green
+            a.cancel
               color: $red
-              a
-                color: $red
+              &:hover
+                span
+                  display: inline
+              span
+                display: none
 
     .results
       .results_preview
