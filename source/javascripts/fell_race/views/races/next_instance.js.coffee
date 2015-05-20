@@ -24,6 +24,7 @@ class FellRace.Views.NextRaceInstance extends Backbone.Marionette.ItemView
       @stickit @getInstance(), @bindings
 
   getInstance: =>
+    console.debug @model.nextOrRecentInstance()
     @model.nextOrRecentInstance()
 
   atTime: (time) =>

@@ -12,10 +12,6 @@ class FellRace.Models.Instance extends FellRace.Model
     name:
       required: true
 
-  initialize: (opts) ->
-    super
-    @build()
-
   build: =>
     unless @isNew()
       @buildDates()
