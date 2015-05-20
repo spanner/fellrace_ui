@@ -21,13 +21,10 @@ class FellRace.Views.EntryRow extends Backbone.Marionette.ItemView
 
   onRender: =>
     @stickit()
-    @$el.addClass('postal') if @model.get('accepted')
 
-  competitorUrl: (id) ->
-    "/runners/#{id}"
+  competitorUrl: (id) -> "/runners/#{id}"
 
-  clubUrl: (id) ->
-    "/clubs/#{id}" if id
+  clubUrl: (id) -> "/clubs/#{id}" if id
 
   rowClass: (value) =>
     cssclass = "entry"

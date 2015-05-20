@@ -16,7 +16,7 @@ class FellRace.Models.PublicInstance extends Backbone.Model
 
     @entries.url = "#{@url()}/entries"
     @entries.on "add remove reset", () =>
-      @set total_entries: @entries.uncancelledCount()
+      @set total_entries: @entries.length
 
     _.each ["performances","entries","checkpoints"], (collection) =>
       @on "change:#{collection}", (model,data) =>

@@ -13,3 +13,5 @@ class FellRace.Models.Entry extends FellRace.Model
     if @collection
       @on "change:paid change:accepted change:cancelled", =>
         @collection.trigger "update_counts"
+      @on "change:cancelled", (model,val) =>
+        @collection.trigger "model:change:cancelled", model, val

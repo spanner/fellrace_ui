@@ -33,9 +33,7 @@ class FellRace.Views.UncancelledAdminEntryRow extends FellRace.Views.AdminEntryR
     "click a.cancel": "cancelEntry"
 
   cancelEntry: =>
-    @model.set {cancelled: true},
-      persistChange: true
-
+    @model.save cancelled: true
 
 class FellRace.Views.AdminEntriesTable extends Backbone.Marionette.CompositeView
   itemView: FellRace.Views.UncancelledAdminEntryRow
@@ -51,9 +49,7 @@ class FellRace.Views.CancelledAdminEntryRow extends FellRace.Views.AdminEntryRow
     "click a.reinstate": "reinstateEntry"
 
   reinstateEntry: =>
-    @model.set {cancelled: false},
-      persistChange: true
-
+    @model.save cancelled: false
 
 class FellRace.Views.AdminCancelledEntriesTable extends FellRace.Views.AdminEntriesTable
   itemView: FellRace.Views.CancelledAdminEntryRow
