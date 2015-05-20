@@ -52,10 +52,10 @@ class FellRace.Models.Instance extends FellRace.Model
       col.on "model:change:cancelled", (model,cancelled) =>
         if cancelled
           @entries.remove model
-          @cancelled_entries.add(model).sort()
+          @cancelled_entries.add(model)
         else
           @cancelled_entries.remove model
-          @entries.add(model).sort()
+          @entries.add(model)
 
     @entries.url = "#{@url()}/entries"
     @cancelled_entries.url = "#{@url()}/entries"
