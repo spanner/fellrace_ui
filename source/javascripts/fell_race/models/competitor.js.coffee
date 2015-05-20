@@ -25,7 +25,7 @@ class FellRace.Models.Competitor extends FellRace.Model
   build: =>
     @performances = new FellRace.Collections.Performances @get("performances"), competitor: @
     @entries = new FellRace.Collections.Entries @get("entries")
-
+    @entries.url = "#{_fellrace.apiUrl()}/entries"
     @set performances_count: @performances.length
 
     @performances.each (p) =>

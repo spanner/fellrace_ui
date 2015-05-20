@@ -74,6 +74,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     "span.total_count": "total_count"
     "span.online_count": "online_count"
     "span.postal_count": "postal_count"
+    "span.cancelled_count": "cancelled_count"
 
     "a.close":
       attributes: [
@@ -108,6 +109,11 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     entries_table = new FellRace.Views.AdminEntriesTable
       collection: @model.entries
       el: @$el.find("table.entries")
+    entries_table.render()
+
+    entries_table = new FellRace.Views.AdminCancelledEntriesTable
+      collection: @model.cancelled_entries
+      el: @$el.find("table.cancelled_entries")
     entries_table.render()
 
   delete: (e) =>

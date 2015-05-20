@@ -136,9 +136,20 @@ table
   thead
     th
       text-align: left
-  tr
-    &.even
-      background: $palest
+  td
+    padding: 3px
+    &:first-child
+      border-top-left-radius: 3px
+      border-bottom-left-radius: 3px
+    &:last-child
+      border-top-right-radius: 3px
+      border-bottom-right-radius: 3px
+  tbody
+    tr
+      &:nth-child(odd)
+        background: rgba(0,0,0,0.03)
+      &:hover
+        background: rgba(0,0,0,0.1)
 
 table.ranking
   border-collapse: collapse
@@ -870,6 +881,14 @@ a.race_link
         margin: 20px 0 0
         padding: 0 24px 20px 32px
         width: 100%
+      table.entries
+        tr
+          &.cancelled
+            background: rgba(255,10,20,0.2)
+          a.cancel
+            +microbutton($red)
+          span.cancelled
+            color: $red
 
       table.results
         font-size: 0.9em
@@ -1054,14 +1073,9 @@ section#extra
             &.cancelled
               background: rgba(255,10,20,0.2)
             a.reinstate
-              color: $green
+              +microbutton($green)
             a.cancel
-              color: $red
-              &:hover
-                span
-                  display: inline
-              span
-                display: none
+              +microbutton($red)
 
     .results
       .results_preview

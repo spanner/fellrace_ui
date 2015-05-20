@@ -65,7 +65,7 @@
     %p.entry_form
 
 %section.entries
-  %h2 Entries list
+  %h2 Entries
 
   %section.entries_import
 
@@ -78,4 +78,12 @@
     %br
     Postal:
     %span.postal_count
-    %table.entries
+    %br
+    Cancelled:
+    %span.cancelled_count
+
+  %table.entries
+
+  %h3 Cancelled
+
+  %table.cancelled_entries

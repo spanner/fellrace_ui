@@ -1,18 +1,8 @@
 class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
-  template: "entries/admin_row"
   className: "entry"
   tagName: "tr"
 
-  events:
-    "click a.control": "toggleControls"
-    "click a.cancel": "cancelEntry"
-    "click a.reinstate": "reinstateEntry"
-
   bindings:
-    ":el":
-      classes:
-        wait: "saving"
-        cancelled: "cancelled"
     "a.name":
       attributes: [
         observe: "competitor_id"
@@ -22,62 +12,49 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
     "span.fore": "forename"
     "span.middle": "middlename"
     "span.sur": "surname"
-
-    "span.cat": "category_name"
-
+    "span.cat": "category"
     "span.paid_or_accepted":
       observe: "paid"
       onGet: "onlineOrPostal"
-
     ".club_name":
       observe: "club_name"
-
-    ".cancel,.edit":
-      observe: "cancelled"
-      visible: "untrue"
-
-    ".reinstate":
-      observe: "cancelled"
-      visible: true
-
-    "input.accepted":
-      observe: "accepted"
-      attributes: [
-        observe: "paid"
-        name: "disabled"
-      ]
 
   onRender: =>
     @stickit()
 
-  competitorUrl: (id) =>
-    "/runners/#{id}"
+  competitorUrl: (id) -> "/runners/#{id}"
+  name: ([fore,middle]=[]) -> if middle then "#{fore} #{middle}" else fore
+  onlineOrPostal: (paid) -> if paid then "online" else "postal"
+  clubUrl: (id) -> "/clubs/#{id}" if id
 
-  name: ([fore,middle]=[]) ->
-    if middle then "#{fore} #{middle}" else fore
-
-  onlineOrPostal: (paid) ->
-    if paid
-      "online"
-    else
-      "postal"
-
-  clubUrl: (id) ->
-    "/clubs/#{id}" if id
-
-  untrue: (val) ->
-    !val
+class FellRace.Views.UncancelledAdminEntryRow extends FellRace.Views.AdminEntryRow
+  template: "entries/admin_row"
+  events:
+    "click a.cancel": "cancelEntry"
 
   cancelEntry: =>
     @model.set {cancelled: true},
       persistChange: true
 
+
+class FellRace.Views.AdminEntriesTable extends Backbone.Marionette.CompositeView
+  itemView: FellRace.Views.UncancelledAdminEntryRow
+  template: "entries/admin_table"
+  tagName: "table"
+  itemViewContainer: "tbody"
+
+
+class FellRace.Views.CancelledAdminEntryRow extends FellRace.Views.AdminEntryRow
+  template: "entries/cancelled_admin_row"
+
+  events:
+    "click a.reinstate": "reinstateEntry"
+
   reinstateEntry: =>
     @model.set {cancelled: false},
       persistChange: true
 
-class FellRace.Views.AdminEntriesTable extends Backbone.Marionette.CompositeView
-  itemView: FellRace.Views.AdminEntryRow
-  template: "entries/admin_table"
-  tagName: "table"
-  itemViewContainer: "tbody"
+
+class FellRace.Views.AdminCancelledEntriesTable extends FellRace.Views.AdminEntriesTable
+  itemView: FellRace.Views.CancelledAdminEntryRow
+

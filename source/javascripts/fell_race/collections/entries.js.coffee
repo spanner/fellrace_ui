@@ -4,17 +4,8 @@ class FellRace.Collections.Entries extends FellRace.Collection
   comparator: (model) ->
     [model.get('surname'), model.get('forename')].join(' ').toLowerCase()
 
-  cancelled: =>
-    @where cancelled: true
-
-  cancelledCount: =>
-    @cancelled().length
-
-  uncancelledCount: =>
-    @length - @cancelledCount()
-
   postalCount: =>
-    @uncancelledCount() - @onlineCount()
+    @length - @onlineCount()
 
   online: =>
     @filter (e) -> e.get("paid") and !e.get("cancelled")

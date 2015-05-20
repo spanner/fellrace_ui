@@ -45,15 +45,24 @@ class FellRace.Models.Instance extends FellRace.Model
 
   buildEntries: =>
     @entries = new FellRace.Collections.Entries @get("entries"), instance: @
+    @cancelled_entries = new FellRace.Collections.Entries @get("cancelled_entries"), instance: @
+
     @on "change:entries", (model,data) =>
       @entries.reset data
+    @on "change:cancelled_entries", (model,data) =>
+      @cancelled_entries.reset data
+
     @entries.url = "#{@url()}/entries"
-    @entries.on "add remove reset update_counts", () =>
-      @setEntryCounts()
+    @cancelled_entries.url = "#{@url()}/entries"
+
+    _.each [@cancelled_entries,@entries], (col) =>
+      col.on "add remove reset update_counts", () =>
+        @setEntryCounts()
 
   setEntryCounts: =>
     @set
-      total_count: @entries.uncancelledCount()#length
+      total_count: @entries.length
+      cancelled_count: @cancelled_entries.length
       online_count: @entries.onlineCount()
       postal_count: @entries.postalCount()
 
