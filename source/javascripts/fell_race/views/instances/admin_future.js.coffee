@@ -111,10 +111,14 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       el: @$el.find("table.entries")
     entries_table.render()
 
-    entries_table = new FellRace.Views.AdminCancelledEntriesTable
+    cancelled_entries_table = new FellRace.Views.AdminCancelledEntriesTable
       collection: @model.cancelled_entries
       el: @$el.find("table.cancelled_entries")
-    entries_table.render()
+    cancelled_entries_table.render()
+
+    clubs_list = new FellRace.Views.ClubSizes
+      collection: @model.clubEntryCounts()
+      el: @$el.find("table.club_entries tbody")
 
   delete: (e) =>
     e.preventDefault() if e
@@ -155,3 +159,20 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   onClose: =>
     $(".pika-single").remove()
+
+class FellRace.Views.ClubSize extends Backbone.Marionette.ItemView
+  template: "instances/club_size"
+  tagName: "tr"
+
+  bindings:
+    "span.name": "name"
+    "span.size": "entry_count"
+
+  onRender: =>
+    @stickit()
+
+class FellRace.Views.ClubSizes extends Backbone.Marionette.CollectionView
+  itemView: FellRace.Views.ClubSize
+
+  initialize: ->
+    @collection.on "sort", @render

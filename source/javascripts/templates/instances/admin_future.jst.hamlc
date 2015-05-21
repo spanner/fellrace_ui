@@ -49,8 +49,9 @@
         %span.admin_charge.currency
 
 %section.postal
-  %input#postal_entry{type: "checkbox"}
-  %label.heading{for: "postal_entry"} Postal entry
+  %p
+    %input#postal_entry{type: "checkbox"}
+    %label.heading{for: "postal_entry"} Postal entry
 
   .postal_details
     %p
@@ -66,25 +67,32 @@
     %p.entry_form
 
 %section.entries
-  %h2 Entries
+  %h2
+    Entries
+    %span.entries_import
 
-  %section.entries_import
+  %p.counts
+    %span.count
+      Total:
+      %span.total_count
+    %span.count
+      Online:
+      %span.online_count
+    %span.count
+      Postal:
+      %span.postal_count
+    %span.count
+      Cancelled:
+      %span.cancelled_count
 
-  %p
-    Total:
-    %span.total_count
-    %br
-    Online:
-    %span.online_count
-    %br
-    Postal:
-    %span.postal_count
-    %br
-    Cancelled:
-    %span.cancelled_count
+  .all_entries
+    %table.entries
 
-  %table.entries
+    %h3 Cancelled
 
-  %h3 Cancelled
+    %table.cancelled_entries
 
-  %table.cancelled_entries
+  .by_club
+    %h3 Clubs
+    %table.club_entries
+      %tbody

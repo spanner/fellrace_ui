@@ -30,7 +30,7 @@ class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
 class FellRace.Views.UncancelledAdminEntryRow extends FellRace.Views.AdminEntryRow
   template: "entries/admin_row"
   events:
-    "click a.cancel": "cancelEntry"
+    "click a.remove": "cancelEntry"
 
   cancelEntry: =>
     @model.save cancelled: true

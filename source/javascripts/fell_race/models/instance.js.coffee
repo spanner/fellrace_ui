@@ -63,6 +63,8 @@ class FellRace.Models.Instance extends FellRace.Model
     _.each [@cancelled_entries,@entries], (col) =>
       col.on "add remove reset update_counts", () =>
         @setEntryCounts()
+        @setClubEntryCounts() if @_club_entry_counts
+
 
   setEntryCounts: =>
     @set
@@ -70,6 +72,20 @@ class FellRace.Models.Instance extends FellRace.Model
       cancelled_count: @cancelled_entries.length
       online_count: @entries.onlineCount()
       postal_count: @entries.postalCount()
+
+  clubEntryCounts: =>
+    @_club_entry_counts = true
+    @clubs ?= new FellRace.Collections.Clubs
+    @clubs.comparator = (c) -> -c.get("entry_count")
+    @setClubEntryCounts()
+    @clubs
+
+  setClubEntryCounts: =>
+    @clubs.reset []
+    @entries.each (entry) =>
+      club = @clubs.findOrAddBy name: entry.get("club_name")
+      club.set entry_count: club.get("entry_count") + 1
+    @clubs.sort()
 
   buildPerformances: =>
     @performances = new FellRace.Collections.Performances @get("performances"), instance: @
@@ -90,6 +106,9 @@ class FellRace.Models.Instance extends FellRace.Model
     # return "Please choose a file" unless attrs.file? or attrs.url?
     # return "Please give a label" if !attrs.name or !attrs.name.length or attrs.name == ""
     undefined
+
+  calculateClubTotals: =>
+    @entries
 
   formdata: () =>
     formdata = new FormData()

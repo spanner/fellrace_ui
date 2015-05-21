@@ -10,6 +10,13 @@ class FellRace.Collections.Clubs extends Backbone.Collection
       @add(opts)
       return @get(opts.id)
 
+  findOrAddBy: (opts) =>
+    if model = @findWhere(opts)
+      return model
+    else
+      @add(opts)
+      return @findWhere(opts)
+
   ## Selection
   # The location of the highlight bar in the suggester interface is controlled by 
   # the assignment of a 'highlighted' property to one of the suggestions.

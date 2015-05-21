@@ -1029,8 +1029,8 @@ section#extra
         padding-bottom: 20px
         overflow: hidden
       section
-        padding-bottom: 20px
-        padding-top: 20px
+        padding-bottom: 10px
+        padding-top: 10px
         // clear: both
         +transition('height', 0.5s, ease-out)
         .heading
@@ -1039,16 +1039,18 @@ section#extra
           font-size: 1.5em
         p
           margin: 0
+          label.heading
+            cursor: pointer
         &.basics
           border-top: none
       span.unavailable
         color: $red
       // .eod
       //   margin-top: 24px
-      .eod, .online, .postal
-        min-width: 240px
-        max-width: 100%
-        float: left
+      // .eod, .online, .postal
+      //   min-width: 240px
+      //   max-width: 100%
+      //   float: left
       .entries
         clear: left
       .eod_details
@@ -1076,16 +1078,19 @@ section#extra
         input[type="file"]
           display: none
 
-      .entries
+      section.entries
+        h2
+          label
+            vertical-align: middle
+        span.count
+          span
+            font-weight: bold
+          &:not(last-child)
+            margin-right: 15px
+        .by_club
+          margin-top: 20px
         table
           +clear
-          tr
-            &.cancelled
-              background: rgba(255,10,20,0.2)
-            a.reinstate
-              +microbutton($green)
-            a.cancel
-              +microbutton($red)
 
     .results
       .results_preview
@@ -1287,10 +1292,14 @@ a.file_name
 
 .microbutton
   +microbutton($pale)
-  &.go
+  &.go, &.reinstate
     +microbutton($green)
   &.remove
     +microbutton($red)
+  &.upload
+    +microbutton($rubine)
+
+    
 
 .button
   +reverse_button
