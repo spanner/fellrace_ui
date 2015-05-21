@@ -123,6 +123,10 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       collection: @model.clubEntryCounts()
       el: @$el.find("table.club_entries tbody")
 
+    category_breakdown = new FellRace.Views.CategoryBreakdown
+      collection: @model.categoryEntryCounts()
+      el: @$el.find("table.category_breakdown tbody")
+
   delete: (e) =>
     e.preventDefault() if e
     @model.destroy()
@@ -233,6 +237,23 @@ class FellRace.Views.ClubSize extends Backbone.Marionette.ItemView
 
 class FellRace.Views.ClubSizes extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.ClubSize
+
+  initialize: ->
+    @collection.on "sort", @render
+
+class FellRace.Views.CategoryEntrySize extends Backbone.Marionette.ItemView
+  template: "instances/category_entry_size"
+  tagName: "tr"
+
+  bindings:
+    "span.name": "name"
+    "span.size": "entry_count"
+
+  onRender: =>
+    @stickit()
+
+class FellRace.Views.CategoryBreakdown extends Backbone.Marionette.CollectionView
+  itemView: FellRace.Views.CategoryEntrySize
 
   initialize: ->
     @collection.on "sort", @render

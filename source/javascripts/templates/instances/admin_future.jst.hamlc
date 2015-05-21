@@ -102,3 +102,8 @@
     %h3 Clubs
     %table.club_entries
       %tbody
+
+  .by_cat
+    %h3 Categories
+    %table.category_breakdown
+      %tbody
