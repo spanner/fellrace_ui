@@ -161,3 +161,4 @@ class FellRace.Models.Instance extends FellRace.Model
   inPast: =>
     if date = @getDate()
       date < Date.now()
+

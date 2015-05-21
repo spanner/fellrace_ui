@@ -15,3 +15,8 @@ class FellRace.Models.Entry extends FellRace.Model
         @collection.trigger "update_counts"
       @on "change:cancelled", (model,val) =>
         @collection.trigger "model:change:cancelled", model, val
+
+  name: =>
+    name = @get("forename")
+    name += " #{@get("middlename")}" if @get("middlename")
+    "#{name} #{@get("surname")}"

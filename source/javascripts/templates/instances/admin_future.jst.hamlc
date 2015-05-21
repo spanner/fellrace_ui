@@ -70,6 +70,12 @@
   %h2
     Entries
     %span.entries_import
+    %span
+      %a.microbutton.export_autodownload Download "AutoDownload" file
+    / %span
+    /   %a.microbutton.export_multisport Download "MultiSport" file
+    / %span
+    /   %a.microbutton.export_all Download all data
 
   %p.counts
     %span.count

@@ -8,6 +8,9 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
   events:
     'click a.delete': "delete"
     "change input#entries_file": 'getPickedFile'
+    'click a.export_autodownload': 'exportAutoDownload'
+    'click a.export_multisport': 'exportMultiSport'
+    'click a.export_all': 'exportAllData'
 
   bindings:
     ".race_name": "race_name"
@@ -159,6 +162,63 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   onClose: =>
     $(".pika-single").remove()
+
+  exportAutoDownload: =>
+    csv = Papa.unparse @model.entries.map (e) ->
+      {
+        RaceNumber: ""
+        CardNumbers: ""
+        MembershipNumbers: ""
+        Name: "#{e.name()}"
+        AgeClass: "#{e.get("category")}"
+        Club: "#{e.get("club_name")}"
+        Country: ""
+        CourseClass: ""
+        StartTime: ""
+        StartTimePreference: ""
+        EnvelopeNumber: ""
+        NonCompetitive: ""
+        Seeded: ""
+        NotUsed1: ""
+        Handicap: ""
+        RegistrationNotes: ""
+        SiEntriesIDs: ""
+        Eligibility: ""
+      }
+    link = document.createElement("a")
+    link.setAttribute("href", encodeURI("data:text/csv;charset=utf-8,#{csv}"))
+    link.setAttribute("download", "#{@model.get("race_slug")}-#{@model.get("name")}-entries-autodownload.csv")
+    link.click()
+
+  exportMultiSport: =>
+    
+
+  exportAllData: =>
+    csv = Papa.unparse @model.entries.map (e) ->
+      {
+        forename: e.get("forename")
+        middlename: e.get("middlename")
+        surname: e.get("surname")
+        club: e.get("club_name")
+        cat: e.get("category")
+        gender: e.get("gender")
+        dob: e.get("dob")
+        emergency_contact: e.get("emergency_contact_name")
+        emergency_contact_phone: e.get("emergency_contact_phone")
+        address_line_1: e.get("postal_address_line_1")
+        address_line_2: e.get("postal_address_line_2")
+        town: e.get("postal_town")
+        county: e.get("postal_county")
+        postcode: e.get("postcode")
+        country: e.get("postal_country")
+        phone: e.get("phone")
+        mobile: e.get("mobile")
+        email: e.get("email")
+      }
+    link = document.createElement("a")
+    link.setAttribute("href", encodeURI("data:text/csv;charset=utf-8,#{csv}"))
+    link.setAttribute("download", "#{@model.get("race_slug")}-#{@model.get("name")}-entries-all.csv")
+    link.click()
 
 class FellRace.Views.ClubSize extends Backbone.Marionette.ItemView
   template: "instances/club_size"
