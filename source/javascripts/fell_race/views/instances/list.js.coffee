@@ -47,6 +47,9 @@ class FellRace.Views.PastListedInstance extends Backbone.Marionette.ItemView
   className: "instance"
 
   bindings:
+    ":el":
+      observe: "has_results"
+      visible: true
     "a.name":
       observe: "name"
       attributes: [

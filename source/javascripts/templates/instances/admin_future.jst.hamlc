@@ -19,7 +19,8 @@
     Entry limit:
     %span.entry_limit.editable{data: {placeholder: "e.g. 500"}}
 
-  %p.eod
+%section.eod
+  %p
     %input#eod{type: "checkbox"}
     %label.heading{for: "eod"} Entry on the day
 

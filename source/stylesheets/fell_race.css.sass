@@ -1010,6 +1010,9 @@ section#extra
           color: $green
         &.notready
           color: $red
+    h2
+      a.edit
+        +microbutton($green)
     &.future
       .datepicker
         display: block
@@ -1028,7 +1031,7 @@ section#extra
       section
         padding-bottom: 20px
         padding-top: 20px
-        clear: both
+        // clear: both
         +transition('height', 0.5s, ease-out)
         .heading
           +light
@@ -1040,8 +1043,14 @@ section#extra
           border-top: none
       span.unavailable
         color: $red
-      .eod
-        margin-top: 24px
+      // .eod
+      //   margin-top: 24px
+      .eod, .online, .postal
+        min-width: 240px
+        max-width: 100%
+        float: left
+      .entries
+        clear: left
       .eod_details
         padding: 0 0 0 24px
       .postal_details, .online_details

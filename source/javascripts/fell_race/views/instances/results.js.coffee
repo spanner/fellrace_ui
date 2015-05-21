@@ -34,6 +34,8 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
       ]
 
     "table#results_table":
+      observe: "has_results"
+      visible: true
       attributes: [
         observe: "show_splits"
         name: "class"

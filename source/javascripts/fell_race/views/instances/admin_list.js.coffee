@@ -59,12 +59,12 @@ class FellRace.Views.AdminPastListedInstance extends FellRace.Views.AdminListedI
         name: "href"
         onGet: "url"
       ]
-    "span.total": 
+    "span.total":
       observe: "performances_count"
       onGet: "summarise"
 
   summarise: (value, options) =>
-    if !value?
+    if !value? or value is 0
       ""
     else
       "#{value} runners"

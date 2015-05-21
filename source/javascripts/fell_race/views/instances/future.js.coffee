@@ -24,6 +24,9 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
       ]
 
     "a.edit":
+      observe: "permissions"
+      onGet: ({can_edit:can_edit}={}) -> can_edit
+      visible: true
       attributes: [
         observe: ["race_slug","name"]
         name: "href"

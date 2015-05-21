@@ -3,6 +3,7 @@
 %h2
   %a.race_name
   %span.instance_name
+  %a.edit edit
 
 .basic_details
   %span.race_date.date
