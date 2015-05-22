@@ -10,4 +10,5 @@
 %td
   %span.paid_or_accepted
 %td
-  %a.microbutton.reinstate reinstate
+  %a.reinstate
+    reinstate

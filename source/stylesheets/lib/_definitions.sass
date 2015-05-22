@@ -41,6 +41,12 @@ $active: $dark
 $input: $blue
 $error: #cc3333
 
+=clearfix
+  &:after
+    content: ""
+    display: table
+    clear: both
+
 =big
   font-size: 1.4em
 
@@ -182,6 +188,13 @@ $error: #cc3333
       text-decoration: none
       background-color: transparent
 
+=just_the_icon
+  width: 16px
+  height: 16px
+  overflow: hidden
+  white-space: nowrap
+  +opacity(0.4)
+
 =icon_link($url, $offset: 0, $hover_offset: -48px)
   display: inline-block
   text-indent: 18px
@@ -196,20 +209,14 @@ $error: #cc3333
   &:hover
     background-position: 0 $offset + $hover_offset
   &.minimal
-    width: 16px
-    height: 16px
-    overflow: hidden
-    white-space: nowrap
-    +opacity(0.4)
-    &:hover
-      overflow: visible
-      +opacity(1)
+    +just_the_icon
   &.big
     text-indent: 26px
     line-height: 32px
     min-height: 26px
     &:hover
       background-position: 0 -48px
+
 
 =column($width: 300px, $margin: 20px)
   display: inline-block

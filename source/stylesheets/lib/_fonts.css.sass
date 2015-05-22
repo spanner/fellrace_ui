@@ -1,54 +1,22 @@
-// @import url("http://fast.fonts.net/t/1.css?apiType=css&projectid=65d04899_693f_4829_bb6a_1b4e1e0a7d5b")
+@import url(http://fonts.googleapis.com/css?family=Merriweather:300italic|Open+Sans:300italic,700italic,700,300)
 
-@font-face
-  font-family: "NeueHaas"
-  src: url(font-path("d24ae558_ac0f_4a43_96da_dd49b68947f5.eot") + "?#iefix")
-  src: url(font-path("d24ae558_ac0f_4a43_96da_dd49b68947f5.eot") + "?#iefix") format("eot"), url(font-path("bb4a10bb_155d_4c1a_a813_c65e10fac36c.woff")) format("woff"), url(font-path("53812a68_b352_4951_b19c_fe964db7ffe2.ttf")) format("truetype"), url(font-path("389e288e_637b_44b2_9b5a_4ecec3ae8e2c.svg#389e288e_637b_44b2_9b5a_4ecec3ae8e2c")) format("svg")
-  font-style: normal
-  font-weight: normal
-
-@font-face
-  font-family: "NeueHaas"
-  src: url(font-path("baa1ea73_44ac_4bb5_a6af_b7fc486d335f.eot") + "?#iefix")
-  src: url(font-path("baa1ea73_44ac_4bb5_a6af_b7fc486d335f.eot") + "?#iefix") format("eot"), url(font-path("ff571a3a_fb16_42b1_a691_23d8955aa35e.woff")) format("woff"), url(font-path("4e756bdf_4269_4158_aad4_70a09c5eed5c.ttf")) format("truetype"), url(font-path("91554ebe_051b_4fa7_bf6e_ac7ed5d0d107.svg#91554ebe_051b_4fa7_bf6e_ac7ed5d0d107")) format("svg")
-  font-style: italic
-  font-weight: normal
-
-@font-face
-  font-family: "NeueHaas"
-  src: url(font-path("8d290bc2_1f22_40ea_be12_7000a5406aff.eot") + "?#iefix")
-  src: url(font-path("8d290bc2_1f22_40ea_be12_7000a5406aff.eot") + "?#iefix") format("eot"), url(font-path("60fa2ce6_c35e_4203_9bbf_25dd128daec5.woff")) format("woff"), url(font-path("dda121ff_e230_440f_83fb_40aefbd6e09a.ttf")) format("truetype"), url(font-path("c98782d3_8599_4314_b717_118a629a3aa4.svg#c98782d3_8599_4314_b717_118a629a3aa4")) format("svg")
-  font-style: normal
-  font-weight: bold
-
-// This is 25 display thin
-@font-face
-  font-family: "NeueHaasThin"
-  src: url(font-path("45070789_5c37_49df_beb0_ab1e3133920e.eot") + "?#iefix")
-  src: url(font-path("45070789_5c37_49df_beb0_ab1e3133920e.eot") + "?#iefix") format("eot"), url(font-path("9683323b_2589_4b72_9201_151e5727d797.woff")) format("woff"), url(font-path("c10a1505_b3d6_46b1_ba11_65d5d5c72150.ttf")) format("truetype"), url(font-path("1af92239_0d66_449c_a312_7ce302b9117d.svg#1af92239_0d66_449c_a312_7ce302b9117d")) format("svg")
-  font-style: normal
-  font-weight: normal
-
-// This is 35 display light
-@font-face
-  font-family: "NeueHaasLight"
-  src: url(font-path("2459b772_216e_4520_97f4_ce5cb27cd66d.eot") + "?#iefix")
-  src: url(font-path("2459b772_216e_4520_97f4_ce5cb27cd66d.eot") + "?#iefix") format("eot"), url(font-path("2cb388a7_9311_4869_8f13_a267ec0df0cb.woff")) format("woff"), url(font-path("373e53df_6f63_436a_a189_25fb3a3e0718.ttf")) format("truetype"), url(font-path("4ea4edba_9d1d_4b94_9ddd_ca9bc5cf9ebe.svg#4ea4edba_9d1d_4b94_9ddd_ca9bc5cf9ebe")) format("svg")
-  font-style: normal
-  font-weight: normal
-
-
-  =heading
-  font-family: "NeueHaas", "HelveticaNeue", "Helvetica Neue", "Helvetica", sans-serif
+=heading
+  font-family: 'Open Sans', sans-serif
 
 =book
-  font-family: "NeueHaas", "HelveticaNeue", "Helvetica Neue", "Helvetica", sans-serif
+  font-family: 'Open Sans', sans-serif
 
 =light
-  font-family: "NeueHaasLight", "HelveticaNeue", "Helvetica Neue", "Helvetica", sans-serif
-  font-weight: normal
+  font-family: 'Open Sans', sans-serif
+  font-weight: lighter
   
-=thin
-  font-family: "NeueHaasThin", "HelveticaNeue", "Helvetica Neue", "Helvetica", sans-serif
-  font-weight: normal
-  
+=fancy
+  font-family: 'Merriweather', serif
+  font-style: italic
+  font-weight: lighter
+
+=big_fancy
+  +fancy
+  font-size: 2.4rem
+  line-height: 1
+  letter-spacing: -0.05em

@@ -1,7 +1,7 @@
 %a.close
 
 
-%section.basics
+.header
   %h2
     %a.race_name
     %span.instance_name
@@ -10,95 +10,90 @@
     %p
       Race date:
       %span.calendar
-      %span.race_date
+      %span.race_date.date
       at
       %span.clock
       %span.time.editable{data: {attributes: 'time',placeholder: "hh:mm"}}
+      %br
+      %input#limited_entry{type: "checkbox"}
+        Entry limit:
+      %span.entry_limit.editable{data: {placeholder: "e.g. 500"}}
 
-  %p.limit
-    Entry limit:
-    %span.entry_limit.editable{data: {placeholder: "e.g. 500"}}
+.dashboard
+  .row
+    .block
+      %span.total_count.total.centered
+      %canvas.entries_chart
 
-%section.eod
-  %p
-    %input#eod{type: "checkbox"}
-    %label.heading{for: "eod"} Entry on the day
+    .block
+      %canvas.categories_chart
 
-  %p.eod_details
-    Fee on the day:
-    %span.eod_fee.currency.editable{data: {placeholder: "0.00"}}
-  
-%section.online
-  %p
-    %input#online_entry{type: "checkbox",disabled:true}
-    %label.heading{for: "online_entry"} Online entry
-    %a.note{href:"/faq/online_entries"}
-      How it works
+  .row
+    .block.category_picker.wide
 
-  .online_details
-    %p
-      Available from:
-      %span.online_entry_opening.date
-      to:
-      %span.online_entry_closing.date
-    %p
-      Online entry fee:
-      %span.online_entry_fee.currency.editable{data: {placeholder: "0.00"}}
-      %span.note.fee_details
-        Transaction charge
-        %span.admin_charge.currency
+  .row
+    .block.narrow.online.optional
+      %h4
+        %input#online_entry{type: "checkbox",disabled:true}
+        %label{for: "online_entry"} Online entry
 
-%section.postal
-  %p
-    %input#postal_entry{type: "checkbox"}
-    %label.heading{for: "postal_entry"} Postal entry
+      .online_details
+        %p
+          %span.online_entry_opening.date
+          to
+          %br
+          %span.online_entry_closing.date
+        %p
+          Online fee:
+          %span.online_entry_fee.currency.editable{data: {placeholder: "0.00"}}
+          %span.note.fee_details
+            \-
+            %span.admin_charge.currency
+        %p
+          Total
 
-  .postal_details
-    %p
-      Available from:
-      %span.date.postal_entry_opening
-      to:
-      %span.postal_entry_closing.date
+    .block.narrow.postal.optional
+      %h4
+        %input#postal_entry{type: "checkbox"}
+        %label{for: "postal_entry"} Postal entry
 
-    %p.fee
-      Postal entry fee:
-      %span.postal_entry_fee.currency.editable{data: {placeholder: "0.00"}}
+      .postal_details
+        %p
+          %span.date.postal_entry_opening
+          to
+          %br
+          %span.postal_entry_closing.date
 
-    %p.entry_form
+        %p.fee
+          Postal fee:
+          %span.postal_entry_fee.currency.editable{data: {placeholder: "0.00"}}
 
-%section.entries
+        %p.entry_form
+
+    .block.narrow.eod.optional
+      %h4
+        %input#eod{type: "checkbox"}
+        %label{for: "eod"} Entry on the day
+
+      %p.eod_details
+        Entry fee:
+        %span.eod_fee.currency.editable{data: {placeholder: "0.00"}}
+
+.entries
   %h2
     Entries
     %span.entries_import
     %span
-      %a.microbutton.export_autodownload Download "AutoDownload" file
+      %a.csv.autodownload Download "AutoDownload" file
     / %span
     /   %a.microbutton.export_multisport Download "MultiSport" file
     / %span
     /   %a.microbutton.export_all Download all data
 
-  %p.counts
-    %span.count
-      Total:
-      %span.total_count
-    %span.count
-      Online:
-      %span.online_count
-    %span.count
-      Postal:
-      %span.postal_count
-    %span.count
-      Cancelled:
-      %span.cancelled_count
 
   .all_entries
     %table.entries
 
-    %h3 Cancelled
+    %h3 Withdrawn entries
 
     %table.cancelled_entries
-
-  .by_club
-    %h3 Clubs
-    %table.club_entries
-      %tbody

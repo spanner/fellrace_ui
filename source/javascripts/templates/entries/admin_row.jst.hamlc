@@ -10,4 +10,5 @@
 %td
   %span.paid_or_accepted
 %td
-  %a.microbutton.remove cancel
+  %a.withdraw
+    withdraw

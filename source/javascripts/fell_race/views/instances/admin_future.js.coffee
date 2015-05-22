@@ -38,11 +38,11 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       observe: "online_entry"
       visible: true
       visibleFn: "quickSlide"
-    "span.online_entry_opening": 
+    "span.online_entry_opening":
       observe: "online_entry_opening"
       onSet: "dateForStorage"
       onGet: "dateForDisplay"
-    "span.online_entry_closing": 
+    "span.online_entry_closing":
       observe: "online_entry_closing"
       onSet: "dateForStorage"
       onGet: "dateForDisplay"
@@ -58,11 +58,11 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       observe: "postal_entry"
       visible: true
       visibleFn: "quickSlide"
-    "span.postal_entry_opening": 
+    "span.postal_entry_opening":
       observe: "postal_entry_opening"
       onSet: "dateForStorage"
       onGet: "dateForDisplay"
-    "span.postal_entry_closing": 
+    "span.postal_entry_closing":
       observe: "postal_entry_closing"
       onSet: "dateForStorage"
       onGet: "dateForDisplay"
@@ -74,10 +74,10 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     "input.cheque_paid_to": "cheque_paid_to"
     "input.accept_cash": "accept_cash"
 
-    "span.total_count": "total_count"
-    "span.online_count": "online_count"
-    "span.postal_count": "postal_count"
-    "span.cancelled_count": "cancelled_count"
+    ".total_count": "total_count"
+    ".online_count": "online_count"
+    ".postal_count": "postal_count"
+    ".cancelled_count": "cancelled_count"
 
     "a.close":
       attributes: [
@@ -87,6 +87,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       ]
 
   onRender: () =>
+    $.in = @model
     @$el.find('.editable').editable()
     @stickit()
     
@@ -99,6 +100,11 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
         onSelect: () ->
           picker.text this.getMoment().format(@_o.format)
 
+    category_picker = new FellRace.Views.CategoryPicker
+      model: @model
+      el: @$el.find(".category_picker")
+    category_picker.render()
+
     entry_form = new FellRace.Views.AdminPostalEntryForm
       model: @model
       el: @$el.find(".entry_form")
@@ -109,6 +115,23 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       el: @$el.find(".entries_import")
     entries_import.render()
 
+    console.log "shall we render entries?", @model.entries.length
+    if @model.entries.length
+      @renderEntries()
+      @renderCharts()
+    else
+      @model.entries.on "reset add remove", @renderEntries
+      @model.on "change:entry_data", @renderCharts
+
+
+  renderCharts: () =>
+    console.log "renderCharts", @model.entryData()
+    if entries_ctx = @$el.find("canvas.entries_chart").get(0)?.getContext("2d")
+      @_entries_chart = new Chart(entries_ctx).Doughnut(@model.entryData())
+    # if categories_ctx = @$el.find("canvas.categories_chart").get(0)?.getContext("2d")
+    #   @_entries_chart = new Chart(entries_ctx).Bar(@model.categoryData())
+
+  renderEntries: () =>
     entries_table = new FellRace.Views.AdminEntriesTable
       collection: @model.entries
       el: @$el.find("table.entries")
@@ -119,9 +142,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       el: @$el.find("table.cancelled_entries")
     cancelled_entries_table.render()
 
-    clubs_list = new FellRace.Views.ClubSizes
-      collection: @model.clubEntryCounts()
-      el: @$el.find("table.club_entries tbody")
 
   delete: (e) =>
     e.preventDefault() if e

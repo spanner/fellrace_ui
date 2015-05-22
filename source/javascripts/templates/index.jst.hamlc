@@ -27,8 +27,3 @@
     #future_instances
     %h2 Recent
     #past_instances
-
-  %p.warning
-    This week we are rolling out a big site update including redesigned race pages, new editing tools, 
-    quicker navigation and (at last) online entries. Please try not to click on anything.
-  

@@ -1,7 +1,7 @@
 %thead
   %tr
     %th name
-    %th category
+    %th cat
     %th club
-    %th method
+    %th
 %tbody

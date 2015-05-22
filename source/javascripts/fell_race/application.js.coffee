@@ -57,6 +57,8 @@ class FellRace.Application extends Backbone.Marionette.Application
     @past_instances.fetch()
 
     @clubs = new FellRace.Collections.Clubs([])
+    @categories = new FellRace.Collections.Categories([])
+    @categories.fetch()
 
     @mapView = new FellRace.Views.Map()
     @gmapRegion.show @mapView
@@ -149,6 +151,9 @@ class FellRace.Application extends Backbone.Marionette.Application
 
   config: (key) =>
     @_config.get(key)
+
+  getCategories: () =>
+    @categories
 
   ## Overrides
   #
