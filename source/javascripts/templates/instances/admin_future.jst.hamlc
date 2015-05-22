@@ -80,15 +80,16 @@
         %span.eod_fee.currency.editable{data: {placeholder: "0.00"}}
 
 .entries
-  %h2
-    Entries
+  .controls
     %span.entries_import
     %span
-      %a.csv.autodownload Download "AutoDownload" file
+      %a.microbutton.autodownload ▼ AutoDownload
     / %span
     /   %a.microbutton.export_multisport Download "MultiSport" file
     / %span
     /   %a.microbutton.export_all Download all data
+  %h2
+    Entries
 
 
   .all_entries

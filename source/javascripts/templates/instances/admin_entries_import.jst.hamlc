@@ -1,2 +1,2 @@
-%label.microbutton.upload{for: "entries_file"} import
+%label.microbutton.upload{for: "entries_file"} ▲ import
 %input.file#entries_file{type: "file", style:"display:none", accept: "text/csv"}

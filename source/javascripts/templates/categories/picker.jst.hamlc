@@ -1,0 +1,7 @@
+%h4
+  Categories offered
+
+.categories
+  %ul.male.flat
+  %ul.female.flat
+  %ul.junior.flat

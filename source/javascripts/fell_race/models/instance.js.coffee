@@ -86,17 +86,18 @@ class FellRace.Models.Instance extends FellRace.Model
   
   ## Total entries
   #
+  # TODO there are a lot of loops here. Can we loop once and populate all our data packages?
+  #
   setEntryCounts: =>
-    console.log "setEntryCounts", @entries.length
     @set
       total_count: @entries.length
       cancelled_count: @cancelled_entries.length
       online_count: @entries.onlineCount()
       postal_count: @entries.postalCount()
     @setEntryData()
+    @setCategoryData()
 
   setEntryData: =>
-    console.log "setEntryData", @get('postal_count'), @get('online_count'), @get('cancelled_count')
     entry_data = @get('entry_data')
     entry_data.length = 0
     entry_data.push
@@ -114,7 +115,7 @@ class FellRace.Models.Instance extends FellRace.Model
       label: "Available"
       color: "#ffffff"
       highlight: "#f2f0ed"
-    @trigger('change:entry_data')
+    @trigger('change:entry_data') # only nested values have changed so we trigger manually.
     entry_data
 
   entryData: () =>
