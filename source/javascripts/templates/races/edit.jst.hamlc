@@ -5,11 +5,11 @@
     .owner
       %a.cancel exit
       %a.publish publish
-  .social
-    %a.fb facebook
-    %a.twit twitter
-    %a.shr SHR
-    %a.fra FRA
+  / .social
+  /   %a.fb facebook
+  /   %a.twit twitter
+  /   %a.shr SHR
+  /   %a.fra FRA
 
 .race_body
   .summary

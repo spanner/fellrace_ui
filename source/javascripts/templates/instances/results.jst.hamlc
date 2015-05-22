@@ -3,6 +3,7 @@
 %h2
   %a.race_name
   %span.instance_name
+  %a.microbutton.edit edit
   %a.addendum.show_splits 
     show splits
   %a.addendum.hide_splits
@@ -11,5 +12,7 @@
 #results_file
   %p.download
     %a.file_icon
+
+%p.summary
 
 %table#results_table

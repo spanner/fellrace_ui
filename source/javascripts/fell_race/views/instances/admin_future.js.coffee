@@ -28,7 +28,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".eod_details":
       observe: "eod"
       visible: true
-      visibleFn: "quickSlide"
+      # visibleFn: "quickSlide"
     "span.eod_fee":
       observe: "eod_fee"
       onGet: "currency"
@@ -37,8 +37,8 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".online_details":
       observe: "online_entry"
       visible: true
-      visibleFn: "quickSlide"
-    "span.online_entry_opening": 
+      # visibleFn: "quickSlide"
+    "span.online_entry_opening":
       observe: "online_entry_opening"
       onSet: "dateForStorage"
       onGet: "dateForDisplay"
@@ -57,7 +57,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".postal_details":
       observe: "postal_entry"
       visible: true
-      visibleFn: "quickSlide"
+      # visibleFn: "quickSlide"
     "span.postal_entry_opening": 
       observe: "postal_entry_opening"
       onSet: "dateForStorage"
@@ -88,6 +88,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   onRender: () =>
     @$el.find('.editable').editable()
+    $.defer
     @stickit()
     
     @$el.find('span.date').each (i, el) =>
@@ -156,7 +157,11 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
   # dates are displayed in a nicer format than they are stored.
 
   dateForDisplay: (string) =>
-    new moment(string, @storage_date_format).format(@display_date_format)
+    console.log "dateForDisplay", string
+    if string and string isnt ""
+      new moment(string, @storage_date_format).format(@display_date_format)
+    else
+      ""
 
   dateForStorage: (string) =>
     new moment(string, @display_date_format).toDate()
@@ -195,7 +200,13 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     link.click()
 
   exportMultiSport: =>
-    
+    csv = Papa.unparse
+      fields: ["Stno","Chip no","Database Id","Surname","First name","YB","S","Block","nc","Start","Finish","Time","Classifier","Club no.","Cl.name","City","Nat","Cl. no.","Short","Long","Num1","Num2","Num3","Text1","Text2","Text3","Adr. name","Street","Line2","Zip","City","Phone","Fax","EMail","Id/Club","Rented","Start fee","Paid"]
+      data: @model.entries.map (e) => ["","","",e.get("surname"),e.get("forename"),"",e.get("gender"),"",0,"#{@model.get("time")}:00","","",0,"",e.get("club_name"),"","","",e.get("category"),e.get("category"),"","","","","","",e.get("postal_address_line_1"),"",e.get("postal_address_line_2"),e.get("postcode"),e.get("postal_town"),e.get("mobile") || e.get("phone"),"",e.get("email"),"","",e.get("cost"),"X"]
+    link = document.createElement("a")
+    link.setAttribute("href", encodeURI("data:text/csv;charset=utf-8,#{csv}"))
+    link.setAttribute("download", "#{@model.get("race_slug")}-#{@model.get("name")}-entries-multisport.csv")
+    link.click()
 
   exportAllData: =>
     csv = Papa.unparse @model.entries.map (e) ->
