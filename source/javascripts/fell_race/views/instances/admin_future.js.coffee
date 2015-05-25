@@ -88,6 +88,8 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   onRender: () =>
     $.in = @model
+    # Chart.defaults.global.showScale = false
+
     @$el.find('.editable').editable()
     @stickit()
     
@@ -115,21 +117,39 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       el: @$el.find(".entries_import")
     entries_import.render()
 
-    console.log "shall we render entries?", @model.entries.length
-    if @model.entries.length
+    if @model.entries?.length
       @renderEntries()
-      @renderCharts()
-    else
-      @model.entries.on "reset add remove", @renderEntries
-      @model.on "change:entry_data", @renderCharts
+    if @model.entry_data?
+      @renderEntryChart()
+    if @model.cat_data?
+      @renderCatCharts()
+    @model.entries.on "reset add remove", @renderEntries
+    @model.on "change:entry_data", @renderEntryChart
+    @model.on "change:cat_data", @renderCatCharts
+
+  renderEntryChart: (model, data) =>
+    # if entries_ctx = @$el.find("canvas.entries_chart").get(0)?.getContext("2d")
+    #   @_entries_chart = new Chart(entries_ctx).Doughnut(@model.get('entry_data'))
+      @_entry_chart = new Chartist.Pie '.entries_chart.ct-chart', @model.get('entry_data'),
+        donut: true
+        donutWidth: 40
+        startAngle: 0
+        showLabel: true
+        plugins: [
+          Chartist.plugins.tooltip()
+        ]
 
 
-  renderCharts: () =>
-    console.log "renderCharts", @model.entryData()
-    if entries_ctx = @$el.find("canvas.entries_chart").get(0)?.getContext("2d")
-      @_entries_chart = new Chart(entries_ctx).Doughnut(@model.entryData())
-    # if categories_ctx = @$el.find("canvas.categories_chart").get(0)?.getContext("2d")
-    #   @_entries_chart = new Chart(entries_ctx).Bar(@model.categoryData())
+  renderCatCharts: (model, data) =>
+    @_cat_chart = new Chartist.Bar '.categories_chart.ct-chart', @model.get('cat_data'),
+      stackBars: true
+      axisX:
+        labelInterpolationFnc: (value, index) -> null
+      axisX:
+        labelInterpolationFnc: (value, index, series) -> null
+      plugins: [
+        Chartist.plugins.tooltip()
+      ]
 
   renderEntries: () =>
     entries_table = new FellRace.Views.AdminEntriesTable
@@ -141,7 +161,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       collection: @model.cancelled_entries
       el: @$el.find("table.cancelled_entries")
     cancelled_entries_table.render()
-
 
   delete: (e) =>
     e.preventDefault() if e

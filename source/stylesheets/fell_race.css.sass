@@ -1,5 +1,5 @@
-@import lib/jquery.daterangepicker
 @import lib/medium-editor
+@import lib/chartist
 @import lib/pikaday
 @import lib/definitions
 @import lib/notifications
@@ -185,27 +185,28 @@ table
     display: inline-block
     vertical-align: top
     float: left
-    width: 240px
+    width: 160px
+    height: 160px
     margin: 0 20px 20px 0
     padding: 5px
-    &.narrow
-      width: 160px
+    &.double
+      width: 340px
       margin-right: 12px
-      h4
-        input[type="checkbox"]
-          margin-left: -20px
-    &.wide
-      width: 500px
+    &.triple
+      width: 520px
     &:last-child
       margin-right: 0
+    h4
+      input[type="checkbox"]
+        margin-left: -20px
     span.total
       +big_fancy
     span.centered
       display: block
       position: absolute
       top: 50%
-      height: 50px
-      margin-top: -25px
+      height: 40px
+      margin-top: -20px
       left: 50%
       width: 100px
       margin-left: -50px
@@ -214,10 +215,6 @@ table
       margin-top: 0
     p
       margin: 0 0 0.5em 0
-    canvas
-      width: 240px
-      height: 240px
-      
 
 
 table.ranking
@@ -269,16 +266,6 @@ div.performance_chart
   a.waiting
     display: block
     margin: 180px 380px
-
-div.tooltip
-  position: absolute
-  display: none
-  border: 1px solid #fdd
-  padding: 2px
-  background-color: white
-  opacity: 0.90
-  border: 1px solid $pale
-  z-index: 1000
 
 table.splits
   border-collapse: collapse
@@ -1451,6 +1438,71 @@ ul.chooser
     &.active, &:active
       background: $rubine
       color: white
+
+
+// charts
+
+.categories_chart 
+  .ct-bar
+    stroke-width: 28px
+  .ct-series.ct-series-a
+    .ct-bar
+      stroke: $greenish
+      &:hover
+        stroke: $green
+  .ct-series.ct-series-b
+    .ct-bar
+      stroke: $warmish
+      &:hover
+        stroke: $warm
+
+.entries_chart 
+  .ct-series.ct-series-a
+    .ct-slice.ct-donut
+      stroke: $greenish
+      &:hover
+        stroke: $green
+  .ct-series.ct-series-b
+    .ct-slice.ct-donut
+      stroke: $greenish
+      &:hover
+        stroke: $green
+  .ct-series.ct-series-c
+    .ct-slice.ct-donut
+      stroke: white
+  .ct-label
+    display: none
+
+.tooltip
+  position: absolute
+  display: inline-block
+  min-width: 2em
+  padding: .5em
+  background: white
+  color: $dark
+  font-weight: 500
+  text-align: center
+  pointer-events: none
+  z-index: 1000
+  &:after
+    content: ""
+    position: absolute
+    top: 100%
+    left: 50%
+    width: 0
+    height: 0
+    margin-left: -8px
+    border: 8px solid transparent
+    border-top-color: white
+
+
+
+
+
+
+
+
+// not very responsive just yet.
 
 @media screen
   #main_content

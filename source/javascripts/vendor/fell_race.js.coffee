@@ -22,7 +22,6 @@
 #= require vendor/papaparse
 #= require vendor/autofill-event
 #= require vendor/chartist
-#= require vendor/chartist-plugin-tooltip
 
 #= require lib/extensions
 #= require lib/utilities

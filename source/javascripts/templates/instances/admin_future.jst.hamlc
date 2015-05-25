@@ -21,15 +21,13 @@
 
 .dashboard
   .row
-    .block
+    .block.entries_chart.ct-chart
       %span.total_count.total.centered
-      %canvas.entries_chart
 
-    .block
-      %canvas.categories_chart
+    .block.double.categories_chart.ct-chart
 
   .row
-    .block.category_picker.wide
+    .block.category_picker.triple
 
   .row
     .block.narrow.online.optional

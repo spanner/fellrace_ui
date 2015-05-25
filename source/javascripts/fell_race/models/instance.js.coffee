@@ -8,6 +8,11 @@ class FellRace.Models.Instance extends FellRace.Model
     "category_names"
   ]
 
+  defaults: 
+    entry_data: {}
+    club_entry_data: {}
+    cat_data: {}
+
   validation:
     date:
       required: true
@@ -15,9 +20,6 @@ class FellRace.Models.Instance extends FellRace.Model
       required: true
 
   build: =>
-    @set 'entry_data', []
-    @set 'club_entry_data', []
-
     unless @isNew()
       @buildDates()
       if @inFuture()
@@ -89,37 +91,61 @@ class FellRace.Models.Instance extends FellRace.Model
   # TODO there are a lot of loops here. Can we loop once and populate all our data packages?
   #
   setEntryCounts: =>
+    @set cancelled_count: @cancelled_entries.length
+    @set total_count: @entries.length
+    postal_count = 0
+    online_count = 0
+    club_counts = {}
+    cat_counts = {}
+    @entries.each (entry) ->
+      club_counts[entry.get('club_name')] ?= 0
+      club_counts[entry.get('club_name')] += 1
+      cat_counts[entry.get('category')] ?= 0
+      cat_counts[entry.get('category')] += 1
+      if entry.get('paid')
+        online_count += 1
+      else
+        postal_count += 1
     @set
-      total_count: @entries.length
-      cancelled_count: @cancelled_entries.length
-      online_count: @entries.onlineCount()
-      postal_count: @entries.postalCount()
-    @setEntryData()
-    @setCategoryData()
+      online_count: online_count
+      postal_count: postal_count
+    @updateEntryData()
+    @updateCategoryData(cat_counts)
+    @updateClubData(club_counts)
 
-  setEntryData: =>
-    entry_data = @get('entry_data')
-    entry_data.length = 0
-    entry_data.push
-      value: @get('postal_count')
-      label: "Postal"
-      color: "#74b87a"
-      highlight: "#00af68"
-    entry_data.push
-      value: @get('online_count')
-      label: "Online"
-      color: "#9bbfa1"
-      highlight: "#00af68"
-    entry_data.push
-      value: @get('entry_limit') - @get('total_count')
-      label: "Available"
-      color: "#ffffff"
-      highlight: "#f2f0ed"
-    @trigger('change:entry_data') # only nested values have changed so we trigger manually.
-    entry_data
+  updateEntryData: =>
+    @set 'entry_data',
+      labels: ["postal", "online", "available"]
+      series: [
+        @get('postal_count'),
+        @get('online_count'),
+        @get('entry_limit') - @get('total_count')
+      ]
 
-  entryData: () =>
-    @get('entry_data')
+  updateCategoryData: (counts) =>
+    [f_cats, m_cats] = _.partition @get('category_names'), (c) -> c[0] is 'F'
+    # if we have more than one U category then they should be spliced
+    # back in ascending same order. f_matches records the next offset.
+    f_matches = m_matches = 0
+    for c, i in f_cats
+      f_cats.splice(f_matches++, 0, f_cats.splice(i, 1)[0]) if c[1] is 'U'
+    for c, i in m_cats
+      m_cats.splice(m_matches++, 0, m_cats.splice(i, 1)[0]) if c[1] is 'U'
+
+    @set 'cat_data',
+      labels: _.map f_cats, (c) -> c.substr(1) || 'S'
+      series: [
+        _.map f_cats, (c) -> 
+          value: counts[c] ? 0
+          meta: c
+      ,
+        _.map m_cats, (c) -> 
+          value: counts[c] ? 0
+          meta: c
+      ]
+
+  updateClubData: (counts) =>
+    console.log "updateClubData", counts
 
   ## Entries by category
   #
