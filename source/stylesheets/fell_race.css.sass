@@ -1459,16 +1459,14 @@ ul.chooser
   .block.entries_chart 
     .ct-label
       display: none
-    .ct-series.ct-series-a
+    .ct-series.ct-series-a, .ct-series.ct-series-b
       .ct-slice.ct-donut
         stroke: $greenish
+        stroke-width: 40px
+        transition: stroke-width 0.2s ease
         &:hover
           stroke: $green
-    .ct-series.ct-series-b
-      .ct-slice.ct-donut
-        stroke: $greenish
-        &:hover
-          stroke: $green
+          stroke-width: 50px
     .ct-series.ct-series-c
       .ct-slice.ct-donut
         stroke: white

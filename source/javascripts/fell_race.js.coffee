@@ -30,9 +30,11 @@
 #= require lib/sortable
 
 #= require_tree ./templates
+
 #= require ./fell_race/application
 #= require ./fell_race/router
 #= require ./fell_race/config
+
 #= require_tree ./fell_race/models
 #= require_tree ./fell_race/collections
 #= require_tree ./fell_race/views

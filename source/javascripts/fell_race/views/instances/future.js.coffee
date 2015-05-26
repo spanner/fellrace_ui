@@ -3,7 +3,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
   className: "instance future"
 
   bindings:
-    ".entry_count": "total_entries"
+    ".entry_count": "total_count"
     ".race_name":
       observe: "race_name"
       attributes: [
@@ -44,11 +44,11 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
       visible: true
 
     ".full":
-      observe: ["entry_limit","entries_count"]
+      observe: ["entry_limit","total_count"]
       onGet: "full"
       visible: true
     ".not_full":
-      observe: ["entry_limit","entries_count"]
+      observe: ["entry_limit","total_count"]
       onGet: "full"
       visible: "untrue"
     "p.no_eod":
@@ -141,7 +141,6 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
     _.delay @model.setEntryCounts, 2
 
   renderClubChart: (model, data) =>
-    console.log "clubs data", @model.get('club_data')
     @_clubs_chart = new Chartist.Pie '.clubs_chart.ct-chart', @model.get('club_data'),
       donut: true
       donutWidth: 40
