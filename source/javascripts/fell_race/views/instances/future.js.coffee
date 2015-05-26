@@ -133,12 +133,13 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
     # @$el.find('.entry_count').text(@model.entries.size())
     @renderEntries() if @model.entries?.length
 
-    # this old version of marionette seems to leave a render gap.
-    # we add a very brief pause to let the DOM arrive.
     @model.entries.on "reset add remove", @renderEntries
     @model.on "change:club_data", @renderClubChart
     @model.on "change:cat_data", @renderCatCharts
-    _.delay @model.setEntryCounts, 2
+    # this old version of marionette seems to leave a render gap, so we wait for the DOM to arrive.
+    _.defer @model.setEntryCounts
+    # hacky shortcut, this, to bring down any wait spinners we have scattered around. Do it properly!
+    _fellrace.vent.trigger 'loaded'
 
   renderClubChart: (model, data) =>
     @_clubs_chart = new Chartist.Pie '.clubs_chart.ct-chart', @model.get('club_data'),

@@ -22,7 +22,7 @@ class FellRace.Views.RaceHistory extends Backbone.Marionette.ItemView
     "span.since":
       observe: "earliest_year"
       onGet: (year) ->
-        "(since #{year})" if year
+        "since #{year}" if year
 
     "table.history":
       attributes: [
@@ -66,6 +66,8 @@ class FellRace.Views.RaceHistory extends Backbone.Marionette.ItemView
       collection: @model.performances
       el: @table_el
     table.render()
+    # hacky shortcut, this, to bring down any wait spinners we have scattered around. Do it properly!
+    _fellrace.vent.trigger 'loaded'
 
   racePublicationUrl: (slug) =>
     "/races/#{slug}"

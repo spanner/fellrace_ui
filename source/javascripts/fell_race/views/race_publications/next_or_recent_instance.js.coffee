@@ -1,6 +1,11 @@
 class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
   template: "race_publications/next_or_recent_instance"
 
+  events:
+    "click a.history": "linkWorking"
+    "click a.date": "linkWorking"
+    "click a.entries": "linkWorking"
+
   bindings:
     "a.date":
       observe: "date"
@@ -43,7 +48,7 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
     'span.postal_entry_fee':
       observe: 'postal_entry_fee'
       onGet: 'decimalize'
-    'span.eod_fee': 
+    'span.eod_fee':
       observe: 'eod_fee'
       onGet: 'decimalize'
     'span.eod':
@@ -61,6 +66,21 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
         observe: ["race_slug", "name"]
         name: "href"
         onGet: "url"
+      ]
+    'a.entries':
+      observe: "online_entry"
+      visible: true
+      attributes: [
+        observe: ["race_slug", "name"]
+        name: "href"
+        onGet: "url"
+      ]
+    'a.history':
+      attributes: [
+        name: "href"
+        observe: "race_slug"
+        onGet: (slug) ->
+          "/races/#{slug}/history"
       ]
 
   onRender: =>
@@ -102,3 +122,9 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
         "#{_fellrace.apiUrl()}#{url}"
       else
         url
+
+  linkWorking: (e) =>
+    if link = e.currentTarget
+      $(link).addClass('working')
+      _fellrace.vent.once 'loaded', () ->
+        $(link).removeClass('working')

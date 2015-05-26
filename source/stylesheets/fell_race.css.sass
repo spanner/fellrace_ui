@@ -755,6 +755,9 @@ a.race_link
               margin: 0.2em 0
               span.eod, span.no_eod
                 color: $mid
+            p.preparation
+              a
+                display: block
           .next
             margin-left: 5px
 
@@ -1299,6 +1302,16 @@ a.file_name
   &.ppt, &.pptx
     color: #cc440a
 
+a.working
+  color: $pale
+  padding-left: 20px
+  margin-left: -20px
+  pointer-events: none
+  background:
+    image: image-url('spinner.gif')
+    position: 2px 5px
+    repeat: no-repeat
+
 .labels
   color: #FF0066
   font-size: 16px
@@ -1313,8 +1326,6 @@ a.file_name
     +microbutton($red)
   &.upload
     +microbutton($rubine)
-
-    
 
 .button
   +reverse_button
