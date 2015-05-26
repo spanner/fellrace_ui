@@ -3,7 +3,7 @@ at
 %span.time
 
 %p.entries
-  %a.enter_online
+  %a.enter_online.opener
     Enter online:
     %span.online_entry_fee.currency
   %a.enter_postal{target: "_blank"}
@@ -15,11 +15,11 @@ at
     No entry on the day
 
 %p.preparation
-  %a.entries
+  %a.entries.opener
     Entry list
-  %a.history
+  %a.history.opener
     All-time results
 
 %p.results
-  %a.results
+  %a.results.opener
     Results available

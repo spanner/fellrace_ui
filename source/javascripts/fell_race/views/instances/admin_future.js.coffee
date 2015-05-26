@@ -11,6 +11,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     'click a.export_autodownload': 'exportAutoDownload'
     'click a.export_multisport': 'exportMultiSport'
     'click a.export_all': 'exportAllData'
+    "click a.toggle": "toggleMore"
 
   bindings:
     ".race_name": "race_name"
@@ -52,6 +53,16 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     "span.admin_charge":
       observe: "online_entry_fee"
       onGet: "adminCharge"
+
+    ".income":
+      observe: "online_total_income"
+      visible: true
+    ".online_total_income":
+      observe: "online_total_income"
+      onGet: "totalOnlineIncome"
+    ".online_total_fee":
+      observe: "online_total_fee"
+      onGet: "totalAdminCharge"
 
     "input#postal_entry": "postal_entry"
     ".postal_details":
@@ -117,17 +128,15 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
     # if @model.entries?.length
     #   @renderEntries()
-    # if @model.get('entry_data')?
+    # if @model.get('entry_data')
     #   @renderEntryChart()
-    # if @model.get('cat_data')?
+    # if @model.get('cat_data')
     #   @renderCatCharts()
     @model.entries.on "reset add remove", @renderEntries
     @model.on "change:entry_data", @renderEntryChart
     @model.on "change:cat_data", @renderCatCharts
 
   renderEntryChart: (model, data) =>
-    # if entries_ctx = @$el.find("canvas.entries_chart").get(0)?.getContext("2d")
-    #   @_entries_chart = new Chart(entries_ctx).Doughnut(@model.get('entry_data'))
       @_entry_chart = new Chartist.Pie '.entries_chart.ct-chart', @model.get('entry_data'),
         donut: true
         donutWidth: 40
@@ -140,27 +149,27 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
   renderCatCharts: (model, data) =>
     @_cat_chart = new Chartist.Bar '.categories_chart.ct-chart', @model.get('cat_data'),
       stackBars: true
-      showGrid: false
       chartPadding:
         top: 15
         right: 15
         bottom: 5
         left: 10
-      axisX:
+      axisY:
         offset: 0
-        labelInterpolationFnc: (value, index) -> null
+        showGrid: false
+        showLabel: false
       axisX:
-        offset: 0
-        labelInterpolationFnc: (value, index, series) -> null
+        offset: 30
+        showGrid: false
       plugins: [
         Chartist.plugins.tooltip()
       ]
 
   renderEntries: () =>
-    entries_table = new FellRace.Views.AdminEntriesTable
-      collection: @model.entries
+    active_entries_table = new FellRace.Views.AdminEntriesTable
+      collection: @model.active_entries
       el: @$el.find("table.entries")
-    entries_table.render()
+    active_entries_table.render()
 
     cancelled_entries_table = new FellRace.Views.AdminCancelledEntriesTable
       collection: @model.cancelled_entries
@@ -183,6 +192,13 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     if fee > fixed
       charge = (fee * ratio + fixed).toFixed(4)
     @currency (Math.ceil(charge * 100) / 100)
+
+  totalOnlineIncome: (amount) ->
+    @currency(parseFloat(amount) / 100.0)
+
+  totalAdminCharge: (amount) ->
+    fee = @currency(parseFloat(amount) / 100.0)
+    "after deductions totalling £#{fee}"
 
   raceUrl: (slug) ->
     "/admin/races/#{slug}"
@@ -209,6 +225,20 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   onClose: =>
     $(".pika-single").remove()
+
+  toggleMore: (e) ->
+    e.preventDefault() if e
+    clicked = $(e.target)
+    toggled_selector = clicked.data('toggle') ? '.expansion'
+    toggled = @$el.find(toggled_selector)
+    showing = toggled.is(":visible")
+    if showing
+      toggled.slideUp () ->
+        toggled.hide()
+        clicked.removeClass("showing")
+    else
+      toggled.slideDown()
+      clicked.addClass("showing")
 
   exportAutoDownload: =>
     csv = Papa.unparse @model.entries.map (e) ->

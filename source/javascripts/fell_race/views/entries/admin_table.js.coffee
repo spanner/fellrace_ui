@@ -53,7 +53,6 @@ class FellRace.Views.UncancelledAdminEntryRow extends FellRace.Views.AdminEntryR
 
 class FellRace.Views.AdminEntriesTable extends Backbone.Marionette.CompositeView
   itemView: FellRace.Views.UncancelledAdminEntryRow
-  emptyView: FellRace.NoEntryRow
   template: "entries/admin_table"
   tagName: "table"
   itemViewContainer: "tbody"

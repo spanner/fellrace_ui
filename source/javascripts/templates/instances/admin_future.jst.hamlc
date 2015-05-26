@@ -27,55 +27,62 @@
     .block.double.categories_chart.ct-chart
 
   .row
-    .block.category_picker.triple
-
-  .row
-    .block.narrow.online.optional
+    .income
       %h4
-        %input#online_entry{type: "checkbox",disabled:true}
-        %label{for: "online_entry"} Online entry
+        Online income:
+      %p
+        %span.online_total_income.verylarge
+        %span.online_total_fee
 
-      .online_details
+    %h4
+      %a.toggle.more{data: {toggle: ".entry_config"}}
+        Entry configuration
+
+  .entry_config.toggled
+    .row
+      .block.narrow.online.optional
         %p
-          %span.online_entry_opening.date
-          to
-          %br
-          %span.online_entry_closing.date
+          %input#eod{type: "checkbox"}
+          %label{for: "eod"} Entry on the day
+
+        %p.eod_details
+          Entry fee:
+          %span.eod_fee.currency.editable{data: {placeholder: "0.00"}}
+
+      .block.narrow.postal.optional
         %p
-          Online fee:
-          %span.online_entry_fee.currency.editable{data: {placeholder: "0.00"}}
-          %span.note.fee_details
-            \-
-            %span.admin_charge.currency
+          %input#postal_entry{type: "checkbox"}
+          %label{for: "postal_entry"} Postal entry
+
+        .postal_details
+          %p
+            %span.date.postal_entry_opening
+            to
+            %br
+            %span.postal_entry_closing.date
+
+          %p.fee
+            Postal fee:
+            %span.postal_entry_fee.currency.editable{data: {placeholder: "0.00"}}
+
+          %p.entry_form
+
+      .block.narrow.online.optional
         %p
-          Total
+          %input#online_entry{type: "checkbox",disabled:true}
+          %label{for: "online_entry"} Online entry
 
-    .block.narrow.postal.optional
-      %h4
-        %input#postal_entry{type: "checkbox"}
-        %label{for: "postal_entry"} Postal entry
+        .online_details
+          %p
+            %span.online_entry_opening.date
+            to
+            %br
+            %span.online_entry_closing.date
+          %p
+            Online fee:
+            %span.online_entry_fee.currency.editable{data: {placeholder: "0.00"}}
 
-      .postal_details
-        %p
-          %span.date.postal_entry_opening
-          to
-          %br
-          %span.postal_entry_closing.date
-
-        %p.fee
-          Postal fee:
-          %span.postal_entry_fee.currency.editable{data: {placeholder: "0.00"}}
-
-        %p.entry_form
-
-    .block.narrow.eod.optional
-      %h4
-        %input#eod{type: "checkbox"}
-        %label{for: "eod"} Entry on the day
-
-      %p.eod_details
-        Entry fee:
-        %span.eod_fee.currency.editable{data: {placeholder: "0.00"}}
+    .category_picker
 
 .entries
   .controls

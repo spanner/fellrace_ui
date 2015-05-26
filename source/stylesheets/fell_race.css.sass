@@ -111,6 +111,16 @@ a.reinstate, span.reinstate
   +icon_link("entrysprite.png", -288px)
   +just_the_icon
 
+a.opener
+  &:before
+    content: "▸ "
+
+span.splits
+  &:after
+    content: "✁"
+    color: $pale
+
+
 ul.flat
   padding: 0
   margin: 0 0 10px 0
@@ -120,6 +130,22 @@ ul.flat
     vertical-align: top
     float: left
     margin-right: 5px
+
+a.toggle
+  display: inline-block
+  vertical-align: top
+  color: $mid
+  +hover
+  &:before
+    content: "▶ "
+    font-size: 75%
+  &.showing
+    &:before
+      content: "▼ "
+
+.toggled
+  display: none
+
 
 .note
   +quiet
@@ -178,7 +204,7 @@ table
 
 
 .dashboard
-  margin: 32px 0 -24px 0
+  margin: 32px 0 20px 0
   .row
     clear: both
     +clearfix
@@ -188,7 +214,7 @@ table
     vertical-align: top
     float: left
     width: 160px
-    height: 160px
+    min-height: 160px
     margin: 0 20px 20px 0
     padding: 5px
     &.double
@@ -202,9 +228,7 @@ table
       margin-right: 0
     &.categories_chart
       width: 360px
-    h4
-      input[type="checkbox"]
-        margin-left: -20px
+      margin-top: -10px
     span.total
       +fancy
       font-size: 1.6rem
@@ -215,14 +239,18 @@ table
       position: absolute
       top: 50%
       height: 40px
-      margin-top: -16px
+      margin-top: -20px
       left: 50%
       width: 100px
       margin-left: -50px
       text-align: center
     p
       margin: 0 0 0.5em 0
+      input[type="checkbox"]
+        margin-left: -20px
 
+.category_picker
+  margin-bottom: 2em
 
 table.ranking
   border-collapse: collapse
@@ -756,6 +784,7 @@ a.race_link
               span.eod, span.no_eod
                 color: $mid
             p.preparation
+              margin: 0.5em 0
               a
                 display: block
           .next
@@ -1512,6 +1541,23 @@ ul.chooser
         .ct-slice.ct-donut
           stroke: $verypale
 
+  .income
+    h4
+      margin: -3em 0 0 0
+    p
+      margin: 0 0 2em 0
+      line-height: 1
+      span
+        display: inline-block
+        vertical-align: bottom
+      span.online_total_income
+        font-size: 3.5em
+        letter-spacing: -0.05em
+        color: $dark
+        font-weight: bold
+        &:before
+          content: "£"
+
 
 .tooltip
   position: absolute
@@ -1534,11 +1580,6 @@ ul.chooser
     margin-left: -8px
     border: 8px solid transparent
     border-top-color: white
-
-
-
-
-
 
 
 
