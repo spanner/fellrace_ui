@@ -3,12 +3,12 @@ class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemVi
   tagName: "tr"
 
   bindings:
-    "span.pos": "pos"
+    "span.pos": "position"
     "span.time":
       observe: "time"
       onGet: "simplestTime"
     "span.date":
-      observe: "instance_date"
+      observe: "date"
       onGet: "date"
     "span.total_competitors":
       observe: "performances_count"

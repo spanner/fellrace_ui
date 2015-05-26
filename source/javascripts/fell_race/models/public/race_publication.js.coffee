@@ -13,21 +13,35 @@ class FellRace.Models.RacePublication extends Backbone.Model
   build: =>
     @attachments = new FellRace.Collections.Attachments(@get("attachments")||[])
     @records = new FellRace.Collections.Records(@get("records")||[])
-    @future_instances = new FellRace.Collections.PublicFutureInstances(@get("future_instances")||[])
-    @past_instances = new FellRace.Collections.PublicPastInstances(@get("past_instances")||[])
     @links = new FellRace.Collections.Links(@get("links")||[])
     @checkpoints = new FellRace.Collections.PublicCheckpoints(@get("checkpoints")||[], race_publication: this)
     @setUrls()
 
-    _.each ["attachments","checkpoints","records","links","past_instances","future_instances"], (collection) =>
+    @buildInstances()
+
+    _.each ["attachments","checkpoints","records","links"], (collection) =>
       @on "change:#{collection}", (model,data) =>
         @[collection].reset data
+
+  buildInstances: =>
+    @past_instances = new FellRace.Collections.PublicPastInstances [],
+      race_publication: @
+      url: "#{@url()}/instances"
+    @future_instances = new FellRace.Collections.PublicFutureInstances [],
+      race_publication: @
+      url: "#{@url()}/instances"
+
+    @partitionInstances() if @get("instances")
+    @on "change:instances", @partitionInstances
+
+  partitionInstances: =>
+    [past_instances, future_instances] = _.partition(@get("instances"), (e) -> new Date(e.date) < Date.now())
+    @past_instances.reset past_instances
+    @future_instances.reset future_instances
 
   setUrls: =>
     url_stem = @url()
     @attachments.url = "#{url_stem}/attachments"
-    @past_instances.url = "#{url_stem}/instances"
-    @future_instances.url = "#{url_stem}/instances"
 
   select: =>
     unless @selected()

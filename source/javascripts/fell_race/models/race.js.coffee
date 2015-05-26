@@ -11,27 +11,19 @@ class FellRace.Models.Race extends FellRace.Model
     delete json.race["picture"] unless @get("image_changed")?
     json
 
+  isNew: =>
+    !@get("slug")
+
   url: =>
     "#{_fellrace.apiUrl()}/races/#{@get("slug")}"
-
-  initialize: ->
-    super
-    @build()
-    @on "select", @select
-    @on "deselect", @deselect
-    @on "toggle_select", @toggleSelect
-    @elevator = new google.maps.ElevationService()
-    @on "change:encoded_route", @setProfile
 
   build: =>
     @attachments = new FellRace.Collections.Attachments(@get("attachments"), race: @)
     @checkpoints = new FellRace.Collections.Checkpoints(@get("checkpoints"), race: @)
     @records = new FellRace.Collections.Records(@get("records"), race: @)
-    @future_instances = new FellRace.Collections.FutureInstances(@get("future_instances"), race: @)
-    @past_instances = new FellRace.Collections.PastInstances(@get("past_instances"), race: @)
     @links = new FellRace.Collections.Links(@get("links"), race: @)
 
-    _.each ["attachments","checkpoints","records","links","past_instances","future_instances"], (collection) =>
+    _.each ["attachments","checkpoints","records","links"], (collection) =>
       @on "change:#{collection}", (model,data) =>
         @[collection].reset data
 
@@ -41,16 +33,35 @@ class FellRace.Models.Race extends FellRace.Model
     else
       @setUrls()
 
-  isNew: =>
-    !@get("slug")
+    @buildInstances()
+
+    @on "select", @select
+    @on "deselect", @deselect
+    @on "toggle_select", @toggleSelect
+    @elevator = new google.maps.ElevationService()
+    @on "change:encoded_route", @setProfile
+
+  buildInstances: =>
+    @past_instances = new FellRace.Collections.PastInstances [],
+      race: @
+      url: "#{@url()}/instances"
+    @future_instances = new FellRace.Collections.FutureInstances [],
+      race: @
+      url: "#{@url()}/instances"
+
+    @partitionInstances() if @get("instances")
+    @on "change:instances", @partitionInstances
+
+  partitionInstances: =>
+    [past_instances, future_instances] = _.partition(@get("instances"), (e) -> new Date(e.date) < Date.now())
+    @past_instances.reset past_instances
+    @future_instances.reset future_instances
 
   setUrls: =>
     url_stem = @url()
     @attachments.url = "#{url_stem}/attachments"
     @checkpoints.url = "#{url_stem}/checkpoints"
     @records.url = "#{url_stem}/records"
-    @past_instances.url = "#{url_stem}/instances"
-    @future_instances.url = "#{url_stem}/instances"
     @links.url = "#{url_stem}/links"
 
   getColour: =>
@@ -161,7 +172,3 @@ class FellRace.Models.Race extends FellRace.Model
       _.each MapStick.decodePathString(route), (point) =>
         bounds.extend point
       bounds
-
-  # getRequirements: () =>
-  #   req = @get("requirements")
-  #   req if $(req)[0].innerText.trim() isnt ""

@@ -146,7 +146,7 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
       ]
 
     '.past_instances':
-      observe: "past_instances"
+      observe: "instances"
       visible: "hasAny"
 
     '.records':
