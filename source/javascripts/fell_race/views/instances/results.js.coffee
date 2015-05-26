@@ -4,6 +4,10 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
   bindings:
     ".race_name": "race_name"
     ".instance_name": "name"
+    "p.summary":
+      observe: "summary"
+      updateView: true
+      visible: true
     "a.race_name":
       attributes: [
         name: "href"
@@ -17,6 +21,16 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
         observe: ["race_slug","competitor_id"]
         onGet: ([slug,id]=[]) ->
           if id then "/runners/#{id}" else "/races/#{slug}"
+      ]
+
+    "a.edit":
+      observe: "permissions"
+      onGet: ({can_edit:can_edit}={}) -> can_edit
+      visible: true
+      attributes: [
+        observe: ["race_slug","name"]
+        name: "href"
+        onGet: "adminUrl"
       ]
 
     "p.download":
@@ -99,3 +113,6 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
 
   notCSV: (filename) =>
     @fileClass(filename) isnt "csv"
+
+  adminUrl: ([slug,name]) =>
+    "/admin/races/#{slug}/#{name}"

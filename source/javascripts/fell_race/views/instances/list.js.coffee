@@ -48,7 +48,8 @@ class FellRace.Views.PastListedInstance extends Backbone.Marionette.ItemView
 
   bindings:
     ":el":
-      observe: "has_results"
+      observe: ["has_results","summary"]
+      onGet: (vals) -> vals[0] or vals[1]
       visible: true
     "a.name":
       observe: "name"

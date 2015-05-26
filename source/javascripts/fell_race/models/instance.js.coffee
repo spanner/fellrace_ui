@@ -1,7 +1,7 @@
 class FellRace.Models.Instance extends FellRace.Model
   singular_name: 'instance'
   savedAttributes: [
-    "name","date","report","online_entry_opening",
+    "name","date","summary","online_entry_opening",
     "online_entry_closing","online_entry","online_entry_fee","entry_limit",
     "time","pre_entry","postal_entry","postal_entry_fee","postal_entry_opening",
     "postal_entry_closing","postal_entry_address","eod","eod_fee","excluded",
@@ -47,7 +47,6 @@ class FellRace.Models.Instance extends FellRace.Model
       @checkpoints.reset data
 
   buildEntries: =>
-    console.log "buildEntries"
     @entries = new FellRace.Collections.Entries [],
       instance: @
       url: "#{@url()}/entries"
@@ -63,7 +62,6 @@ class FellRace.Models.Instance extends FellRace.Model
     @on "change:entries", @partitionEntries
 
   partitionEntries: =>
-    console.log "partitionEntries"
     [cancelled_entries, entries] = _.partition(@get("entries"), (e) -> e.cancelled)
     @entries.reset entries
     @cancelled_entries.reset cancelled_entries
@@ -89,7 +87,6 @@ class FellRace.Models.Instance extends FellRace.Model
   #
   #
   setEntryCounts: =>
-    console.log "setEntryCounts"
     @set cancelled_count: @cancelled_entries.length
     @set total_count: @entries.length
     postal_count = 0
@@ -144,7 +141,6 @@ class FellRace.Models.Instance extends FellRace.Model
       ]
 
   updateClubData: (counts) =>
-    console.log "updateClubData", counts
     @set 'club_data',
       labels: _.keys(counts)
       series: [
@@ -173,9 +169,6 @@ class FellRace.Models.Instance extends FellRace.Model
     # return "Please choose a file" unless attrs.file? or attrs.url?
     # return "Please give a label" if !attrs.name or !attrs.name.length or attrs.name == ""
     undefined
-
-  calculateClubTotals: =>
-    @entries
 
   formdata: () =>
     formdata = new FormData()

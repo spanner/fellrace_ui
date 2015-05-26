@@ -114,25 +114,14 @@ class FellRace.Models.PublicInstance extends Backbone.Model
       ]
 
   updateClubData: (counts) =>
-    console.log "club data", counts
-
     sorted_clubs = _.sortBy _.keys(counts), (k) -> -counts[k]
-    console.log "sorted_clubs", sorted_clubs
-    
     top_clubs = sorted_clubs.splice(0, 20)
-    console.log "top_clubs", top_clubs
-    
     total_others = sorted_clubs.reduce (t, s) -> 
       t + parseInt(counts[s], 10)
     , 0
-
-    console.log "total_others", total_others
-    
     not_taken = @get('entry_limit') - @get('total_count')
-      
     labels = top_clubs.concat(['Other', 'Available'])
     values = _.map(top_clubs, (k) -> counts[k]).concat([total_others, not_taken])
-
     @set 'club_data',
       labels: labels
       series: values

@@ -173,6 +173,8 @@ table
         background: rgba(0,0,0,0.03)
       &:hover
         background: rgba(0,0,0,0.1)
+      &.female
+        background: rgba(129,129,129,0.25)
 
 
 .dashboard
@@ -935,14 +937,6 @@ a.race_link
         margin: 20px 0 0
         padding: 0 24px 20px 32px
         width: 100%
-      table.entries
-        tr
-          &.cancelled
-            background: rgba(255,10,20,0.2)
-          a.cancel
-            +microbutton($red)
-          span.cancelled
-            color: $red
 
       table.results
         font-size: 0.9em
@@ -987,6 +981,8 @@ section#extra
   z-index: 200
   h2
     margin: 0
+    a, span
+      vertical-align: middle
   a.close
     position: absolute
     top: 20px
@@ -995,8 +991,6 @@ section#extra
   table.clubs
     font-size: 0.8em
     tr
-      &:hover
-        background: $verypale
       .full_name
         font-size: 0.9em
     .merging
@@ -1037,13 +1031,6 @@ section#extra
         padding: 4px 10px
     tbody
       overflow: auto
-      tr
-        &.female
-          background: rgba(129,129,129,0.25)
-        &:hover
-          background: rgba(189,189,189,0.25)
-          // &:hover
-          //   background: rgba(102,0,45,0.25)
       td
         vertical-align: top
         text-align: left
@@ -1320,7 +1307,7 @@ a.file_name
 
 .microbutton
   +microbutton($pale)
-  &.go, &.reinstate
+  &.go, &.reinstate, &.edit
     +microbutton($green)
   &.remove
     +microbutton($red)
