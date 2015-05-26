@@ -34,7 +34,7 @@ class FellRace.Views.HistoryRow extends Backbone.Marionette.ItemView
       ]
 
     "span.time":
-      observe: "time"
+      observe: "elapsed_time"
       onGet: "time"
 
     "span.instance": "instance_name"
