@@ -140,7 +140,7 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
     'a.history':
       attributes: [
         name: "href"
-        observe: "slug"
+        observe: "race_slug"
         onGet: (slug) ->
           "/races/#{slug}/history"
       ]

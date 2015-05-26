@@ -48,7 +48,11 @@ class FellRace.Views.HistoryRow extends Backbone.Marionette.ItemView
   compUrl: (id) =>
     "/runners/#{id}/"
 
-class FellRace.Views.HistoryTable extends Backbone.Marionette.CompositeView
-  template: "performances/history_table"
+
+class FellRace.Views.NoHistory extends Backbone.Marionette.ItemView
+  template: "performances/history_loading"
+  tagName: "tr"
+
+class FellRace.Views.HistoryTable extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.HistoryRow
-  itemViewContainer: "tbody"
+  emptyView: FellRace.Views.NoHistory

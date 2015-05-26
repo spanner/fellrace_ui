@@ -2,21 +2,39 @@
 
 %h2
   %a.race_name
-  Results
-  %span.since
-  %a.addendum.compact show runners
-  %a.addendum.full show performances
-
+  %span
+    all-time results
+  %span.since.addendum
 
 %p
   %span.all_runs
     %span.performances_count
-    performances
+    Showing all performances
+    %a.addendum.compact (show the best time for each runner)
 
   %span.all_runners
     %span.competitors_count
-    runners
-  %span.note
+    Showing personal bests
+    %a.addendum.full (show all performances)
+
+  %p
     Results from alternative (bad weather/winter) courses are excluded from this table.
 
 %table.history
+  %thead
+    %tr
+      %th.pos
+        Pos
+      %th.name
+        Name
+      %th.club
+        Club
+      %th.cat
+        Category
+      %th.race_position
+        Race pos
+      %th.time
+        Time
+      %th.instance
+        Year
+  %tbody.history
