@@ -21,3 +21,20 @@
     Results from alternative (bad weather/winter) courses are excluded from this table.
 
 %table.history
+  %thead
+    %tr
+      %th.pos
+        Pos
+      %th.name
+        Name
+      %th.club
+        Club
+      %th.cat
+        Category
+      %th.race_position
+        Race pos
+      %th.time
+        Time
+      %th.instance
+        Year
+  %tbody.history
