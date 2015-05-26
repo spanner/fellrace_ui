@@ -87,9 +87,6 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       ]
 
   onRender: () =>
-    $.in = @model
-    # Chart.defaults.global.showScale = false
-
     @$el.find('.editable').editable()
     @stickit()
     
@@ -117,12 +114,12 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       el: @$el.find(".entries_import")
     entries_import.render()
 
-    if @model.entries?.length
-      @renderEntries()
-    if @model.entry_data?
-      @renderEntryChart()
-    if @model.cat_data?
-      @renderCatCharts()
+    # if @model.entries?.length
+    #   @renderEntries()
+    # if @model.get('entry_data')?
+    #   @renderEntryChart()
+    # if @model.get('cat_data')?
+    #   @renderCatCharts()
     @model.entries.on "reset add remove", @renderEntries
     @model.on "change:entry_data", @renderEntryChart
     @model.on "change:cat_data", @renderCatCharts
@@ -139,13 +136,20 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
           Chartist.plugins.tooltip()
         ]
 
-
   renderCatCharts: (model, data) =>
     @_cat_chart = new Chartist.Bar '.categories_chart.ct-chart', @model.get('cat_data'),
       stackBars: true
+      showGrid: false
+      chartPadding:
+        top: 15
+        right: 15
+        bottom: 5
+        left: 10
       axisX:
+        offset: 0
         labelInterpolationFnc: (value, index) -> null
       axisX:
+        offset: 0
         labelInterpolationFnc: (value, index, series) -> null
       plugins: [
         Chartist.plugins.tooltip()
@@ -259,19 +263,3 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     link.setAttribute("download", "#{@model.get("race_slug")}-#{@model.get("name")}-entries-all.csv")
     link.click()
 
-class FellRace.Views.ClubSize extends Backbone.Marionette.ItemView
-  template: "instances/club_size"
-  tagName: "tr"
-
-  bindings:
-    "span.name": "name"
-    "span.size": "entry_count"
-
-  onRender: =>
-    @stickit()
-
-class FellRace.Views.ClubSizes extends Backbone.Marionette.CollectionView
-  itemView: FellRace.Views.ClubSize
-
-  initialize: ->
-    @collection.on "sort", @render

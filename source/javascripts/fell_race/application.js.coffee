@@ -64,6 +64,7 @@ class FellRace.Application extends Backbone.Marionette.Application
     @gmapRegion.show @mapView
     @user_controlsRegion.show new FellRace.Views.UserControls()
     @listenToToggle()
+
     @noticeRegion.show new Notifier model: @vent, wait: 4000
     @session.load()
     @router = new FellRace.BaseRouter

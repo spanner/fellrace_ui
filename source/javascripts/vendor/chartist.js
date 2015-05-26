@@ -278,7 +278,7 @@ var Chartist = {
 
     width = width || '100%';
     height = height || '100%';
-
+    
     // Check if there is a previous SVG element in the container that contains the Chartist XML namespace and remove it
     // Since the DOM API does not support namespaces we need to manually search the returned list http://www.w3.org/TR/selectors-api/
     Array.prototype.slice.call(container.querySelectorAll('svg')).filter(function filterChartistSvgObjects(svg) {
@@ -3652,11 +3652,11 @@ var Chartist = {
       }, Chartist.xmlNs.uri);
 
       // If this is a donut, we add the stroke-width as style attribute
-      if(options.donut) {
-        pathElement.attr({
-          'style': 'stroke-width: ' + (+options.donutWidth) + 'px'
-        });
-      }
+      // if(options.donut) {
+      //   pathElement.attr({
+      //     'style': 'stroke-width: ' + (+options.donutWidth) + 'px'
+      //   });
+      // }
 
       // Fire off draw event
       this.eventEmitter.emit('draw', {

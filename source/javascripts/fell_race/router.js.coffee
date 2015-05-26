@@ -63,6 +63,7 @@ class FellRace.BaseRouter extends Backbone.Router
     else
       _fellrace.toPublicOrHome()
 
+
 class FellRace.PublicRouter extends FellRace.Router
   routes:
     "(/)": "index"
@@ -155,6 +156,7 @@ class FellRace.PublicRouter extends FellRace.Router
     _fellrace.indexMapView()
     _fellrace.mainRegion.show view
     _fellrace.closeRight()
+
 
 class FellRace.AdminRouter extends FellRace.Router
   routes:

@@ -47,6 +47,7 @@ class FellRace.Models.Instance extends FellRace.Model
       @checkpoints.reset data
 
   buildEntries: =>
+    console.log "buildEntries"
     @entries = new FellRace.Collections.Entries [],
       instance: @
       url: "#{@url()}/entries"
@@ -62,6 +63,7 @@ class FellRace.Models.Instance extends FellRace.Model
     @on "change:entries", @partitionEntries
 
   partitionEntries: =>
+    console.log "partitionEntries"
     [cancelled_entries, entries] = _.partition(@get("entries"), (e) -> e.cancelled)
     @entries.reset entries
     @cancelled_entries.reset cancelled_entries
@@ -85,12 +87,9 @@ class FellRace.Models.Instance extends FellRace.Model
   # It is very likely that all this logic will move into the
   # relevant chart views but this is an easy place to work it out.
   #
-  
-  ## Total entries
-  #
-  # TODO there are a lot of loops here. Can we loop once and populate all our data packages?
   #
   setEntryCounts: =>
+    console.log "setEntryCounts"
     @set cancelled_count: @cancelled_entries.length
     @set total_count: @entries.length
     postal_count = 0
@@ -146,39 +145,14 @@ class FellRace.Models.Instance extends FellRace.Model
 
   updateClubData: (counts) =>
     console.log "updateClubData", counts
-
-  ## Entries by category
-  #
-  setCategoryData: =>
-    @_m_cat_counts ?= {}
-    @_f_cat_counts ?= {}
-    @_cat_data ?= []
-    @_cat_data.length = 0
-    for entry in @entries
-      if entry.get('gender') is 'm'
-        @_m_cat_counts[entry.get('category_name')] ?= 0
-        @_m_cat_counts[entry.get('category_name')] += 1
-      else
-        @_f_cat_counts[entry.get('category_name')] ?= 0
-        @_f_cat_counts[entry.get('category_name')] += 1
-    # for cat in @get('category_names')
-    #...
+    @set 'club_data',
+      labels: _.keys(counts)
+      series: [
+        _.values(counts)
+      ]
 
 
 
-  clubEntryCounts: =>
-    @_club_entry_counts = true
-    @clubs ?= new FellRace.Collections.Clubs
-    @clubs.comparator = (c) -> -c.get("entry_count")
-    @setClubEntryCounts()
-    @clubs
-
-  setClubEntryCounts: =>
-    @clubs.reset []
-    @entries.each (entry) =>
-      club = @clubs.findOrAddBy name: entry.get("club_name")
-      club.set entry_count: club.get("entry_count") + 1
-    @clubs.sort()
 
   buildPerformances: =>
     @performances = new FellRace.Collections.Performances @get("performances"), instance: @

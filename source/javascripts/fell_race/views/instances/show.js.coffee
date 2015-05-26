@@ -41,6 +41,7 @@ class FellRace.Views.Instance extends Backbone.Marionette.ItemView
       onGet: "summarise"
 
   onRender: () =>
+    console.log "*** show render"
     @stickit()
     if @model.inFuture() and @model.get("online_entry")
       entries_table = new FellRace.Views.EntriesTable

@@ -13,40 +13,44 @@
   Entries:
   %span.entry_count
   %span.limit
-    of allowed
+    of the allowed
     %span.entry_limit
 
-/ %p.full
-/   %span.warning This race is full! No more entries will be accepted.
-/
-/ .not_full
-/   %p.no_eod
-/     %span.warning No entry on the day
-/
-/   %p.eod
-/     %span.heading Entry on the day:
-/     %span.eod_fee.currency
-/
-/   %p.postal
-/     %span.heading Postal entry:
-/     %span.postal_entry_fee.currency
-/     %span
-/       from
-/       %span.postal_entry_opening.date
-/       to
-/       %span.postal_entry_closing.date
-/     %a.entry_form.file_icon.pdf{target:"_blank"} download form
-/
-/   %p.online
-/     %span.heading Online entry:
-/     %span.online_entry_fee.currency
-/     %span
-/       from
-/       %span.online_entry_opening.date
-/       to
-/       %span.online_entry_closing.date
-/     %a.button.enter enter
+.dashboard
+  .row
+    .block.clubs_chart.ct-chart
+      %span.total_count.total.centered
 
-%section.entries
+    .block.double.categories_chart.ct-chart
+
+%p.full
+  %span.warning This race is full! No more entries will be accepted.
+
+.not_full
+  %p.eod
+    %span.heading Entry on the day:
+    %span.eod_fee.currency
+
+  %p.postal
+    %span.heading Postal entry:
+    %span.postal_entry_fee.currency
+    %span
+      from
+      %span.postal_entry_opening.date
+      to
+      %span.postal_entry_closing.date
+    %a.entry_form.file_icon.pdf{target:"_blank"} download form
+
+  %p.online
+    %span.heading Online entry:
+    %span.online_entry_fee.currency
+    %span
+      from
+      %span.online_entry_opening.date
+      to
+      %span.online_entry_closing.date
+    %a.button.enter enter
+
+.entries
   %h3 Entries
   %table.entries

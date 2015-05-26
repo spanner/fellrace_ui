@@ -58,10 +58,10 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
       observe: "eod"
       visible: true
     "p.online":
-      observe: "online_entry"
+      observe: "online_entry_active"
       visible: true
     "p.postal":
-      observe: "postal_entry"
+      observe: "postal_entry_active"
       visible: true
 
     #eod details
@@ -75,7 +75,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
       onGet: "currency"
 
     "a.enter":
-      observe: ['online_entry_active',"entered"]
+      observe: ['online_entry_active', "entered"]
       onGet: (vals) -> vals[0] and not vals[1]
       visible: true
       attributes: [
@@ -84,17 +84,17 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
         onGet: "entryUrl"
       ]
 
-    "span.online_entry_opening": 
+    "span.online_entry_opening":
       observe: "online_entry_opening"
       onGet: "date"
-    "span.online_entry_closing": 
+    "span.online_entry_closing":
       observe: "online_entry_closing"
       onGet: "date"
 
-    "span.postal_entry_opening": 
+    "span.postal_entry_opening":
       observe: "postal_entry_opening"
       onGet: "date"
-    "span.postal_entry_closing": 
+    "span.postal_entry_closing":
       observe: "postal_entry_closing"
       onGet: "date"
 
@@ -120,20 +120,61 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
         name: "class"
         observe: "entry_form_type"
       ]
-
+    ".total_count": "total_count"
     ".entries":
       observe: "total_entries"
       visible: "some"
 
   onRender: =>
+    $.in = @model
     @stickit()
     if _fellrace.userConfirmed() and @model.entries.findWhere(competitor_id: _fellrace.getCurrentCompetitor().id)
       @model.set entered:true
+    # @$el.find('.entry_count').text(@model.entries.size())
+    @renderEntries() if @model.entries?.length
+
+    # this old version of marionette seems to leave a render gap.
+    # we add a very brief pause to let the DOM arrive.
+    @model.entries.on "reset add remove", @renderEntries
+    @model.on "change:club_data", @renderClubChart
+    @model.on "change:cat_data", @renderCatCharts
+    _.delay @model.setEntryCounts, 2
+
+  renderClubChart: (model, data) =>
+    console.log "clubs data", @model.get('club_data')
+    @_clubs_chart = new Chartist.Pie '.clubs_chart.ct-chart', @model.get('club_data'),
+      donut: true
+      donutWidth: 40
+      startAngle: 0
+      showLabel: true
+      plugins: [
+        Chartist.plugins.tooltip()
+      ]
+
+  renderCatCharts: (model, data) =>
+    @_cat_chart = new Chartist.Bar '.categories_chart.ct-chart', @model.get('cat_data'),
+      stackBars: true
+      chartPadding:
+        top: 15
+        right: 15
+        bottom: 5
+        left: 10
+      axisY:
+        offset: 0
+        showGrid: false
+        showLabel: false
+      axisX:
+        offset: 30
+        showGrid: false
+      plugins: [
+        Chartist.plugins.tooltip()
+      ]
+
+  renderEntries: () =>
     entries_table = new FellRace.Views.EntriesTable
       collection: @model.entries
       el: @$el.find("table.entries")
     entries_table.render()
-    # @$el.find('.entry_count').text(@model.entries.size())
 
   date: (date) =>
     moment(date).format("D MMMM YYYY") if date

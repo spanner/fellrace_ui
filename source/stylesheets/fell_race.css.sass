@@ -176,7 +176,7 @@ table
 
 
 .dashboard
-  margin: 24px 0
+  margin: 32px 0 -24px 0
   .row
     clear: both
     +clearfix
@@ -196,23 +196,28 @@ table
       width: 520px
     &:last-child
       margin-right: 0
+    &.entries_chart
+      margin-right: 0
+    &.categories_chart
+      width: 360px
     h4
       input[type="checkbox"]
         margin-left: -20px
     span.total
-      +big_fancy
+      +fancy
+      font-size: 1.6rem
+      line-height: 1
+      letter-spacing: -0.05em
     span.centered
       display: block
       position: absolute
       top: 50%
       height: 40px
-      margin-top: -20px
+      margin-top: -16px
       left: 50%
       width: 100px
       margin-left: -50px
       text-align: center
-    *:first-child
-      margin-top: 0
     p
       margin: 0 0 0.5em 0
 
@@ -745,6 +750,7 @@ a.race_link
             a.date
               font-weight: bold
             p.entries
+              margin: 0.2em 0
               span.eod, span.no_eod
                 color: $mid
           .next
@@ -1442,36 +1448,60 @@ ul.chooser
 
 // charts
 
-.categories_chart 
-  .ct-bar
-    stroke-width: 28px
-  .ct-series.ct-series-a
+.dashboard 
+  .block.categories_chart
+    height: 190px
+    .ct-label
+      display: inline-block
+      +fancy
+      font-size: 1rem
+      margin: 6px 0
     .ct-bar
-      stroke: $greenish
-      &:hover
-        stroke: $green
-  .ct-series.ct-series-b
-    .ct-bar
-      stroke: $warmish
-      &:hover
-        stroke: $warm
+      stroke-width: 32px
+    .ct-series.ct-series-a
+      .ct-bar
+        stroke: #f4c63d
+        &:hover
+          stroke: lighten(#f4c63d, 10)
+    .ct-series.ct-series-b
+      .ct-bar
+        stroke: #f05b4f
+        &:hover
+          stroke: lighten(#f05b4f, 10)
 
-.entries_chart 
-  .ct-series.ct-series-a
-    .ct-slice.ct-donut
-      stroke: $greenish
-      &:hover
-        stroke: $green
-  .ct-series.ct-series-b
-    .ct-slice.ct-donut
-      stroke: $greenish
-      &:hover
-        stroke: $green
-  .ct-series.ct-series-c
-    .ct-slice.ct-donut
-      stroke: white
-  .ct-label
-    display: none
+  .block.entries_chart 
+    .ct-label
+      display: none
+    .ct-series.ct-series-a
+      .ct-slice.ct-donut
+        stroke: $greenish
+        &:hover
+          stroke: $green
+    .ct-series.ct-series-b
+      .ct-slice.ct-donut
+        stroke: $greenish
+        &:hover
+          stroke: $green
+    .ct-series.ct-series-c
+      .ct-slice.ct-donut
+        stroke: white
+
+  .block.clubs_chart
+    .ct-label
+      display: none
+    .ct-series.ct-series
+      .ct-slice.ct-donut
+        stroke-width: 40px
+        transition: stroke-width 0.2s ease
+        &:hover
+          stroke-width: 50px
+      &:first-child
+        .ct-slice.ct-donut
+          stroke: white
+      &:last-child
+        .ct-slice.ct-donut
+          stroke: $verypale
+
 
 .tooltip
   position: absolute
