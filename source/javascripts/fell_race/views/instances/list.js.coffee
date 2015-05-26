@@ -64,9 +64,12 @@ class FellRace.Views.PastListedInstance extends Backbone.Marionette.ItemView
         onGet: (fetching) ->
           "loading" if fetching
       ]
-    "span.total": 
+    "span.total":
       observe: "performances_count"
       onGet: "summarise"
+    "span.splits":
+      observe: "has_splits"
+      visible: true
 
   onRender: () =>
     @stickit()

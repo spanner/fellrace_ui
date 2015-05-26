@@ -53,26 +53,24 @@ class FellRace.Models.Instance extends FellRace.Model
     @entries.on "add remove reset update_counts", @setEntryCounts
     @entries.on "model:change:cancelled", @moveEntry
 
-    @cancelled_entries = new FellRace.Collections.Entries [],
-      instance: @
-      url: "#{@url()}/entries"
-    @cancelled_entries.on "model:change:cancelled", @moveEntry
-
+    @active_entries = new FellRace.Collections.Entries []
+    @cancelled_entries = new FellRace.Collections.Entries []
     @partitionEntries() if @get("entries")
     @on "change:entries", @partitionEntries
 
   partitionEntries: =>
-    [cancelled_entries, entries] = _.partition(@get("entries"), (e) -> e.cancelled)
-    @entries.reset entries
+    @entries.reset @get('entries')
+    [cancelled_entries, active_entries] = @entries.partition (e) -> e.get('cancelled')
+    @active_entries.reset active_entries
     @cancelled_entries.reset cancelled_entries
 
   moveEntry: (model,cancelled) =>
     if cancelled
-      @entries.remove model
+      @active_entries.remove model
       @cancelled_entries.add(model)
     else
       @cancelled_entries.remove model
-      @entries.add(model)
+      @active_entries.add(model)
 
 
 
@@ -91,6 +89,8 @@ class FellRace.Models.Instance extends FellRace.Model
     @set total_count: @entries.length
     postal_count = 0
     online_count = 0
+    online_income = 0
+    online_fee = 0
     club_counts = {}
     cat_counts = {}
     @entries.each (entry) ->
@@ -100,10 +100,17 @@ class FellRace.Models.Instance extends FellRace.Model
       cat_counts[entry.get('category')] += 1
       if entry.get('paid')
         online_count += 1
+        cost = entry.get('cost')
+        fee = cost * 0.049 + 20
+        online_income += entry.get('cost') - fee
+        online_fee += fee
       else
         postal_count += 1
+
     @set
       online_count: online_count
+      online_total_income: online_income
+      online_total_fee: online_fee
       postal_count: postal_count
     @updateEntryData()
     @updateCategoryData(cat_counts)

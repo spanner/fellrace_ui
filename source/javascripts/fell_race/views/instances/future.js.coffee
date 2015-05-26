@@ -132,6 +132,8 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
       @model.set entered:true
     # @$el.find('.entry_count').text(@model.entries.size())
     @renderEntries() if @model.entries?.length
+    @renderClubChart() if @model.get('club_data')
+    @renderCatCharts() if @model.get('cat_data')
 
     @model.entries.on "reset add remove", @renderEntries
     @model.on "change:club_data", @renderClubChart
