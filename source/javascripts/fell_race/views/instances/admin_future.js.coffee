@@ -8,8 +8,8 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
   events:
     'click a.delete': "delete"
     "change input#entries_file": 'getPickedFile'
-    'click a.export_autodownload': 'exportAutoDownload'
-    'click a.export_multisport': 'exportMultiSport'
+    'click a.autodownload': 'exportAutoDownload'
+    'click a.multisport': 'exportMultiSport'
     'click a.export_all': 'exportAllData'
     "click a.toggle": "toggleMore"
 

@@ -5,12 +5,7 @@ class FellRace.Views.AdminListedInstance extends Backbone.Marionette.ItemView
     'click a.delete': "delete"
 
   onRender: () =>
-    @$el.find('.editable').editable()
     @stickit()
-
-  delete: (e) =>
-    e.preventDefault() if e
-    @model.destroy()
 
   url: ([race_slug,name]=[]) =>
     "/admin/races/#{race_slug}/#{name}"
@@ -31,17 +26,6 @@ class FellRace.Views.AdminFutureListedInstance extends FellRace.Views.AdminListe
     "span.time":
       observe: "time"
       onGet: "time"
-    "span.total_entries": 
-      observe: ["online_entries","entries_count","entry_limit"]
-      onGet: "summarise"
-
-  summarise: ([online_entry,entries_count,entry_limit]=[]) ->
-    string = ""
-    if online_entry
-      string = entries_count
-      if entry_limit and entry_limit > 0
-        string = "#{string} / #{entry_limit}"
-      string = "#{string} entries"
 
   date: (date) =>
     moment(date).format("D MMMM YYYY") if date

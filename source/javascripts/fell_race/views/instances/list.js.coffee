@@ -20,20 +20,9 @@ class FellRace.Views.FutureListedInstance extends Backbone.Marionette.ItemView
     "span.time":
       observe: "time"
       onGet: "time"
-    "span.total": 
-      observe: ["online_entry","entries_count","entry_limit"]
-      onGet: "summarise"
 
   onRender: () =>
     @stickit()
-
-  summarise: ([online_entry,entries_count,entry_limit]=[]) ->
-    string = ""
-    if online_entry
-      string = entries_count
-      if entry_limit and entry_limit > 0
-        string = "#{string} / #{entry_limit}"
-      string = "#{string} entries"
 
   date: (date) =>
     moment(date).format("D MMMM YYYY") if date

@@ -89,8 +89,8 @@
     %span.entries_import
     %span
       %a.microbutton.autodownload ▼ AutoDownload
-    / %span
-    /   %a.microbutton.export_multisport Download "MultiSport" file
+    %span
+      %a.microbutton.multisport ▼ MultiSport
     / %span
     /   %a.microbutton.export_all Download all data
   %h2
