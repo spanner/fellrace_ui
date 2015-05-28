@@ -12,6 +12,7 @@ class FellRace.Models.Instance extends FellRace.Model
     entry_data: {}
     club_entry_data: {}
     cat_data: {}
+    summary: ""
 
   validation:
     date:

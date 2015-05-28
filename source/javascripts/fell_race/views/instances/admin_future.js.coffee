@@ -267,10 +267,17 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     link.setAttribute("download", "#{@model.get("race_slug")}-#{@model.get("name")}-entries-autodownload.csv")
     link.click()
 
+  # There seems to be a bug in multisport where it always puts the club name in the city column
+  # and then gives the club a default name like "IMP001". If we only give it cities, it seems to work.
+  #
   exportMultiSport: =>
     csv = Papa.unparse
-      fields: ["Stno","Chip no","Database Id","Surname","First name","YB","S","Block","nc","Start","Finish","Time","Classifier","Club no.","Cl.name","City","Nat","Cl. no.","Short","Long","Num1","Num2","Num3","Text1","Text2","Text3","Adr. name","Street","Line2","Zip","City","Phone","Fax","EMail","Id/Club","Rented","Start fee","Paid"]
-      data: @model.entries.map (e) => ["","","",e.get("surname"),e.get("forename"),"",e.get("gender"),"",0,"#{@model.get("time")}:00","","",0,"",e.get("club_name"),"","","",e.get("category"),e.get("category"),"","","","","","",e.get("postal_address_line_1"),"",e.get("postal_address_line_2"),e.get("postcode"),e.get("postal_town"),e.get("mobile") || e.get("phone"),"",e.get("email"),"","",e.get("cost"),"X"]
+      fields: [
+        "Stno","Chip no","Database Id","Surname",        "First name",      "YB", "S",             "Block", "nc", "Start", "Finish", "Time", "Classifier", "Club no.",      "Cl. name", "City",             "Nat", "Cl. no.",            "Short",                         "Long",                          "Num1", "Num2", "Num3", "Text1", "Text2", "Text3", "Adr. name",                    "Street", "Line2",                        "Zip",             "City",               "Phone",                          "Fax", "EMail",       "Id/Club", "Rented", "Start fee",   "Paid"
+      ]
+      data: @model.entries.map (e) => [
+        "",    "",       e.get("id"),  e.get("surname"), e.get("forename"), "",   e.get("gender"), "",       0,   "",      "",        "",    0,            e.get("club_id"), "",        e.get("club_name"), "",    e.get("category_id"), e.get("category").toUpperCase(), e.get("category").toUpperCase(), "",     "",     "",     "",      "",      "",      e.get("postal_address_line_1"), "",       e.get("postal_address_line_2"), e.get("postcode"), e.get("postal_town"), e.get("mobile") or e.get("phone"), "",   e.get("email"), "",       "",       e.get("cost"), "X"
+      ]
     link = document.createElement("a")
     link.setAttribute("href", encodeURI("data:text/csv;charset=utf-8,#{csv}"))
     link.setAttribute("download", "#{@model.get("race_slug")}-#{@model.get("name")}-entries-multisport.csv")
@@ -278,22 +285,19 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   exportAllData: =>
     csv = Papa.unparse @model.entries.map (e) ->
+      name = _.compact(_.map(['forename', 'middlename', 'surname'], (c) -> e.get(c))).join(' ')
+      address = _.compact(_.map(['postal_address_line_1', 'postal_address_line_2', 'postal_town', 'postal_county', 'postal_country'], (c) -> e.get(c))).join(', ')
       {
-        forename: e.get("forename")
-        middlename: e.get("middlename")
-        surname: e.get("surname")
+        id: e.get('id')
+        name: name
         club: e.get("club_name")
         cat: e.get("category")
         gender: e.get("gender")
         dob: e.get("dob")
         emergency_contact: e.get("emergency_contact_name")
         emergency_contact_phone: e.get("emergency_contact_phone")
-        address_line_1: e.get("postal_address_line_1")
-        address_line_2: e.get("postal_address_line_2")
-        town: e.get("postal_town")
-        county: e.get("postal_county")
+        address: address
         postcode: e.get("postcode")
-        country: e.get("postal_country")
         phone: e.get("phone")
         mobile: e.get("mobile")
         email: e.get("email")

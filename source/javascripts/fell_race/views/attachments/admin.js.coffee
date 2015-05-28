@@ -17,7 +17,6 @@ class FellRace.Views.AdminAttachment extends Backbone.Marionette.ItemView
       attributes: [{name: 'class', observe: 'extension'}]
 
   onRender: () =>
-    console.log "onRender", @model
     @_filefield = @$el.find('input[type="file"]')
     @thaw()
     @stickit()

@@ -2,19 +2,17 @@
 at
 %span.time
 
-%p.entries
-  %a.enter_online.opener
-    Enter online:
-    %span.online_entry_fee.currency
-  %a.enter_postal{target: "_blank"}
-    Download entry form
+%p
   %span.eod
     Entry on the day:
     %span.eod_fee.currency
   %span.no_eod
     No entry on the day
-
-%p.preparation
+  %a.enter_online.opener
+    Enter online:
+    %span.online_entry_fee.currency
+  %a.enter_postal{target: "_blank"}
+    Download entry form
   %a.entries.opener
     Entry list
   %a.history.opener

@@ -106,7 +106,7 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
 
   visibleBlock: ($el, isVisible, options) =>
     if isVisible
-      $el.css display: "inline-block"
+      $el.css display: "block"
     else
       $el.hide()
   

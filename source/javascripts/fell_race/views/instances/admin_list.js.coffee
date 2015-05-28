@@ -46,6 +46,9 @@ class FellRace.Views.AdminPastListedInstance extends FellRace.Views.AdminListedI
     "span.total":
       observe: "performances_count"
       onGet: "summarise"
+    "span.splits":
+      observe: "has_splits"
+      visible: true
 
   summarise: (value, options) =>
     if !value? or value is 0

@@ -90,12 +90,12 @@ a.config
   &:hover
     background-position: 0 -128px
 
-a.enter_online
-  +icon_link("linksprite.png", -288px)
-  font-weight: bold
-  color: $rubine
-  &:hover
-    color: $link
+// a.enter_online
+//   +icon_link("linksprite.png", -288px)
+//   font-weight: bold
+//   color: $rubine
+//   &:hover
+//     color: $link
 
 a.postal, span.postal
   +icon_link("entrysprite.png")
@@ -781,14 +781,15 @@ a.race_link
             margin: 5px 20px 0 23px
             a.date
               font-weight: bold
-            p.entries
-              margin: 0.2em 0
+            p
+              margin: 0.5em 0
               span.eod, span.no_eod
                 color: $mid
-            p.preparation
-              margin: 0.5em 0
+                display: block
               a
                 display: block
+                &.enter_online
+                  color: $rubine
           .next
             margin-left: 5px
 

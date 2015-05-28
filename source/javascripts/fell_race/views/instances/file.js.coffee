@@ -15,6 +15,8 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
     firstname: 'forename'
     christian_name: 'forename'
 
+  fields: ["position","number","forename","middlename","surname","name","club","category","elapsed_time"]
+
   template: "instances/results_file"
   size_limit: 10
   allowed_extensions: [".csv"]
@@ -26,7 +28,6 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
     filefield: "input.file"
 
   initialize: ->
-    @fields = ["position","number","forename","middlename","surname","name","club","category","elapsed_time"]
     @checkpoints = _.without(@model.race.checkpoints.pluck("name"), "Start")
 
   onRender: =>
@@ -47,7 +48,6 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
     field_translations = {}
     _.each headers, (header,i) =>
       data_field = header.toLowerCase().replace(/(-| )/,'')
-      console.log header, i, data_field
       if @fields.indexOf(data_field) isnt -1
         field_translations[data_field] = header
         headers[i] = null
@@ -58,7 +58,6 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
 
   translateCheckpoints: (headers) =>
     # for now, just use exact matches (which is what we currently do in back end)
-    console.log "remaining_headers", headers
     checkpoint_translations = []
 
     _.each headers, (header) =>
@@ -71,7 +70,7 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
 
   performancesJson: (parsed_data, headers) =>
     field_translations = @translateFields(headers)
-    checkpoint_translations = @translateCheckpoints(headers)
+    checkpoint_translations = @translateCheckpoints(_.compact(headers))
 
     performances = []
     _.each parsed_data, (csv_performance) =>
@@ -81,13 +80,15 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
         performance[json_key] = csv_performance[csv_key]
 
       _.each checkpoint_translations, (cp) =>
+        string = csv_performance[cp.csv_key] || ""
+        time = moment(string,["HH:mm:ss","mm:ss","HH.mm.ss","mm.ss"])
         performance.splits.push {
           name: cp.json_key
-          time: csv_performance[cp.csv_key]
+          elapsed_time: time.hours()*3600+time.minutes()*60+time.seconds()
         }
 
       performances.push performance
-    
+
     json = {
       performances: performances
     }
