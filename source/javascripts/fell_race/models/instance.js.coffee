@@ -20,6 +20,7 @@ class FellRace.Models.Instance extends FellRace.Model
       required: true
 
   build: =>
+    @race = @collection?.race
     unless @isNew()
       @buildDates()
       if @inFuture()

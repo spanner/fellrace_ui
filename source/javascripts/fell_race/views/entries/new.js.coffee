@@ -14,6 +14,7 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
 
   initialize: ->
     @_competitor = _fellrace.getCurrentCompetitor()
+    console.log @model.collection
     @_instance = @model.collection.instance
     @model.set("cost", @_instance.get("online_entry_fee"))
     @_payment = new FellRace.Models.Payment
