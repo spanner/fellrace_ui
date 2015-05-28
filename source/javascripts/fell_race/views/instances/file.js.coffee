@@ -74,20 +74,31 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
 
     performances = []
     _.each parsed_data, (csv_performance) =>
-      performance = splits: []
+      performance = checkpoints: {}
 
       _.each field_translations, (csv_key, json_key) =>
         performance[json_key] = csv_performance[csv_key]
 
-      _.each checkpoint_translations, (cp) =>
-        string = csv_performance[cp.csv_key] || ""
-        time = moment(string,["HH:mm:ss","mm:ss","HH.mm.ss","mm.ss"])
-        performance.splits.push {
-          name: cp.json_key
-          elapsed_time: time.hours()*3600+time.minutes()*60+time.seconds()
-        }
+      elapsed_time = 0
+      _.each checkpoint_translations, (cp,i) =>
+        previous_time = elapsed_time
+        string = csv_performance[cp.csv_key]
+        if string and string isnt ""
+          time = moment(string,["HH:mm:ss","mm:ss","HH.mm.ss","mm.ss"])
+          elapsed_time = time.hours()*3600+time.minutes()*60+time.seconds()
+          if i is 0
+            split_time = elapsed_time
+          else if performance.checkpoints[checkpoint_translations[i-1].json_key]
+            split_time = elapsed_time - previous_time
+          else
+            split_time = null
+          performance.checkpoints[cp.json_key] = {
+            elapsed_time: elapsed_time
+            split_time: split_time
+          }
 
       performances.push performance
+
 
     json = {
       performances: performances
