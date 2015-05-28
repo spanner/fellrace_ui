@@ -18,7 +18,6 @@ class FellRace.Views.NextRaceInstance extends Backbone.Marionette.ItemView
   onRender: =>
     @stickit @getInstance(), @bindings
     @model.future_instances.on "add remove reset check_dates", () =>
-      console.log "some sort of change"
       @stickit @getInstance(), @bindings
     @model.past_instances.on "add remove reset check_dates", () =>
       @stickit @getInstance(), @bindings

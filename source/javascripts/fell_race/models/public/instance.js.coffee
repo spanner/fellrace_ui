@@ -62,7 +62,6 @@ class FellRace.Models.PublicInstance extends Backbone.Model
   ## Summary chart data
 
   setEntryCounts: =>
-    console.log "setEntryCounts"
     @set total_count: @entries.length
     postal_count = 0
     online_count = 0

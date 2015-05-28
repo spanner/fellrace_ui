@@ -92,7 +92,7 @@
     %span
       %a.microbutton.export_multisport  ▼ for MultiSport
     %span
-      %a.microbutton.export_all Download all data
+      %a.microbutton.export_all ▼ CSV data
   %h2
     Entries
 
