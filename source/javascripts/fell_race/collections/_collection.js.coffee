@@ -1,7 +1,7 @@
 class FellRace.Collection extends Backbone.Collection
   delegatedEvents: ['show', 'hide']
 
-  initialize: (models,options) =>
+  initialize: (models, options) =>
     if options
       for key, val of options
         @[key] = val
