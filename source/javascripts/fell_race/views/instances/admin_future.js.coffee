@@ -288,6 +288,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       name = _.compact(_.map(['forename', 'middlename', 'surname'], (c) -> e.get(c))).join(' ')
       address = _.compact(_.map(['postal_address_line_1', 'postal_address_line_2', 'postal_town', 'postal_county', 'postal_country'], (c) -> e.get(c))).join(', ')
       {
+        id: e.get('id')
         name: name
         club: e.get("club_name")
         cat: e.get("category")
