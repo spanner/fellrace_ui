@@ -241,16 +241,17 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
       clicked.addClass("showing")
 
   exportAutoDownload: =>
+    i = 0
     csv = Papa.unparse @model.entries.map (e) ->
       {
         RaceNumber: ""
         CardNumbers: ""
         MembershipNumbers: ""
-        Name: "#{e.name()}"
-        AgeClass: "#{e.get("category")}"
-        Club: "#{e.get("club_name")}"
+        Name: e.name()
+        AgeClass: e.get("category")
+        Club: e.get("club_name")
         Country: ""
-        CourseClass: ""
+        CourseClass: @model.get('name')
         StartTime: ""
         StartTimePreference: ""
         EnvelopeNumber: ""
@@ -268,7 +269,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     link.click()
 
   # There seems to be a bug in multisport where it always puts the club name in the city column
-  # and then gives the club a default name like "IMP001". If we only give it cities, it seems to work.
+  # and then gives the club a default name like "IMP001". If we only give it cities, all is well.
   #
   exportMultiSport: =>
     csv = Papa.unparse
