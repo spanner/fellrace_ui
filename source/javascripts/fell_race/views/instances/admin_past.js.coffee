@@ -34,7 +34,7 @@ class FellRace.Views.AdminPastInstance extends Backbone.Marionette.ItemView
       ]
 
   onRender: () =>
-    new FellRace.Views.ResultsFile(model: @model, el: @$el.find(".results_file")).render()
+    new FellRace.Views.ResultsFile(model: @model, el: @$el.find("span.results_upload")).render()
     new FellRace.Views.ResultsPreview(model: @model, el: @$el.find(".results_preview")).render()
     @$el.find('.editable').editable()
     @stickit()

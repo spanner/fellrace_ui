@@ -22,6 +22,8 @@
 %span.note (tick if a short/alternative course was run)
 
 .results
-  %h3 Results
-  .results_file
+  .controls
+    %span.results_upload
+  %h3
+    Results
   .results_preview
