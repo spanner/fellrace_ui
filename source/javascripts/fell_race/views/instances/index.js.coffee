@@ -21,6 +21,7 @@ class FellRace.Views.IndexInstance extends Backbone.Marionette.ItemView
   onRender: =>
     _.extend(@bindings, @extra_bindings) if @extra_bindings
     @stickit()
+    console.log @model
     if @model.has("route_profile") and @model.get("route_profile") != ""
       _.defer @peify
 
@@ -45,14 +46,21 @@ class FellRace.Views.IndexInstance extends Backbone.Marionette.ItemView
   instanceUrl: ([name,race_slug]=[]) =>
     "/races/#{race_slug}/#{name}" if name and race_slug
 
+
 class FellRace.Views.FutureIndexInstance extends FellRace.Views.IndexInstance
   template: "instances/index/future"
 
   extra_bindings:
     ".entry_count": 'entry_count'
-    "a.entries_link":
-      observe: ["name","race_slug"]
-      onGet: "instanceUrl"
+    "a.online_entries":
+      observe: "online_entry_active"
+      visible: true
+      attributes: [
+        observe: ["name","race_slug"]
+        name: "href"
+        onGet: "instanceUrl"
+      ]
+
 
 class FellRace.Views.PastIndexInstance extends FellRace.Views.IndexInstance
   template: "instances/index/past"

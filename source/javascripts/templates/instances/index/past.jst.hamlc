@@ -2,5 +2,5 @@
   %span.profile
   %span.race_name
   %span.date
-%a.results_link
+%a.results_link.opener
   results

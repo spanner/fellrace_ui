@@ -2,3 +2,5 @@
   %span.profile
   %span.race_name
   %span.date
+  %a.online_entries.opener Online entries open
+  
