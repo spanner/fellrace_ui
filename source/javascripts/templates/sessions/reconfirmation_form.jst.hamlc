@@ -18,7 +18,7 @@
             cancel
 
       %p.note
-        When you click 'send instructions' we will check
+        When you click 'send message' we will check
         %span.email
         and if it is recognised, send another confirmation message to that address.
         Please check the email address carefully.
