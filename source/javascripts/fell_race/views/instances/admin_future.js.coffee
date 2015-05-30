@@ -132,6 +132,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     #   @renderEntryChart()
     # if @model.get('cat_data')
     #   @renderCatCharts()
+
     @model.entries.on "reset add remove", @renderEntries
     @model.on "change:entry_data", @renderEntryChart
     @model.on "change:cat_data", @renderCatCharts
@@ -242,7 +243,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
 
   exportAutoDownload: =>
     i = 0
-    csv = Papa.unparse @model.entries.map (e) ->
+    csv = Papa.unparse @model.entries.map (e) =>
       {
         RaceNumber: ""
         CardNumbers: ""

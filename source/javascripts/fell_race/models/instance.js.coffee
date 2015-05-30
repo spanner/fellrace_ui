@@ -23,11 +23,9 @@ class FellRace.Models.Instance extends FellRace.Model
   build: =>
     unless @isNew()
       @buildDates()
-      if @inFuture()
-        @buildEntries()
-      else
-        @buildCheckpoints()
-        @buildPerformances()
+      @buildEntries()
+      @buildCheckpoints()
+      @buildPerformances()
       @buildWinner()
 
   buildDates: =>

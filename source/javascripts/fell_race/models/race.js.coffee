@@ -53,7 +53,10 @@ class FellRace.Models.Race extends FellRace.Model
     @on "change:instances", @partitionInstances
 
   partitionInstances: =>
-    [past_instances, future_instances] = _.partition(@get("instances"), (e) -> new Date(e.date) < Date.now())
+    # temporary: compare race date with yesterday so that today's race is in the future
+    # TODO: use a proper datetime attribute.
+    divider = new Date(new Date().getTime() - 24 * 60 * 60 * 1000)
+    [past_instances, future_instances] = _.partition @get("instances"), (e) -> new Date(e.date) < divider
     @past_instances.reset past_instances
     @future_instances.reset future_instances
 
