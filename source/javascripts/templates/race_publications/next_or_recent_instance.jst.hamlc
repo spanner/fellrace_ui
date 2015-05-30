@@ -2,7 +2,7 @@
 at
 %span.time
 
-%p
+%p.entry
   %span.eod
     Entry on the day:
     %span.eod_fee.currency
@@ -19,5 +19,5 @@ at
     All-time results
 
 %p.results
-  %a.results.opener
+  %a.results
     Results available

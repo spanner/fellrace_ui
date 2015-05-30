@@ -7,6 +7,12 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
     "click a.entries": "linkWorking"
 
   bindings:
+    "p.entry":
+      observe: "date"
+      visible: "ifFuture"
+    "p.results":
+      observe: 'file'
+      visible: true
     "a.date":
       observe: "date"
       onGet: "niceDate"
@@ -60,8 +66,6 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
       visible: "untrue"
       visibleFn: "visibleBlock"
     'a.results':
-      observe: 'file'
-      visible: true
       attributes: [
         observe: ["race_slug", "name"]
         name: "href"
@@ -128,3 +132,9 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
       $(link).addClass('working')
       _fellrace.vent.once 'loaded', () ->
         $(link).removeClass('working')
+
+  ifFuture: (date) =>
+    date > new Date()
+  
+  ifPast: (date) =>
+    date <= new Date()

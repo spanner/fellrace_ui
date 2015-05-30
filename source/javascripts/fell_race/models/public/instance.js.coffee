@@ -50,7 +50,6 @@ class FellRace.Models.PublicInstance extends Backbone.Model
 
   inFuture: =>
     if datetime = @getDateTime()
-      console.log "instance datetime", datetime
       datetime > Date.now()
 
   inPast: =>
