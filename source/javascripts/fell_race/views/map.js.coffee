@@ -4,7 +4,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
   mapConfig: =>
     center: new google.maps.LatLng @startLat(), @startLng()
     zoom: @startZoom()
-    mapTypeId: "Open"
+    mapTypeId: "Landscape"
     # scrollwheel: false
     zoomControlOptions:
       position: google.maps.ControlPosition.RIGHT_TOP
@@ -12,7 +12,8 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
       position: google.maps.ControlPosition.RIGHT_TOP
     mapTypeControlOptions:
       mapTypeIds: [
-        "Open",
+        "Landscape",
+        "Outdoors",
         "OS",
         "OOM",
         google.maps.MapTypeId.ROADMAP,
@@ -98,11 +99,18 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     #   maxZoom: 17
     #   minZoom: 12
     #
-    @_gmap.mapTypes.set "Open", new google.maps.ImageMapType
+    @_gmap.mapTypes.set "Outdoors", new google.maps.ImageMapType
+      getTileUrl: (coord, zoom) ->
+        return "https://#{"abc".charAt(Math.floor(Math.random() * 2))}.tile.thunderforest.com/outdoors/#{zoom}/#{coord.x}/#{coord.y}.png"
+      tileSize: new google.maps.Size(256, 256)
+      name: "Outdoors"
+      maxZoom: 18
+
+    @_gmap.mapTypes.set "Landscape", new google.maps.ImageMapType
       getTileUrl: (coord, zoom) ->
         return "https://#{"abc".charAt(Math.floor(Math.random() * 2))}.tile.thunderforest.com/landscape/#{zoom}/#{coord.x}/#{coord.y}.png"
       tileSize: new google.maps.Size(256, 256)
-      name: "OSM"
+      name: "Landscape"
       maxZoom: 18
 
     @_gmap.mapTypes.set "OS", new google.maps.ImageMapType
