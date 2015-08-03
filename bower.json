@@ -1,0 +1,18 @@
+{
+  "name": "fellrace",
+  "version": "1.1.0",
+  "homepage": "https://github.com/spanner/fellrace_ui",
+  "authors": [
+    "mike <mike@spanner.org>"
+  ],
+  "description": "fellrace ui",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "app/bower_components",
+    "test",
+    "tests"
+  ]
+}
