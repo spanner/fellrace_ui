@@ -5,27 +5,31 @@ var gulp = require('gulp'),
     sass = require('gulp-sass'),
     prefix = require('gulp-autoprefixer'),
     coffee = require('gulp-coffee'),
-    coffeelint = require('gulp-coffeelint'),
+    // coffeelint = require('gulp-coffeelint'),
     concat = require('gulp-concat'),
     plumber = require('gulp-plumber'),
     changed = require('gulp-changed'),
     uglify = require('gulp-uglify');
+
+// Define base folders
+var src = './src/',
+    dest = './build/';
 
 var options = {
     // HTML
     // HTML_SOURCE     : "views/**/*.tpl",
 
     // CSS
-    SASS_SOURCE     : "./source/stylesheets/**/*.sass",
-    SASS_DEST       : "./build/stylesheets/",
+    SASS_SOURCE     : src + "stylesheets/**/*.sass",
+    SASS_DEST       : dest + "stylesheets/",
 
     // JavaScript
-    COFFEE_SOURCE   : "./source/javascripts/**/*.coffee",
-    COFFEE_DEST     : "./build/assets/js/",
+    COFFEE_SOURCE   : src + "javascripts/**/*.coffee",
+    COFFEE_DEST     : dest + "javascripts/",
 
     // Images
-    IMAGE_SOURCE    : "./source/images/**/*",
-    IMAGE_DEST      : "./build/assets/images/",
+    IMAGE_SOURCE    : src + "images/**/*",
+    IMAGE_DEST      : dest + "images/",
 
     // Live reload
     LIVE_RELOAD_PORT: 35729

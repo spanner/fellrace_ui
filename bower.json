@@ -11,8 +11,16 @@
     "**/.*",
     "node_modules",
     "bower_components",
-    "app/bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "marionette": "~2.4.2",
+    "papa.parse": "~4.1.1",
+    "moment": "~2.10.6",
+    "medium-editor": "~5.5.4",
+    "backbone-mapstick": "~0.1.1",
+    "chartist": "~0.9.2",
+    "chartist-plugin-tooltip": "~0.0.11"
+  }
 }

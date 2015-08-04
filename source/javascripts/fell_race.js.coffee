@@ -1,28 +1,43 @@
 #= require hamlcoffee
-#= require vendor/jquery
+#= require jquery/dist/jquery
+
 #= require vendor/modernizr
-#= require vendor/moment
+
+#= require moment/moment
+
 #= require vendor/jquery.peity
 #= require vendor/jquery.cookie
 #= require vendor/jquery.complexify
 #= require vendor/pikaday
 #= require vendor/tinycolor
-#= require vendor/underscore
+
+#= require underscore/underscore
+
 #= require vendor/underscore.string
-#= require vendor/backbone
-#= require vendor/backbone.marionette
+
+#= require backbone/backbone
+#= require marionette/lib/backbone.marionette
 #= require vendor/backbone.stickit
+
 #= require vendor/backbone.notifications
-#= require vendor/backbone.mapstick
+
+#= require backbone-mapstick/backbone-mapstick
+
 #= require vendor/backbone.validation
-#= require vendor/medium-editor
+
+#= require medium-editor/dist/js/medium-editor
+
 #= require vendor/coordtransform
 #= require vendor/latlon
 #= require vendor/gridref
-#= require vendor/papaparse
+
+#= require papa.parse/papaparse
+
 #= require vendor/autofill-event
-#= require vendor/chartist
-#= require vendor/chartist-plugin-tooltip
+
+#= require chartist/dist/chartist
+
+#= require chartist-plugin-tooltip/dist/chartist-plugin-tooltip
 
 #= require lib/extensions
 #= require lib/utilities

@@ -1,0 +1,38 @@
+{
+  "name": "backbone-mapstick",
+  "version": "0.1.1",
+  "main": "backbone-mapstick.js",
+  "authors": [
+    "Mike McIver <mike@spanner.org>",
+    "William Ross <will@spanner.org>"
+  ],
+  "keywords": [
+    "backbone",
+    "google-maps-api",
+    "map"
+  ],
+  "dependencies": {
+    "backbone": "~1.2.1"
+  },
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "demo",
+    "Gruntfile.js",
+    "lib",
+    "node_modules",
+    "package.json",
+    "src",
+    "test"
+  ],
+  "homepage": "https://github.com/mike1104/mapstick",
+  "_release": "0.1.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.1.1",
+    "commit": "ec2267da426ec85f8ca018d385f1afe6b294b70d"
+  },
+  "_source": "git://github.com/mike1104/mapstick.git",
+  "_target": "~0.1.1",
+  "_originalSource": "backbone-mapstick"
+}
