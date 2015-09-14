@@ -1,0 +1,1 @@
+#= require ../../fell_race/views/records/list

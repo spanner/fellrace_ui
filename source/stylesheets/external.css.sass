@@ -1,0 +1,112 @@
+@import lib/definitions
+@import lib/fonts
+
+$translucent: rgba(255,255,255,0.92)    
+
+#fell_race_info
+  a
+    cursor: pointer
+
+  a.file_icon, a.file_icon:visited
+    display: inline-block
+    vertical-align: middle
+    overflow: hidden
+    padding: 2px
+    min-height: 26px
+    text-indent: 25px
+    line-height: 26px
+    background-image: image-url('icons.png')
+    background: 
+      repeat: no-repeat
+      position: 0 0
+    &.pdf
+      background-position: 0 -200px
+      color: #df0f00
+    &.doc, &.docx
+      background-position: 0 -400px
+      color: #1683ab
+      +hover
+    &.xls, &.xlsx
+      background-position: 0 -600px
+      color: #369620
+      +hover
+    &.ppt, &.pptx
+      background-position: 0 -800px
+      color: #cc440a
+      +hover
+
+  a.file_name
+    vertical-align: middle
+    max-width: 222px
+    display: inline-block
+    &.pdf
+      color: #df0f00
+    &.doc, &.docx
+      color: #1683ab
+    &.xls, &.xlsx
+      color: #369620
+    &.ppt, &.pptx
+      color: #cc440a
+
+  #credit
+    p
+      font-size: 80%
+      color: $pale
+      a
+        color: $mid
+        +hover
+  .race
+    margin-top: 1em
+    .race_title
+      margin-top: -2em
+      h2
+        font-size: 1.25em
+        margin: 0
+        a
+          color: $dark
+        span.subtitle
+          font-size: 80%
+          font-weight: normal
+
+    .race_body
+      font-size: 80%
+      div.records, div.checkpoints
+        display: inline-block
+        vertical-align: top
+        width: 45%
+        h4
+          margin-bottom: 0
+      ul.records
+        list-style: none
+        padding: 0
+        margin: 0 0 10px 0
+        li.record
+          span.label, span.time
+            font-weight: bold
+      ul.checkpoints
+        list-style: none
+        padding: 0
+        margin: 0 0 10px -5px
+        li.checkpoint
+          border: 1px solid transparent
+          &:before
+            content: "\025CB"
+            width: 16px
+            display: inline-block
+            vertical-align: top
+            text-align: center
+          &.start:before
+            content: "\025B3"
+          &.finish:before
+            content: "\025CE"
+        span.gridref
+          color: $mid
+          min-width: 20px
+          font-size: 0.8em
+      ul.attachments
+        list-style: none
+        padding: 0
+        margin: 0
+        li.attachment
+          a.file_icon
+            width: 20px
