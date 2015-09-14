@@ -36,9 +36,10 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     @_gmap = new google.maps.Map @$el.find('.map_holder')[0], @mapConfig()
     google.maps.event.addListener @_gmap, "dragend", @setState
     @addMapTypes()
-    @userMarker = new FellRace.Views.UserMarker
-      model: _fellrace.currentUser()
+    @userMarker = new FellRace.Views.UserMarker?(
+      model: _fellrace.currentUser?()
       map: @_gmap
+    )
 
     @_polys = new FellRace.Views.RacePublicationPolylines
       collection: _fellrace.race_publications
