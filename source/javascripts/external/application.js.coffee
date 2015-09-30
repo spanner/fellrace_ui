@@ -84,7 +84,9 @@ class FellRace.Views.ExternalRacePublication extends Backbone.Marionette.ItemVie
     '.climb': "climb"
     '.cat': 'cat'
     '.route_elevation': "route_elevation"
-    '.description': 'clean_description'
+    '.description':
+      observe: 'description'
+      updateMethod: "html"
     'span.race_profile':
       observe: 'route_profile'
       update: "peify"

@@ -11,6 +11,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     panControlOptions:
       position: google.maps.ControlPosition.RIGHT_TOP
     mapTypeControlOptions:
+      position: google.maps.ControlPosition.TOP_RIGHT
       mapTypeIds: [
         "Open",
         "OS",
