@@ -20,9 +20,6 @@ class FellRace.Views.CompetitorEntryRow extends Backbone.Marionette.ItemView
         onGet: ([race_slug,instance_name]=[]) ->
           "/races/#{race_slug}/#{instance_name}"
       ]
-    "span.paid":
-      observe: "cost"
-      onGet: "currency"
     "a.cancel":
       observe: ["permissions","cancelled"]
       visible: true

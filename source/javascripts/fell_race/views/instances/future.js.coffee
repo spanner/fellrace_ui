@@ -140,7 +140,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
     @model.on "change:cat_data", @renderCatCharts
     # this old version of marionette seems to leave a render gap, so we wait for the DOM to arrive.
     _.defer @model.setEntryCounts
-    # hacky shortcut, this, to bring down any wait spinners we have scattered around. Do it properly!
+    # hacky shortcut this, to bring down any wait spinners we have scattered around. Do it properly!
     _fellrace.vent.trigger 'loaded'
 
   renderClubChart: (model, data) =>

@@ -69,8 +69,10 @@
 
       .block.narrow.online.optional
         %p
-          %input#online_entry{type: "checkbox",disabled:true}
+          %input#online_entry{type: "checkbox"}
           %label{for: "online_entry"} Online entry
+          %sup.warning
+            testing
 
         .online_details
           %p

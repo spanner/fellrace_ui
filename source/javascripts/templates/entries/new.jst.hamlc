@@ -53,7 +53,8 @@
     %a{href: "/faq/online_entries"} online payments page
     for details of where that goes.
 
-  %p
-    This is all carefully tested but it's brand new, so if anything goes wrong or could be improved, please
-    %a{href:"mailto:will@spanner.org"} let Will know 
+  %p.warning
+    We're going to change this form soon so that you can buy more than one entry, or buy them for other people.
+    That should happen over Christmas. If anything else goes wrong or could be improved, please
+    %a{href:"mailto:will@spanner.org"} let Will know
     right away.

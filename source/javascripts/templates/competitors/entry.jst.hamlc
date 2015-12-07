@@ -2,8 +2,6 @@
   %span.date
 %td.race
   %a.race
-%td.paid
-  %span.paid.currency
 %td
   %a.cancel x
   %span.cancelled cancelled

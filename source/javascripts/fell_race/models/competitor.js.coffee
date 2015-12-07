@@ -28,8 +28,6 @@ class FellRace.Models.Competitor extends FellRace.Model
     @entries.url = "#{_fellrace.apiUrl()}/entries"
     @set performances_count: @performances.length
 
-    @performances.each (p) =>
-      
     @on "change:performances", (model, data) =>
       @performances.reset data
     @on "change:entries", (model, data) =>
