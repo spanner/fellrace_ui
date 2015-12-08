@@ -20,3 +20,6 @@ class FellRace.Models.Entry extends FellRace.Model
     name = @get("forename")
     name += " #{@get("middlename")}" if @get("middlename")
     "#{name} #{@get("surname")}"
+
+  matchString: =>
+    [@get("forename"), @get("surname"), @get("club_name"), @get("category")].join(" ")

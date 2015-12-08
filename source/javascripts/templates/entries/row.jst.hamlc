@@ -3,4 +3,4 @@
     %span.fore
     %span.sur
 %td.cat
-%td.club
+%td.club{colspan: 2}

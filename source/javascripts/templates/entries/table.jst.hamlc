@@ -3,4 +3,7 @@
     %th name
     %th cat
     %th club
+    %th
+      %input{type: 'text', name: "filter", placeholder: "Filter..."}
+
 %tbody

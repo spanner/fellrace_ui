@@ -52,5 +52,6 @@
     %a.button.enter enter
 
 .entries
-  %h3 Entries
+  %h3
+    Entries
   %table.entries

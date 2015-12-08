@@ -1133,6 +1133,10 @@ section#extra
         input[type="file"]
           display: none
 
+      p.online
+        a.button
+          float: right
+
       div.entries
         div.controls
           float: right
@@ -1141,6 +1145,18 @@ section#extra
             vertical-align: middle
         table
           +clear
+          th
+            input
+              margin: 0
+              padding: 6px 0
+              float: right
+              font-size: 1rem
+              +book
+              border: 0
+              border-bottom: 1px solid $pale
+              width: 75%
+              outline: none
+
 
     .results
       .results_preview

@@ -58,3 +58,12 @@ class FellRace.Model extends Backbone.Model
   getIndex: () =>
     if @collection
       @collection.indexOf(@)
+
+
+  # filter box support
+
+  matchString: =>
+    @get('name')
+
+  unmatches: (term) =>
+    @matchString().toLowerCase().indexOf(term.toLowerCase()) is -1
