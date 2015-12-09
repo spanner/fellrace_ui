@@ -50,23 +50,9 @@ class FellRace.Views.EntriesTable extends Backbone.Marionette.CompositeView
   template: "entries/table"
   itemViewContainer: "tbody"
 
-  bindings:
-    "input": "term"
-
-  initialize: ->
-    @model = new Backbone.Model
-
   onRender: =>
-    @stickit()
-    @model.on "change:term", (model, term) =>
-      if term
-        @collection.each (model) ->
-          model.set unmatched: model.unmatches(term)
-      else
-        @clearMatches()
+    @_filter = new FellRace.Views.CollectionFilter
+      collection: @collection
+      el: @$el.find('input')
+    @_filter.render()
 
-  clearMatches: =>
-    @collection.each (model) -> model.unset "unmatched"
-
-  onBeforeDestroy: =>
-    @clearMatches()

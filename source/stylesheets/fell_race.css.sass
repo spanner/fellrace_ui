@@ -179,6 +179,15 @@ input[type="checkbox"]
     &+label
       color: $green
 
+input.filter
+  margin: 0
+  padding: 6px 0
+  font-size: 1rem
+  +book
+  border: 0
+  border-bottom: 1px solid $pale
+  outline: none
+
 table
   border-collapse: collapse
   width: 100%
@@ -1016,6 +1025,9 @@ section#extra
     margin: 0
     a, span
       vertical-align: middle
+    input.filter
+      float: right
+      margin: 0 10px 0 0
   a.close
     position: absolute
     top: 20px
@@ -1148,14 +1160,9 @@ section#extra
           th
             input
               margin: 0
-              padding: 6px 0
               float: right
               font-size: 1rem
-              +book
-              border: 0
-              border-bottom: 1px solid $pale
               width: 75%
-              outline: none
 
 
     .results
@@ -1597,6 +1604,19 @@ ul.chooser
     margin-left: -8px
     border: 8px solid transparent
     border-top-color: white
+
+.filterer
+  float: right
+  margin: 0 0 10px 20px
+  input
+    margin: 0
+    padding: 6px 0
+    font-size: 1rem
+    +book
+    border: 0
+    border-bottom: 1px solid $pale
+    width: 75%
+    outline: none
 
 
 

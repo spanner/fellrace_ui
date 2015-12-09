@@ -4,6 +4,9 @@ class FellRace.Views.HistoryRow extends Backbone.Marionette.ItemView
 
   bindings:
     ":el":
+      observe: "unmatched"
+      visible: "untrue"
+      visibleFn: "visibleWithSlide"
       attributes: [
         observe: ["cat_name","c_pos"]
         name: "class"
@@ -48,11 +51,28 @@ class FellRace.Views.HistoryRow extends Backbone.Marionette.ItemView
   compUrl: (id) =>
     "/runners/#{id}/"
 
+  untrue: (value) =>
+    not value
+
+  visibleWithSlide: ($el, isVisible, options) =>
+    if isVisible
+      $el.slideDown('fast')
+    else
+      $el.slideUp('fast')
+
 
 class FellRace.Views.NoHistory extends Backbone.Marionette.ItemView
   template: "performances/history_loading"
   tagName: "tr"
 
+
 class FellRace.Views.HistoryTable extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.HistoryRow
   emptyView: FellRace.Views.NoHistory
+
+  onRender: =>
+    @_filter = new FellRace.Views.CollectionFilter
+      collection: @collection
+      el: @$el.find('input')
+    @_filter.render()
+

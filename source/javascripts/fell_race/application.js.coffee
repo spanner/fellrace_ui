@@ -161,8 +161,8 @@ class FellRace.Application extends Backbone.Marionette.Application
   # We take over rendering to use our JST templates, which are in fact haml_coffee.
   #
   render: (template, data) ->
-    path = "templates/#{template}"
-    if template?
+    if template
+      path = "templates/#{template}"
       throw("Template '" + path + "' not found!") unless JST[path]
       JST[path](data)
     else

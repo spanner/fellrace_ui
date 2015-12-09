@@ -4,6 +4,9 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
 
   bindings:
     ":el":
+      observe: "unmatched"
+      visible: "untrue"
+      visibleFn: "visibleWithSlide"
       attributes: [
         observe: "cat"
         name: "class"
@@ -73,6 +76,16 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
   compUrl: ([id,race_slug,instance_name]=[]) =>
     "/runners/#{id}/#{race_slug}/#{instance_name}"
 
+  untrue: (value) =>
+    not value
+
+  visibleWithSlide: ($el, isVisible, options) =>
+    if isVisible
+      $el.slideDown('fast')
+    else
+      $el.slideUp('fast')
+
+
 class FellRace.Views.ResultsTable extends Backbone.Marionette.CompositeView
   template: "performances/results_table"
   itemView: FellRace.Views.ResultRow
@@ -108,6 +121,7 @@ class FellRace.Views.ResultsTable extends Backbone.Marionette.CompositeView
 
   sort: =>
     @render()
+
 
 class FellRace.Views.CheckpointCell extends Backbone.Marionette.ItemView
   template: "performances/checkpoint_cell"

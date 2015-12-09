@@ -8,7 +8,8 @@
     show splits
   %a.addendum.hide_splits
     hide splits
-  
+  %input.filter{type: 'text', name: "filter", placeholder: "Filter..."}
+
 #results_file
   %p.download
     %a.file_icon

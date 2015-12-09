@@ -4,6 +4,6 @@
     %th cat
     %th club
     %th
-      %input{type: 'text', name: "filter", placeholder: "Filter..."}
+      %input.filter{type: 'text', name: "filter", placeholder: "Filter..."}
 
 %tbody

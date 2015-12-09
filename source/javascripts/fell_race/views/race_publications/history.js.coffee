@@ -60,8 +60,13 @@ class FellRace.Views.RaceHistory extends Backbone.Marionette.ItemView
 
   onRender: =>
     @stickit()
-    @table_el = @$el.find("table.history tbody")
 
+    @_filter = new FellRace.Views.CollectionFilter
+      collection: @model.performances
+      el: @$el.find('input.filter')
+    @_filter.render()
+
+    @table_el = @$el.find("table.history tbody")
     table = new FellRace.Views.HistoryTable
       collection: @model.performances
       el: @table_el

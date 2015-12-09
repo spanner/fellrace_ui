@@ -15,4 +15,4 @@ class FellRace.Models.Performance extends FellRace.Model
     time
 
   matchString: =>
-    [@get("fore"), @get("sur"), @get("cat_name"), @get("club_name")].join(" ")
+    [@get("forename"), @get("surname"), @get("competitor_forename"), @get("competitor_surname"), @get("cat"), @get("club")].join(" ")

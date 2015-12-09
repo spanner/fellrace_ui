@@ -12,3 +12,29 @@ class FellRace.Views.LayoutView extends Backbone.Marionette.Layout
   handle: (path) ->
     path ?= "/"
     @_router.handle(path)
+
+
+class FellRace.Views.CollectionFilter extends Backbone.Marionette.ItemView
+  template: false
+
+  bindings:
+    ":el": "term"
+
+  initialize: ->
+    @model = new Backbone.Model
+
+  onRender: =>
+    @stickit()
+    matcher = (model, term) =>
+      if term
+        @collection.each (model) ->
+          model.set unmatched: model.unmatches(term)
+      else
+        @clearMatches()
+    @model.on "change:term", _.debounce(matcher, 250)
+
+  clearMatches: =>
+    @collection.each (model) -> model.unset "unmatched"
+
+  onBeforeDestroy: =>
+    @clearMatches()

@@ -8,14 +8,19 @@
 
 %p
   %span.all_runs
+    Showing all
     %span.performances_count
-    Showing all performances
+    performances
     %a.addendum.compact (show the best time for each runner)
 
   %span.all_runners
+    Showing
     %span.competitors_count
-    Showing personal bests
-    %a.addendum.full (show all performances)
+    personal bests
+    %a.addendum.full (show every performance)
+
+  .filterer
+    %input.filter{type: 'text', name: "filter", placeholder: "Filter..."}
 
   %p
     Results from alternative (bad weather/winter) courses are excluded from this table.

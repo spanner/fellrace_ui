@@ -90,6 +90,11 @@ class FellRace.Views.InstanceResults extends Backbone.Marionette.ItemView
       if @_competitor
         @_performances.findWhere(competitor_id: @_competitor.id)?.set current: true
 
+      @_filter = new FellRace.Views.CollectionFilter
+        collection: @_performances
+        el: @$el.find('input')
+      @_filter.render()
+
     table = new FellRace.Views.ResultsTable
       collection: @_performances
       model: @model
