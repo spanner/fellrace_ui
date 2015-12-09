@@ -25,9 +25,9 @@ class FellRace.Views.HistoryRow extends Backbone.Marionette.ItemView
     "span.club": "club_name"
     "span.cat": "cat_name"
 
-    "span.forename": "fore"
-    "span.middlename": "middle"
-    "span.surname": "sur"
+    "span.forename": "forename"
+    "span.middlename": "middlename"
+    "span.surname": "surname"
 
     "a.name":
       attributes: [

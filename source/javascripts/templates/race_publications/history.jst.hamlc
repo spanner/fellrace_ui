@@ -5,6 +5,7 @@
   %span
     all-time results
   %span.since.addendum
+  %input.filter{type: 'text', name: "filter", placeholder: "Filter..."}
 
 %p
   %span.all_runs
@@ -18,9 +19,6 @@
     %span.competitors_count
     personal bests
     %a.addendum.full (show every performance)
-
-  .filterer
-    %input.filter{type: 'text', name: "filter", placeholder: "Filter..."}
 
   %p
     Results from alternative (bad weather/winter) courses are excluded from this table.

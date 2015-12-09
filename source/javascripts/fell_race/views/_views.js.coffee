@@ -26,11 +26,14 @@ class FellRace.Views.CollectionFilter extends Backbone.Marionette.ItemView
   onRender: =>
     @stickit()
     matcher = (model, term) =>
+      @$el.addClass "working"
       if term
         @collection.each (model) ->
           model.set unmatched: model.unmatches(term)
       else
         @clearMatches()
+      @$el.removeClass "working"
+
     @model.on "change:term", _.debounce(matcher, 250)
 
   clearMatches: =>
