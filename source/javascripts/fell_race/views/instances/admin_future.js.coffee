@@ -18,7 +18,7 @@ class FellRace.Views.AdminFutureInstance extends Backbone.Marionette.ItemView
     ".instance_name":
       observe: "name"
       onGet: "deSlugify"
-    "span.race_date": 
+    "span.race_date":
       observe: "date"
       onSet: "dateForStorage"
       onGet: "dateForDisplay"

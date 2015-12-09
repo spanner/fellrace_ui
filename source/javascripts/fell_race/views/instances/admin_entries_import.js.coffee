@@ -21,7 +21,7 @@ class FellRace.Views.AdminEntriesImport extends Backbone.Marionette.ItemView
     sex: "gender"
     dateofbirth: "dob"
 
-  _model_fields: ["forename","middlename","surname","name","club_name","category_name","dob","gender"]
+  _model_fields: ["forename","middlename","surname","name","email","club_name","category_name","dob","gender","emergency_contact_name","emergency_contact_phone"]
 
   initialize: ->
     @_entries = @model.entries
