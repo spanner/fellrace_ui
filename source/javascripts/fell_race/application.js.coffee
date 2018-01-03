@@ -9,7 +9,10 @@ root.FellRace = FellRace
 class FellRace.AppRouter extends Backbone.Marionette.AppRouter
   appRoutes:
     "": "indexMapView"
-    "races/:race_id": "showRace"
+    "races": ""
+    "races/:race_id": "publicMapView"
+    "admin/races/:race_id": "adminMapView"
+    
     
     
 
