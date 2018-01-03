@@ -81,7 +81,7 @@ class FellRace.Views.Picture extends Backbone.Marionette.ItemView
   readLocalFile: (file) =>
     if file?
       if @fileOk(file.name, file.size)
-        # job = _fellrace.announce("Reading file")
+        # job = _fr.announce("Reading file")
         reader = new FileReader()
         reader.onprogress = (e) -> 
           # job.setProgress(e)
@@ -94,7 +94,7 @@ class FellRace.Views.Picture extends Backbone.Marionette.ItemView
     if file = files[0]
       if @fileOk(file.name, file.bytes)
         url = file.link
-        # job = _fellrace.announce("Reading file #{file.name} from dropbox")
+        # job = _fr.announce("Reading file #{file.name} from dropbox")
         request = new XMLHttpRequest()
         request.responseType = "blob"
         request.onprogress = (e) -> 
@@ -131,11 +131,11 @@ class FellRace.Views.Picture extends Backbone.Marionette.ItemView
     
   complain: (error, filename, filesize) =>
     if error is "toobig"
-      _fellrace.notify "refusal", "Sorry: there is a limit of #{@size_limit}MB for these files and #{filename} is #{@niceSize(filesize)}. Please choose another image or make this one smaller before uploading."
+      _fr.notify "refusal", "Sorry: there is a limit of #{@size_limit}MB for these files and #{filename} is #{@niceSize(filesize)}. Please choose another image or make this one smaller before uploading."
     else if error is "notimage"
-      _fellrace.notify "refusal", "Sorry: #{filename} doesn't look like an image file. We can handle jpeg, png and gif files. Please choose another, or make sure that your file has the right extension."
+      _fr.notify "refusal", "Sorry: #{filename} doesn't look like an image file. We can handle jpeg, png and gif files. Please choose another, or make sure that your file has the right extension."
     else
-      _fellrace.notify "error", "Unknown file-selection error"
+      _fr.notify "error", "Unknown file-selection error"
 
   # drag and drop event handling
   
@@ -177,14 +177,14 @@ class FellRace.Views.Picture extends Backbone.Marionette.ItemView
       if url.match(/data:image/) and not url.match(/^\//)
         url
       else
-        "#{_fellrace.apiUrl()}/#{url}"
+        "#{_fr.apiUrl()}/#{url}"
 
   backgroundImageUrl: (url) =>
     if url
       if url.match(/data:image/)
         "background-image: url(#{url})"
       else if url.match(/^\//)
-        "background-image: url(#{_fellrace.apiUrl()}/#{url})"
+        "background-image: url(#{_fr.apiUrl()}/#{url})"
       else
         "background-image: url(#{url})"
   

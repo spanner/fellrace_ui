@@ -13,7 +13,7 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
       onGet: "calculateCharge"
 
   initialize: ->
-    @_competitor = _fellrace.getCurrentCompetitor()
+    @_competitor = _fr.getCurrentCompetitor()
     @_instance = @model.collection.instance
     @model.set("cost", @_instance.get("online_entry_fee"))
     @_payment = new FellRace.Models.Payment
@@ -60,13 +60,13 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     @model.set 
       stripe_token: token
       competitor_id: @_competitor.id
-      user_id: _fellrace.currentUser().id
+      user_id: _fr.currentUser().id
     @_edit_competitor_view.saveCompetitor =>
       @model.save().done () =>
         if @model.get("paid")
           @_competitor.entries.add @model
           @_instance.entries.add @model
-          _fellrace.navigate "/races/#{@model.get("race_slug")}/#{@model.get("instance_name")}/my_entry"
+          _fr.navigate "/races/#{@model.get("race_slug")}/#{@model.get("instance_name")}/my_entry"
         else
           @_payment.set
             error_param: @model.get("error").param

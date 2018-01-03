@@ -54,7 +54,7 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
   readLocalFile: (file) =>
     if file?
       if @fileOk(file.name, file.size)
-        # job = _fellrace.announce("Reading file")
+        # job = _fr.announce("Reading file")
         reader = new FileReader()
         reader.onprogress = (e) ->
           # job.setProgress(e)
@@ -101,11 +101,11 @@ class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
     
   complain: (error, filename, filesize) =>
     if error is "toobig"
-      _fellrace.notify "refusal", "Sorry: there is a limit of #{@size_limit}MB for these files and #{filename} is #{@niceSize(filesize)}."
+      _fr.notify "refusal", "Sorry: there is a limit of #{@size_limit}MB for these files and #{filename} is #{@niceSize(filesize)}."
     else if error is "notcsv"
-      _fellrace.notify "refusal", "Sorry: #{filename} doesn't look like a CSV file. Please choose another, or make sure that your file has the right extension."
+      _fr.notify "refusal", "Sorry: #{filename} doesn't look like a CSV file. Please choose another, or make sure that your file has the right extension."
     else
-      _fellrace.notify "error", "Unknown file-selection error"
+      _fr.notify "error", "Unknown file-selection error"
 
   fileNameOrDefault: (name) =>
     if name

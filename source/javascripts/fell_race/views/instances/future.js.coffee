@@ -128,7 +128,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
   onRender: =>
     $.in = @model
     @stickit()
-    if _fellrace.userConfirmed() and @model.entries.findWhere(competitor_id: _fellrace.getCurrentCompetitor().id)
+    if _fr.userConfirmed() and @model.entries.findWhere(competitor_id: _fr.getCurrentCompetitor().id)
       @model.set entered:true
     # @$el.find('.entry_count').text(@model.entries.size())
     @renderEntries() if @model.entries?.length
@@ -141,7 +141,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
     # this old version of marionette seems to leave a render gap, so we wait for the DOM to arrive.
     _.defer @model.setEntryCounts
     # hacky shortcut this, to bring down any wait spinners we have scattered around. Do it properly!
-    _fellrace.vent.trigger 'loaded'
+    _fr.vent.trigger 'loaded'
 
   renderClubChart: (model, data) =>
     @_clubs_chart = new Chartist.Pie '.clubs_chart.ct-chart', @model.get('club_data'),
@@ -205,7 +205,7 @@ class FellRace.Views.FutureInstance extends Backbone.Marionette.ItemView
   entryFormUrl: (url) =>
     if url
       if url.match(/^\//)
-        "#{_fellrace.apiUrl()}#{url}"
+        "#{_fr.apiUrl()}#{url}"
       else
         url
 

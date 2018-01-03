@@ -42,7 +42,7 @@ class FellRace.Models.UserSession extends Backbone.Model
   load: () =>
     if @authToken()
       @set state: FellRace.Models.UserSession.pendingState
-      $.getJSON("#{_fellrace.apiUrl()}/users/me").done(@setUser) #.fail(@unsetCookie)
+      $.getJSON("#{_fr.apiUrl()}/users/me").done(@setUser) #.fail(@unsetCookie)
 
   reset: () =>
     @user.clear()
@@ -82,7 +82,7 @@ class FellRace.Models.UserSession extends Backbone.Model
       @set "state", FellRace.Models.UserSession.unconfirmedState
 
   changedState: (model, value, options) =>
-    _fellrace.vent.trigger('auth.change', model, value)
+    _fr.vent.trigger('auth.change', model, value)
 
   authPending: =>
     @getState() is FellRace.Models.UserSession.pendingState
@@ -102,7 +102,7 @@ class FellRace.Models.UserSession extends Backbone.Model
   # All our auth has to span subdomains.
   #
   cookieDomain: () =>
-    ".#{_fellrace.domain()}"
+    ".#{_fr.domain()}"
 
   getCookie: () =>
     $.cookie('fellrace_blah')
@@ -113,10 +113,10 @@ class FellRace.Models.UserSession extends Backbone.Model
         domain: @cookieDomain()
         path: "/"
         expires: 7
-      _fellrace.vent.trigger "login:changed"
+      _fr.vent.trigger "login:changed"
 
   unsetCookie: () =>
     $.removeCookie 'fellrace_blah',
       domain: @cookieDomain()
       path: "/"
-    _fellrace.vent.trigger "login:changed"
+    _fr.vent.trigger "login:changed"

@@ -11,7 +11,7 @@ class FellRace.Models.Competitor extends FellRace.Model
       required: true
   
   urlRoot: =>
-    "#{_fellrace.apiUrl()}/competitors"
+    "#{_fr.apiUrl()}/competitors"
 
   initialize: ->
     super
@@ -25,7 +25,7 @@ class FellRace.Models.Competitor extends FellRace.Model
   build: =>
     @performances = new FellRace.Collections.Performances @get("performances"), competitor: @
     @entries = new FellRace.Collections.Entries @get("entries")
-    @entries.url = "#{_fellrace.apiUrl()}/entries"
+    @entries.url = "#{_fr.apiUrl()}/entries"
     @set performances_count: @performances.length
 
     @on "change:performances", (model, data) =>

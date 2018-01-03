@@ -6,10 +6,10 @@ class FellRace.Views.AdminCompetitorLayout extends FellRace.Views.LayoutView
     super
     view = new FellRace.Views.AdminCompetitor
       model: @model
-    _fellrace.mainRegion.show view
+    _fr.mainRegion.show view
 
   default: =>
-    _fellrace.closeRight()
+    _fr.closeRight()
 
 class FellRace.Views.AdminCompetitorsLayout extends FellRace.Views.LayoutView
   routes: =>
@@ -31,4 +31,4 @@ class FellRace.Views.AdminCompetitorsLayout extends FellRace.Views.LayoutView
               view: view
               param: id
         else
-          _fellrace.navigate "/runners/#{id}"
+          _fr.navigate "/runners/#{id}"

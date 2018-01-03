@@ -13,7 +13,7 @@ class FellRace.Views.SessionResetForm extends Backbone.Marionette.ItemView
       update: "checkValidity"
 
   initialize: () ->
-    @model = _fellrace.session
+    @model = _fr.session
 
   onRender: () =>
     @_form = @$el.find('form')
@@ -28,7 +28,7 @@ class FellRace.Views.SessionResetForm extends Backbone.Marionette.ItemView
     @$el.find('.error').remove()
     @_form.find('input[type="submit"]').disable()
     $.ajax
-      url: "#{_fellrace.apiUrl()}/users/password"
+      url: "#{_fr.apiUrl()}/users/password"
       type: "post"
       data:
         user:
@@ -38,7 +38,7 @@ class FellRace.Views.SessionResetForm extends Backbone.Marionette.ItemView
 
   succeed: () =>
     $.notify "success", "Password reset instructions sent to #{@model.get "email"}"
-    _fellrace.actionRegion.close()
+    _fr.actionRegion.close()
     # @_form.slideUp () =>
     #   @_confirmation.show()
 
@@ -62,7 +62,7 @@ class FellRace.Views.SessionResetForm extends Backbone.Marionette.ItemView
     value
 
   reconfirm: =>
-    _fellrace.user_actions().reconfirm()
+    _fr.user_actions().reconfirm()
 
   signIn: =>
-    _fellrace.user_actions().signIn()
+    _fr.user_actions().signIn()

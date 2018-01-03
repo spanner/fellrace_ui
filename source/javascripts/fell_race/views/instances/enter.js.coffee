@@ -13,19 +13,19 @@ class FellRace.Views.InstanceEnter extends Backbone.Marionette.ItemView
       ]
 
   initialize: ->
-    _fellrace.vent.on "auth.change", @render
+    _fr.vent.on "auth.change", @render
 
   onRender: () =>
     @stickit()
-    if _fellrace.userConfirmed()
-      @model.entries.url = "#{_fellrace.apiUrl()}/entries"
+    if _fr.userConfirmed()
+      @model.entries.url = "#{_fr.apiUrl()}/entries"
       @_entry = @model.entries.add(instance_id: @model.id)
       @_entry_view = new FellRace.Views.NewEntry
         model: @_entry
         el: @$el.find("section.entry")
       @_entry_view.render()
     else
-      _fellrace.user_actions().requestConfirmation()
+      _fr.user_actions().requestConfirmation()
 
   racePublicationUrl: (slug) =>
     "/races/#{slug}"

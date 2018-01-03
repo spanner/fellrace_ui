@@ -1,7 +1,7 @@
 class FellRace.Collections.Clubs extends Backbone.Collection
   model: FellRace.Models.Club
   url: ->
-    "#{_fellrace.apiUrl()}/clubs"
+    "#{_fr.apiUrl()}/clubs"
 
   findOrAdd: (opts) =>
     if model = @get(opts.id)

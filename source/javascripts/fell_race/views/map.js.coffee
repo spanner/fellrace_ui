@@ -1,6 +1,7 @@
 class FellRace.Views.Map extends Backbone.Marionette.ItemView
   template: 'map'
   className: 'gmap'
+
   mapConfig: =>
     center: new google.maps.LatLng @startLat(), @startLng()
     zoom: @startZoom()
@@ -34,17 +35,29 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
 
   onRender: () =>
     throw new Error("Google maps API is not loaded.") unless google and google.maps
-    @_gmap = new google.maps.Map @$el.find('.map_holder')[0], @mapConfig()
-    google.maps.event.addListener @_gmap, "dragend", @setState
-    @addMapTypes()
-    @userMarker = new FellRace.Views.UserMarker?(
-      model: _fellrace.currentUser?()
-      map: @_gmap
-    )
+    @initBingTiles().done =>
+      @_gmap = new google.maps.Map @$el.find('.map_holder')[0], @mapConfig()
+      google.maps.event.addListener @_gmap, "dragend", @setState
+      @addMapTypes()
+      @userMarker = new FellRace.Views.UserMarker
+        model: _fr.currentUser?()
+        map: @_gmap
+      @_polys = new FellRace.Views.RacePublicationPolylines
+        collection: _fr.race_publications
+        map: @_gmap
 
-    @_polys = new FellRace.Views.RacePublicationPolylines
-      collection: _fellrace.race_publications
-      map: @_gmap
+  initBingTiles: =>
+    apikey = _fr.config('bing_api_key')
+    inited = $.Deferred()
+    getter = $.getJSON("https://dev.virtualearth.net/REST/V1/Imagery/Metadata/Road?output=json&include=ImageryProviders&key=#{apikey}").done (response) =>
+      if res = response.resourceSets[0].resources[0]
+        @_bing =
+          url: res.imageUrl
+          subdomains: res.imageUrlSubdomains
+          w: res.imageWidth
+          h: res.imageHeight
+      inited.resolve()
+    inited.promise()
 
   showRace: (race) =>
     @removeRace()
@@ -58,7 +71,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     @_race_poly = null
 
   indexView: =>
-    _fellrace.race_publications.deselectAll()
+    _fr.race_publications.deselectAll()
 
   publicView: =>
     @removeRace()
@@ -83,7 +96,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
           @setOptions model.getMapOptions()
         else
           @_gmap.fitBounds bounds
-    @_gmap.panBy _fellrace.offsetX(), 0
+    @_gmap.panBy _fr.offsetX(), 0
 
   setState: =>
     localStorage["fr_lat"] = @_gmap.center.lat()
@@ -91,7 +104,6 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     localStorage["fr_zoom"] = @_gmap.zoom
 
   addMapTypes: =>
-    
     # @_gmap.mapTypes.set "OOM", new google.maps.ImageMapType
     #   getTileUrl: (coord, zoom) ->
     #     return "https://tiler#{"123".charAt(Math.floor(Math.random() * 2))}.oobrien.com/oterrain/#{zoom}/#{coord.x}/#{coord.y}.png"
@@ -102,38 +114,45 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     #
     @_gmap.mapTypes.set "Open", new google.maps.ImageMapType
       getTileUrl: (coord, zoom) ->
-        return "https://#{"abc".charAt(Math.floor(Math.random() * 2))}.tile.thunderforest.com/landscape/#{zoom}/#{coord.x}/#{coord.y}.png?apikey=f42f7cc1c70d465588f47c2a78648ad7"
+        apikey = _fr.config('osm_api_key')
+        "https://#{"abc".charAt(Math.floor(Math.random() * 2))}.tile.thunderforest.com/landscape/#{zoom}/#{coord.x}/#{coord.y}.png?apikey=#{apikey}"
       tileSize: new google.maps.Size(256, 256)
       name: "OSM"
       maxZoom: 18
 
+    bu = @_bing.url
+    bs = @_bing.subdomains
+    
     @_gmap.mapTypes.set "OS", new google.maps.ImageMapType
       getTileUrl: (coord, zoom) =>
-        "https://t#{"0123".charAt(Math.floor(Math.random() * 3))}.ssl.ak.tiles.virtualearth.net/tiles/r#{@tileXYToQuadKey(coord.x,coord.y,zoom)}.png?g=3467&productSet=mmOS"
-      tileSize: new google.maps.Size(256, 256)
+        apikey = _fr.config('bing_api_key')
+        url = bu.replace('{subdomain}', bs[Math.floor(Math.random() * bs.length)])
+                .replace('{quadkey}', @tileXYToQuadKey(coord.x,coord.y,zoom))
+                .replace('{culture}', "en-GB")
+        "#{url}&productSet=mmOS&key=#{apikey}&c4w=1"
+      tileSize: new google.maps.Size(@_bing.w, @_bing.h)
       name: "OS"
       maxZoom: 17
       minZoom: 10
 
     shadow = new google.maps.ImageMapType
       getTileUrl: (coord, zoom) ->
-        "https://#{"abc".charAt(Math.floor(Math.random() * 2))}.tiles.wmflabs.org/hillshading/#{zoom}/#{coord.x}/#{coord.y}.png"
-        # "https://toolserver.org/~cmarqu/hill/#{zoom}/#{coord.x}/#{coord.y}.png"
+        "http://#{"abc".charAt(Math.floor(Math.random() * 2))}.tiles.wmflabs.org/hillshading/#{zoom}/#{coord.x}/#{coord.y}.png"
       tileSize: new google.maps.Size(256, 256)
       name: "OS"
       maxZoom: 17
       minZoom: 10
 
-    # unless document.all? && document.documentMode? && document.documentMode < 9
-    #   @_gmap.overlayMapTypes.insertAt(0, shadow)
-    #   google.maps.event.addListener @_gmap, 'maptypeid_changed', =>
-    #     type = @_gmap.getMapTypeId()
-    #     if type is "OS" or type is "roadmap" or type is "OOM"
-    #       shadow.setOpacity(0.8)
-    #     else
-    #       shadow.setOpacity(0)
-    #
-    #   google.maps.event.trigger @_gmap, "maptypeid_changed"
+    unless document.all? && document.documentMode? && document.documentMode < 9
+      @_gmap.overlayMapTypes.insertAt(0, shadow)
+      google.maps.event.addListener @_gmap, 'maptypeid_changed', =>
+        type = @_gmap.getMapTypeId()
+        if type is "OS" or type is "roadmap" or type is "OSM"
+          shadow.setOpacity(0.8)
+        else
+          shadow.setOpacity(0)
+
+      google.maps.event.trigger @_gmap, "maptypeid_changed"
 
   tileXYToQuadKey: (tileX, tileY, levelOfDetail) ->
     quadKey = ""

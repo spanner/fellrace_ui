@@ -7,17 +7,17 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
 
   handle: =>
     super
-    _fellrace.vent.on 'login:changed', =>
+    _fr.vent.on 'login:changed', =>
       @model.fetchPermissions()
 
   initialize: ->
-    _fellrace.mainRegion.show new FellRace.Views.RacePublication
+    _fr.mainRegion.show new FellRace.Views.RacePublication
       model: @model
     $.r = @model
     super
 
   default: =>
-    _fellrace.closeRight()
+    _fr.closeRight()
     @_previous =
       route: "default"
 
@@ -45,12 +45,12 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
             @instance instance_name,path
       else
         $.notify "error", "This instance doesn't exist. Redirecting to the race page."
-        _fellrace.navigate "/races/#{@model.get("slug")}", replace:true
+        _fr.navigate "/races/#{@model.get("slug")}", replace:true
 
   checkpoint: (slug,path) =>
     if cp = @model.checkpoints.findWhere(slug: slug)
-      _fellrace.closeRight()
-      _fellrace.moveMapTo cp
+      _fr.closeRight()
+      _fr.moveMapTo cp
     @_previous =
       route: "checkpoint"
       param: slug
@@ -58,7 +58,7 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
   history: (path) =>
     view = new FellRace.Views.RaceHistory
       model: @model
-    _fellrace.extraContentRegion.show view
+    _fr.extraContentRegion.show view
     @_previous =
       route: "history"
 
@@ -68,14 +68,14 @@ class FellRace.Views.RacePublicationsLayout extends FellRace.Views.LayoutView
     ":slug(/*path)": @racePublication
 
   index: =>
-    _fellrace.mainRegion.show new FellRace.Views.RacePublicationsIndex
-      collection: _fellrace.race_publications
-    _fellrace.closeRight()
+    _fr.mainRegion.show new FellRace.Views.RacePublicationsIndex
+      collection: _fr.race_publications
+    _fr.closeRight()
     @_previous =
       route: "index"
 
   racePublication: (slug,path) =>
-    model = _fellrace.race_publications.add(slug: slug)
+    model = _fr.race_publications.add(slug: slug)
     model.fetch
       success: =>
         if @_previous.route is "racePublication" and @_previous.param is slug
@@ -89,10 +89,10 @@ class FellRace.Views.RacePublicationsLayout extends FellRace.Views.LayoutView
             param: slug
             view: layout
       error: (model,response) =>
-        $.getJSON "#{_fellrace.apiUrl()}/races/#{slug}/permissions", (data) =>
+        $.getJSON "#{_fr.apiUrl()}/races/#{slug}/permissions", (data) =>
           if data.permissions.can_edit
             $.notify('error', "This race needs to be published.")
-            _fellrace.navigate "/admin/races/#{slug}", replace:true
+            _fr.navigate "/admin/races/#{slug}", replace:true
           else
             $.notify('error', "#{slug}.fellrace.org.uk does not exist.")
-            _fellrace.navigate "/", replace:true
+            _fr.navigate "/", replace:true

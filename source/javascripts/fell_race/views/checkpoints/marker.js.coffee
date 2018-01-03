@@ -68,7 +68,7 @@ class FellRace.Views.CheckpointMarker extends MapStick.Marker
     selected is true
 
   click: =>
-    _fellrace.navigate "/races/#{@model.race_publication.get("slug")}/checkpoints/#{@model.get("slug")}"
+    _fr.navigate "/races/#{@model.race_publication.get("slug")}/checkpoints/#{@model.get("slug")}"
 
 class FellRace.Views.CheckpointMarkers extends MapStick.OverlayCollection
   itemView: FellRace.Views.CheckpointMarker

@@ -4,7 +4,7 @@ class FellRace.Models.Club extends FellRace.Model
     entry_count: 0
 
   urlRoot: ->
-    "#{_fellrace.apiUrl()}/clubs"
+    "#{_fr.apiUrl()}/clubs"
 
   build: ->
     @competitors = new FellRace.Collections.Competitors(@get("competitors")||[])

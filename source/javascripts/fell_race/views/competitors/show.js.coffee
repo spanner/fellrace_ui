@@ -61,7 +61,7 @@ class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
     # ".disown":
     #   observe: "user_id"
     #   visible: (val) ->
-    #     val is _fellrace.currentUser()?.get "id"
+    #     val is _fr.currentUser()?.get "id"
     #   visibleFn: "inlineBlock"
     #
     # ".edit":
@@ -92,7 +92,7 @@ class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
       el: @$el.find ".entries"
     entries_view.render()
 
-    if _fellrace.userConfirmed() and @model.get("permissions")?.can_edit
+    if _fr.userConfirmed() and @model.get("permissions")?.can_edit
       match_table = new FellRace.Views.MatchTable
         model: @model
         el: @$el.find(".matches")
@@ -112,22 +112,22 @@ class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
       if url.match(/data:image/)
         "background-image: url(#{url})"
       else if url.match(/^\//)
-        "background-image: url(#{_fellrace.apiUrl()}#{url})"
+        "background-image: url(#{_fr.apiUrl()}#{url})"
       else
         "background-image: url(#{url})"
 
   # claim: =>
-  #   if _fellrace.userSignedIn()
-  #     @model.save user_id: _fellrace.currentUser().get("id"),
+  #   if _fr.userSignedIn()
+  #     @model.save user_id: _fr.currentUser().get("id"),
   #       success: (model, data) =>
-  #         if data.user_id is _fellrace.currentUser().get("id")
+  #         if data.user_id is _fr.currentUser().get("id")
   #           $.notify "success", "The profile '#{@model.get "forename"} #{@model.get "surname"}' now belongs to you."
   #         else
   #           $.notify "success", "Merge request sent to admin."
   #   else
   #     $.notify "flash", "You have to be signed in to claim a competitor."
   #     #TODO show a competitor claim form instead of basic signIn
-  #     _fellrace.user_actions().signIn()
+  #     _fr.user_actions().signIn()
   #
   # disown: =>
   #   @model.save user_id: null,

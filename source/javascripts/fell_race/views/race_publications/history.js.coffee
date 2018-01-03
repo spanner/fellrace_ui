@@ -72,7 +72,7 @@ class FellRace.Views.RaceHistory extends Backbone.Marionette.ItemView
       el: @table_el
     table.render()
     # hacky shortcut, this, to bring down any wait spinners we have scattered around. Do it properly!
-    _fellrace.vent.trigger 'loaded'
+    _fr.vent.trigger 'loaded'
 
   racePublicationUrl: (slug) =>
     "/races/#{slug}"

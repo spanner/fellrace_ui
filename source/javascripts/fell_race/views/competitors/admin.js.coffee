@@ -59,4 +59,4 @@ class FellRace.Views.AdminCompetitor extends Backbone.Marionette.ItemView
 
   save: =>
     @model.save(club_name: @_club_input.val()).done =>
-      _fellrace.navigate "/runners/#{@model.id}"
+      _fr.navigate "/runners/#{@model.id}"

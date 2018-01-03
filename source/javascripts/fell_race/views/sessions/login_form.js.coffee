@@ -13,11 +13,11 @@ class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
 
   initialize: (opts={}) ->
     @opts = opts
-    @model = _fellrace.session
-    _fellrace.vent.on "auth.change", @render
+    @model = _fr.session
+    _fr.vent.on "auth.change", @render
 
   onRender: () =>
-    state = _fellrace.session.getState()
+    state = _fr.session.getState()
     # this is needed because replacing the view from a marionette region
     # has the side effect of detaching all its events.
     @delegateEvents(@events)
@@ -34,7 +34,7 @@ class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
     e.preventDefault() if e
     @$el.find('.error').remove()
     $.ajax
-      url: "#{_fellrace.config("api_url")}/users/sign_in.json"
+      url: "#{_fr.config("api_url")}/users/sign_in.json"
       type: "post"
       data:
         user:
@@ -44,22 +44,22 @@ class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
       error: @fail
 
   succeed: (json) =>
-    _fellrace.actionRegion.close()
+    _fr.actionRegion.close()
     $.notify "success", "Sign in successful"
-    _fellrace.navigate(@opts.destination_url, replace:true) if @opts.destination_url
+    _fr.navigate(@opts.destination_url, replace:true) if @opts.destination_url
     @model.setUser(json)
 
   fail: (err) =>
     console.log "login error", err
 
   forgotten: =>
-    _fellrace.user_actions().requestReset()
+    _fr.user_actions().requestReset()
 
   reconfirm: =>
-    _fellrace.user_actions().reconfirm()
+    _fr.user_actions().reconfirm()
 
   signUp: =>
-    _fellrace.user_actions().signUp(@opts)
+    _fr.user_actions().signUp(@opts)
 
   submit: =>
     @login()

@@ -37,7 +37,7 @@ class FellRace.Views.Attachment extends Backbone.Marionette.ItemView
     @stickit()
 
   externalUrl: (url) =>
-    "//api.#{_fellrace.domain()}#{url}"
+    "//api.#{_fr.domain()}#{url}"
 
 class FellRace.Views.AttachmentsList extends Backbone.Marionette.CollectionView
   itemView: FellRace.Views.Attachment

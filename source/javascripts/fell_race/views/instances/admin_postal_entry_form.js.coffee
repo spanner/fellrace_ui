@@ -87,11 +87,11 @@ class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
     
   complain: (error, filename, filesize) =>
     if error is "toobig"
-      _fellrace.notify "refusal", "Sorry: there is a limit of #{@size_limit}MB for these files and #{filename} is #{@niceSize(filesize)}."
+      _fr.notify "refusal", "Sorry: there is a limit of #{@size_limit}MB for these files and #{filename} is #{@niceSize(filesize)}."
     else if error is "wrongtype"
-      _fellrace.notify "refusal", "Sorry: #{filename} doesn't look like a PDF file. Please choose another, or make sure that your file has the right extension."
+      _fr.notify "refusal", "Sorry: #{filename} doesn't look like a PDF file. Please choose another, or make sure that your file has the right extension."
     else
-      _fellrace.notify "error", "Unknown file-selection error"
+      _fr.notify "error", "Unknown file-selection error"
 
   fileNameOrDefault: (name) =>
     if name

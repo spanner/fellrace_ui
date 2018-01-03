@@ -57,7 +57,7 @@ class FellRace.Views.NewInstance extends Backbone.Marionette.ItemView
   _names_taken: []
 
   initialize: ->
-    $.getJSON "#{_fellrace.apiUrl()}/races/#{@model.get("race_slug")}/instances/taken", (response) =>
+    $.getJSON "#{_fr.apiUrl()}/races/#{@model.get("race_slug")}/instances/taken", (response) =>
       @_names_taken = response
     @model.on "change:date", @setName
 
@@ -90,7 +90,7 @@ class FellRace.Views.NewInstance extends Backbone.Marionette.ItemView
     "/admin/races/#{slug}"
 
   redirect: =>
-    _fellrace.navigate "/admin/races/#{@model.get("race_slug")}/#{@model.get("name")}"
+    _fr.navigate "/admin/races/#{@model.get("race_slug")}/#{@model.get("name")}"
 
   dateForDisplay: (string) =>
     new moment(string, @storage_date_format).format(@display_date_format) if string

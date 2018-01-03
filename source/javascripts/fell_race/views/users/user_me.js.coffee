@@ -22,13 +22,13 @@ class FellRace.Views.Me extends Backbone.Marionette.ItemView
       ]
 
   initialize: ->
-    @model = _fellrace.currentUser()
+    @model = _fr.currentUser()
     @render()
 
   onRender: =>
     @stickit()
     events_list = new FellRace.Views.EventsList
-      collection: _fellrace.events
+      collection: _fr.events
       el: @$el.find ".events"
     events_list.render()
     if @model.hasCompetitor()
@@ -38,4 +38,4 @@ class FellRace.Views.Me extends Backbone.Marionette.ItemView
       competitor_view.render()
 
   newEvent: =>
-    _fellrace.events.add(user_id: @model.get("id"))
+    _fr.events.add(user_id: @model.get("id"))

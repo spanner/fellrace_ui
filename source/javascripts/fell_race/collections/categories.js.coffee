@@ -2,7 +2,7 @@ class FellRace.Collections.Categories extends Backbone.Collection
   model: FellRace.Models.Category
 
   url: ->
-    "#{_fellrace.apiUrl()}/categories"
+    "#{_fr.apiUrl()}/categories"
 
   findOrAddBy: (opts) =>
     if model = @findWhere(opts)

@@ -15,7 +15,7 @@ class FellRace.Models.Race extends FellRace.Model
     !@get("slug")
 
   url: =>
-    "#{_fellrace.apiUrl()}/races/#{@get("slug")}"
+    "#{_fr.apiUrl()}/races/#{@get("slug")}"
 
   build: =>
     @attachments = new FellRace.Collections.Attachments(@get("attachments"), race: @)
@@ -112,7 +112,7 @@ class FellRace.Models.Race extends FellRace.Model
       published_json: @jsonForPublication()
     $.notify "publishing race"
     $.post "#{@url()}/publish", data, (response) =>
-      _fellrace.navigate("/races/#{@get("slug")}")
+      _fr.navigate("/races/#{@get("slug")}")
     , 'json'
 
   jsonForPublication: =>

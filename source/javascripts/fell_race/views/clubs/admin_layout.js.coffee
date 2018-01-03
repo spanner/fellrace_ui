@@ -5,6 +5,6 @@ class FellRace.Views.AdminClubsLayout extends FellRace.Views.LayoutView
   index: =>
     unless @_previous.route is "index"
       more_view = new FellRace.Views.AdminClubsTable
-      _fellrace.extraContentRegion.show more_view
+      _fr.extraContentRegion.show more_view
       @_previous =
         route: "index"

@@ -9,13 +9,13 @@ root.FellRace = FellRace
 
 class FellRace.Application extends Backbone.Marionette.Application
   regions:
-    gmapRegion: '#gmap'
-    contentRegion: '#content'
-    mainRegion: 'main'
-    user_controlsRegion: '#user_controls'
-    noticeRegion: '#notice'
-    actionRegion: '#action'
-    extraContentRegion: 'section#extra'
+    gmap: '#gmap'
+    content: '#content'
+    main: 'main'
+    user_controls: '#user_controls'
+    notice: '#notice'
+    action: '#action'
+    extraContent: 'section#extra'
 
   months:
     full: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
@@ -27,19 +27,19 @@ class FellRace.Application extends Backbone.Marionette.Application
     top: ''
     left: ''
 
-  constructor: (options={}) ->
-    super
+  initialize: (opts={}) ->
+    root._fr = @
     @original_backbone_sync = Backbone.sync
     Backbone.sync = @sync
+    Backbone.Marionette.Renderer.render = @render
+    $(document).ajaxSend @sendAuthenticationHeader
 
-    root._fellrace = @
+    # TODO turn this into a normal function of _fr
+    # and stop using the vent anyway
     $.notify = (type, argument) =>
       @vent.trigger(type, argument)
 
-    $(document).ajaxSend @sendAuthenticationHeader
-    Backbone.Marionette.Renderer.render = @render
-
-    @addRegions @regions
+    #TODO this has to go in the UI view and then get less strange
     @actionRegionSetup()
 
     @_config = new FellRace.Config(options.config)
@@ -48,54 +48,45 @@ class FellRace.Application extends Backbone.Marionette.Application
     Stripe?.setPublishableKey @config("stripe_publishable_key")
 
     @session = new FellRace.Models.UserSession()
+    @clubs = new FellRace.Collections.Clubs([])
+    @categories = new FellRace.Collections.Categories([])
+    @categories.fetch()
+
+    #TODO move these to the mapping view: they're used for drawing routes
     @race_publications = new FellRace.Collections.RacePublications([])
     @race_publications.fetch(remove: false)
 
+    #TODO get these out of here
+    # they belong in FellRace.Views.IndexView
+    # and stop using datey collection classes anyway.
     @future_instances = new FellRace.Collections.PublicFutureInstances([])
     @past_instances = new FellRace.Collections.PublicPastInstances([])
     @future_instances.fetch()
     @past_instances.fetch()
 
-    @clubs = new FellRace.Collections.Clubs([])
-    @categories = new FellRace.Collections.Categories([])
-    @categories.fetch()
 
+  #TODO minimise application:
+  # move regions into a UI view
+  # move actions into a session view
+  # wait for map to load
+  # route with ui functions
+  onStart: =>
     @mapView = new FellRace.Views.Map()
-    @gmapRegion.show @mapView
-    @user_controlsRegion.show new FellRace.Views.UserControls()
+    @getRegion('gmap').show @mapView
+    @getRegion('user_controls').show new FellRace.Views.UserControls()
     @listenToToggle()
 
-    @noticeRegion.show new Notifier model: @vent, wait: 4000
+    @getRegion('notice').show new Notifier model: @vent, wait: 4000
     @session.load()
+
     @router = new FellRace.BaseRouter
     @content = $('#content')
-    view = $(window)
-
     Backbone.history.start
       pushState: true
       root: '/'
 
-  sync: (method, model, opts) =>
-      # unless method is "read"
-        # job = opts.job || @announce("Saving")
-        # opts.beforeSend = (xhr, settings) ->
-        #   settings.xhr = () ->
-        #     xhr = new window.XMLHttpRequest()
-        #     xhr.upload.addEventListener "progress", (e) ->
-        #       job.setProgress e
-        #     , false
-        #     xhr
-        # opts.success = ->
-        #   job.setCompleted true
-        # opts.error = ->
-      @original_backbone_sync method, model, opts
 
-  apiUrl: =>
-    @_api_url
-
-  domain: =>
-    @_domain
-
+  #TODO move toggle to UI view
   listenToToggle: =>
     $("#view_toggle").on "click", =>
       if @content.hasClass("collapsed")
@@ -110,9 +101,8 @@ class FellRace.Application extends Backbone.Marionette.Application
     else
       -10 / 2
 
-  moveMapTo: (model,zoom) =>
-    @mapView.moveTo model, zoom
 
+  #TODO move route handlers to UI view
   showRace: (race) =>
     @mapView.showRace race
 
@@ -126,12 +116,15 @@ class FellRace.Application extends Backbone.Marionette.Application
     @mapView.adminView()
 
   toPublicOrHome: =>
-    _fellrace.navigate Backbone.history.fragment.match(/admin(.+)/)?[1] || "/"
+    _fr.navigate Backbone.history.fragment.match(/admin(.+)/)?[1] || "/"
 
-  #TODO: This should be in a subclass of Region
-  #
+
+  #TODO 1. move to UI view
+  # 2. what is this anyway?
+  # 3. and why isn't it encapsulated in a View?
   actionRegionSetup: =>
-    @actionRegion
+    action_region = @getRegion('action')
+    action_region
       .on "show", (view) ->
         @$el.show()
         @$el.find("a.close, a.hide, a.cancel").on "click", =>
@@ -143,9 +136,9 @@ class FellRace.Application extends Backbone.Marionette.Application
     $(document).keyup (e) =>
       code = e.keyCode || e.which
       if code is 27
-        @actionRegion.close()
+        action_region.close()
       else if code is 13
-        @actionRegion.currentView.trigger("submit") if @actionRegion.currentView
+        action_region.currentView.trigger("submit") if action_region.currentView
 
   closeRight: =>
     @extraContentRegion.close()
@@ -156,20 +149,11 @@ class FellRace.Application extends Backbone.Marionette.Application
   getCategories: () =>
     @categories
 
-  ## Overrides
-  #
-  # We take over rendering to use our JST templates, which are in fact haml_coffee.
-  #
-  render: (template, data) ->
-    if template
-      path = "templates/#{template}"
-      throw("Template '" + path + "' not found!") unless JST[path]
-      JST[path](data)
-    else
-      ""
 
+
+  #TODO Move to UI view and turn these into route handlers instead of click actions.
+  #
   user_actions: =>
-    #TODO: intervene whenever someone is signed in but not confirmed.
     resetPassword: (uid, token) =>
       @actionRegion.show(new FellRace.Views.SessionPasswordForm({uid: uid, token: token}))
     requestReset: =>
@@ -196,11 +180,18 @@ class FellRace.Application extends Backbone.Marionette.Application
     menu: =>
       @actionRegion.show(new FellRace.Views.UserActionMenu())
 
+  #TODO These will need to be wrapped in a withMap promise handler.
   getMap: =>
     @mapView?.getMap()
 
   setMapOptions: (opts) =>
     @mapView?.setOptions(opts)
+
+  moveMapTo: (model,zoom) =>
+    @mapView.moveTo model, zoom
+
+
+  # housekeeping can stay here
 
   currentUser: =>
     @session.user
@@ -218,6 +209,38 @@ class FellRace.Application extends Backbone.Marionette.Application
     #TODO: repopulate competitor before entry process begins.
     @currentUser()?.getCompetitor()
 
+
+  # only these foundations should really be here.
+
+  sync: (method, model, opts) =>
+      # unless method is "read"
+        # job = opts.job || @announce("Saving")
+        # opts.beforeSend = (xhr, settings) ->
+        #   settings.xhr = () ->
+        #     xhr = new window.XMLHttpRequest()
+        #     xhr.upload.addEventListener "progress", (e) ->
+        #       job.setProgress e
+        #     , false
+        #     xhr
+        # opts.success = ->
+        #   job.setCompleted true
+        # opts.error = ->
+      @original_backbone_sync method, model, opts
+
+  apiUrl: =>
+    @_api_url
+
+  domain: =>
+    @_domain
+
+  render: (template, data) ->
+    if template
+      path = "templates/#{template}"
+      throw("Template '" + path + "' not found!") unless JST[path]
+      JST[path](data)
+    else
+      ""
+
   navigate: (route, {trigger:trigger, replace:replace}={}) =>
     trigger ?= true
     replace ?= false
@@ -229,3 +252,7 @@ class FellRace.Application extends Backbone.Marionette.Application
   sendAuthenticationHeader: (e, request) =>
     if token = @session?.authToken()
       request.setRequestHeader("Authorization", "Token token=#{token}")
+
+
+  # TODO: add logging
+  # add error-trapping and reporting

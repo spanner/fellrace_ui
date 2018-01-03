@@ -8,10 +8,10 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
     super
     view = new FellRace.Views.Race
       model: @model
-    _fellrace.mainRegion.show view
+    _fr.mainRegion.show view
 
   default: =>
-    _fellrace.closeRight()
+    _fr.closeRight()
 
   instance: (instance_name,path) =>
     if instance = @model.past_instances.findWhere(name: instance_name)
@@ -23,17 +23,17 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
 
     if instance
       instance.fetch()
-      _fellrace.extraContentRegion.show view
+      _fr.extraContentRegion.show view
     else
       $.notify "error", "This instance doesn't exist"
-      _fellrace.navigate "/admin/races/#{@model.get("slug")}", replace:true
+      _fr.navigate "/admin/races/#{@model.get("slug")}", replace:true
 
   newInstance: =>
     model = new FellRace.Models.Instance(race_slug:@model.get("slug"),race_name:@model.get("name"))
     model.urlRoot = "#{@model.url()}/instances"
     view = new FellRace.Views.NewInstance
       model: model
-    _fellrace.extraContentRegion.show view
+    _fr.extraContentRegion.show view
 
 class FellRace.Views.RacesLayout extends FellRace.Views.LayoutView
   routes: =>
@@ -46,7 +46,7 @@ class FellRace.Views.RacesLayout extends FellRace.Views.LayoutView
       model = new FellRace.Models.Race slug: slug
       model.fetch
         success: =>
-          _fellrace.showRace model
+          _fr.showRace model
           view = new FellRace.Views.RaceLayout
             model: model
             path: path
@@ -55,4 +55,4 @@ class FellRace.Views.RacesLayout extends FellRace.Views.LayoutView
             param: model
             view: view
         error: =>
-          _fellrace.navigate "/races/#{slug}"
+          _fr.navigate "/races/#{slug}"

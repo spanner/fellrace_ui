@@ -7,10 +7,10 @@ class FellRace.Views.ClubLayout extends FellRace.Views.LayoutView
     super
     view = new FellRace.Views.Club
       model: @model
-    _fellrace.mainRegion.show view
+    _fr.mainRegion.show view
 
   default: =>
-    _fellrace.closeRight()
+    _fr.closeRight()
     @_previous =
       route: "default"
 
@@ -31,7 +31,7 @@ class FellRace.Views.ClubsLayout extends FellRace.Views.LayoutView
     ":id(/)": @club
 
   default: =>
-    _fellrace.closeRight()
+    _fr.closeRight()
     $.notify "error", "no 'runners' page yet"
     @_previous =
       route: "default"

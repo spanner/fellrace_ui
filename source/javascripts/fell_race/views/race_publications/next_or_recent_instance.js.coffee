@@ -123,14 +123,14 @@ class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
   entryFormUrl: (url) =>
     if url
       if url.match(/^\//)
-        "#{_fellrace.apiUrl()}#{url}"
+        "#{_fr.apiUrl()}#{url}"
       else
         url
 
   linkWorking: (e) =>
     if link = e.currentTarget
       $(link).addClass('working')
-      _fellrace.vent.once 'loaded', () ->
+      _fr.vent.once 'loaded', () ->
         $(link).removeClass('working')
 
   ifFuture: (date) =>

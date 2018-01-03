@@ -46,7 +46,7 @@ class FellRace.BaseRouter extends Backbone.Router
     router.handle path
 
   admin: (path) =>
-    if _fellrace.userSignedIn()
+    if _fr.userSignedIn()
       if @_previous.route is "admin"
         @_previous.router.handle path
       else
@@ -55,13 +55,13 @@ class FellRace.BaseRouter extends Backbone.Router
         @_previous =
           route: "admin"
           router: router
-      _fellrace.vent.once "login:changed", =>
-        _fellrace.toPublicOrHome()
-    else if _fellrace.authPending()
-      _fellrace.vent.once "login:changed", =>
+      _fr.vent.once "login:changed", =>
+        _fr.toPublicOrHome()
+    else if _fr.authPending()
+      _fr.vent.once "login:changed", =>
         @admin path
     else
-      _fellrace.toPublicOrHome()
+      _fr.toPublicOrHome()
 
 
 class FellRace.PublicRouter extends FellRace.Router
@@ -78,20 +78,20 @@ class FellRace.PublicRouter extends FellRace.Router
     "*path": "index"
 
   initialize: ->
-    _fellrace.publicMapView()
+    _fr.publicMapView()
     super
 
   index: =>
     unless @_previous.route is "index"
-      _fellrace.indexMapView()
+      _fr.indexMapView()
       view = new FellRace.Views.IndexView
-      _fellrace.mainRegion.show view
-      _fellrace.closeRight()
+      _fr.mainRegion.show view
+      _fr.closeRight()
       @_previous =
         route: "index"
 
   events: (path) =>
-    _fellrace.navigate "/races/#{path}", replace: true
+    _fr.navigate "/races/#{path}", replace: true
 
   racePublications: (path) =>
     if @_previous.route is "race_publications"
@@ -124,7 +124,7 @@ class FellRace.PublicRouter extends FellRace.Router
         view: view
 
   users: (path) =>      
-    if _fellrace.userSignedIn()
+    if _fr.userSignedIn()
       if @_previous.route is "users"
         @_previous.view.handle path
       else
@@ -133,29 +133,29 @@ class FellRace.PublicRouter extends FellRace.Router
         @_previous =
           route: "users"
           view: view
-      _fellrace.vent.on "login:changed", =>
-        _fellrace.navigate "/"
+      _fr.vent.on "login:changed", =>
+        _fr.navigate "/"
     else
-      if _fellrace.authPending()
-        _fellrace.vent.once "login:changed", =>
+      if _fr.authPending()
+        _fr.vent.once "login:changed", =>
           @users path
       else
-        _fellrace.navigate "/"
+        _fr.navigate "/"
 
   confirmUser: (uid,token) =>
     @index()
-    _fellrace.actionRegion.show(new FellRace.Views.SessionConfirmationForm({uid: uid, token: token}))
+    _fr.actionRegion.show(new FellRace.Views.SessionConfirmationForm({uid: uid, token: token}))
 
   resetPassword: (uid,token) =>
     @index()
-    _fellrace.actionRegion.show(new FellRace.Views.SessionPasswordForm({uid: uid, token: token}))
+    _fr.actionRegion.show(new FellRace.Views.SessionPasswordForm({uid: uid, token: token}))
 
   page: (page_name) =>
     view = new FellRace.Views.Page
       template: "pages/#{page_name}"
-    _fellrace.indexMapView()
-    _fellrace.mainRegion.show view
-    _fellrace.closeRight()
+    _fr.indexMapView()
+    _fr.mainRegion.show view
+    _fr.closeRight()
 
 
 class FellRace.AdminRouter extends FellRace.Router
@@ -165,7 +165,7 @@ class FellRace.AdminRouter extends FellRace.Router
     "runners(/*path)": "competitors"
 
   initialize: ->
-    _fellrace.adminMapView()
+    _fr.adminMapView()
     super
 
   races: (path) =>

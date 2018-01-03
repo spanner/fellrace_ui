@@ -40,17 +40,17 @@ class FellRace.Views.AdminClubRow extends Backbone.Marionette.ItemView
 
   aliasName: (id) =>
     if id
-      if name = _fellrace.clubs.findWhere(id:id).get("name")
+      if name = _fr.clubs.findWhere(id:id).get("name")
         name
       else
         "missing club"
 
   merge: =>
     alias = @model.get("name")
-    club_name = _fellrace.clubs.findWhere(id:@model.get "original_club_id").get("name")
+    club_name = _fr.clubs.findWhere(id:@model.get "original_club_id").get("name")
     if confirm "Merge '#{alias}' into '#{club_name}'?"
       $.post "#{@model.url()}/merge", (data) =>
-        _fellrace.clubs.remove(@model)
+        _fr.clubs.remove(@model)
         $.notify "success", "Merged '#{alias}' into '#{club_name}"
 
   untrue: (val) =>
@@ -85,6 +85,6 @@ class FellRace.Views.AdminClubsTable extends Backbone.Marionette.CompositeView
   id: "clubs"
 
   initialize: ->
-    @collection = _fellrace.clubs
+    @collection = _fr.clubs
     @collection.fetch()
 

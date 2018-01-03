@@ -17,7 +17,7 @@ class FellRace.Application extends Backbone.Marionette.Application
   constructor: ->
     super
     Backbone.Marionette.Renderer.render = @render
-    root._fellrace = @
+    root._fr = @
     @addRegions @regions
     @race_publications = new FellRace.Collections.RacePublications
 

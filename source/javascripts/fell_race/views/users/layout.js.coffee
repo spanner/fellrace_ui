@@ -6,14 +6,14 @@ class FellRace.Views.UserLayout extends FellRace.Views.LayoutView
   default: =>
     view = new FellRace.Views.User
       model: @model
-    _fellrace.mainRegion.show view
-    _fellrace.closeRight()
+    _fr.mainRegion.show view
+    _fr.closeRight()
 
   prefs: =>
     view = new FellRace.Views.UserPrefs
       model: @model
-    _fellrace.mainRegion.show view
-    _fellrace.closeRight()
+    _fr.mainRegion.show view
+    _fr.closeRight()
 
 
 class FellRace.Views.UsersLayout extends FellRace.Views.LayoutView
@@ -23,7 +23,7 @@ class FellRace.Views.UsersLayout extends FellRace.Views.LayoutView
     ":id(/*path)": @user
 
   # index: =>
-  #   _fellrace.closeRight()
+  #   _fr.closeRight()
   #   @_previous =
   #     route: "index"
 
@@ -31,7 +31,7 @@ class FellRace.Views.UsersLayout extends FellRace.Views.LayoutView
     if @_previous.route is "me"
       @_previous.view.handle path
     else
-      model = _fellrace.getCurrentCompetitor()
+      model = _fr.getCurrentCompetitor()
       model.fetch
         success: =>
           view = new FellRace.Views.CompetitorLayout

@@ -23,7 +23,7 @@ class FellRace.Views.CategoryPicker extends Backbone.Marionette.CompositeView
     "input.category": "category_names"
 
   initialize: ->
-    @collection = _fellrace.getCategories()
+    @collection = _fr.getCategories()
 
   onRender: ->
     @stickit()

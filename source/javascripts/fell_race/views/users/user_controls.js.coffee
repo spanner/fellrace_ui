@@ -7,7 +7,7 @@ class FellRace.Views.UserControls extends Backbone.Marionette.ItemView
     "click a.avatar": "showAction"
 
   initialize: ->
-    @model = _fellrace.session
+    @model = _fr.session
 
   onRender: =>
     #@stickit()
@@ -15,11 +15,11 @@ class FellRace.Views.UserControls extends Backbone.Marionette.ItemView
   showAction: =>
     if @model.signedIn()
       if @model.confirmed()
-        _fellrace.user_actions().menu()
+        _fr.user_actions().menu()
       else
-        _fellrace.user_actions().requestConfirmation()
+        _fr.user_actions().requestConfirmation()
     else
-      _fellrace.user_actions().signIn()
+      _fr.user_actions().signIn()
 
   inlineBlock: ($el, isVisible, options) =>
     if isVisible

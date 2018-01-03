@@ -2,7 +2,7 @@ class FellRace.Models.RacePublication extends Backbone.Model
   idAttribute: "slug"
 
   url: =>
-    "#{_fellrace.apiUrl()}/race_publications/#{@get("slug")}"
+    "#{_fr.apiUrl()}/race_publications/#{@get("slug")}"
 
   initialize: ->
     @build()
@@ -45,7 +45,7 @@ class FellRace.Models.RacePublication extends Backbone.Model
 
   select: =>
     unless @selected()
-      _fellrace.moveMapTo @
+      _fr.moveMapTo @
       @collection.deselectAll()
       @set selected: true
 

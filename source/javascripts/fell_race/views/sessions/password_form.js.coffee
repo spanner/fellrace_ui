@@ -18,7 +18,7 @@ class FellRace.Views.SessionPasswordForm extends Backbone.Marionette.ItemView
       update: "showIfPasswordConfirmed"
 
   initialize: (opts={}) ->
-    @model = _fellrace.session.user
+    @model = _fr.session.user
     @_uid = opts.uid
     @_tok = opts.token
 
@@ -30,7 +30,7 @@ class FellRace.Views.SessionPasswordForm extends Backbone.Marionette.ItemView
     @$el.find('#password').complexify @showComplexity
     @stickit()
     @$el.find("input").checkAndTriggerAutoFillEvent()
-    $.ajax "#{_fellrace.apiUrl()}/users/password/edit.json",
+    $.ajax "#{_fr.apiUrl()}/users/password/edit.json",
       type: "GET"
       data: 
         id: @_uid
@@ -55,10 +55,10 @@ class FellRace.Views.SessionPasswordForm extends Backbone.Marionette.ItemView
       success: (json) =>        # 
         # @$el.find('form').hide()
         # @$el.find('.confirmation').show()
-        _fellrace.actionRegion.close()
-        _fellrace.navigate('/')
+        _fr.actionRegion.close()
+        _fr.navigate('/')
         $.notify "success", "Password successfully changed"
-        _fellrace.session.setUser(json)
+        _fr.session.setUser(json)
 
   fail: (err) =>
     console.log "reset error", err

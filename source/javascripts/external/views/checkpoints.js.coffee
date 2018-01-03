@@ -111,7 +111,7 @@ class FellRace.Views.Checkpoint extends Backbone.Marionette.ItemView
       @model.get("name").toLowerCase()
 
   goTo: =>
-    _fellrace.moveMapTo @model
+    _fr.moveMapTo @model
 
   latAndLng: ([lat,lng]=[]) =>
     lat and lng

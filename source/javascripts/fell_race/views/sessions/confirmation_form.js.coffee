@@ -24,12 +24,12 @@ class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemVie
       update: "showIfPasswordConfirmed"
 
   initialize: (opts={}) ->
-    @model = _fellrace.currentUser()
+    @model = _fr.currentUser()
     @_uid = opts.uid
     @_tok = opts.token
 
   onRender: () =>
-    state = _fellrace.session.get('state')
+    state = _fr.session.get('state')
     # show 'no need' message if already confirmed.
     @$el.find('.waiter').show()
     @$el.find('form').hide()
@@ -39,7 +39,7 @@ class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemVie
     @stickit()
     @$el.find("input").checkAndTriggerAutoFillEvent()
     $.ajax
-      url: "#{_fellrace.apiUrl()}/users/verify"
+      url: "#{_fr.apiUrl()}/users/verify"
       type: "POST"
       data: 
         uid: @_uid
@@ -48,13 +48,13 @@ class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemVie
       error: @deny
   
   allow: (json) =>
-    _fellrace.session.setUser(json)
+    _fr.session.setUser(json)
     @$el.find('.waiter').hide()
     @$el.find('.password_confirmation').hide()
     @$el.find('form').slideDown()
     
   deny: () =>
-    _fellrace.session.reset()
+    _fr.session.reset()
     @$el.find('.waiter').hide()
     @$el.find('.refusal').slideDown()
 
@@ -66,12 +66,12 @@ class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemVie
     @model.save @model.attributes,
       error: @fail
       success: (json) =>
-        _fellrace.user_actions().signedUp()
-        _fellrace.session.setUser(json)
+        _fr.user_actions().signedUp()
+        _fr.session.setUser(json)
         if slug
-          _fellrace.navigate "/admin/races/#{slug}"
+          _fr.navigate "/admin/races/#{slug}"
         else if url
-          _fellrace.navigate url
+          _fr.navigate url
         #TODO: show friendly starter message, set status to 'new user' somehow
 
   fail: (err) =>

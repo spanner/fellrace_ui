@@ -15,13 +15,13 @@ class FellRace.Views.UserConfirmationNotice extends Backbone.Marionette.ItemView
       visible: true
 
   initialize: () ->
-    @model = _fellrace.currentUser()
-    _fellrace.vent.on "auth.change", @render
+    @model = _fr.currentUser()
+    _fr.vent.on "auth.change", @render
     @render()
 
   onRender: () =>
     @stickit()
-    state = _fellrace.session.getState()
+    state = _fr.session.getState()
     if state is FellRace.Models.UserSession.unconfirmedState
       @$el.show()
     else

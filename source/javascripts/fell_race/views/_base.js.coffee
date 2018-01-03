@@ -1,3 +1,6 @@
+#TODO More base views.
+# There are no Layouts in Marionette 3: these should just be views.
+
 class FellRace.Views.LayoutView extends Backbone.Marionette.Layout
   routes: =>
     {}

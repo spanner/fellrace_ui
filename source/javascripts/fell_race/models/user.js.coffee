@@ -13,7 +13,7 @@ class FellRace.Models.User extends Backbone.Model
   isPoint: true
 
   urlRoot: =>
-    "#{_fellrace.apiUrl()}/users"
+    "#{_fr.apiUrl()}/users"
 
   initialize: ->
     @_competitor = new FellRace.Models.Competitor @get("competitor")
@@ -61,4 +61,4 @@ class FellRace.Models.User extends Backbone.Model
     new google.maps.LatLng @get("lat"), @get("lng")
 
   goTo: =>
-    _fellrace.moveMapTo @, 15
+    _fr.moveMapTo @, 15

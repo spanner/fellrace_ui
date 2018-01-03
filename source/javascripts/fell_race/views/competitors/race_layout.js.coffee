@@ -20,7 +20,7 @@ class FellRace.Views.CompetitorRaceLayout extends FellRace.Views.LayoutView
     view = new FellRace.Views.CompetitorRaceView
       model: @model
       competitor: @competitor
-    _fellrace.extraContentRegion.show view
+    _fr.extraContentRegion.show view
     @_previous =
       route: "default"
 

@@ -56,7 +56,7 @@ class FellRace.Views.ClubChooser extends Backbone.Marionette.CollectionView
 
   initialize: (options = {}) ->
     @_search_box = options.input
-    @_source_collection = _fellrace.clubs
+    @_source_collection = _fr.clubs
     @collection = new FellRace.Collections.Clubs
     @_hidden = true
     
@@ -75,7 +75,7 @@ class FellRace.Views.ClubChooser extends Backbone.Marionette.CollectionView
     @_search_box.on 'keydown', @catchControlKeys
     @_search_box.on 'keyup', @moveHighlight
     refreshSuggestions = _.debounce(@setSuggestions, 100)
-    if _fellrace.msie
+    if _fr.msie
       @_search_box.on 'keyup paste', (e) =>
         @_search_box.addClass('working')
         refreshSuggestions(e)

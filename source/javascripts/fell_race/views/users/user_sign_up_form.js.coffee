@@ -13,15 +13,15 @@ class FellRace.Views.UserSignupForm extends Backbone.Marionette.ItemView
     
   initialize: (opts={}) ->
     @_opts = opts
-    @model = _fellrace.currentUser()
-    _fellrace.vent.on "auth.change", @observeState
+    @model = _fr.currentUser()
+    _fr.vent.on "auth.change", @observeState
 
   onRender: () =>
     @_form = @$el.find('form')
     @stickit()
 
   observeState: () =>
-    if _fellrace.session.signedIn()
+    if _fr.session.signedIn()
       @$el.hide()
     else
       @$el.show()
@@ -63,8 +63,8 @@ class FellRace.Views.UserSignupForm extends Backbone.Marionette.ItemView
     attrs = _.extend @model.attributes, @_opts
     @model.save attrs,
       success: (model, data) =>
-        _fellrace.session.setUser(data)
-        _fellrace.actionRegion.close()
+        _fr.session.setUser(data)
+        _fr.actionRegion.close()
         $.notify "success", "Confirmation email sent to #{@model.get "email"}"
       error: (model, response) =>
         result = $.parseJSON(response.responseText)
@@ -73,4 +73,4 @@ class FellRace.Views.UserSignupForm extends Backbone.Marionette.ItemView
         @$el.find('input[type="submit"]').val('Sign up').removeClass('unavailable')
 
   signIn: =>
-    _fellrace.user_actions().signIn(@_opts)
+    _fr.user_actions().signIn(@_opts)

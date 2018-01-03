@@ -24,11 +24,17 @@ class FellRace.Config
     api_url: "//api.fellrace.org.uk"
     domain: "fellrace.org.uk"
     stripe_publishable_key: "pk_live_dOxGZ6LC5I1womT8MgsDn3jB"
+    bing_api_key: "ApY0qAIIkStmgyAoqcr-Iav2s1obEi-MHhyMkNyZDD6Z2b-gf3CLmHo7djH6968P"
+    google_api_key: "AIzaSyBP7pXQfGfZOeIC33zcyFP_S2go1V1I4fw"
+    osm_api_key: "f42f7cc1c70d465588f47c2a78648ad7"
 
   development:
-    api_url: "http://api.fr.dev"
+    api_url: "//api.fr.dev"
     domain: "fr.dev"
     stripe_publishable_key: "pk_test_orOZm4kTjBQOf5XB3RM01q0U"
+    bing_api_key: "ApY0qAIIkStmgyAoqcr-Iav2s1obEi-MHhyMkNyZDD6Z2b-gf3CLmHo7djH6968P"
+    google_api_key: "AIzaSyBP7pXQfGfZOeIC33zcyFP_S2go1V1I4fw"
+    osm_api_key: "f42f7cc1c70d465588f47c2a78648ad7"
 
   constructor: (options={}) ->
     options.environment ?= @guessEnvironment()

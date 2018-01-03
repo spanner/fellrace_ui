@@ -1,3 +1,6 @@
+#TODO: get all these from yarn / node_modules
+#TODO: add honeybadger, slim down everything else
+
 #= require hamlcoffee
 #= require vendor/jquery
 #= require vendor/modernizr
@@ -42,8 +45,6 @@
 
 $ ->
   _.mixin(_.str.exports())
-    
-  new FellRace.Application()
 
   $(document).on "click", "a:not([data-bypass])", (e) ->
     unless @protocol is "mailto:"
@@ -55,4 +56,9 @@ $ ->
         prot = @protocol + "//"
         if href and href.slice(0, prot.length) isnt prot
           e.preventDefault()
-          _fellrace.navigate href
+          _fr.navigate href
+
+  #TODO this should be async, and triggered by a callback when maps are loaded.
+  # but for that to work we have to fix or discard mapstick.
+  console.log "ok go"
+  new FellRace.Application().start()

@@ -16,7 +16,7 @@ class FellRace.Views.UserActionMenu extends Backbone.Marionette.ItemView
       visible: true
 
   initialize: ->
-    @model = _fellrace.currentUser()
+    @model = _fr.currentUser()
     unless Modernizr.geolocation
       @$el.find("li.find_me").hide()
 
@@ -27,10 +27,10 @@ class FellRace.Views.UserActionMenu extends Backbone.Marionette.ItemView
     [first_name, last_name].join(' ')
   
   signout: () =>
-    _fellrace.user_actions().signOut()
+    _fr.user_actions().signOut()
 
   closeMenu: =>
-    _fellrace.user_actions().hideAction()
+    _fr.user_actions().hideAction()
 
   findMe: =>
     @model.findUserLocation()
