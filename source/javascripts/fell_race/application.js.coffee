@@ -120,8 +120,9 @@ class FellRace.Application extends Backbone.Marionette.Application
 
 
   #TODO 1. move to UI view
-  # 2. what is this anyway?
-  # 3. and why isn't it encapsulated in a View?
+  # 2. we can't route this so it does have to be event-based
+  # 3. but why isn't it encapsulated in a View? ugh.
+  #
   actionRegionSetup: =>
     action_region = @getRegion('action')
     action_region
