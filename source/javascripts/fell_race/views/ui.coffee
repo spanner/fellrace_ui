@@ -46,15 +46,8 @@ class FellRace.Views.Ui extends FellRace.View
   #       action_region.close()
   #     else if code is 13
   #       action_region.currentView.trigger("submit") if action_region.currentView
-        
-  #TODO minimise application:
-  # move regions into a UI view
-  # move actions into a session view
-  # wait for map to load
-  # route with ui functions      
   
   
-  #TODO move toggle to UI view
   listenToToggle: =>
     $("#view_toggle").on "click", =>
       if @content.hasClass("collapsed")
@@ -63,7 +56,7 @@ class FellRace.Views.Ui extends FellRace.View
         @content.addClass("collapsed")
         # @user_actions().hideAction()
   
-  #TODO move route handlers to UI view
+  #TODO Create route for showRace
   showRace: (race) =>
     @mapView.showRace race
 
@@ -76,34 +69,46 @@ class FellRace.Views.Ui extends FellRace.View
   adminMapView: =>
     @mapView.adminView()
 
+  #TODO Create route for toPublicOrHome  
   toPublicOrHome: =>
     _fr.navigate Backbone.history.fragment.match(/admin(.+)/)?[1] || "/"
   
-  #TODO Move to UI view and turn these into route handlers instead of click actions.
+  #TODO Turn these into route handlers instead of click actions.
   user_actions: =>
     resetPassword: (uid, token) =>
       @actionRegion.show(new FellRace.Views.SessionPasswordForm({uid: uid, token: token}))
+      
     requestReset: =>
       @actionRegion.show(new FellRace.Views.SessionResetForm())
+      
     signOut: =>
       @session.reset()
+      
     signUp: (opts) =>
       @actionRegion.show(new FellRace.Views.UserSignupForm(opts))
+      
     signUpForEvent: =>
       @actionRegion.show(new FellRace.Views.UserSignupFormForRace())
-    signIn: (opts) =>
+      
+    signIn: (opts) =>å
       @actionRegion.show(new FellRace.Views.SessionLoginForm(opts))
+      
     confirm: (uid, token) =>
       @actionRegion.show(new FellRace.Views.SessionConfirmationForm({uid: uid, token: token}))
+      
     reconfirm: =>
       @actionRegion.show(new FellRace.Views.SessionReconfirmationForm())
+      
     requestConfirmation: =>
       @actionRegion.show(new FellRace.Views.ConfirmationRequired())
+      
     signedUp: =>
       $.notify "success", "User account created"
       @actionRegion.close()
+      
     hideAction: =>
       @actionRegion.close()
+      
     menu: =>
       @actionRegion.show(new FellRace.Views.UserActionMenu())
   
