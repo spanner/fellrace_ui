@@ -1,6 +1,21 @@
 #TODO More base views.
 # There are no Layouts in Marionette 3: these should just be views.
 
+class FellRace.View extends Backbone.Marionette.View
+  template: false
+  
+  initialize: =>
+    @subviews = []
+    @render()
+
+  onRender: =>
+    @stickit()
+
+  onDestroy: =>
+    subview.destroy() for subview in @subviews
+  
+
+
 class FellRace.Views.LayoutView extends Backbone.Marionette.Layout
   routes: =>
     {}
@@ -15,6 +30,7 @@ class FellRace.Views.LayoutView extends Backbone.Marionette.Layout
   handle: (path) ->
     path ?= "/"
     @_router.handle(path)
+      
 
 
 class FellRace.Views.CollectionFilter extends Backbone.Marionette.ItemView

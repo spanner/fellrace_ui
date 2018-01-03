@@ -1,5 +1,6 @@
-class FellRace.Views.Ui extends Fellrace.View
-  
+class FellRace.Views.Ui extends FellRace.View
+  template: "ui"
+
   regions:
     gmap: '#gmap'
     content: '#content'
@@ -9,43 +10,48 @@ class FellRace.Views.Ui extends Fellrace.View
     action: '#action'
     extraContent: 'section#extra'
   
-  
-  #TODO this has to go in the UI view and then get less strange
-  @actionRegionSetup()
+  initialize: =>
+    #TODO this has to go in the UI view and then get less strange
+    # @actionRegionSetup()
+    @mapView = new FellRace.Views.Map()
+    
+    
+  onRender: =>
+    @getRegion('gmap').show @mapView
+    @getRegion('user_controls').show new FellRace.Views.UserControls()
+    @listenToToggle()
+
+    @getRegion('notice').show new Notifier model: @vent, wait: 4000
+    
   
   
   #TODO 1. move to UI view
   # 2. we can't route this so it does have to be event-based
   # 3. but why isn't it encapsulated in a View? ugh.
   #
-  actionRegionSetup: =>
-    action_region = @getRegion('action')
-    action_region
-      .on "show", (view) ->
-        @$el.show()
-        @$el.find("a.close, a.hide, a.cancel").on "click", =>
-          @trigger "close"
-      .on "hide", (view) ->
-        @$el.hide()
-      .on "close", (view) ->
-        @$el.hide()
-    $(document).keyup (e) =>
-      code = e.keyCode || e.which
-      if code is 27
-        action_region.close()
-      else if code is 13
-        action_region.currentView.trigger("submit") if action_region.currentView
+  # actionRegionSetup: =>
+  #   action_region = @getRegion('action')
+  #   action_region
+  #     .on "show", (view) ->
+  #       @$el.show()
+  #       @$el.find("a.close, a.hide, a.cancel").on "click", =>
+  #         @trigger "close"
+  #     .on "hide", (view) ->
+  #       @$el.hide()
+  #     .on "close", (view) ->
+  #       @$el.hide()
+  #   $(document).keyup (e) =>
+  #     code = e.keyCode || e.which
+  #     if code is 27
+  #       action_region.close()
+  #     else if code is 13
+  #       action_region.currentView.trigger("submit") if action_region.currentView
         
   #TODO minimise application:
   # move regions into a UI view
   # move actions into a session view
   # wait for map to load
   # route with ui functions      
-  @getRegion('gmap').show @mapView
-  @getRegion('user_controls').show new FellRace.Views.UserControls()
-  @listenToToggle()
-
-  @getRegion('notice').show new Notifier model: @vent, wait: 4000
   
   
   #TODO move toggle to UI view

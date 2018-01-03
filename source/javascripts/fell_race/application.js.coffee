@@ -9,7 +9,9 @@ root.FellRace = FellRace
 class FellRace.AppRouter extends Backbone.Marionette.AppRouter
   appRoutes:
     "": "indexMapView"
-    "races/:race_id": "showRace" 
+    "races/:race_id": "showRace"
+    
+    
 
 
 class FellRace.Application extends Backbone.Marionette.Application
@@ -34,6 +36,7 @@ class FellRace.Application extends Backbone.Marionette.Application
 
   initialize: (opts={}) ->
     root._fr = @
+    
     @original_backbone_sync = Backbone.sync
     Backbone.sync = @sync
     Backbone.Marionette.Renderer.render = @render
@@ -52,7 +55,7 @@ class FellRace.Application extends Backbone.Marionette.Application
     @_domain = @config("domain")
     Stripe?.setPublishableKey @config("stripe_publishable_key")
 
-    @session = new FellRace.Models.UserSession()
+    @session = new FellRace.Models.UserSession
     @clubs = new FellRace.Collections.Clubs([])
     @categories = new FellRace.Collections.Categories([])
     @categories.fetch()
@@ -81,15 +84,15 @@ class FellRace.Application extends Backbone.Marionette.Application
     @_router = new FellRace.AppRouter
       controller: @ui
     
-    @mapView = new FellRace.Views.Map()
+    # @mapView = new FellRace.Views.Map()
     # @getRegion('gmap').show @mapView
     # @getRegion('user_controls').show new FellRace.Views.UserControls()
     # @listenToToggle()
     #
     # @getRegion('notice').show new Notifier model: @vent, wait: 4000
-    @session.load()
+    # @session.load()
 
-    @router = new FellRace.BaseRouter
+    # @router = new FellRace.BaseRouter
     @content = $('#content')
     Backbone.history.start
       pushState: true
