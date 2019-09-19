@@ -35,6 +35,7 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
       model: model
     _fr.extraContentRegion.show view
 
+
 class FellRace.Views.RacesLayout extends FellRace.Views.LayoutView
   routes: =>
     ":slug(/*path)": @race

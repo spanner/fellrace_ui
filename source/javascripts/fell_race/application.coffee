@@ -8,24 +8,11 @@ root.FellRace = FellRace
 
 
 class FellRace.Application extends Backbone.Marionette.Application
-  regions:
-    gmap: '#gmap'
-    content: '#content'
-    main: 'main'
-    user_controls: '#user_controls'
-    notice: '#notice'
-    action: '#action'
-    extraContent: 'section#extra'
+  region: "#ui"
 
   months:
     full: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     short: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-
-  open_drawer: true
-
-  open_css:
-    top: ''
-    left: ''
 
   initialize: (opts={}) ->
     root._fr = @
@@ -39,14 +26,12 @@ class FellRace.Application extends Backbone.Marionette.Application
     $.notify = (type, argument) =>
       @vent.trigger(type, argument)
 
-    #TODO this has to go in the UI view and then get less strange
-    @actionRegionSetup()
-
     @_config = new FellRace.Config(options.config)
     @_api_url = @config("api_url")
     @_domain = @config("domain")
     Stripe?.setPublishableKey @config("stripe_publishable_key")
 
+  onBeforeStart: =>
     @session = new FellRace.Models.UserSession()
     @clubs = new FellRace.Collections.Clubs([])
     @categories = new FellRace.Collections.Categories([])
@@ -65,134 +50,21 @@ class FellRace.Application extends Backbone.Marionette.Application
     @past_instances.fetch()
 
 
-  #TODO minimise application:
-  # move regions into a UI view
-  # move actions into a session view
-  # wait for map to load
-  # route with ui functions
   onStart: =>
-    @mapView = new FellRace.Views.Map()
-    @getRegion('gmap').show @mapView
-    @getRegion('user_controls').show new FellRace.Views.UserControls()
-    @listenToToggle()
-
-    @getRegion('notice').show new Notifier model: @vent, wait: 4000
-    @session.load()
-
-    @router = new FellRace.BaseRouter
-    @content = $('#content')
+    @_ui = new SIS.Views.UILayout
+      model: @_session
+    @showView @_ui_view
+    @router = new FellRace.AppRouter(ui: @_ui)
     Backbone.history.start
       pushState: true
       root: '/'
-
-
-  #TODO move toggle to UI view
-  listenToToggle: =>
-    $("#view_toggle").on "click", =>
-      if @content.hasClass("collapsed")
-        @content.removeClass("collapsed")
-      else
-        @content.addClass("collapsed")
-        # @user_actions().hideAction()
-
-  offsetX: =>
-    if @open_drawer
-      -(@content.width() - 10) / 2
-    else
-      -10 / 2
-
-
-  #TODO move route handlers to UI view
-  showRace: (race) =>
-    @mapView.showRace race
-
-  indexMapView: =>
-    @mapView.indexView()
-
-  publicMapView: =>
-    @mapView.publicView()
-
-  adminMapView: =>
-    @mapView.adminView()
-
-  toPublicOrHome: =>
-    _fr.navigate Backbone.history.fragment.match(/admin(.+)/)?[1] || "/"
-
-
-  #TODO 1. move to UI view
-  # 2. we can't route this so it does have to be event-based
-  # 3. but why isn't it encapsulated in a View? ugh.
-  #
-  actionRegionSetup: =>
-    action_region = @getRegion('action')
-    action_region
-      .on "show", (view) ->
-        @$el.show()
-        @$el.find("a.close, a.hide, a.cancel").on "click", =>
-          @trigger "close"
-      .on "hide", (view) ->
-        @$el.hide()
-      .on "close", (view) ->
-        @$el.hide()
-    $(document).keyup (e) =>
-      code = e.keyCode || e.which
-      if code is 27
-        action_region.close()
-      else if code is 13
-        action_region.currentView.trigger("submit") if action_region.currentView
-
-  closeRight: =>
-    @extraContentRegion.close()
+    $(document).on "click", "a:not([data-bypass])", @handleLinkClick
 
   config: (key) =>
     @_config.get(key)
 
   getCategories: () =>
     @categories
-
-
-
-  #TODO Move to UI view and turn these into route handlers instead of click actions.
-  #
-  user_actions: =>
-    resetPassword: (uid, token) =>
-      @actionRegion.show(new FellRace.Views.SessionPasswordForm({uid: uid, token: token}))
-    requestReset: =>
-      @actionRegion.show(new FellRace.Views.SessionResetForm())
-    signOut: =>
-      @session.reset()
-    signUp: (opts) =>
-      @actionRegion.show(new FellRace.Views.UserSignupForm(opts))
-    signUpForEvent: =>
-      @actionRegion.show(new FellRace.Views.UserSignupFormForRace())
-    signIn: (opts) =>
-      @actionRegion.show(new FellRace.Views.SessionLoginForm(opts))
-    confirm: (uid, token) =>
-      @actionRegion.show(new FellRace.Views.SessionConfirmationForm({uid: uid, token: token}))
-    reconfirm: =>
-      @actionRegion.show(new FellRace.Views.SessionReconfirmationForm())
-    requestConfirmation: =>
-      @actionRegion.show(new FellRace.Views.ConfirmationRequired())
-    signedUp: =>
-      $.notify "success", "User account created"
-      @actionRegion.close()
-    hideAction: =>
-      @actionRegion.close()
-    menu: =>
-      @actionRegion.show(new FellRace.Views.UserActionMenu())
-
-  #TODO These will need to be wrapped in a withMap promise handler.
-  getMap: =>
-    @mapView?.getMap()
-
-  setMapOptions: (opts) =>
-    @mapView?.setOptions(opts)
-
-  moveMapTo: (model,zoom) =>
-    @mapView.moveTo model, zoom
-
-
-  # housekeeping can stay here
 
   currentUser: =>
     @session.user
@@ -211,7 +83,14 @@ class FellRace.Application extends Backbone.Marionette.Application
     @currentUser()?.getCompetitor()
 
 
-  # only these foundations should really be here.
+  ## UI pass-through
+  #
+  offsetX: =>
+    @ui.offsetX()
+
+  user_actions: =>
+    @ui.user_actions()
+
 
   sync: (method, model, opts) =>
       # unless method is "read"
@@ -245,6 +124,13 @@ class FellRace.Application extends Backbone.Marionette.Application
     else
       ""
 
+  handleLinkClick: (e) ->
+    href = $(@).attr("href")
+    if href and href[0] isnt "#" and href.slice(0, 4) isnt 'http' and href.slice(0, 6) isnt 'mailto'
+      e.preventDefault()
+      has_target = _.includes(href, "#")
+      _fr.navigate href, trigger: !has_target           # `this` would be the link, so we call _fr
+
   navigate: (route, {trigger:trigger, replace:replace}={}) =>
     trigger ?= true
     replace ?= false
@@ -258,5 +144,67 @@ class FellRace.Application extends Backbone.Marionette.Application
       request.setRequestHeader("Authorization", "Token token=#{token}")
 
 
-  # TODO: add logging
-  # add error-trapping and reporting
+  ## Logging
+
+  logging: () =>
+    !!@_logging
+
+  startLogging: =>
+    @_logging = true
+
+  stopLogging: =>
+    @_logging = false
+
+  startComplaining: =>
+    @_config.set 'report_errors', true
+    @_config.set 'trap_errors', false
+
+  stopComplaining: =>
+    @_config.set 'report_errors', false
+    @_config.set 'trap_errors', true
+
+
+
+  ## Notification
+
+  reportError: (message, source, lineno, colno, error) =>
+    if error is "not_allowed"
+      @complain('<p><strong>' + t('problems.not_allowed') + '</strong>.' + t('notes.view_denied') + t('please_go_home') + '</p>', 100000)
+      true
+    else if error is "not_found"
+      @complain('<p><strong>' + t('problems.not_found') + '</strong>.' + t('notes.item_denied') + t('please_go_home') + '</p>', 100000)
+      true
+    else
+      complaint = "<strong>#{message}</strong> #{t('at')} #{source} #{t('line')} #{lineno} #{t('col')} #{colno}."
+      if @config('report_errors')
+        @notify complaint, 100000, null, 'error'
+      # Honeybadger has to be webpacked in now
+      # if @config('badger_errors')
+      #   Honeybadger.notify error,
+      #     message: complaint
+      true if @config('trap_errors')
+
+  confirm: (message, href) =>
+    @notify message, 4000, href, 'confirmation'
+
+  complain: (message, href) =>
+    @notify message, 10000, href, 'error'
+
+  warn: (message, href) =>
+    @notify message, 10000, href, 'warning'
+
+  notify: (html_or_text, duration=4000, href=null, notice_type='information') =>
+    if @_ui_view
+      @_notices.add
+        message: html_or_text
+        href: href
+        duration: duration
+        notice_type: notice_type
+    else
+      failure_notice = $('<div class="complete_failure" />').appendTo($("#notices"))
+      failure_notice.html(html_or_text)
+
+  log: =>
+    if @logging() and console?.log?
+      console.log "[FR]", arguments...
+

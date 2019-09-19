@@ -2,17 +2,14 @@
 # There are no Layouts in Marionette 3: these should just be views.
 
 class FellRace.Views.LayoutView extends Backbone.Marionette.Layout
-  routes: =>
-    {}
+  routes: {}
 
-  _previous: {}
-
-  initialize: ({path:path}={}) ->
-    @_router = new FellRace.Router
+  initialize: (opts={}) ->
+    @_router = new FellRace.ViewRouter
+      view: this
       routes: _.result(this, 'routes')
-    @handle(path)
 
-  handle: (path) ->
+  setPath: (path) ->
     path ?= "/"
     @_router.handle(path)
 

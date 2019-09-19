@@ -31,7 +31,8 @@
 #= require_tree ./templates
 
 #= require ./fell_race/application
-#= require ./fell_race/router
+#= require ./fell_race/app_router
+#= require ./fell_race/view_router
 #= require ./fell_race/config
 
 #= require_tree ./fell_race/models
@@ -41,18 +42,6 @@
 
 $ ->
   _.mixin(_.str.exports())
-
-  $(document).on "click", "a:not([data-bypass])", (e) ->
-    unless @protocol is "mailto:"
-      href = $(@).attr("href")
-      if $(@).attr("data-window")
-        e.preventDefault()
-        window.open href
-      else
-        prot = @protocol + "//"
-        if href and href.slice(0, prot.length) isnt prot
-          e.preventDefault()
-          _fr.navigate href
 
   #TODO this should be async, and triggered by a callback when maps are loaded.
   # but for that to work we have to fix or discard mapstick.
