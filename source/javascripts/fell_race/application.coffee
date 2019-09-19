@@ -234,11 +234,14 @@ class FellRace.Application extends Backbone.Marionette.Application
   domain: =>
     @_domain
 
-  render: (template, data) ->
-    if template
-      path = "templates/#{template}"
-      throw("Template '" + path + "' not found!") unless JST[path]
-      JST[path](data)
+  render: (template, data={}) =>
+    if _.isFunction(template)
+      template = template()
+    if template?
+      if FellRace.Templates[template]
+        FellRace.Templates[template](data)
+      else
+        template
     else
       ""
 

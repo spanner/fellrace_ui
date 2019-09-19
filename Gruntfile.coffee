@@ -33,10 +33,16 @@ config = (grunt) ->
         trace: true
         style: 'nested'
         lineNumbers: true
-      files:
-        'dist/stylesheets/sis.css': 'source/stylesheets/sis.sass'
-        'dist/stylesheets/dl.css': 'source/stylesheets/dl.sass'
-        'dist/stylesheets/icons.css': 'source/stylesheets/icons.sass'
+      files: [
+        expand: true
+        cwd: 'source/stylesheets/'
+        src: ['*.sass']
+        dest: 'dist/stylesheets/'
+      ]
+      # files:
+      #   'dist/stylesheets/fell_race.css': 'source/stylesheets/fell_race.sass'
+      #   'dist/stylesheets/dl.css': 'source/stylesheets/dl.sass'
+      #   'dist/stylesheets/icons.css': 'source/stylesheets/icons.sass'
 
   haml:
     compile:
@@ -51,7 +57,7 @@ config = (grunt) ->
   cssmin:
     compress:
       files:
-        'dist/stylesheets/app.css': ['dist/stylesheets/app.css']
+        'dist/stylesheets/fell_race.css': ['dist/stylesheets/fell_race.css']
       options:
         keepSpecialComments: 0
 

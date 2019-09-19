@@ -168,7 +168,7 @@ input[type="submit"]
   +reverse_button($green)
   // &.unavailable
   //   background-color: $mid
-  //   +opacity(0.5)
+  //   opacity: 0.5
   //   &:hover
   //     background-color: $mid
 
@@ -444,9 +444,9 @@ $shadow: 1px 3px 8px #333
     top: 10px
     left: 10px
   float: left
-  +opacity(0.4)
+  opacity: 0.4
   &:hover
-    +opacity(1)
+    opacity: 1
   a
     color: $dark
     +glow
@@ -617,7 +617,7 @@ a.race_link
   background-color: white
   border-right: 1px solid white
   z-index: 300
-  +transition(margin-left, 0.5s, ease-out)
+  transition: margin-left 0.5s ease-out
   #user_controls
     position: absolute
     left: 540px
@@ -908,7 +908,7 @@ a.race_link
               a.file_icon
                 width: 20px
               &.frozen
-                +opacity(0.25)
+                opacity: 0.25
               .delete
                 display: none
               &:hover
@@ -959,7 +959,7 @@ a.race_link
                 position: absolute
                 left: 10000px
               &.frozen
-                +opacity(0.25)
+                opacity: 0.25
           .enter_race
             background: $brightgreen
 
@@ -1013,7 +1013,7 @@ a.race_link
   top: 0
   left: 580px
   right: 0
-  +transition(left, 0.5s, ease-out)
+  transition: left 0.5s ease-out
   height: 100%
   pointer-events: none
 
@@ -1119,7 +1119,7 @@ section#extra
         padding-bottom: 20px
         overflow: hidden
       .option
-        +transition('height', 0.5s, ease-out)
+        transition: height 0.5s ease-out
         .heading
           +light
           font-weight: normal

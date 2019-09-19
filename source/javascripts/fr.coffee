@@ -1,7 +1,3 @@
-#TODO: get all these from yarn / node_modules
-#TODO: add honeybadger, slim down everything else
-
-#= require hamlcoffee
 #= require vendor/jquery
 #= require vendor/modernizr
 #= require vendor/moment
