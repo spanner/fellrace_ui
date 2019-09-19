@@ -26,7 +26,7 @@
 
 #= require external/views/map
 
-#= require fell_race/views/_views
+#= require fell_race/views/_base
 
 #= require_tree ./external/views
 #= require_self

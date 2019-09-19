@@ -13,10 +13,6 @@ class FellRace.Models.Competitor extends FellRace.Model
   urlRoot: =>
     "#{_fr.apiUrl()}/competitors"
 
-  initialize: ->
-    super
-    @build()
-
   toJSON: =>
     json = super
     delete json.competitor["picture"] unless @get("image_changed")?

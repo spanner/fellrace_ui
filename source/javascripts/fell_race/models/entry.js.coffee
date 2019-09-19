@@ -16,6 +16,9 @@ class FellRace.Models.Entry extends FellRace.Model
       @on "change:cancelled", (model,val) =>
         @collection.trigger "model:change:cancelled", model, val
 
+  build: =>
+    @competitor = new FellRace.Models.Competitor
+
   name: =>
     name = @get("forename")
     name += " #{@get("middlename")}" if @get("middlename")

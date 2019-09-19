@@ -3,21 +3,20 @@ unless Number::toSimplestTime?
     if @ <= 0
       ""
     else
-      date = new Date(@ * 1000)
       if @ >= 3600
-        h = date.getHours()
-        m = date.getMinutes()
-        s = date.getSeconds()
+        h = Math.floor(@ / 3600)
+        m = Math.floor(@ % 3600 / 60)
+        s = Math.floor(@ % 60)
         m0 = if m < 10 then 0 else ""
         s0 = if s < 10 then 0 else ""
         "#{h}:#{m0}#{m}:#{s0}#{s}"
       else if @ >= 60
-        m = date.getMinutes()
-        s = date.getSeconds()
+        m = Math.floor(@ / 60)
+        s = Math.floor(@ % 60)
         s0 = if s < 10 then 0 else ""
         "#{m}:#{s0}#{s}"
       else
-        "#{date.getSeconds()}"
+        @
 
 unless String::toSeconds?
   String::toSeconds = () ->

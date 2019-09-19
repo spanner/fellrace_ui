@@ -115,7 +115,7 @@ class FellRace.Views.Map extends Backbone.Marionette.ItemView
     @_gmap.mapTypes.set "Open", new google.maps.ImageMapType
       getTileUrl: (coord, zoom) ->
         apikey = _fr.config('osm_api_key')
-        "https://#{"abc".charAt(Math.floor(Math.random() * 2))}.tile.thunderforest.com/landscape/#{zoom}/#{coord.x}/#{coord.y}.png?apikey=#{apikey}"
+        "https://tile.thunderforest.com/outdoors/#{zoom}/#{coord.x}/#{coord.y}.png?apikey=#{apikey}"
       tileSize: new google.maps.Size(256, 256)
       name: "OSM"
       maxZoom: 18

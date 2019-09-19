@@ -5,35 +5,26 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     "input#emergency_contact_name": "emergency_contact_name"
     "input#emergency_contact_phone": "emergency_contact_phone"
     "input#terms_accepted": "terms_accepted"
-    "span#amount": 
+    "span#amount":
       observe: "cost"
       onGet: "decimalize"
-    "span#deduction": 
+    "span#deduction":
       observe: "cost"
       onGet: "calculateCharge"
 
   initialize: ->
-    @_competitor = _fr.getCurrentCompetitor()
+    # @_competitor = _fr.getCurrentCompetitor()
     @_instance = @model.collection.instance
     @model.set("cost", @_instance.get("online_entry_fee"))
-    @_payment = new FellRace.Models.Payment
-      amount: @model.get("cost")
-    @_payment.on "change:stripeToken", @performTransaction
-    Backbone.Validation.bind(@)
 
   onRender: =>
     @stickit()
     @_edit_competitor_view = new FellRace.Views.EditEntryCompetitor
-      model: @_competitor
+      model: @model.competitor
       el: @$el.find("section.competitor")
-    @_edit_payment_view = new FellRace.Views.EditEntryPayment
-      model: @_payment
-      el: @$el.find("section.payment")
     @_edit_competitor_view.render()
-    @_edit_payment_view.render()
     @setReadiness()
     @_competitor.on "change", @setReadiness
-    @_payment.on "change", @setReadiness
     @model.on "change", @setReadiness
 
   setReadiness: () =>
@@ -43,7 +34,7 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
       @_edit_payment_view.disable()
   
   isReady: =>
-    @model.isValid(true) and @_competitor.isValid(true) and @_payment.isValid(true)
+    @model.isValid(true)
 
   decimalize: (value) =>
     decimal = value?.toFixed(2)
@@ -56,18 +47,22 @@ class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
     fr_fixed = 0
     @decimalize(fee * (merchant_ratio + fr_ratio) + merchant_fixed + fr_fixed) + "."
 
-  performTransaction: (payment, token) =>
-    @model.set 
-      stripe_token: token
-      competitor_id: @_competitor.id
-      user_id: _fr.currentUser().id
-    @_edit_competitor_view.saveCompetitor =>
-      @model.save().done () =>
-        if @model.get("paid")
-          @_competitor.entries.add @model
-          @_instance.entries.add @model
-          _fr.navigate "/races/#{@model.get("race_slug")}/#{@model.get("instance_name")}/my_entry"
-        else
-          @_payment.set
-            error_param: @model.get("error").param
-            error_message: @model.get("error").message
+
+
+
+  # performTransaction: (payment, token) =>
+  #   @model.set
+  #     stripe_token: token
+  #     competitor_id: @_competitor.id
+  #     user_id: _fr.currentUser().id
+  #
+  #   @_edit_competitor_view.saveCompetitor =>
+  #     @model.save().done () =>
+  #       if @model.get("paid")
+  #         @_competitor.entries.add @model
+  #         @_instance.entries.add @model
+  #         _fr.navigate "/races/#{@model.get("race_slug")}/#{@model.get("instance_name")}/my_entry"
+  #       else
+  #         @_payment.set
+  #           error_param: @model.get("error").param
+  #           error_message: @model.get("error").message
