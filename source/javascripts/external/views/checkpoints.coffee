@@ -68,7 +68,7 @@ class FellRace.Views.CheckpointMarkers extends MapStick.OverlayCollection
   itemView: FellRace.Views.CheckpointMarker
 
 
-class FellRace.Views.Checkpoint extends Backbone.Marionette.ItemView
+class FellRace.Views.Checkpoint extends FellRace.View
   template: 'checkpoints/list_item'
   tagName: "li"
   className: "checkpoint"
@@ -116,5 +116,5 @@ class FellRace.Views.Checkpoint extends Backbone.Marionette.ItemView
   latAndLng: ([lat,lng]=[]) =>
     lat and lng
 
-class FellRace.Views.CheckpointsList extends Backbone.Marionette.CollectionView
+class FellRace.Views.CheckpointsList extends Marionette.CollectionView
   itemView: FellRace.Views.Checkpoint

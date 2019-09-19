@@ -1,4 +1,4 @@
-class FellRace.Views.IndexView extends Backbone.Marionette.Layout
+class FellRace.Views.IndexView extends FellRace.View
   template: "index"
   id: "index"
 

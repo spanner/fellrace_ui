@@ -1,4 +1,4 @@
-class FellRace.Views.EditEntryPayment extends Backbone.Marionette.ItemView
+class FellRace.Views.EditEntryPayment extends FellRace.View
   template: 'entries/edit_payment'
 
   events: 

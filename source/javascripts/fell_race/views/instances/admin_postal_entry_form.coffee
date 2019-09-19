@@ -1,4 +1,4 @@
-class FellRace.Views.AdminPostalEntryForm extends Backbone.Marionette.ItemView
+class FellRace.Views.AdminPostalEntryForm extends FellRace.View
   template: "instances/admin_postal_entry_form"
   size_limit: 1
   allowed_extensions: [".pdf"]

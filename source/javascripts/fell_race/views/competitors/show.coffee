@@ -1,4 +1,4 @@
-class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
+class FellRace.Views.Competitor extends FellRace.View
   template: 'competitors/show'
   id: "competitor"
 
@@ -121,15 +121,15 @@ class FellRace.Views.Competitor extends Backbone.Marionette.ItemView
   #     @model.save user_id: _fr.currentUser().get("id"),
   #       success: (model, data) =>
   #         if data.user_id is _fr.currentUser().get("id")
-  #           $.notify "success", "The profile '#{@model.get "forename"} #{@model.get "surname"}' now belongs to you."
+  #           _fr.broadcast "success", "The profile '#{@model.get "forename"} #{@model.get "surname"}' now belongs to you."
   #         else
-  #           $.notify "success", "Merge request sent to admin."
+  #           _fr.broadcast "success", "Merge request sent to admin."
   #   else
-  #     $.notify "flash", "You have to be signed in to claim a competitor."
+  #     _fr.broadcast "flash", "You have to be signed in to claim a competitor."
   #     #TODO show a competitor claim form instead of basic signIn
   #     _fr.user_actions().signIn()
   #
   # disown: =>
   #   @model.save user_id: null,
   #     success: (data) =>
-  #       $.notify "success", "The profile '#{@model.get "forename"} #{@model.get "surname"}' no longer belongs to you."
+  #       _fr.broadcast "success", "The profile '#{@model.get "forename"} #{@model.get "surname"}' no longer belongs to you."

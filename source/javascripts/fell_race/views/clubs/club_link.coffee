@@ -1,4 +1,4 @@
-class FellRace.Views.ClubLink extends Backbone.Marionette.ItemView
+class FellRace.Views.ClubLink extends FellRace.View
   template: 'clubs/link'
 
   bindings:

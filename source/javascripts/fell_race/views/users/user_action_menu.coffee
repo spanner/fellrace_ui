@@ -1,4 +1,4 @@
-class FellRace.Views.UserActionMenu extends Backbone.Marionette.ItemView
+class FellRace.Views.UserActionMenu extends FellRace.View
   template: "users/action_menu"
 
   events:

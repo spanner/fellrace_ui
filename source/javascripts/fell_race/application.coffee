@@ -7,7 +7,7 @@ root = exports ? this
 root.FellRace = FellRace
 
 
-class FellRace.Application extends Backbone.Marionette.Application
+class FellRace.Application extends Marionette.Application
   region: "#ui"
 
   months:
@@ -18,15 +18,11 @@ class FellRace.Application extends Backbone.Marionette.Application
     root._fr = @
     @original_backbone_sync = Backbone.sync
     Backbone.sync = @sync
-    Backbone.Marionette.Renderer.render = @render
+    Marionette.setRenderer @render
     $(document).ajaxSend @sendAuthenticationHeader
 
-    # TODO turn this into a normal function of _fr
-    # and stop using the vent anyway
-    $.notify = (type, argument) =>
-      @vent.trigger(type, argument)
-
-    @_config = new FellRace.Config(options.config)
+    @_config = new FellRace.Config
+    @_radio = Backbone.Radio.channel('fell_race')
     @_api_url = @config("api_url")
     @_domain = @config("domain")
     Stripe?.setPublishableKey @config("stripe_publishable_key")
@@ -49,11 +45,10 @@ class FellRace.Application extends Backbone.Marionette.Application
     @future_instances.fetch()
     @past_instances.fetch()
 
-
   onStart: =>
-    @_ui = new SIS.Views.UILayout
+    @_ui = new FellRace.Views.UILayout
       model: @_session
-    @showView @_ui_view
+    @showView @_ui
     @router = new FellRace.AppRouter(ui: @_ui)
     Backbone.history.start
       pushState: true
@@ -145,7 +140,7 @@ class FellRace.Application extends Backbone.Marionette.Application
 
 
   ## Logging
-
+  #
   logging: () =>
     !!@_logging
 
@@ -164,8 +159,10 @@ class FellRace.Application extends Backbone.Marionette.Application
     @_config.set 'trap_errors', true
 
 
-
   ## Notification
+  #
+  broadcast: (event_type, argument) =>
+    @_radio.trigger event_type, argument
 
   reportError: (message, source, lineno, colno, error) =>
     if error is "not_allowed"

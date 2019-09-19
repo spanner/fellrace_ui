@@ -1,4 +1,4 @@
-class FellRace.Views.AdminRecord extends Backbone.Marionette.ItemView
+class FellRace.Views.AdminRecord extends FellRace.View
   template: 'records/admin_list_item'
   tagName: "li"
   className: "record"
@@ -29,11 +29,11 @@ class FellRace.Views.AdminRecord extends Backbone.Marionette.ItemView
     e.stopPropagation() if e
     @model.destroy()
 
-class FellRace.Views.AddFirstRecord extends Backbone.Marionette.ItemView
+class FellRace.Views.AddFirstRecord extends FellRace.View
   template: 'records/empty'
   tagName: "li"
   className: "note"
 
-class FellRace.Views.AdminRecordsList extends Backbone.Marionette.CollectionView
+class FellRace.Views.AdminRecordsList extends Marionette.CollectionView
   itemView: FellRace.Views.AdminRecord
   emptyView: FellRace.Views.AddFirstRecord

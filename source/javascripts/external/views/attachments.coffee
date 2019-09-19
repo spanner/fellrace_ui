@@ -1,4 +1,4 @@
-class FellRace.Views.Attachment extends Backbone.Marionette.ItemView
+class FellRace.Views.Attachment extends FellRace.View
   template: 'attachments/list_item'
   tagName: "li"
   className: "attachment"
@@ -39,5 +39,5 @@ class FellRace.Views.Attachment extends Backbone.Marionette.ItemView
   externalUrl: (url) =>
     "//api.#{_fr.domain()}#{url}"
 
-class FellRace.Views.AttachmentsList extends Backbone.Marionette.CollectionView
+class FellRace.Views.AttachmentsList extends Marionette.CollectionView
   itemView: FellRace.Views.Attachment

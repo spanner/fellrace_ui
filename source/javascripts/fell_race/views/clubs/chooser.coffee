@@ -1,4 +1,4 @@
-class FellRace.Views.ClubSuggestion extends Backbone.Marionette.ItemView
+class FellRace.Views.ClubSuggestion extends FellRace.View
   template: "clubs/suggestion"
   className: "suggestion"
   tagName: "li"
@@ -49,7 +49,7 @@ class FellRace.Views.ClubSuggestion extends Backbone.Marionette.ItemView
       name
 
 
-class FellRace.Views.ClubChooser extends Backbone.Marionette.CollectionView
+class FellRace.Views.ClubChooser extends Marionette.CollectionView
   tagName: "ul"
   className: "chooser"
   itemView: FellRace.Views.ClubSuggestion

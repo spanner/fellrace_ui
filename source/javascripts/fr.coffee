@@ -6,13 +6,16 @@
 #= require vendor/jquery.complexify
 #= require vendor/pikaday
 #= require vendor/tinycolor
-#= require vendor/underscore
-#= require vendor/underscore.string
-#= require vendor/backbone
-#= require vendor/backbone.marionette
-#= require vendor/backbone.stickit
+
+#= require underscore/underscore
+#= require underscore.string/dist/underscore.string
+#= require backbone/backbone
+#= require backbone.marionette/lib/backbone.marionette
+#= require backbone.radio/build/backbone.radio
+#= require backbone.stickit/backbone.stickit
+#= require backbone.mapstick/backbone.mapstick
+
 #= require vendor/backbone.notifications
-#= require vendor/backbone.mapstick
 #= require vendor/backbone.validation
 #= require vendor/medium-editor
 #= require vendor/coordtransform
@@ -41,9 +44,6 @@
 #= require_self
 
 $ ->
-  _.mixin(_.str.exports())
-
   #TODO this should be async, and triggered by a callback when maps are loaded.
   # but for that to work we have to fix or discard mapstick.
-  console.log "ok go"
   new FellRace.Application().start()

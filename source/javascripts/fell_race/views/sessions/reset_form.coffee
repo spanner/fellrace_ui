@@ -1,4 +1,4 @@
-class FellRace.Views.SessionResetForm extends Backbone.Marionette.ItemView
+class FellRace.Views.SessionResetForm extends FellRace.View
   template: 'sessions/reset_form'
 
   events:
@@ -37,7 +37,7 @@ class FellRace.Views.SessionResetForm extends Backbone.Marionette.ItemView
       error: @fail
 
   succeed: () =>
-    $.notify "success", "Password reset instructions sent to #{@model.get "email"}"
+    _fr.broadcast "success", "Password reset instructions sent to #{@model.get "email"}"
     _fr.actionRegion.close()
     # @_form.slideUp () =>
     #   @_confirmation.show()

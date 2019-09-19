@@ -1,4 +1,4 @@
-class FellRace.Views.AdminAttachment extends Backbone.Marionette.ItemView
+class FellRace.Views.AdminAttachment extends FellRace.View
   template: 'attachments/admin_list_item'
   tagName: "li"
   className: "attachment"

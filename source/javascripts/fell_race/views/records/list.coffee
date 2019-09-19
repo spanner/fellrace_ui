@@ -1,4 +1,4 @@
-class FellRace.Views.Record extends Backbone.Marionette.ItemView
+class FellRace.Views.Record extends FellRace.View
   template: 'records/list_item'
   tagName: "li"
   className: "record"
@@ -12,5 +12,5 @@ class FellRace.Views.Record extends Backbone.Marionette.ItemView
   onRender: () =>
     @stickit()
 
-class FellRace.Views.RecordsList extends Backbone.Marionette.CollectionView
+class FellRace.Views.RecordsList extends Marionette.CollectionView
   itemView: FellRace.Views.Record

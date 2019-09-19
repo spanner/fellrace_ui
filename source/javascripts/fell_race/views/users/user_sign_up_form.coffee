@@ -1,4 +1,4 @@
-class FellRace.Views.UserSignupForm extends Backbone.Marionette.ItemView
+class FellRace.Views.UserSignupForm extends FellRace.View
   template: 'users/sign_up'
 
   events:
@@ -65,7 +65,7 @@ class FellRace.Views.UserSignupForm extends Backbone.Marionette.ItemView
       success: (model, data) =>
         _fr.session.setUser(data)
         _fr.actionRegion.close()
-        $.notify "success", "Confirmation email sent to #{@model.get "email"}"
+        _fr.broadcast "success", "Confirmation email sent to #{@model.get "email"}"
       error: (model, response) =>
         result = $.parseJSON(response.responseText)
         _(result.errors).each (errors,field) =>

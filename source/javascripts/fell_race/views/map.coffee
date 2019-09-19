@@ -1,4 +1,4 @@
-class FellRace.Views.Map extends Backbone.Marionette.ItemView
+class FellRace.Views.Map extends FellRace.View
   template: 'map'
   className: 'gmap'
 

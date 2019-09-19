@@ -1,4 +1,4 @@
-class FellRace.Views.CompetitorRow extends Backbone.Marionette.ItemView
+class FellRace.Views.CompetitorRow extends FellRace.View
   template: 'competitors/row'
   className: "competitor"
   tagName: "tr"
@@ -30,7 +30,7 @@ class FellRace.Views.CompetitorRow extends Backbone.Marionette.ItemView
   name: (values) =>
     "#{values[0]} #{values[1]}"
 
-class FellRace.Views.CompetitorsTable extends Backbone.Marionette.CompositeView
+class FellRace.Views.CompetitorsTable extends FellRace.CollectionView
   itemView: FellRace.Views.CompetitorRow
   itemViewContainer: ".competitors"
   template: "competitors/table"

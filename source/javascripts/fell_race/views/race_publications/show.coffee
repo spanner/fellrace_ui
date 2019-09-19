@@ -1,4 +1,4 @@
-class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
+class FellRace.Views.RacePublication extends FellRace.View
   template: 'race_publications/show'
   className: "race"
 
@@ -242,5 +242,5 @@ class FellRace.Views.RacePublication extends Backbone.Marionette.ItemView
   canEdit: ({can_edit:can_edit}={}) =>
     can_edit
 
-class FellRace.Views.RacePublicationsList extends Backbone.Marionette.CollectionView
+class FellRace.Views.RacePublicationsList extends Marionette.CollectionView
   itemView: FellRace.Views.RacePublication

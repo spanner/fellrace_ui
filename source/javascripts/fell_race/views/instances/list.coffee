@@ -1,4 +1,4 @@
-class FellRace.Views.FutureListedInstance extends Backbone.Marionette.ItemView
+class FellRace.Views.FutureListedInstance extends FellRace.View
   template: 'instances/future_list_item'
   tagName: "li"
   className: "instance"
@@ -30,7 +30,7 @@ class FellRace.Views.FutureListedInstance extends Backbone.Marionette.ItemView
   time: (time) =>
     "at #{time}" if time
 
-class FellRace.Views.PastListedInstance extends Backbone.Marionette.ItemView
+class FellRace.Views.PastListedInstance extends FellRace.View
   template: 'instances/past_list_item'
   tagName: "li"
   className: "instance"
@@ -70,8 +70,8 @@ class FellRace.Views.PastListedInstance extends Backbone.Marionette.ItemView
       "#{value} runners"
 
 
-class FellRace.Views.FutureInstancesList extends Backbone.Marionette.CollectionView
+class FellRace.Views.FutureInstancesList extends Marionette.CollectionView
   itemView: FellRace.Views.FutureListedInstance
 
-class FellRace.Views.PastInstancesList extends Backbone.Marionette.CollectionView
+class FellRace.Views.PastInstancesList extends Marionette.CollectionView
   itemView: FellRace.Views.PastListedInstance

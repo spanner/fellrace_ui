@@ -25,7 +25,7 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
       instance.fetch()
       _fr.extraContentRegion.show view
     else
-      $.notify "error", "This instance doesn't exist"
+      _fr.broadcast "error", "This instance doesn't exist"
       _fr.navigate "/admin/races/#{@model.get("slug")}", replace:true
 
   newInstance: =>

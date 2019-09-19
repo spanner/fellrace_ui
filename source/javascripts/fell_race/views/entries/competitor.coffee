@@ -1,4 +1,4 @@
-class FellRace.Views.EditEntryCompetitor extends Backbone.Marionette.ItemView
+class FellRace.Views.EditEntryCompetitor extends FellRace.View
   template: 'entries/edit_competitor'
 
   bindings:

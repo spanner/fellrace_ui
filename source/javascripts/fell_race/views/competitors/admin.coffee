@@ -1,4 +1,4 @@
-class FellRace.Views.AdminCompetitor extends Backbone.Marionette.ItemView
+class FellRace.Views.AdminCompetitor extends FellRace.View
   template: 'competitors/admin'
   className: "competitor"
 

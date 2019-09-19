@@ -1,4 +1,4 @@
-class FellRace.Views.AdminEntriesImport extends Backbone.Marionette.ItemView
+class FellRace.Views.AdminEntriesImport extends FellRace.View
   template: 'instances/admin_entries_import'
   tagName: "section"
 

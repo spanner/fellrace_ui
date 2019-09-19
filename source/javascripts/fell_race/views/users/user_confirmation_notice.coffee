@@ -1,4 +1,4 @@
-class FellRace.Views.UserConfirmationNotice extends Backbone.Marionette.ItemView
+class FellRace.Views.UserConfirmationNotice extends FellRace.View
   template: 'users/confirmation_notice'
 
   events:
@@ -40,5 +40,5 @@ class FellRace.Views.UserConfirmationNotice extends Backbone.Marionette.ItemView
     @model.save {reconfirm: true},
       success: (model, data) =>
         @render()
-        $.notify "success", "Confirmation message sent"
+        _fr.broadcast "success", "Confirmation message sent"
 

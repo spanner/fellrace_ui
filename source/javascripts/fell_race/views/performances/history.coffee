@@ -1,4 +1,4 @@
-class FellRace.Views.HistoryRow extends Backbone.Marionette.ItemView
+class FellRace.Views.HistoryRow extends FellRace.View
   template: "performances/history_row"
   tagName: "tr"
 
@@ -61,12 +61,12 @@ class FellRace.Views.HistoryRow extends Backbone.Marionette.ItemView
       $el.slideUp('fast')
 
 
-class FellRace.Views.NoHistory extends Backbone.Marionette.ItemView
+class FellRace.Views.NoHistory extends FellRace.View
   template: "performances/history_loading"
   tagName: "tr"
 
 
-class FellRace.Views.HistoryTable extends Backbone.Marionette.CollectionView
+class FellRace.Views.HistoryTable extends Marionette.CollectionView
   itemView: FellRace.Views.HistoryRow
   emptyView: FellRace.Views.NoHistory
 

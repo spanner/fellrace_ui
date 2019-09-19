@@ -1,4 +1,4 @@
-class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemView
+class FellRace.Views.CompetitorPerformanceRow extends FellRace.View
   template: "competitors/performance"
   tagName: "tr"
 
@@ -52,7 +52,7 @@ class FellRace.Views.CompetitorPerformanceRow extends Backbone.Marionette.ItemVi
   date: (date) =>
     moment(date).format("D MMM YY") if date
 
-class FellRace.Views.CompetitorPerformancesTable extends Backbone.Marionette.CompositeView
+class FellRace.Views.CompetitorPerformancesTable extends FellRace.CollectionView
   template: "competitors/performances"
   itemView: FellRace.Views.CompetitorPerformanceRow
   itemViewContainer: 'tbody'

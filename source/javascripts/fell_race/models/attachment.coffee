@@ -53,19 +53,19 @@ class FellRace.Models.Attachment extends FellRace.Model
 
   upload_begin: () =>
     @trigger "freeze"
-    $.notify "start:progress", "Uploading #{@filename()}"
+    _fr.broadcast "start:progress", "Uploading #{@filename()}"
     @set "editable", false
 
   upload_progress: (e) =>
     if e and e.lengthComputable
       percentage = parseInt(e.loaded / e.total * 100, 10)
-      $.notify "progress", percentage
+      _fr.broadcast "progress", percentage
 
   upload_end: () =>
-    $.notify "finish:progress"
+    _fr.broadcast "finish:progress"
     @set 'file', null
     @set "editable", true
     @trigger "thaw"
 
   upload_error: (model, xhr, options) =>
-    $.notify "error", "upload failed for #{@filename}"
+    _fr.broadcast "error", "upload failed for #{@filename}"

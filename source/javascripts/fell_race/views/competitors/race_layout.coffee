@@ -1,4 +1,4 @@
-class FellRace.Views.CompetitorRaceView extends Backbone.Marionette.ItemView
+class FellRace.Views.CompetitorRaceView extends FellRace.View
   template: "competitors/race"
 
   # bindings:

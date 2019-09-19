@@ -1,4 +1,4 @@
-class FellRace.Views.UserGreeting extends Backbone.Marionette.ItemView
+class FellRace.Views.UserGreeting extends FellRace.View
   template: 'users/greeting'
   className: 'greeting'
     

@@ -1,4 +1,4 @@
-class FellRace.Views.ResultsPreview extends Backbone.Marionette.ItemView
+class FellRace.Views.ResultsPreview extends FellRace.View
   template: 'instances/results_preview'
 
   initialize: ({competitor:@_competitor}) ->

@@ -1,4 +1,4 @@
-class FellRace.Views.MyEntry extends Backbone.Marionette.ItemView
+class FellRace.Views.MyEntry extends FellRace.View
   template: 'entries/my_entry'
 
   bindings:

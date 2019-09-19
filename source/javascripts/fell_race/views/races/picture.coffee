@@ -1,4 +1,4 @@
-class FellRace.Views.Picture extends Backbone.Marionette.ItemView
+class FellRace.Views.Picture extends FellRace.View
   template: "races/picture"
   size_limit: 10
   allowed_extensions: [".png",".jpg",".jpeg"]

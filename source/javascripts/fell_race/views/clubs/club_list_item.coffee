@@ -1,4 +1,4 @@
-class FellRace.Views.ClubListItem extends Backbone.Marionette.ItemView
+class FellRace.Views.ClubListItem extends FellRace.View
   template: 'clubs/list_item'
   className: "club"
   tagName: "li"

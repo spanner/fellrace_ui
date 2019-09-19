@@ -1,4 +1,4 @@
-class FellRace.Views.SessionConfirmationForm extends Backbone.Marionette.ItemView
+class FellRace.Views.SessionConfirmationForm extends FellRace.View
   template: 'sessions/confirmation_form'
   className: 'confirmation'
 

@@ -1,4 +1,4 @@
-class FellRace.Views.NextRaceInstance extends Backbone.Marionette.ItemView
+class FellRace.Views.NextRaceInstance extends FellRace.View
   template: "races/next_instance"
 
   bindings:

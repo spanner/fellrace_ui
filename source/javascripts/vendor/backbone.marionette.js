@@ -1,4 +1,4 @@
-// MarionetteJS (Backbone.Marionette)
+// MarionetteJS (Marionette)
 // ----------------------------------
 // v1.0.2
 //
@@ -216,7 +216,7 @@ Backbone.ChildViewContainer = (function(Backbone, _){
   return Container;
 })(Backbone, _);
 
-// Backbone.Wreqr (Backbone.Marionette)
+// Backbone.Wreqr (Marionette)
 // ----------------------------------
 // v0.2.0
 //
@@ -481,14 +481,14 @@ Wreqr.EventAggregator = (function(Backbone, _){
 
 
   return Wreqr;
-})(Backbone, Backbone.Marionette, _);
+})(Backbone, Marionette, _);
 
 var Marionette = (function(global, Backbone, _){
   "use strict";
 
   // Define and export the Marionette namespace
   var Marionette = {};
-  Backbone.Marionette = Marionette;
+  Marionette = Marionette;
 
   // Get the DOM manipulator for later use
   Marionette.$ = Backbone.$;

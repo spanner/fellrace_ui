@@ -1,4 +1,4 @@
-class FellRace.Views.Link extends Backbone.Marionette.ItemView
+class FellRace.Views.Link extends FellRace.View
   template: 'links/list_item'
   tagName: "li"
   className: "link"
@@ -27,5 +27,5 @@ class FellRace.Views.Link extends Backbone.Marionette.ItemView
     e.preventDefault() if e
     window.open "http://#{@model.get("url")}"
 
-class FellRace.Views.LinksList extends Backbone.Marionette.CollectionView
+class FellRace.Views.LinksList extends Marionette.CollectionView
   itemView: FellRace.Views.Link

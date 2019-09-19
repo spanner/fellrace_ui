@@ -1,4 +1,4 @@
-class FellRace.Views.CompetitorMergeRow extends Backbone.Marionette.ItemView
+class FellRace.Views.CompetitorMergeRow extends FellRace.View
   template: 'competitors/merge_row'
   className: "competitor"
   tagName: "tr"
@@ -43,7 +43,7 @@ class FellRace.Views.CompetitorMergeRow extends Backbone.Marionette.ItemView
     @model.save merge_to_id: null,
       success: (data) =>
         @remove()
-        $.notify "success", "Merge rejected"
+        _fr.broadcast "success", "Merge rejected"
 
   accept: =>
     $.ajax
@@ -52,9 +52,9 @@ class FellRace.Views.CompetitorMergeRow extends Backbone.Marionette.ItemView
       dataType: "text"
       success: =>
         @remove()
-        $.notify "success", "Merge successful"
+        _fr.broadcast "success", "Merge successful"
 
-class FellRace.Views.MainCompetitor extends Backbone.Marionette.ItemView
+class FellRace.Views.MainCompetitor extends FellRace.View
   template: 'competitors/main'
   className: "competitor"
   tagName: "tr"
@@ -81,7 +81,7 @@ class FellRace.Views.MainCompetitor extends Backbone.Marionette.ItemView
   name: (values) =>
     "#{values[0]} #{values[1]}"
 
-class FellRace.Views.CompetitorsMergeTable extends Backbone.Marionette.CompositeView
+class FellRace.Views.CompetitorsMergeTable extends FellRace.CollectionView
   itemView: FellRace.Views.CompetitorMergeRow
   itemViewContainer: "table.competitors"
   template: "competitors/merge_table"

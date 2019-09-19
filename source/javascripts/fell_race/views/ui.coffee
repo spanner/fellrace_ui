@@ -7,7 +7,7 @@
 # and determines which view does the routing.
 #
 class FellRace.Views.UILayout extends FellRace.Views.LayoutView
-  template: "layouts/ui"
+  template: "ui"
 
   regions:
     gmap: '#gmap'
@@ -35,13 +35,13 @@ class FellRace.Views.UILayout extends FellRace.Views.LayoutView
   #
   onRender: =>
     @_map_view = new FellRace.Views.Map()
-    @showChildView @_mapView, 'gmap'
+    @showChildView 'gmap', @_map_view
 
     @_user_controls = new FellRace.Views.UserControls()
-    @showChildView @_userControls, 'user_controls'
+    @showChildView 'user_controls', @_user_controls
 
-    @_notifier = new Notifier model: @vent, wait: 4000
-    @showChildView @_notifier, 'notice'
+    @_notifier = new Notifier model: _fr._radio, wait: 4000
+    @showChildView 'notice', @_notifier
 
     @listenToToggle()
     @session.load()
@@ -102,13 +102,12 @@ class FellRace.Views.UILayout extends FellRace.Views.LayoutView
       @_view.handle options.path if options.path
     else
       @_view = new view_class(options)
-      @showChildView @_view, 'content'
+      @showChildView 'content', @_view
 
   showActionView: (view_class, options={}) =>
     @_action_view = new view_class(options)
-    @showChildView @_action_view, 'action'
+    @showChildView 'action', @_action_view
     @showIndex() unless @_view
-
 
 
   ## Ancient Mike Globals
@@ -154,7 +153,7 @@ class FellRace.Views.UILayout extends FellRace.Views.LayoutView
     requestConfirmation: =>
       @actionRegion.show(new FellRace.Views.ConfirmationRequired())
     signedUp: =>
-      $.notify "success", "User account created"
+      _fr.broadcast "success", "User account created"
       @actionRegion.close()
     hideAction: =>
       @actionRegion.close()

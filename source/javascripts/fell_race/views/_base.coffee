@@ -1,7 +1,20 @@
 #TODO More base views.
 # There are no Layouts in Marionette 3: these should just be views.
 
-class FellRace.Views.LayoutView extends Backbone.Marionette.Layout
+
+class FellRace.View extends Marionette.View
+
+  onRender: () =>
+    @triggerMethod 'ready', this
+
+
+class FellRace.CollectionView extends Marionette.CollectionView
+
+  onRender: () =>
+    @triggerMethod 'ready', this
+
+
+class FellRace.Views.LayoutView extends Marionette.View
   routes: {}
 
   initialize: (opts={}) ->
@@ -14,7 +27,7 @@ class FellRace.Views.LayoutView extends Backbone.Marionette.Layout
     @_router.handle(path)
 
 
-class FellRace.Views.CollectionFilter extends Backbone.Marionette.ItemView
+class FellRace.Views.CollectionFilter extends FellRace.View
   template: false
 
   bindings:

@@ -1,4 +1,4 @@
-class FellRace.Views.MatchRow extends Backbone.Marionette.ItemView
+class FellRace.Views.MatchRow extends FellRace.View
   template: 'competitors/match_row'
   className: "competitor"
   tagName: "tr"
@@ -35,9 +35,9 @@ class FellRace.Views.MatchRow extends Backbone.Marionette.ItemView
           merge_to_id: @model.collection.competitor.id
       success: =>
         @model.collection.remove(@model)
-        $.notify "success", "Merge request sent to admin"
+        _fr.broadcast "success", "Merge request sent to admin"
 
-class FellRace.Views.MatchTable extends Backbone.Marionette.CompositeView
+class FellRace.Views.MatchTable extends FellRace.CollectionView
   itemView: FellRace.Views.MatchRow
   itemViewContainer: 'tbody'
   template: "competitors/match_table"

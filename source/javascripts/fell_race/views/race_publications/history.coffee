@@ -1,4 +1,4 @@
-class FellRace.Views.RaceHistory extends Backbone.Marionette.ItemView
+class FellRace.Views.RaceHistory extends FellRace.View
   template: 'race_publications/history'
   className: "race"
 

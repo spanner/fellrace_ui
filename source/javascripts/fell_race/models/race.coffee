@@ -110,7 +110,7 @@ class FellRace.Models.Race extends FellRace.Model
   publish: =>
     data =
       published_json: @jsonForPublication()
-    $.notify "publishing race"
+    _fr.broadcast "publishing race"
     $.post "#{@url()}/publish", data, (response) =>
       _fr.navigate("/races/#{@get("slug")}")
     , 'json'

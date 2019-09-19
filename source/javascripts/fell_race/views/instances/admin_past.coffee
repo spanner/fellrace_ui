@@ -1,4 +1,4 @@
-class FellRace.Views.AdminPastInstance extends Backbone.Marionette.ItemView
+class FellRace.Views.AdminPastInstance extends FellRace.View
   template: 'instances/admin_past'
   className: "instance"
   tagName: "section"

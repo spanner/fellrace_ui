@@ -1,4 +1,4 @@
-class FellRace.Views.CompetitorEntryRow extends Backbone.Marionette.ItemView
+class FellRace.Views.CompetitorEntryRow extends FellRace.View
   template: "competitors/entry"
   tagName: "tr"
 
@@ -42,7 +42,7 @@ class FellRace.Views.CompetitorEntryRow extends Backbone.Marionette.ItemView
     if confirm "Cancel entry for #{@model.get("race_name")} #{@model.get("instance_name")}?"
       @model.set {cancelled:true}, persistChange: true
 
-class FellRace.Views.CompetitorEntriesTable extends Backbone.Marionette.CompositeView
+class FellRace.Views.CompetitorEntriesTable extends FellRace.CollectionView
   template: "competitors/entries"
   itemView: FellRace.Views.CompetitorEntryRow
   itemViewContainer: 'tbody'

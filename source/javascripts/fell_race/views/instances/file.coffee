@@ -1,4 +1,4 @@
-class FellRace.Views.ResultsFile extends Backbone.Marionette.ItemView
+class FellRace.Views.ResultsFile extends FellRace.View
   template: "instances/results_file"
   size_limit: 10
   allowed_extensions: [".csv"]

@@ -1805,6 +1805,22 @@
     FellRace.Templates = {};
   }
 
+  FellRace.Templates['ui'] = function(context) {
+    return (function() {
+      var $o;
+      $o = [];
+      $o.push("<section id='gmap'></section>\n<div id='backdrop'></div>\n<section id='content'>\n  <div id='view_toggle'></div>\n  <main id='fellrace'></main>\n  <header>\n    <div id='banner'>\n      <a href='/'>\n        <h1 class='title'>\n          fellrace.org.uk\n        </h1>\n        <p class='strapline'>\n          free love for fell races\n        </p>\n      </a>\n    </div>\n  </header>\n  <div id='user_controls'></div>\n</section>\n<div id='more'>\n  <section id='extra'></section>\n  <div id='action'></div>\n</div>\n<div id='notice'></div>");
+      return $o.join("\n").replace(/\s(?:id|class)=(['"])(\1)/mg, "");
+    }).call(context);
+  };
+
+}).call(this);
+
+(function() {
+  if (FellRace.Templates == null) {
+    FellRace.Templates = {};
+  }
+
   FellRace.Templates['users/action_menu'] = function(context) {
     return (function() {
       var $o;

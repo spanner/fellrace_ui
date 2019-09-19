@@ -1,4 +1,4 @@
-class FellRace.Views.NewEntry extends Backbone.Marionette.ItemView
+class FellRace.Views.NewEntry extends FellRace.View
   template: 'entries/new'
 
   bindings:

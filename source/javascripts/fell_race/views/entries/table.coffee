@@ -1,4 +1,4 @@
-class FellRace.Views.EntryRow extends Backbone.Marionette.ItemView
+class FellRace.Views.EntryRow extends FellRace.View
   template: "entries/row"
   className: "entry"
   tagName: "tr"
@@ -45,7 +45,7 @@ class FellRace.Views.EntryRow extends Backbone.Marionette.ItemView
       $el.slideUp('fast')
 
 
-class FellRace.Views.EntriesTable extends Backbone.Marionette.CompositeView
+class FellRace.Views.EntriesTable extends FellRace.CollectionView
   itemView: FellRace.Views.EntryRow
   template: "entries/table"
   itemViewContainer: "tbody"

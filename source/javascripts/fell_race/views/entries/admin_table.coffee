@@ -1,4 +1,4 @@
-class FellRace.Views.AdminEntryRow extends Backbone.Marionette.ItemView
+class FellRace.Views.AdminEntryRow extends FellRace.View
   className: "entry"
   tagName: "tr"
 
@@ -51,7 +51,7 @@ class FellRace.Views.UncancelledAdminEntryRow extends FellRace.Views.AdminEntryR
     @model.save cancelled: true
 
 
-class FellRace.Views.AdminEntriesTable extends Backbone.Marionette.CompositeView
+class FellRace.Views.AdminEntriesTable extends FellRace.CollectionView
   itemView: FellRace.Views.UncancelledAdminEntryRow
   template: "entries/admin_table"
   tagName: "table"

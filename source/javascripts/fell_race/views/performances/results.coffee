@@ -1,4 +1,4 @@
-class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
+class FellRace.Views.ResultRow extends FellRace.View
   template: "performances/result_row"
   tagName: "tr"
 
@@ -86,7 +86,7 @@ class FellRace.Views.ResultRow extends Backbone.Marionette.ItemView
       $el.slideUp('fast')
 
 
-class FellRace.Views.ResultsTable extends Backbone.Marionette.CompositeView
+class FellRace.Views.ResultsTable extends FellRace.CollectionView
   template: "performances/results_table"
   itemView: FellRace.Views.ResultRow
   itemViewContainer: "tbody"
@@ -123,7 +123,7 @@ class FellRace.Views.ResultsTable extends Backbone.Marionette.CompositeView
     @render()
 
 
-class FellRace.Views.CheckpointCell extends Backbone.Marionette.ItemView
+class FellRace.Views.CheckpointCell extends FellRace.View
   template: "performances/checkpoint_cell"
   tagName: "td"
   className: "checkpoint"

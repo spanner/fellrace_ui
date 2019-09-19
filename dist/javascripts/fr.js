@@ -14858,9 +14858,9 @@ else {
     window.tinycolor = tinycolor;
 }
 
-})();//     Underscore.js 1.6.0
+})();//     Underscore.js 1.9.1
 //     http://underscorejs.org
-//     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//     (c) 2009-2018 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Underscore may be freely distributed under the MIT license.
 
 (function() {
@@ -14868,41 +14868,35 @@ else {
   // Baseline setup
   // --------------
 
-  // Establish the root object, `window` in the browser, or `exports` on the server.
-  var root = this;
+  // Establish the root object, `window` (`self`) in the browser, `global`
+  // on the server, or `this` in some virtual machines. We use `self`
+  // instead of `window` for `WebWorker` support.
+  var root = typeof self == 'object' && self.self === self && self ||
+            typeof global == 'object' && global.global === global && global ||
+            this ||
+            {};
 
   // Save the previous value of the `_` variable.
   var previousUnderscore = root._;
 
-  // Establish the object that gets returned to break out of a loop iteration.
-  var breaker = {};
-
   // Save bytes in the minified (but not gzipped) version:
-  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype;
+  var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
 
   // Create quick reference variables for speed access to core prototypes.
-  var
-    push             = ArrayProto.push,
-    slice            = ArrayProto.slice,
-    concat           = ArrayProto.concat,
-    toString         = ObjProto.toString,
-    hasOwnProperty   = ObjProto.hasOwnProperty;
+  var push = ArrayProto.push,
+      slice = ArrayProto.slice,
+      toString = ObjProto.toString,
+      hasOwnProperty = ObjProto.hasOwnProperty;
 
   // All **ECMAScript 5** native function implementations that we hope to use
   // are declared here.
-  var
-    nativeForEach      = ArrayProto.forEach,
-    nativeMap          = ArrayProto.map,
-    nativeReduce       = ArrayProto.reduce,
-    nativeReduceRight  = ArrayProto.reduceRight,
-    nativeFilter       = ArrayProto.filter,
-    nativeEvery        = ArrayProto.every,
-    nativeSome         = ArrayProto.some,
-    nativeIndexOf      = ArrayProto.indexOf,
-    nativeLastIndexOf  = ArrayProto.lastIndexOf,
-    nativeIsArray      = Array.isArray,
-    nativeKeys         = Object.keys,
-    nativeBind         = FuncProto.bind;
+  var nativeIsArray = Array.isArray,
+      nativeKeys = Object.keys,
+      nativeCreate = Object.create;
+
+  // Naked function reference for surrogate-prototype-swapping.
+  var Ctor = function(){};
 
   // Create a safe reference to the Underscore object for use below.
   var _ = function(obj) {
@@ -14912,11 +14906,12 @@ else {
   };
 
   // Export the Underscore object for **Node.js**, with
-  // backwards-compatibility for the old `require()` API. If we're in
-  // the browser, add `_` as a global object via a string identifier,
-  // for Closure Compiler "advanced" mode.
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
+  // backwards-compatibility for their old module API. If we're in
+  // the browser, add `_` as a global object.
+  // (`nodeType` is checked to ensure that `module`
+  // and `exports` are not HTML elements.)
+  if (typeof exports != 'undefined' && !exports.nodeType) {
+    if (typeof module != 'undefined' && !module.nodeType && module.exports) {
       exports = module.exports = _;
     }
     exports._ = _;
@@ -14925,171 +14920,263 @@ else {
   }
 
   // Current version.
-  _.VERSION = '1.6.0';
+  _.VERSION = '1.9.1';
+
+  // Internal function that returns an efficient (for current engines) version
+  // of the passed-in callback, to be repeatedly applied in other Underscore
+  // functions.
+  var optimizeCb = function(func, context, argCount) {
+    if (context === void 0) return func;
+    switch (argCount == null ? 3 : argCount) {
+      case 1: return function(value) {
+        return func.call(context, value);
+      };
+      // The 2-argument case is omitted because we’re not using it.
+      case 3: return function(value, index, collection) {
+        return func.call(context, value, index, collection);
+      };
+      case 4: return function(accumulator, value, index, collection) {
+        return func.call(context, accumulator, value, index, collection);
+      };
+    }
+    return function() {
+      return func.apply(context, arguments);
+    };
+  };
+
+  var builtinIteratee;
+
+  // An internal function to generate callbacks that can be applied to each
+  // element in a collection, returning the desired result — either `identity`,
+  // an arbitrary callback, a property matcher, or a property accessor.
+  var cb = function(value, context, argCount) {
+    if (_.iteratee !== builtinIteratee) return _.iteratee(value, context);
+    if (value == null) return _.identity;
+    if (_.isFunction(value)) return optimizeCb(value, context, argCount);
+    if (_.isObject(value) && !_.isArray(value)) return _.matcher(value);
+    return _.property(value);
+  };
+
+  // External wrapper for our callback generator. Users may customize
+  // `_.iteratee` if they want additional predicate/iteratee shorthand styles.
+  // This abstraction hides the internal-only argCount argument.
+  _.iteratee = builtinIteratee = function(value, context) {
+    return cb(value, context, Infinity);
+  };
+
+  // Some functions take a variable number of arguments, or a few expected
+  // arguments at the beginning and then a variable number of values to operate
+  // on. This helper accumulates all remaining arguments past the function’s
+  // argument length (or an explicit `startIndex`), into an array that becomes
+  // the last argument. Similar to ES6’s "rest parameter".
+  var restArguments = function(func, startIndex) {
+    startIndex = startIndex == null ? func.length - 1 : +startIndex;
+    return function() {
+      var length = Math.max(arguments.length - startIndex, 0),
+          rest = Array(length),
+          index = 0;
+      for (; index < length; index++) {
+        rest[index] = arguments[index + startIndex];
+      }
+      switch (startIndex) {
+        case 0: return func.call(this, rest);
+        case 1: return func.call(this, arguments[0], rest);
+        case 2: return func.call(this, arguments[0], arguments[1], rest);
+      }
+      var args = Array(startIndex + 1);
+      for (index = 0; index < startIndex; index++) {
+        args[index] = arguments[index];
+      }
+      args[startIndex] = rest;
+      return func.apply(this, args);
+    };
+  };
+
+  // An internal function for creating a new object that inherits from another.
+  var baseCreate = function(prototype) {
+    if (!_.isObject(prototype)) return {};
+    if (nativeCreate) return nativeCreate(prototype);
+    Ctor.prototype = prototype;
+    var result = new Ctor;
+    Ctor.prototype = null;
+    return result;
+  };
+
+  var shallowProperty = function(key) {
+    return function(obj) {
+      return obj == null ? void 0 : obj[key];
+    };
+  };
+
+  var has = function(obj, path) {
+    return obj != null && hasOwnProperty.call(obj, path);
+  }
+
+  var deepGet = function(obj, path) {
+    var length = path.length;
+    for (var i = 0; i < length; i++) {
+      if (obj == null) return void 0;
+      obj = obj[path[i]];
+    }
+    return length ? obj : void 0;
+  };
+
+  // Helper for collection methods to determine whether a collection
+  // should be iterated as an array or as an object.
+  // Related: http://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
+  // Avoids a very nasty iOS 8 JIT bug on ARM-64. #2094
+  var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
+  var getLength = shallowProperty('length');
+  var isArrayLike = function(collection) {
+    var length = getLength(collection);
+    return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
+  };
 
   // Collection Functions
   // --------------------
 
   // The cornerstone, an `each` implementation, aka `forEach`.
-  // Handles objects with the built-in `forEach`, arrays, and raw objects.
-  // Delegates to **ECMAScript 5**'s native `forEach` if available.
-  var each = _.each = _.forEach = function(obj, iterator, context) {
-    if (obj == null) return obj;
-    if (nativeForEach && obj.forEach === nativeForEach) {
-      obj.forEach(iterator, context);
-    } else if (obj.length === +obj.length) {
-      for (var i = 0, length = obj.length; i < length; i++) {
-        if (iterator.call(context, obj[i], i, obj) === breaker) return;
+  // Handles raw objects in addition to array-likes. Treats all
+  // sparse array-likes as if they were dense.
+  _.each = _.forEach = function(obj, iteratee, context) {
+    iteratee = optimizeCb(iteratee, context);
+    var i, length;
+    if (isArrayLike(obj)) {
+      for (i = 0, length = obj.length; i < length; i++) {
+        iteratee(obj[i], i, obj);
       }
     } else {
       var keys = _.keys(obj);
-      for (var i = 0, length = keys.length; i < length; i++) {
-        if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
+      for (i = 0, length = keys.length; i < length; i++) {
+        iteratee(obj[keys[i]], keys[i], obj);
       }
     }
     return obj;
   };
 
-  // Return the results of applying the iterator to each element.
-  // Delegates to **ECMAScript 5**'s native `map` if available.
-  _.map = _.collect = function(obj, iterator, context) {
-    var results = [];
-    if (obj == null) return results;
-    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
-    each(obj, function(value, index, list) {
-      results.push(iterator.call(context, value, index, list));
-    });
+  // Return the results of applying the iteratee to each element.
+  _.map = _.collect = function(obj, iteratee, context) {
+    iteratee = cb(iteratee, context);
+    var keys = !isArrayLike(obj) && _.keys(obj),
+        length = (keys || obj).length,
+        results = Array(length);
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys ? keys[index] : index;
+      results[index] = iteratee(obj[currentKey], currentKey, obj);
+    }
     return results;
   };
 
-  var reduceError = 'Reduce of empty array with no initial value';
+  // Create a reducing function iterating left or right.
+  var createReduce = function(dir) {
+    // Wrap code that reassigns argument variables in a separate function than
+    // the one that accesses `arguments.length` to avoid a perf hit. (#1991)
+    var reducer = function(obj, iteratee, memo, initial) {
+      var keys = !isArrayLike(obj) && _.keys(obj),
+          length = (keys || obj).length,
+          index = dir > 0 ? 0 : length - 1;
+      if (!initial) {
+        memo = obj[keys ? keys[index] : index];
+        index += dir;
+      }
+      for (; index >= 0 && index < length; index += dir) {
+        var currentKey = keys ? keys[index] : index;
+        memo = iteratee(memo, obj[currentKey], currentKey, obj);
+      }
+      return memo;
+    };
+
+    return function(obj, iteratee, memo, context) {
+      var initial = arguments.length >= 3;
+      return reducer(obj, optimizeCb(iteratee, context, 4), memo, initial);
+    };
+  };
 
   // **Reduce** builds up a single result from a list of values, aka `inject`,
-  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
-  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
-    var initial = arguments.length > 2;
-    if (obj == null) obj = [];
-    if (nativeReduce && obj.reduce === nativeReduce) {
-      if (context) iterator = _.bind(iterator, context);
-      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
-    }
-    each(obj, function(value, index, list) {
-      if (!initial) {
-        memo = value;
-        initial = true;
-      } else {
-        memo = iterator.call(context, memo, value, index, list);
-      }
-    });
-    if (!initial) throw new TypeError(reduceError);
-    return memo;
-  };
+  // or `foldl`.
+  _.reduce = _.foldl = _.inject = createReduce(1);
 
   // The right-associative version of reduce, also known as `foldr`.
-  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
-  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
-    var initial = arguments.length > 2;
-    if (obj == null) obj = [];
-    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
-      if (context) iterator = _.bind(iterator, context);
-      return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
-    }
-    var length = obj.length;
-    if (length !== +length) {
-      var keys = _.keys(obj);
-      length = keys.length;
-    }
-    each(obj, function(value, index, list) {
-      index = keys ? keys[--length] : --length;
-      if (!initial) {
-        memo = obj[index];
-        initial = true;
-      } else {
-        memo = iterator.call(context, memo, obj[index], index, list);
-      }
-    });
-    if (!initial) throw new TypeError(reduceError);
-    return memo;
-  };
+  _.reduceRight = _.foldr = createReduce(-1);
 
   // Return the first value which passes a truth test. Aliased as `detect`.
   _.find = _.detect = function(obj, predicate, context) {
-    var result;
-    any(obj, function(value, index, list) {
-      if (predicate.call(context, value, index, list)) {
-        result = value;
-        return true;
-      }
-    });
-    return result;
+    var keyFinder = isArrayLike(obj) ? _.findIndex : _.findKey;
+    var key = keyFinder(obj, predicate, context);
+    if (key !== void 0 && key !== -1) return obj[key];
   };
 
   // Return all the elements that pass a truth test.
-  // Delegates to **ECMAScript 5**'s native `filter` if available.
   // Aliased as `select`.
   _.filter = _.select = function(obj, predicate, context) {
     var results = [];
-    if (obj == null) return results;
-    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(predicate, context);
-    each(obj, function(value, index, list) {
-      if (predicate.call(context, value, index, list)) results.push(value);
+    predicate = cb(predicate, context);
+    _.each(obj, function(value, index, list) {
+      if (predicate(value, index, list)) results.push(value);
     });
     return results;
   };
 
   // Return all the elements for which a truth test fails.
   _.reject = function(obj, predicate, context) {
-    return _.filter(obj, function(value, index, list) {
-      return !predicate.call(context, value, index, list);
-    }, context);
+    return _.filter(obj, _.negate(cb(predicate)), context);
   };
 
   // Determine whether all of the elements match a truth test.
-  // Delegates to **ECMAScript 5**'s native `every` if available.
   // Aliased as `all`.
   _.every = _.all = function(obj, predicate, context) {
-    predicate || (predicate = _.identity);
-    var result = true;
-    if (obj == null) return result;
-    if (nativeEvery && obj.every === nativeEvery) return obj.every(predicate, context);
-    each(obj, function(value, index, list) {
-      if (!(result = result && predicate.call(context, value, index, list))) return breaker;
-    });
-    return !!result;
+    predicate = cb(predicate, context);
+    var keys = !isArrayLike(obj) && _.keys(obj),
+        length = (keys || obj).length;
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys ? keys[index] : index;
+      if (!predicate(obj[currentKey], currentKey, obj)) return false;
+    }
+    return true;
   };
 
   // Determine if at least one element in the object matches a truth test.
-  // Delegates to **ECMAScript 5**'s native `some` if available.
   // Aliased as `any`.
-  var any = _.some = _.any = function(obj, predicate, context) {
-    predicate || (predicate = _.identity);
-    var result = false;
-    if (obj == null) return result;
-    if (nativeSome && obj.some === nativeSome) return obj.some(predicate, context);
-    each(obj, function(value, index, list) {
-      if (result || (result = predicate.call(context, value, index, list))) return breaker;
-    });
-    return !!result;
+  _.some = _.any = function(obj, predicate, context) {
+    predicate = cb(predicate, context);
+    var keys = !isArrayLike(obj) && _.keys(obj),
+        length = (keys || obj).length;
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys ? keys[index] : index;
+      if (predicate(obj[currentKey], currentKey, obj)) return true;
+    }
+    return false;
   };
 
-  // Determine if the array or object contains a given value (using `===`).
-  // Aliased as `include`.
-  _.contains = _.include = function(obj, target) {
-    if (obj == null) return false;
-    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
-    return any(obj, function(value) {
-      return value === target;
-    });
+  // Determine if the array or object contains a given item (using `===`).
+  // Aliased as `includes` and `include`.
+  _.contains = _.includes = _.include = function(obj, item, fromIndex, guard) {
+    if (!isArrayLike(obj)) obj = _.values(obj);
+    if (typeof fromIndex != 'number' || guard) fromIndex = 0;
+    return _.indexOf(obj, item, fromIndex) >= 0;
   };
 
   // Invoke a method (with arguments) on every item in a collection.
-  _.invoke = function(obj, method) {
-    var args = slice.call(arguments, 2);
-    var isFunc = _.isFunction(method);
-    return _.map(obj, function(value) {
-      return (isFunc ? method : value[method]).apply(value, args);
+  _.invoke = restArguments(function(obj, path, args) {
+    var contextPath, func;
+    if (_.isFunction(path)) {
+      func = path;
+    } else if (_.isArray(path)) {
+      contextPath = path.slice(0, -1);
+      path = path[path.length - 1];
+    }
+    return _.map(obj, function(context) {
+      var method = func;
+      if (!method) {
+        if (contextPath && contextPath.length) {
+          context = deepGet(context, contextPath);
+        }
+        if (context == null) return void 0;
+        method = context[path];
+      }
+      return method == null ? method : method.apply(context, args);
     });
-  };
+  });
 
   // Convenience version of a common use case of `map`: fetching a property.
   _.pluck = function(obj, key) {
@@ -15099,89 +15186,101 @@ else {
   // Convenience version of a common use case of `filter`: selecting only objects
   // containing specific `key:value` pairs.
   _.where = function(obj, attrs) {
-    return _.filter(obj, _.matches(attrs));
+    return _.filter(obj, _.matcher(attrs));
   };
 
   // Convenience version of a common use case of `find`: getting the first object
   // containing specific `key:value` pairs.
   _.findWhere = function(obj, attrs) {
-    return _.find(obj, _.matches(attrs));
+    return _.find(obj, _.matcher(attrs));
   };
 
-  // Return the maximum element or (element-based computation).
-  // Can't optimize arrays of integers longer than 65,535 elements.
-  // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
-  _.max = function(obj, iterator, context) {
-    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.max.apply(Math, obj);
-    }
-    var result = -Infinity, lastComputed = -Infinity;
-    each(obj, function(value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      if (computed > lastComputed) {
-        result = value;
-        lastComputed = computed;
+  // Return the maximum element (or element-based computation).
+  _.max = function(obj, iteratee, context) {
+    var result = -Infinity, lastComputed = -Infinity,
+        value, computed;
+    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
+      obj = isArrayLike(obj) ? obj : _.values(obj);
+      for (var i = 0, length = obj.length; i < length; i++) {
+        value = obj[i];
+        if (value != null && value > result) {
+          result = value;
+        }
       }
-    });
+    } else {
+      iteratee = cb(iteratee, context);
+      _.each(obj, function(v, index, list) {
+        computed = iteratee(v, index, list);
+        if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
+          result = v;
+          lastComputed = computed;
+        }
+      });
+    }
     return result;
   };
 
   // Return the minimum element (or element-based computation).
-  _.min = function(obj, iterator, context) {
-    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.min.apply(Math, obj);
-    }
-    var result = Infinity, lastComputed = Infinity;
-    each(obj, function(value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      if (computed < lastComputed) {
-        result = value;
-        lastComputed = computed;
+  _.min = function(obj, iteratee, context) {
+    var result = Infinity, lastComputed = Infinity,
+        value, computed;
+    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
+      obj = isArrayLike(obj) ? obj : _.values(obj);
+      for (var i = 0, length = obj.length; i < length; i++) {
+        value = obj[i];
+        if (value != null && value < result) {
+          result = value;
+        }
       }
-    });
+    } else {
+      iteratee = cb(iteratee, context);
+      _.each(obj, function(v, index, list) {
+        computed = iteratee(v, index, list);
+        if (computed < lastComputed || computed === Infinity && result === Infinity) {
+          result = v;
+          lastComputed = computed;
+        }
+      });
+    }
     return result;
   };
 
-  // Shuffle an array, using the modern version of the
-  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisherâ€“Yates_shuffle).
+  // Shuffle a collection.
   _.shuffle = function(obj) {
-    var rand;
-    var index = 0;
-    var shuffled = [];
-    each(obj, function(value) {
-      rand = _.random(index++);
-      shuffled[index - 1] = shuffled[rand];
-      shuffled[rand] = value;
-    });
-    return shuffled;
+    return _.sample(obj, Infinity);
   };
 
-  // Sample **n** random values from a collection.
+  // Sample **n** random values from a collection using the modern version of the
+  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
   // If **n** is not specified, returns a single random element.
   // The internal `guard` argument allows it to work with `map`.
   _.sample = function(obj, n, guard) {
     if (n == null || guard) {
-      if (obj.length !== +obj.length) obj = _.values(obj);
+      if (!isArrayLike(obj)) obj = _.values(obj);
       return obj[_.random(obj.length - 1)];
     }
-    return _.shuffle(obj).slice(0, Math.max(0, n));
+    var sample = isArrayLike(obj) ? _.clone(obj) : _.values(obj);
+    var length = getLength(sample);
+    n = Math.max(Math.min(n, length), 0);
+    var last = length - 1;
+    for (var index = 0; index < n; index++) {
+      var rand = _.random(index, last);
+      var temp = sample[index];
+      sample[index] = sample[rand];
+      sample[rand] = temp;
+    }
+    return sample.slice(0, n);
   };
 
-  // An internal function to generate lookup iterators.
-  var lookupIterator = function(value) {
-    if (value == null) return _.identity;
-    if (_.isFunction(value)) return value;
-    return _.property(value);
-  };
-
-  // Sort the object's values by a criterion produced by an iterator.
-  _.sortBy = function(obj, iterator, context) {
-    iterator = lookupIterator(iterator);
-    return _.pluck(_.map(obj, function(value, index, list) {
+  // Sort the object's values by a criterion produced by an iteratee.
+  _.sortBy = function(obj, iteratee, context) {
+    var index = 0;
+    iteratee = cb(iteratee, context);
+    return _.pluck(_.map(obj, function(value, key, list) {
       return {
         value: value,
-        index: index,
-        criteria: iterator.call(context, value, index, list)
+        index: index++,
+        criteria: iteratee(value, key, list)
       };
     }).sort(function(left, right) {
       var a = left.criteria;
@@ -15195,13 +15294,13 @@ else {
   };
 
   // An internal function used for aggregate "group by" operations.
-  var group = function(behavior) {
-    return function(obj, iterator, context) {
-      var result = {};
-      iterator = lookupIterator(iterator);
-      each(obj, function(value, index) {
-        var key = iterator.call(context, value, index, obj);
-        behavior(result, key, value);
+  var group = function(behavior, partition) {
+    return function(obj, iteratee, context) {
+      var result = partition ? [[], []] : {};
+      iteratee = cb(iteratee, context);
+      _.each(obj, function(value, index) {
+        var key = iteratee(value, index, obj);
+        behavior(result, value, key);
       });
       return result;
     };
@@ -15209,49 +15308,47 @@ else {
 
   // Groups the object's values by a criterion. Pass either a string attribute
   // to group by, or a function that returns the criterion.
-  _.groupBy = group(function(result, key, value) {
-    _.has(result, key) ? result[key].push(value) : result[key] = [value];
+  _.groupBy = group(function(result, value, key) {
+    if (has(result, key)) result[key].push(value); else result[key] = [value];
   });
 
   // Indexes the object's values by a criterion, similar to `groupBy`, but for
   // when you know that your index values will be unique.
-  _.indexBy = group(function(result, key, value) {
+  _.indexBy = group(function(result, value, key) {
     result[key] = value;
   });
 
   // Counts instances of an object that group by a certain criterion. Pass
   // either a string attribute to count by, or a function that returns the
   // criterion.
-  _.countBy = group(function(result, key) {
-    _.has(result, key) ? result[key]++ : result[key] = 1;
+  _.countBy = group(function(result, value, key) {
+    if (has(result, key)) result[key]++; else result[key] = 1;
   });
 
-  // Use a comparator function to figure out the smallest index at which
-  // an object should be inserted so as to maintain order. Uses binary search.
-  _.sortedIndex = function(array, obj, iterator, context) {
-    iterator = lookupIterator(iterator);
-    var value = iterator.call(context, obj);
-    var low = 0, high = array.length;
-    while (low < high) {
-      var mid = (low + high) >>> 1;
-      iterator.call(context, array[mid]) < value ? low = mid + 1 : high = mid;
-    }
-    return low;
-  };
-
+  var reStrSymbol = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
   // Safely create a real, live array from anything iterable.
   _.toArray = function(obj) {
     if (!obj) return [];
     if (_.isArray(obj)) return slice.call(obj);
-    if (obj.length === +obj.length) return _.map(obj, _.identity);
+    if (_.isString(obj)) {
+      // Keep surrogate pair characters together
+      return obj.match(reStrSymbol);
+    }
+    if (isArrayLike(obj)) return _.map(obj, _.identity);
     return _.values(obj);
   };
 
   // Return the number of elements in an object.
   _.size = function(obj) {
     if (obj == null) return 0;
-    return (obj.length === +obj.length) ? obj.length : _.keys(obj).length;
+    return isArrayLike(obj) ? obj.length : _.keys(obj).length;
   };
+
+  // Split a collection into two arrays: one whose elements all satisfy the given
+  // predicate, and one whose elements all do not satisfy the predicate.
+  _.partition = group(function(result, value, pass) {
+    result[pass ? 0 : 1].push(value);
+  }, true);
 
   // Array Functions
   // ---------------
@@ -15260,139 +15357,157 @@ else {
   // values in the array. Aliased as `head` and `take`. The **guard** check
   // allows it to work with `_.map`.
   _.first = _.head = _.take = function(array, n, guard) {
-    if (array == null) return void 0;
-    if ((n == null) || guard) return array[0];
-    if (n < 0) return [];
-    return slice.call(array, 0, n);
+    if (array == null || array.length < 1) return n == null ? void 0 : [];
+    if (n == null || guard) return array[0];
+    return _.initial(array, array.length - n);
   };
 
   // Returns everything but the last entry of the array. Especially useful on
   // the arguments object. Passing **n** will return all the values in
-  // the array, excluding the last N. The **guard** check allows it to work with
-  // `_.map`.
+  // the array, excluding the last N.
   _.initial = function(array, n, guard) {
-    return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
+    return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
   };
 
   // Get the last element of an array. Passing **n** will return the last N
-  // values in the array. The **guard** check allows it to work with `_.map`.
+  // values in the array.
   _.last = function(array, n, guard) {
-    if (array == null) return void 0;
-    if ((n == null) || guard) return array[array.length - 1];
-    return slice.call(array, Math.max(array.length - n, 0));
+    if (array == null || array.length < 1) return n == null ? void 0 : [];
+    if (n == null || guard) return array[array.length - 1];
+    return _.rest(array, Math.max(0, array.length - n));
   };
 
   // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
   // Especially useful on the arguments object. Passing an **n** will return
-  // the rest N values in the array. The **guard**
-  // check allows it to work with `_.map`.
+  // the rest N values in the array.
   _.rest = _.tail = _.drop = function(array, n, guard) {
-    return slice.call(array, (n == null) || guard ? 1 : n);
+    return slice.call(array, n == null || guard ? 1 : n);
   };
 
   // Trim out all falsy values from an array.
   _.compact = function(array) {
-    return _.filter(array, _.identity);
+    return _.filter(array, Boolean);
   };
 
   // Internal implementation of a recursive `flatten` function.
-  var flatten = function(input, shallow, output) {
-    if (shallow && _.every(input, _.isArray)) {
-      return concat.apply(output, input);
-    }
-    each(input, function(value) {
-      if (_.isArray(value) || _.isArguments(value)) {
-        shallow ? push.apply(output, value) : flatten(value, shallow, output);
-      } else {
-        output.push(value);
+  var flatten = function(input, shallow, strict, output) {
+    output = output || [];
+    var idx = output.length;
+    for (var i = 0, length = getLength(input); i < length; i++) {
+      var value = input[i];
+      if (isArrayLike(value) && (_.isArray(value) || _.isArguments(value))) {
+        // Flatten current level of array or arguments object.
+        if (shallow) {
+          var j = 0, len = value.length;
+          while (j < len) output[idx++] = value[j++];
+        } else {
+          flatten(value, shallow, strict, output);
+          idx = output.length;
+        }
+      } else if (!strict) {
+        output[idx++] = value;
       }
-    });
+    }
     return output;
   };
 
   // Flatten out an array, either recursively (by default), or just one level.
   _.flatten = function(array, shallow) {
-    return flatten(array, shallow, []);
+    return flatten(array, shallow, false);
   };
 
   // Return a version of the array that does not contain the specified value(s).
-  _.without = function(array) {
-    return _.difference(array, slice.call(arguments, 1));
-  };
-
-  // Split an array into two arrays: one whose elements all satisfy the given
-  // predicate, and one whose elements all do not satisfy the predicate.
-  _.partition = function(array, predicate) {
-    var pass = [], fail = [];
-    each(array, function(elem) {
-      (predicate(elem) ? pass : fail).push(elem);
-    });
-    return [pass, fail];
-  };
+  _.without = restArguments(function(array, otherArrays) {
+    return _.difference(array, otherArrays);
+  });
 
   // Produce a duplicate-free version of the array. If the array has already
   // been sorted, you have the option of using a faster algorithm.
+  // The faster algorithm will not work with an iteratee if the iteratee
+  // is not a one-to-one function, so providing an iteratee will disable
+  // the faster algorithm.
   // Aliased as `unique`.
-  _.uniq = _.unique = function(array, isSorted, iterator, context) {
-    if (_.isFunction(isSorted)) {
-      context = iterator;
-      iterator = isSorted;
+  _.uniq = _.unique = function(array, isSorted, iteratee, context) {
+    if (!_.isBoolean(isSorted)) {
+      context = iteratee;
+      iteratee = isSorted;
       isSorted = false;
     }
-    var initial = iterator ? _.map(array, iterator, context) : array;
-    var results = [];
+    if (iteratee != null) iteratee = cb(iteratee, context);
+    var result = [];
     var seen = [];
-    each(initial, function(value, index) {
-      if (isSorted ? (!index || seen[seen.length - 1] !== value) : !_.contains(seen, value)) {
-        seen.push(value);
-        results.push(array[index]);
+    for (var i = 0, length = getLength(array); i < length; i++) {
+      var value = array[i],
+          computed = iteratee ? iteratee(value, i, array) : value;
+      if (isSorted && !iteratee) {
+        if (!i || seen !== computed) result.push(value);
+        seen = computed;
+      } else if (iteratee) {
+        if (!_.contains(seen, computed)) {
+          seen.push(computed);
+          result.push(value);
+        }
+      } else if (!_.contains(result, value)) {
+        result.push(value);
       }
-    });
-    return results;
+    }
+    return result;
   };
 
   // Produce an array that contains the union: each distinct element from all of
   // the passed-in arrays.
-  _.union = function() {
-    return _.uniq(_.flatten(arguments, true));
-  };
+  _.union = restArguments(function(arrays) {
+    return _.uniq(flatten(arrays, true, true));
+  });
 
   // Produce an array that contains every item shared between all the
   // passed-in arrays.
   _.intersection = function(array) {
-    var rest = slice.call(arguments, 1);
-    return _.filter(_.uniq(array), function(item) {
-      return _.every(rest, function(other) {
-        return _.contains(other, item);
-      });
-    });
+    var result = [];
+    var argsLength = arguments.length;
+    for (var i = 0, length = getLength(array); i < length; i++) {
+      var item = array[i];
+      if (_.contains(result, item)) continue;
+      var j;
+      for (j = 1; j < argsLength; j++) {
+        if (!_.contains(arguments[j], item)) break;
+      }
+      if (j === argsLength) result.push(item);
+    }
+    return result;
   };
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
-  _.difference = function(array) {
-    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
-    return _.filter(array, function(value){ return !_.contains(rest, value); });
+  _.difference = restArguments(function(array, rest) {
+    rest = flatten(rest, true, true);
+    return _.filter(array, function(value){
+      return !_.contains(rest, value);
+    });
+  });
+
+  // Complement of _.zip. Unzip accepts an array of arrays and groups
+  // each array's elements on shared indices.
+  _.unzip = function(array) {
+    var length = array && _.max(array, getLength).length || 0;
+    var result = Array(length);
+
+    for (var index = 0; index < length; index++) {
+      result[index] = _.pluck(array, index);
+    }
+    return result;
   };
 
   // Zip together multiple lists into a single array -- elements that share
   // an index go together.
-  _.zip = function() {
-    var length = _.max(_.pluck(arguments, 'length').concat(0));
-    var results = new Array(length);
-    for (var i = 0; i < length; i++) {
-      results[i] = _.pluck(arguments, '' + i);
-    }
-    return results;
-  };
+  _.zip = restArguments(_.unzip);
 
   // Converts lists into objects. Pass either a single array of `[key, value]`
   // pairs, or two parallel arrays of the same length -- one of keys, and one of
-  // the corresponding values.
+  // the corresponding values. Passing by pairs is the reverse of _.pairs.
   _.object = function(list, values) {
-    if (list == null) return {};
     var result = {};
-    for (var i = 0, length = list.length; i < length; i++) {
+    for (var i = 0, length = getLength(list); i < length; i++) {
       if (values) {
         result[list[i]] = values[i];
       } else {
@@ -15402,135 +15517,182 @@ else {
     return result;
   };
 
-  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
-  // we need this function. Return the position of the first occurrence of an
-  // item in an array, or -1 if the item is not included in the array.
-  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
-  // If the array is large and already in sort order, pass `true`
-  // for **isSorted** to use binary search.
-  _.indexOf = function(array, item, isSorted) {
-    if (array == null) return -1;
-    var i = 0, length = array.length;
-    if (isSorted) {
-      if (typeof isSorted == 'number') {
-        i = (isSorted < 0 ? Math.max(0, length + isSorted) : isSorted);
-      } else {
-        i = _.sortedIndex(array, item);
-        return array[i] === item ? i : -1;
+  // Generator function to create the findIndex and findLastIndex functions.
+  var createPredicateIndexFinder = function(dir) {
+    return function(array, predicate, context) {
+      predicate = cb(predicate, context);
+      var length = getLength(array);
+      var index = dir > 0 ? 0 : length - 1;
+      for (; index >= 0 && index < length; index += dir) {
+        if (predicate(array[index], index, array)) return index;
       }
-    }
-    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
-    for (; i < length; i++) if (array[i] === item) return i;
-    return -1;
+      return -1;
+    };
   };
 
-  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
-  _.lastIndexOf = function(array, item, from) {
-    if (array == null) return -1;
-    var hasIndex = from != null;
-    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) {
-      return hasIndex ? array.lastIndexOf(item, from) : array.lastIndexOf(item);
+  // Returns the first index on an array-like that passes a predicate test.
+  _.findIndex = createPredicateIndexFinder(1);
+  _.findLastIndex = createPredicateIndexFinder(-1);
+
+  // Use a comparator function to figure out the smallest index at which
+  // an object should be inserted so as to maintain order. Uses binary search.
+  _.sortedIndex = function(array, obj, iteratee, context) {
+    iteratee = cb(iteratee, context, 1);
+    var value = iteratee(obj);
+    var low = 0, high = getLength(array);
+    while (low < high) {
+      var mid = Math.floor((low + high) / 2);
+      if (iteratee(array[mid]) < value) low = mid + 1; else high = mid;
     }
-    var i = (hasIndex ? from : array.length);
-    while (i--) if (array[i] === item) return i;
-    return -1;
+    return low;
   };
+
+  // Generator function to create the indexOf and lastIndexOf functions.
+  var createIndexFinder = function(dir, predicateFind, sortedIndex) {
+    return function(array, item, idx) {
+      var i = 0, length = getLength(array);
+      if (typeof idx == 'number') {
+        if (dir > 0) {
+          i = idx >= 0 ? idx : Math.max(idx + length, i);
+        } else {
+          length = idx >= 0 ? Math.min(idx + 1, length) : idx + length + 1;
+        }
+      } else if (sortedIndex && idx && length) {
+        idx = sortedIndex(array, item);
+        return array[idx] === item ? idx : -1;
+      }
+      if (item !== item) {
+        idx = predicateFind(slice.call(array, i, length), _.isNaN);
+        return idx >= 0 ? idx + i : -1;
+      }
+      for (idx = dir > 0 ? i : length - 1; idx >= 0 && idx < length; idx += dir) {
+        if (array[idx] === item) return idx;
+      }
+      return -1;
+    };
+  };
+
+  // Return the position of the first occurrence of an item in an array,
+  // or -1 if the item is not included in the array.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  _.indexOf = createIndexFinder(1, _.findIndex, _.sortedIndex);
+  _.lastIndexOf = createIndexFinder(-1, _.findLastIndex);
 
   // Generate an integer Array containing an arithmetic progression. A port of
   // the native Python `range()` function. See
   // [the Python documentation](http://docs.python.org/library/functions.html#range).
   _.range = function(start, stop, step) {
-    if (arguments.length <= 1) {
+    if (stop == null) {
       stop = start || 0;
       start = 0;
     }
-    step = arguments[2] || 1;
+    if (!step) {
+      step = stop < start ? -1 : 1;
+    }
 
     var length = Math.max(Math.ceil((stop - start) / step), 0);
-    var idx = 0;
-    var range = new Array(length);
+    var range = Array(length);
 
-    while(idx < length) {
-      range[idx++] = start;
-      start += step;
+    for (var idx = 0; idx < length; idx++, start += step) {
+      range[idx] = start;
     }
 
     return range;
   };
 
+  // Chunk a single array into multiple arrays, each containing `count` or fewer
+  // items.
+  _.chunk = function(array, count) {
+    if (count == null || count < 1) return [];
+    var result = [];
+    var i = 0, length = array.length;
+    while (i < length) {
+      result.push(slice.call(array, i, i += count));
+    }
+    return result;
+  };
+
   // Function (ahem) Functions
   // ------------------
 
-  // Reusable constructor function for prototype setting.
-  var ctor = function(){};
+  // Determines whether to execute a function as a constructor
+  // or a normal function with the provided arguments.
+  var executeBound = function(sourceFunc, boundFunc, context, callingContext, args) {
+    if (!(callingContext instanceof boundFunc)) return sourceFunc.apply(context, args);
+    var self = baseCreate(sourceFunc.prototype);
+    var result = sourceFunc.apply(self, args);
+    if (_.isObject(result)) return result;
+    return self;
+  };
 
   // Create a function bound to a given object (assigning `this`, and arguments,
   // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
   // available.
-  _.bind = function(func, context) {
-    var args, bound;
-    if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
-    if (!_.isFunction(func)) throw new TypeError;
-    args = slice.call(arguments, 2);
-    return bound = function() {
-      if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
-      ctor.prototype = func.prototype;
-      var self = new ctor;
-      ctor.prototype = null;
-      var result = func.apply(self, args.concat(slice.call(arguments)));
-      if (Object(result) === result) return result;
-      return self;
-    };
-  };
+  _.bind = restArguments(function(func, context, args) {
+    if (!_.isFunction(func)) throw new TypeError('Bind must be called on a function');
+    var bound = restArguments(function(callArgs) {
+      return executeBound(func, bound, context, this, args.concat(callArgs));
+    });
+    return bound;
+  });
 
   // Partially apply a function by creating a version that has had some of its
   // arguments pre-filled, without changing its dynamic `this` context. _ acts
-  // as a placeholder, allowing any combination of arguments to be pre-filled.
-  _.partial = function(func) {
-    var boundArgs = slice.call(arguments, 1);
-    return function() {
-      var position = 0;
-      var args = boundArgs.slice();
-      for (var i = 0, length = args.length; i < length; i++) {
-        if (args[i] === _) args[i] = arguments[position++];
+  // as a placeholder by default, allowing any combination of arguments to be
+  // pre-filled. Set `_.partial.placeholder` for a custom placeholder argument.
+  _.partial = restArguments(function(func, boundArgs) {
+    var placeholder = _.partial.placeholder;
+    var bound = function() {
+      var position = 0, length = boundArgs.length;
+      var args = Array(length);
+      for (var i = 0; i < length; i++) {
+        args[i] = boundArgs[i] === placeholder ? arguments[position++] : boundArgs[i];
       }
       while (position < arguments.length) args.push(arguments[position++]);
-      return func.apply(this, args);
+      return executeBound(func, bound, this, this, args);
     };
-  };
+    return bound;
+  });
+
+  _.partial.placeholder = _;
 
   // Bind a number of an object's methods to that object. Remaining arguments
   // are the method names to be bound. Useful for ensuring that all callbacks
   // defined on an object belong to it.
-  _.bindAll = function(obj) {
-    var funcs = slice.call(arguments, 1);
-    if (funcs.length === 0) throw new Error('bindAll must be passed function names');
-    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
-    return obj;
-  };
+  _.bindAll = restArguments(function(obj, keys) {
+    keys = flatten(keys, false, false);
+    var index = keys.length;
+    if (index < 1) throw new Error('bindAll must be passed function names');
+    while (index--) {
+      var key = keys[index];
+      obj[key] = _.bind(obj[key], obj);
+    }
+  });
 
   // Memoize an expensive function by storing its results.
   _.memoize = function(func, hasher) {
-    var memo = {};
-    hasher || (hasher = _.identity);
-    return function() {
-      var key = hasher.apply(this, arguments);
-      return _.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+    var memoize = function(key) {
+      var cache = memoize.cache;
+      var address = '' + (hasher ? hasher.apply(this, arguments) : key);
+      if (!has(cache, address)) cache[address] = func.apply(this, arguments);
+      return cache[address];
     };
+    memoize.cache = {};
+    return memoize;
   };
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
-  _.delay = function(func, wait) {
-    var args = slice.call(arguments, 2);
-    return setTimeout(function(){ return func.apply(null, args); }, wait);
-  };
+  _.delay = restArguments(function(func, wait, args) {
+    return setTimeout(function() {
+      return func.apply(null, args);
+    }, wait);
+  });
 
   // Defers a function, scheduling it to run after the current call stack has
   // cleared.
-  _.defer = function(func) {
-    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
-  };
+  _.defer = _.partial(_.delay, _, 1);
 
   // Returns a function, that, when invoked, will only be triggered at most once
   // during a given window of time. Normally, the throttled function will run
@@ -15538,33 +15700,44 @@ else {
   // but if you'd like to disable the execution on the leading edge, pass
   // `{leading: false}`. To disable execution on the trailing edge, ditto.
   _.throttle = function(func, wait, options) {
-    var context, args, result;
-    var timeout = null;
+    var timeout, context, args, result;
     var previous = 0;
-    options || (options = {});
+    if (!options) options = {};
+
     var later = function() {
       previous = options.leading === false ? 0 : _.now();
       timeout = null;
       result = func.apply(context, args);
-      context = args = null;
+      if (!timeout) context = args = null;
     };
-    return function() {
+
+    var throttled = function() {
       var now = _.now();
       if (!previous && options.leading === false) previous = now;
       var remaining = wait - (now - previous);
       context = this;
       args = arguments;
-      if (remaining <= 0) {
-        clearTimeout(timeout);
-        timeout = null;
+      if (remaining <= 0 || remaining > wait) {
+        if (timeout) {
+          clearTimeout(timeout);
+          timeout = null;
+        }
         previous = now;
         result = func.apply(context, args);
-        context = args = null;
+        if (!timeout) context = args = null;
       } else if (!timeout && options.trailing !== false) {
         timeout = setTimeout(later, remaining);
       }
       return result;
     };
+
+    throttled.cancel = function() {
+      clearTimeout(timeout);
+      previous = 0;
+      timeout = context = args = null;
+    };
+
+    return throttled;
   };
 
   // Returns a function, that, as long as it continues to be invoked, will not
@@ -15572,49 +15745,32 @@ else {
   // N milliseconds. If `immediate` is passed, trigger the function on the
   // leading edge, instead of the trailing.
   _.debounce = function(func, wait, immediate) {
-    var timeout, args, context, timestamp, result;
+    var timeout, result;
 
-    var later = function() {
-      var last = _.now() - timestamp;
-      if (last < wait) {
-        timeout = setTimeout(later, wait - last);
-      } else {
-        timeout = null;
-        if (!immediate) {
-          result = func.apply(context, args);
-          context = args = null;
-        }
-      }
+    var later = function(context, args) {
+      timeout = null;
+      if (args) result = func.apply(context, args);
     };
 
-    return function() {
-      context = this;
-      args = arguments;
-      timestamp = _.now();
-      var callNow = immediate && !timeout;
-      if (!timeout) {
+    var debounced = restArguments(function(args) {
+      if (timeout) clearTimeout(timeout);
+      if (immediate) {
+        var callNow = !timeout;
         timeout = setTimeout(later, wait);
-      }
-      if (callNow) {
-        result = func.apply(context, args);
-        context = args = null;
+        if (callNow) result = func.apply(this, args);
+      } else {
+        timeout = _.delay(later, wait, this, args);
       }
 
       return result;
-    };
-  };
+    });
 
-  // Returns a function that will be executed at most one time, no matter how
-  // often you call it. Useful for lazy initialization.
-  _.once = function(func) {
-    var ran = false, memo;
-    return function() {
-      if (ran) return memo;
-      ran = true;
-      memo = func.apply(this, arguments);
-      func = null;
-      return memo;
+    debounced.cancel = function() {
+      clearTimeout(timeout);
+      timeout = null;
     };
+
+    return debounced;
   };
 
   // Returns the first function passed as an argument to the second,
@@ -15624,20 +15780,27 @@ else {
     return _.partial(wrapper, func);
   };
 
-  // Returns a function that is the composition of a list of functions, each
-  // consuming the return value of the function that follows.
-  _.compose = function() {
-    var funcs = arguments;
+  // Returns a negated version of the passed-in predicate.
+  _.negate = function(predicate) {
     return function() {
-      var args = arguments;
-      for (var i = funcs.length - 1; i >= 0; i--) {
-        args = [funcs[i].apply(this, args)];
-      }
-      return args[0];
+      return !predicate.apply(this, arguments);
     };
   };
 
-  // Returns a function that will only be executed after being called N times.
+  // Returns a function that is the composition of a list of functions, each
+  // consuming the return value of the function that follows.
+  _.compose = function() {
+    var args = arguments;
+    var start = args.length - 1;
+    return function() {
+      var i = start;
+      var result = args[start].apply(this, arguments);
+      while (i--) result = args[i].call(this, result);
+      return result;
+    };
+  };
+
+  // Returns a function that will only be executed on and after the Nth call.
   _.after = function(times, func) {
     return function() {
       if (--times < 1) {
@@ -15646,16 +15809,68 @@ else {
     };
   };
 
+  // Returns a function that will only be executed up to (but not including) the Nth call.
+  _.before = function(times, func) {
+    var memo;
+    return function() {
+      if (--times > 0) {
+        memo = func.apply(this, arguments);
+      }
+      if (times <= 1) func = null;
+      return memo;
+    };
+  };
+
+  // Returns a function that will be executed at most one time, no matter how
+  // often you call it. Useful for lazy initialization.
+  _.once = _.partial(_.before, 2);
+
+  _.restArguments = restArguments;
+
   // Object Functions
   // ----------------
 
-  // Retrieve the names of an object's properties.
-  // Delegates to **ECMAScript 5**'s native `Object.keys`
+  // Keys in IE < 9 that won't be iterated by `for key in ...` and thus missed.
+  var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString');
+  var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
+    'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
+
+  var collectNonEnumProps = function(obj, keys) {
+    var nonEnumIdx = nonEnumerableProps.length;
+    var constructor = obj.constructor;
+    var proto = _.isFunction(constructor) && constructor.prototype || ObjProto;
+
+    // Constructor is a special case.
+    var prop = 'constructor';
+    if (has(obj, prop) && !_.contains(keys, prop)) keys.push(prop);
+
+    while (nonEnumIdx--) {
+      prop = nonEnumerableProps[nonEnumIdx];
+      if (prop in obj && obj[prop] !== proto[prop] && !_.contains(keys, prop)) {
+        keys.push(prop);
+      }
+    }
+  };
+
+  // Retrieve the names of an object's own properties.
+  // Delegates to **ECMAScript 5**'s native `Object.keys`.
   _.keys = function(obj) {
     if (!_.isObject(obj)) return [];
     if (nativeKeys) return nativeKeys(obj);
     var keys = [];
-    for (var key in obj) if (_.has(obj, key)) keys.push(key);
+    for (var key in obj) if (has(obj, key)) keys.push(key);
+    // Ahem, IE < 9.
+    if (hasEnumBug) collectNonEnumProps(obj, keys);
+    return keys;
+  };
+
+  // Retrieve all the property names of an object.
+  _.allKeys = function(obj) {
+    if (!_.isObject(obj)) return [];
+    var keys = [];
+    for (var key in obj) keys.push(key);
+    // Ahem, IE < 9.
+    if (hasEnumBug) collectNonEnumProps(obj, keys);
     return keys;
   };
 
@@ -15663,18 +15878,33 @@ else {
   _.values = function(obj) {
     var keys = _.keys(obj);
     var length = keys.length;
-    var values = new Array(length);
+    var values = Array(length);
     for (var i = 0; i < length; i++) {
       values[i] = obj[keys[i]];
     }
     return values;
   };
 
+  // Returns the results of applying the iteratee to each element of the object.
+  // In contrast to _.map it returns an object.
+  _.mapObject = function(obj, iteratee, context) {
+    iteratee = cb(iteratee, context);
+    var keys = _.keys(obj),
+        length = keys.length,
+        results = {};
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys[index];
+      results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
+    }
+    return results;
+  };
+
   // Convert an object into a list of `[key, value]` pairs.
+  // The opposite of _.object.
   _.pairs = function(obj) {
     var keys = _.keys(obj);
     var length = keys.length;
-    var pairs = new Array(length);
+    var pairs = Array(length);
     for (var i = 0; i < length; i++) {
       pairs[i] = [keys[i], obj[keys[i]]];
     }
@@ -15692,7 +15922,7 @@ else {
   };
 
   // Return a sorted list of the function names available on the object.
-  // Aliased as `methods`
+  // Aliased as `methods`.
   _.functions = _.methods = function(obj) {
     var names = [];
     for (var key in obj) {
@@ -15701,48 +15931,92 @@ else {
     return names.sort();
   };
 
-  // Extend a given object with all the properties in passed-in object(s).
-  _.extend = function(obj) {
-    each(slice.call(arguments, 1), function(source) {
-      if (source) {
-        for (var prop in source) {
-          obj[prop] = source[prop];
+  // An internal function for creating assigner functions.
+  var createAssigner = function(keysFunc, defaults) {
+    return function(obj) {
+      var length = arguments.length;
+      if (defaults) obj = Object(obj);
+      if (length < 2 || obj == null) return obj;
+      for (var index = 1; index < length; index++) {
+        var source = arguments[index],
+            keys = keysFunc(source),
+            l = keys.length;
+        for (var i = 0; i < l; i++) {
+          var key = keys[i];
+          if (!defaults || obj[key] === void 0) obj[key] = source[key];
         }
       }
-    });
-    return obj;
+      return obj;
+    };
+  };
+
+  // Extend a given object with all the properties in passed-in object(s).
+  _.extend = createAssigner(_.allKeys);
+
+  // Assigns a given object with all the own properties in the passed-in object(s).
+  // (https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
+  _.extendOwn = _.assign = createAssigner(_.keys);
+
+  // Returns the first key on an object that passes a predicate test.
+  _.findKey = function(obj, predicate, context) {
+    predicate = cb(predicate, context);
+    var keys = _.keys(obj), key;
+    for (var i = 0, length = keys.length; i < length; i++) {
+      key = keys[i];
+      if (predicate(obj[key], key, obj)) return key;
+    }
+  };
+
+  // Internal pick helper function to determine if `obj` has key `key`.
+  var keyInObj = function(value, key, obj) {
+    return key in obj;
   };
 
   // Return a copy of the object only containing the whitelisted properties.
-  _.pick = function(obj) {
-    var copy = {};
-    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
-    each(keys, function(key) {
-      if (key in obj) copy[key] = obj[key];
-    });
-    return copy;
-  };
-
-   // Return a copy of the object without the blacklisted properties.
-  _.omit = function(obj) {
-    var copy = {};
-    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
-    for (var key in obj) {
-      if (!_.contains(keys, key)) copy[key] = obj[key];
+  _.pick = restArguments(function(obj, keys) {
+    var result = {}, iteratee = keys[0];
+    if (obj == null) return result;
+    if (_.isFunction(iteratee)) {
+      if (keys.length > 1) iteratee = optimizeCb(iteratee, keys[1]);
+      keys = _.allKeys(obj);
+    } else {
+      iteratee = keyInObj;
+      keys = flatten(keys, false, false);
+      obj = Object(obj);
     }
-    return copy;
-  };
+    for (var i = 0, length = keys.length; i < length; i++) {
+      var key = keys[i];
+      var value = obj[key];
+      if (iteratee(value, key, obj)) result[key] = value;
+    }
+    return result;
+  });
+
+  // Return a copy of the object without the blacklisted properties.
+  _.omit = restArguments(function(obj, keys) {
+    var iteratee = keys[0], context;
+    if (_.isFunction(iteratee)) {
+      iteratee = _.negate(iteratee);
+      if (keys.length > 1) context = keys[1];
+    } else {
+      keys = _.map(flatten(keys, false, false), String);
+      iteratee = function(value, key) {
+        return !_.contains(keys, key);
+      };
+    }
+    return _.pick(obj, iteratee, context);
+  });
 
   // Fill in a given object with default properties.
-  _.defaults = function(obj) {
-    each(slice.call(arguments, 1), function(source) {
-      if (source) {
-        for (var prop in source) {
-          if (obj[prop] === void 0) obj[prop] = source[prop];
-        }
-      }
-    });
-    return obj;
+  _.defaults = createAssigner(_.allKeys, true);
+
+  // Creates an object that inherits from the given prototype object.
+  // If additional properties are provided then they will be added to the
+  // created object.
+  _.create = function(prototype, props) {
+    var result = baseCreate(prototype);
+    if (props) _.extendOwn(result, props);
+    return result;
   };
 
   // Create a (shallow-cloned) duplicate of an object.
@@ -15759,110 +16033,136 @@ else {
     return obj;
   };
 
+  // Returns whether an object has a given set of `key:value` pairs.
+  _.isMatch = function(object, attrs) {
+    var keys = _.keys(attrs), length = keys.length;
+    if (object == null) return !length;
+    var obj = Object(object);
+    for (var i = 0; i < length; i++) {
+      var key = keys[i];
+      if (attrs[key] !== obj[key] || !(key in obj)) return false;
+    }
+    return true;
+  };
+
+
   // Internal recursive comparison function for `isEqual`.
-  var eq = function(a, b, aStack, bStack) {
+  var eq, deepEq;
+  eq = function(a, b, aStack, bStack) {
     // Identical objects are equal. `0 === -0`, but they aren't identical.
     // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
-    if (a === b) return a !== 0 || 1 / a == 1 / b;
-    // A strict comparison is necessary because `null == undefined`.
-    if (a == null || b == null) return a === b;
+    if (a === b) return a !== 0 || 1 / a === 1 / b;
+    // `null` or `undefined` only equal to itself (strict comparison).
+    if (a == null || b == null) return false;
+    // `NaN`s are equivalent, but non-reflexive.
+    if (a !== a) return b !== b;
+    // Exhaust primitive checks
+    var type = typeof a;
+    if (type !== 'function' && type !== 'object' && typeof b != 'object') return false;
+    return deepEq(a, b, aStack, bStack);
+  };
+
+  // Internal recursive comparison function for `isEqual`.
+  deepEq = function(a, b, aStack, bStack) {
     // Unwrap any wrapped objects.
     if (a instanceof _) a = a._wrapped;
     if (b instanceof _) b = b._wrapped;
     // Compare `[[Class]]` names.
     var className = toString.call(a);
-    if (className != toString.call(b)) return false;
+    if (className !== toString.call(b)) return false;
     switch (className) {
-      // Strings, numbers, dates, and booleans are compared by value.
+      // Strings, numbers, regular expressions, dates, and booleans are compared by value.
+      case '[object RegExp]':
+      // RegExps are coerced to strings for comparison (Note: '' + /a/i === '/a/i')
       case '[object String]':
         // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
         // equivalent to `new String("5")`.
-        return a == String(b);
+        return '' + a === '' + b;
       case '[object Number]':
-        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
-        // other numeric values.
-        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
+        // `NaN`s are equivalent, but non-reflexive.
+        // Object(NaN) is equivalent to NaN.
+        if (+a !== +a) return +b !== +b;
+        // An `egal` comparison is performed for other numeric values.
+        return +a === 0 ? 1 / +a === 1 / b : +a === +b;
       case '[object Date]':
       case '[object Boolean]':
         // Coerce dates and booleans to numeric primitive values. Dates are compared by their
         // millisecond representations. Note that invalid dates with millisecond representations
         // of `NaN` are not equivalent.
-        return +a == +b;
-      // RegExps are compared by their source patterns and flags.
-      case '[object RegExp]':
-        return a.source == b.source &&
-               a.global == b.global &&
-               a.multiline == b.multiline &&
-               a.ignoreCase == b.ignoreCase;
+        return +a === +b;
+      case '[object Symbol]':
+        return SymbolProto.valueOf.call(a) === SymbolProto.valueOf.call(b);
     }
-    if (typeof a != 'object' || typeof b != 'object') return false;
+
+    var areArrays = className === '[object Array]';
+    if (!areArrays) {
+      if (typeof a != 'object' || typeof b != 'object') return false;
+
+      // Objects with different constructors are not equivalent, but `Object`s or `Array`s
+      // from different frames are.
+      var aCtor = a.constructor, bCtor = b.constructor;
+      if (aCtor !== bCtor && !(_.isFunction(aCtor) && aCtor instanceof aCtor &&
+                               _.isFunction(bCtor) && bCtor instanceof bCtor)
+                          && ('constructor' in a && 'constructor' in b)) {
+        return false;
+      }
+    }
     // Assume equality for cyclic structures. The algorithm for detecting cyclic
     // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+
+    // Initializing stack of traversed objects.
+    // It's done here since we only need them for objects and arrays comparison.
+    aStack = aStack || [];
+    bStack = bStack || [];
     var length = aStack.length;
     while (length--) {
       // Linear search. Performance is inversely proportional to the number of
       // unique nested structures.
-      if (aStack[length] == a) return bStack[length] == b;
+      if (aStack[length] === a) return bStack[length] === b;
     }
-    // Objects with different constructors are not equivalent, but `Object`s
-    // from different frames are.
-    var aCtor = a.constructor, bCtor = b.constructor;
-    if (aCtor !== bCtor && !(_.isFunction(aCtor) && (aCtor instanceof aCtor) &&
-                             _.isFunction(bCtor) && (bCtor instanceof bCtor))
-                        && ('constructor' in a && 'constructor' in b)) {
-      return false;
-    }
+
     // Add the first object to the stack of traversed objects.
     aStack.push(a);
     bStack.push(b);
-    var size = 0, result = true;
+
     // Recursively compare objects and arrays.
-    if (className == '[object Array]') {
+    if (areArrays) {
       // Compare array lengths to determine if a deep comparison is necessary.
-      size = a.length;
-      result = size == b.length;
-      if (result) {
-        // Deep compare the contents, ignoring non-numeric properties.
-        while (size--) {
-          if (!(result = eq(a[size], b[size], aStack, bStack))) break;
-        }
+      length = a.length;
+      if (length !== b.length) return false;
+      // Deep compare the contents, ignoring non-numeric properties.
+      while (length--) {
+        if (!eq(a[length], b[length], aStack, bStack)) return false;
       }
     } else {
       // Deep compare objects.
-      for (var key in a) {
-        if (_.has(a, key)) {
-          // Count the expected number of properties.
-          size++;
-          // Deep compare each member.
-          if (!(result = _.has(b, key) && eq(a[key], b[key], aStack, bStack))) break;
-        }
-      }
-      // Ensure that both objects contain the same number of properties.
-      if (result) {
-        for (key in b) {
-          if (_.has(b, key) && !(size--)) break;
-        }
-        result = !size;
+      var keys = _.keys(a), key;
+      length = keys.length;
+      // Ensure that both objects contain the same number of properties before comparing deep equality.
+      if (_.keys(b).length !== length) return false;
+      while (length--) {
+        // Deep compare each member
+        key = keys[length];
+        if (!(has(b, key) && eq(a[key], b[key], aStack, bStack))) return false;
       }
     }
     // Remove the first object from the stack of traversed objects.
     aStack.pop();
     bStack.pop();
-    return result;
+    return true;
   };
 
   // Perform a deep comparison to check if two objects are equal.
   _.isEqual = function(a, b) {
-    return eq(a, b, [], []);
+    return eq(a, b);
   };
 
   // Is a given array, string, or object empty?
   // An "empty" object has no enumerable own-properties.
   _.isEmpty = function(obj) {
     if (obj == null) return true;
-    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
-    for (var key in obj) if (_.has(obj, key)) return false;
-    return true;
+    if (isArrayLike(obj) && (_.isArray(obj) || _.isString(obj) || _.isArguments(obj))) return obj.length === 0;
+    return _.keys(obj).length === 0;
   };
 
   // Is a given value a DOM element?
@@ -15873,49 +16173,52 @@ else {
   // Is a given value an array?
   // Delegates to ECMA5's native Array.isArray
   _.isArray = nativeIsArray || function(obj) {
-    return toString.call(obj) == '[object Array]';
+    return toString.call(obj) === '[object Array]';
   };
 
   // Is a given variable an object?
   _.isObject = function(obj) {
-    return obj === Object(obj);
+    var type = typeof obj;
+    return type === 'function' || type === 'object' && !!obj;
   };
 
-  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp.
-  each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function(name) {
+  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp, isError, isMap, isWeakMap, isSet, isWeakSet.
+  _.each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp', 'Error', 'Symbol', 'Map', 'WeakMap', 'Set', 'WeakSet'], function(name) {
     _['is' + name] = function(obj) {
-      return toString.call(obj) == '[object ' + name + ']';
+      return toString.call(obj) === '[object ' + name + ']';
     };
   });
 
-  // Define a fallback version of the method in browsers (ahem, IE), where
+  // Define a fallback version of the method in browsers (ahem, IE < 9), where
   // there isn't any inspectable "Arguments" type.
   if (!_.isArguments(arguments)) {
     _.isArguments = function(obj) {
-      return !!(obj && _.has(obj, 'callee'));
+      return has(obj, 'callee');
     };
   }
 
-  // Optimize `isFunction` if appropriate.
-  if (typeof (/./) !== 'function') {
+  // Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
+  // IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
+  var nodelist = root.document && root.document.childNodes;
+  if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof nodelist != 'function') {
     _.isFunction = function(obj) {
-      return typeof obj === 'function';
+      return typeof obj == 'function' || false;
     };
   }
 
   // Is a given object a finite number?
   _.isFinite = function(obj) {
-    return isFinite(obj) && !isNaN(parseFloat(obj));
+    return !_.isSymbol(obj) && isFinite(obj) && !isNaN(parseFloat(obj));
   };
 
-  // Is the given value `NaN`? (NaN is the only number which does not equal itself).
+  // Is the given value `NaN`?
   _.isNaN = function(obj) {
-    return _.isNumber(obj) && obj != +obj;
+    return _.isNumber(obj) && isNaN(obj);
   };
 
   // Is a given value a boolean?
   _.isBoolean = function(obj) {
-    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
+    return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
   };
 
   // Is a given value equal to null?
@@ -15930,8 +16233,19 @@ else {
 
   // Shortcut function for checking if an object has a given property directly
   // on itself (in other words, not on a prototype).
-  _.has = function(obj, key) {
-    return hasOwnProperty.call(obj, key);
+  _.has = function(obj, path) {
+    if (!_.isArray(path)) {
+      return has(obj, path);
+    }
+    var length = path.length;
+    for (var i = 0; i < length; i++) {
+      var key = path[i];
+      if (obj == null || !hasOwnProperty.call(obj, key)) {
+        return false;
+      }
+      obj = obj[key];
+    }
+    return !!length;
   };
 
   // Utility Functions
@@ -15944,39 +16258,55 @@ else {
     return this;
   };
 
-  // Keep the identity function around for default iterators.
+  // Keep the identity function around for default iteratees.
   _.identity = function(value) {
     return value;
   };
 
+  // Predicate-generating functions. Often useful outside of Underscore.
   _.constant = function(value) {
-    return function () {
+    return function() {
       return value;
     };
   };
 
-  _.property = function(key) {
+  _.noop = function(){};
+
+  // Creates a function that, when passed an object, will traverse that object’s
+  // properties down the given `path`, specified as an array of keys or indexes.
+  _.property = function(path) {
+    if (!_.isArray(path)) {
+      return shallowProperty(path);
+    }
     return function(obj) {
-      return obj[key];
+      return deepGet(obj, path);
     };
   };
 
-  // Returns a predicate for checking whether an object has a given set of `key:value` pairs.
-  _.matches = function(attrs) {
-    return function(obj) {
-      if (obj === attrs) return true; //avoid comparing an object to itself.
-      for (var key in attrs) {
-        if (attrs[key] !== obj[key])
-          return false;
-      }
-      return true;
+  // Generates a function for a given object that returns a given property.
+  _.propertyOf = function(obj) {
+    if (obj == null) {
+      return function(){};
     }
+    return function(path) {
+      return !_.isArray(path) ? obj[path] : deepGet(obj, path);
+    };
+  };
+
+  // Returns a predicate for checking whether an object has a given set of
+  // `key:value` pairs.
+  _.matcher = _.matches = function(attrs) {
+    attrs = _.extendOwn({}, attrs);
+    return function(obj) {
+      return _.isMatch(obj, attrs);
+    };
   };
 
   // Run a function **n** times.
-  _.times = function(n, iterator, context) {
+  _.times = function(n, iteratee, context) {
     var accum = Array(Math.max(0, n));
-    for (var i = 0; i < n; i++) accum[i] = iterator.call(context, i);
+    iteratee = optimizeCb(iteratee, context, 1);
+    for (var i = 0; i < n; i++) accum[i] = iteratee(i);
     return accum;
   };
 
@@ -15990,54 +16320,56 @@ else {
   };
 
   // A (possibly faster) way to get the current timestamp as an integer.
-  _.now = Date.now || function() { return new Date().getTime(); };
+  _.now = Date.now || function() {
+    return new Date().getTime();
+  };
 
   // List of HTML entities for escaping.
-  var entityMap = {
-    escape: {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;'
-    }
+  var escapeMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    '`': '&#x60;'
   };
-  entityMap.unescape = _.invert(entityMap.escape);
-
-  // Regexes containing the keys and values listed immediately above.
-  var entityRegexes = {
-    escape:   new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
-    unescape: new RegExp('(' + _.keys(entityMap.unescape).join('|') + ')', 'g')
-  };
+  var unescapeMap = _.invert(escapeMap);
 
   // Functions for escaping and unescaping strings to/from HTML interpolation.
-  _.each(['escape', 'unescape'], function(method) {
-    _[method] = function(string) {
-      if (string == null) return '';
-      return ('' + string).replace(entityRegexes[method], function(match) {
-        return entityMap[method][match];
-      });
+  var createEscaper = function(map) {
+    var escaper = function(match) {
+      return map[match];
     };
-  });
-
-  // If the value of the named `property` is a function then invoke it with the
-  // `object` as context; otherwise, return it.
-  _.result = function(object, property) {
-    if (object == null) return void 0;
-    var value = object[property];
-    return _.isFunction(value) ? value.call(object) : value;
+    // Regexes for identifying a key that needs to be escaped.
+    var source = '(?:' + _.keys(map).join('|') + ')';
+    var testRegexp = RegExp(source);
+    var replaceRegexp = RegExp(source, 'g');
+    return function(string) {
+      string = string == null ? '' : '' + string;
+      return testRegexp.test(string) ? string.replace(replaceRegexp, escaper) : string;
+    };
   };
+  _.escape = createEscaper(escapeMap);
+  _.unescape = createEscaper(unescapeMap);
 
-  // Add your own custom functions to the Underscore object.
-  _.mixin = function(obj) {
-    each(_.functions(obj), function(name) {
-      var func = _[name] = obj[name];
-      _.prototype[name] = function() {
-        var args = [this._wrapped];
-        push.apply(args, arguments);
-        return result.call(this, func.apply(_, args));
-      };
-    });
+  // Traverses the children of `obj` along `path`. If a child is a function, it
+  // is invoked with its parent as context. Returns the value of the final
+  // child, or `fallback` if any child is undefined.
+  _.result = function(obj, path, fallback) {
+    if (!_.isArray(path)) path = [path];
+    var length = path.length;
+    if (!length) {
+      return _.isFunction(fallback) ? fallback.call(obj) : fallback;
+    }
+    for (var i = 0; i < length; i++) {
+      var prop = obj == null ? void 0 : obj[path[i]];
+      if (prop === void 0) {
+        prop = fallback;
+        i = length; // Ensure we don't continue iterating.
+      }
+      obj = _.isFunction(prop) ? prop.call(obj) : prop;
+    }
+    return obj;
   };
 
   // Generate a unique integer id (unique within the entire client session).
@@ -16051,9 +16383,9 @@ else {
   // By default, Underscore uses ERB-style template delimiters, change the
   // following template settings to use alternative delimiters.
   _.templateSettings = {
-    evaluate    : /<%([\s\S]+?)%>/g,
-    interpolate : /<%=([\s\S]+?)%>/g,
-    escape      : /<%-([\s\S]+?)%>/g
+    evaluate: /<%([\s\S]+?)%>/g,
+    interpolate: /<%=([\s\S]+?)%>/g,
+    escape: /<%-([\s\S]+?)%>/g
   };
 
   // When customizing `templateSettings`, if you don't want to define an
@@ -16064,26 +16396,30 @@ else {
   // Certain characters need to be escaped so that they can be put into a
   // string literal.
   var escapes = {
-    "'":      "'",
-    '\\':     '\\',
-    '\r':     'r',
-    '\n':     'n',
-    '\t':     't',
+    "'": "'",
+    '\\': '\\',
+    '\r': 'r',
+    '\n': 'n',
     '\u2028': 'u2028',
     '\u2029': 'u2029'
   };
 
-  var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
+  var escapeRegExp = /\\|'|\r|\n|\u2028|\u2029/g;
+
+  var escapeChar = function(match) {
+    return '\\' + escapes[match];
+  };
 
   // JavaScript micro-templating, similar to John Resig's implementation.
   // Underscore templating handles arbitrary delimiters, preserves whitespace,
   // and correctly escapes quotes within interpolated code.
-  _.template = function(text, data, settings) {
-    var render;
+  // NB: `oldSettings` only exists for backwards compatibility.
+  _.template = function(text, settings, oldSettings) {
+    if (!settings && oldSettings) settings = oldSettings;
     settings = _.defaults({}, settings, _.templateSettings);
 
     // Combine delimiters into one regular expression via alternation.
-    var matcher = new RegExp([
+    var matcher = RegExp([
       (settings.escape || noMatch).source,
       (settings.interpolate || noMatch).source,
       (settings.evaluate || noMatch).source
@@ -16093,19 +16429,18 @@ else {
     var index = 0;
     var source = "__p+='";
     text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
-      source += text.slice(index, offset)
-        .replace(escaper, function(match) { return '\\' + escapes[match]; });
+      source += text.slice(index, offset).replace(escapeRegExp, escapeChar);
+      index = offset + match.length;
 
       if (escape) {
         source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
-      }
-      if (interpolate) {
+      } else if (interpolate) {
         source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
-      }
-      if (evaluate) {
+      } else if (evaluate) {
         source += "';\n" + evaluate + "\n__p+='";
       }
-      index = offset + match.length;
+
+      // Adobe VMs need the match returned to produce the correct offset.
       return match;
     });
     source += "';\n";
@@ -16115,8 +16450,9 @@ else {
 
     source = "var __t,__p='',__j=Array.prototype.join," +
       "print=function(){__p+=__j.call(arguments,'');};\n" +
-      source + "return __p;\n";
+      source + 'return __p;\n';
 
+    var render;
     try {
       render = new Function(settings.variable || 'obj', '_', source);
     } catch (e) {
@@ -16124,20 +16460,22 @@ else {
       throw e;
     }
 
-    if (data) return render(data, _);
     var template = function(data) {
       return render.call(this, data, _);
     };
 
-    // Provide the compiled function source as a convenience for precompilation.
-    template.source = 'function(' + (settings.variable || 'obj') + '){\n' + source + '}';
+    // Provide the compiled source as a convenience for precompilation.
+    var argument = settings.variable || 'obj';
+    template.source = 'function(' + argument + '){\n' + source + '}';
 
     return template;
   };
 
-  // Add a "chain" function, which will delegate to the wrapper.
+  // Add a "chain" function. Start chaining a wrapped Underscore object.
   _.chain = function(obj) {
-    return _(obj).chain();
+    var instance = _(obj);
+    instance._chain = true;
+    return instance;
   };
 
   // OOP
@@ -16147,46 +16485,57 @@ else {
   // underscore functions. Wrapped objects may be chained.
 
   // Helper function to continue chaining intermediate results.
-  var result = function(obj) {
-    return this._chain ? _(obj).chain() : obj;
+  var chainResult = function(instance, obj) {
+    return instance._chain ? _(obj).chain() : obj;
+  };
+
+  // Add your own custom functions to the Underscore object.
+  _.mixin = function(obj) {
+    _.each(_.functions(obj), function(name) {
+      var func = _[name] = obj[name];
+      _.prototype[name] = function() {
+        var args = [this._wrapped];
+        push.apply(args, arguments);
+        return chainResult(this, func.apply(_, args));
+      };
+    });
+    return _;
   };
 
   // Add all of the Underscore functions to the wrapper object.
   _.mixin(_);
 
   // Add all mutator Array functions to the wrapper.
-  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
+  _.each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
     var method = ArrayProto[name];
     _.prototype[name] = function() {
       var obj = this._wrapped;
       method.apply(obj, arguments);
-      if ((name == 'shift' || name == 'splice') && obj.length === 0) delete obj[0];
-      return result.call(this, obj);
+      if ((name === 'shift' || name === 'splice') && obj.length === 0) delete obj[0];
+      return chainResult(this, obj);
     };
   });
 
   // Add all accessor Array functions to the wrapper.
-  each(['concat', 'join', 'slice'], function(name) {
+  _.each(['concat', 'join', 'slice'], function(name) {
     var method = ArrayProto[name];
     _.prototype[name] = function() {
-      return result.call(this, method.apply(this._wrapped, arguments));
+      return chainResult(this, method.apply(this._wrapped, arguments));
     };
   });
 
-  _.extend(_.prototype, {
+  // Extracts the result from a wrapped and chained object.
+  _.prototype.value = function() {
+    return this._wrapped;
+  };
 
-    // Start chaining a wrapped Underscore object.
-    chain: function() {
-      this._chain = true;
-      return this;
-    },
+  // Provide unwrapping proxy for some methods used in engine operations
+  // such as arithmetic and JSON stringification.
+  _.prototype.valueOf = _.prototype.toJSON = _.prototype.value;
 
-    // Extracts the result from a wrapped and chained object.
-    value: function() {
-      return this._wrapped;
-    }
-
-  });
+  _.prototype.toString = function() {
+    return String(this._wrapped);
+  };
 
   // AMD registration happens at the end for compatibility with AMD loaders
   // that may not enforce next-turn semantics on modules. Even though general
@@ -16195,691 +16544,1392 @@ else {
   // popular enough to be bundled in a third party lib, but not be part of
   // an AMD load request. Those cases could generate an error when an
   // anonymous define() is called outside of a loader request.
-  if (typeof define === 'function' && define.amd) {
+  if (typeof define == 'function' && define.amd) {
     define('underscore', [], function() {
       return _;
     });
   }
-}).call(this);//  Underscore.string
-//  (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
-//  Underscore.string is freely distributable under the terms of the MIT license.
-//  Documentation: https://github.com/epeli/underscore.string
-//  Some code is borrowed from MooTools and Alexandru Marasteanu.
-//  Version '2.3.2'
+}());/*
+* Underscore.string
+* (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
+* Underscore.string is freely distributable under the terms of the MIT license.
+* Documentation: https://github.com/epeli/underscore.string
+* Some code is borrowed from MooTools and Alexandru Marasteanu.
+* Version '3.3.4'
+* @preserve
+*/
 
-!function(root, String){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.s = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var trim = require('./trim');
+var decap = require('./decapitalize');
+
+module.exports = function camelize(str, decapitalize) {
+  str = trim(str).replace(/[-_\s]+(.)?/g, function(match, c) {
+    return c ? c.toUpperCase() : '';
+  });
+
+  if (decapitalize === true) {
+    return decap(str);
+  } else {
+    return str;
+  }
+};
+
+},{"./decapitalize":10,"./trim":65}],2:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function capitalize(str, lowercaseRest) {
+  str = makeString(str);
+  var remainingChars = !lowercaseRest ? str.slice(1) : str.slice(1).toLowerCase();
+
+  return str.charAt(0).toUpperCase() + remainingChars;
+};
+
+},{"./helper/makeString":20}],3:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function chars(str) {
+  return makeString(str).split('');
+};
+
+},{"./helper/makeString":20}],4:[function(require,module,exports){
+module.exports = function chop(str, step) {
+  if (str == null) return [];
+  str = String(str);
+  step = ~~step;
+  return step > 0 ? str.match(new RegExp('.{1,' + step + '}', 'g')) : [str];
+};
+
+},{}],5:[function(require,module,exports){
+var capitalize = require('./capitalize');
+var camelize = require('./camelize');
+var makeString = require('./helper/makeString');
+
+module.exports = function classify(str) {
+  str = makeString(str);
+  return capitalize(camelize(str.replace(/[\W_]/g, ' ')).replace(/\s/g, ''));
+};
+
+},{"./camelize":1,"./capitalize":2,"./helper/makeString":20}],6:[function(require,module,exports){
+var trim = require('./trim');
+
+module.exports = function clean(str) {
+  return trim(str).replace(/\s\s+/g, ' ');
+};
+
+},{"./trim":65}],7:[function(require,module,exports){
+
+var makeString = require('./helper/makeString');
+
+var from  = 'ąàáäâãåæăćčĉęèéëêĝĥìíïîĵłľńňòóöőôõðøśșşšŝťțţŭùúüűûñÿýçżźž',
+  to    = 'aaaaaaaaaccceeeeeghiiiijllnnoooooooossssstttuuuuuunyyczzz';
+
+from += from.toUpperCase();
+to += to.toUpperCase();
+
+to = to.split('');
+
+// for tokens requireing multitoken output
+from += 'ß';
+to.push('ss');
+
+
+module.exports = function cleanDiacritics(str) {
+  return makeString(str).replace(/.{1}/g, function(c){
+    var index = from.indexOf(c);
+    return index === -1 ? c : to[index];
+  });
+};
+
+},{"./helper/makeString":20}],8:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function(str, substr) {
+  str = makeString(str);
+  substr = makeString(substr);
+
+  if (str.length === 0 || substr.length === 0) return 0;
+  
+  return str.split(substr).length - 1;
+};
+
+},{"./helper/makeString":20}],9:[function(require,module,exports){
+var trim = require('./trim');
+
+module.exports = function dasherize(str) {
+  return trim(str).replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
+};
+
+},{"./trim":65}],10:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function decapitalize(str) {
+  str = makeString(str);
+  return str.charAt(0).toLowerCase() + str.slice(1);
+};
+
+},{"./helper/makeString":20}],11:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+function getIndent(str) {
+  var matches = str.match(/^[\s\\t]*/gm);
+  var indent = matches[0].length;
+  
+  for (var i = 1; i < matches.length; i++) {
+    indent = Math.min(matches[i].length, indent);
+  }
+
+  return indent;
+}
+
+module.exports = function dedent(str, pattern) {
+  str = makeString(str);
+  var indent = getIndent(str);
+  var reg;
+
+  if (indent === 0) return str;
+
+  if (typeof pattern === 'string') {
+    reg = new RegExp('^' + pattern, 'gm');
+  } else {
+    reg = new RegExp('^[ \\t]{' + indent + '}', 'gm');
+  }
+
+  return str.replace(reg, '');
+};
+
+},{"./helper/makeString":20}],12:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+var toPositive = require('./helper/toPositive');
+
+module.exports = function endsWith(str, ends, position) {
+  str = makeString(str);
+  ends = '' + ends;
+  if (typeof position == 'undefined') {
+    position = str.length - ends.length;
+  } else {
+    position = Math.min(toPositive(position), str.length) - ends.length;
+  }
+  return position >= 0 && str.indexOf(ends, position) === position;
+};
+
+},{"./helper/makeString":20,"./helper/toPositive":22}],13:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+var escapeChars = require('./helper/escapeChars');
+
+var regexString = '[';
+for(var key in escapeChars) {
+  regexString += key;
+}
+regexString += ']';
+
+var regex = new RegExp( regexString, 'g');
+
+module.exports = function escapeHTML(str) {
+
+  return makeString(str).replace(regex, function(m) {
+    return '&' + escapeChars[m] + ';';
+  });
+};
+
+},{"./helper/escapeChars":17,"./helper/makeString":20}],14:[function(require,module,exports){
+module.exports = function() {
+  var result = {};
+
+  for (var prop in this) {
+    if (!this.hasOwnProperty(prop) || prop.match(/^(?:include|contains|reverse|join|map|wrap)$/)) continue;
+    result[prop] = this[prop];
+  }
+
+  return result;
+};
+
+},{}],15:[function(require,module,exports){
+var makeString = require('./makeString');
+
+module.exports = function adjacent(str, direction) {
+  str = makeString(str);
+  if (str.length === 0) {
+    return '';
+  }
+  return str.slice(0, -1) + String.fromCharCode(str.charCodeAt(str.length - 1) + direction);
+};
+
+},{"./makeString":20}],16:[function(require,module,exports){
+var escapeRegExp = require('./escapeRegExp');
+
+module.exports = function defaultToWhiteSpace(characters) {
+  if (characters == null)
+    return '\\s';
+  else if (characters.source)
+    return characters.source;
+  else
+    return '[' + escapeRegExp(characters) + ']';
+};
+
+},{"./escapeRegExp":18}],17:[function(require,module,exports){
+/* We're explicitly defining the list of entities we want to escape.
+nbsp is an HTML entity, but we don't want to escape all space characters in a string, hence its omission in this map.
+
+*/
+var escapeChars = {
+  '¢' : 'cent',
+  '£' : 'pound',
+  '¥' : 'yen',
+  '€': 'euro',
+  '©' :'copy',
+  '®' : 'reg',
+  '<' : 'lt',
+  '>' : 'gt',
+  '"' : 'quot',
+  '&' : 'amp',
+  '\'' : '#39'
+};
+
+module.exports = escapeChars;
+
+},{}],18:[function(require,module,exports){
+var makeString = require('./makeString');
+
+module.exports = function escapeRegExp(str) {
+  return makeString(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
+};
+
+},{"./makeString":20}],19:[function(require,module,exports){
+/*
+We're explicitly defining the list of entities that might see in escape HTML strings
+*/
+var htmlEntities = {
+  nbsp: ' ',
+  cent: '¢',
+  pound: '£',
+  yen: '¥',
+  euro: '€',
+  copy: '©',
+  reg: '®',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  amp: '&',
+  apos: '\''
+};
+
+module.exports = htmlEntities;
+
+},{}],20:[function(require,module,exports){
+/**
+ * Ensure some object is a coerced to a string
+ **/
+module.exports = function makeString(object) {
+  if (object == null) return '';
+  return '' + object;
+};
+
+},{}],21:[function(require,module,exports){
+module.exports = function strRepeat(str, qty){
+  if (qty < 1) return '';
+  var result = '';
+  while (qty > 0) {
+    if (qty & 1) result += str;
+    qty >>= 1, str += str;
+  }
+  return result;
+};
+
+},{}],22:[function(require,module,exports){
+module.exports = function toPositive(number) {
+  return number < 0 ? 0 : (+number || 0);
+};
+
+},{}],23:[function(require,module,exports){
+var capitalize = require('./capitalize');
+var underscored = require('./underscored');
+var trim = require('./trim');
+
+module.exports = function humanize(str) {
+  return capitalize(trim(underscored(str).replace(/_id$/, '').replace(/_/g, ' ')));
+};
+
+},{"./capitalize":2,"./trim":65,"./underscored":67}],24:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function include(str, needle) {
+  if (needle === '') return true;
+  return makeString(str).indexOf(needle) !== -1;
+};
+
+},{"./helper/makeString":20}],25:[function(require,module,exports){
+/*
+* Underscore.string
+* (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
+* Underscore.string is freely distributable under the terms of the MIT license.
+* Documentation: https://github.com/epeli/underscore.string
+* Some code is borrowed from MooTools and Alexandru Marasteanu.
+* Version '3.3.4'
+* @preserve
+*/
+
+'use strict';
+
+function s(value) {
+  /* jshint validthis: true */
+  if (!(this instanceof s)) return new s(value);
+  this._wrapped = value;
+}
+
+s.VERSION = '3.3.4';
+
+s.isBlank          = require('./isBlank');
+s.stripTags        = require('./stripTags');
+s.capitalize       = require('./capitalize');
+s.decapitalize     = require('./decapitalize');
+s.chop             = require('./chop');
+s.trim             = require('./trim');
+s.clean            = require('./clean');
+s.cleanDiacritics  = require('./cleanDiacritics');
+s.count            = require('./count');
+s.chars            = require('./chars');
+s.swapCase         = require('./swapCase');
+s.escapeHTML       = require('./escapeHTML');
+s.unescapeHTML     = require('./unescapeHTML');
+s.splice           = require('./splice');
+s.insert           = require('./insert');
+s.replaceAll       = require('./replaceAll');
+s.include          = require('./include');
+s.join             = require('./join');
+s.lines            = require('./lines');
+s.dedent           = require('./dedent');
+s.reverse          = require('./reverse');
+s.startsWith       = require('./startsWith');
+s.endsWith         = require('./endsWith');
+s.pred             = require('./pred');
+s.succ             = require('./succ');
+s.titleize         = require('./titleize');
+s.camelize         = require('./camelize');
+s.underscored      = require('./underscored');
+s.dasherize        = require('./dasherize');
+s.classify         = require('./classify');
+s.humanize         = require('./humanize');
+s.ltrim            = require('./ltrim');
+s.rtrim            = require('./rtrim');
+s.truncate         = require('./truncate');
+s.prune            = require('./prune');
+s.words            = require('./words');
+s.pad              = require('./pad');
+s.lpad             = require('./lpad');
+s.rpad             = require('./rpad');
+s.lrpad            = require('./lrpad');
+s.sprintf          = require('./sprintf');
+s.vsprintf         = require('./vsprintf');
+s.toNumber         = require('./toNumber');
+s.numberFormat     = require('./numberFormat');
+s.strRight         = require('./strRight');
+s.strRightBack     = require('./strRightBack');
+s.strLeft          = require('./strLeft');
+s.strLeftBack      = require('./strLeftBack');
+s.toSentence       = require('./toSentence');
+s.toSentenceSerial = require('./toSentenceSerial');
+s.slugify          = require('./slugify');
+s.surround         = require('./surround');
+s.quote            = require('./quote');
+s.unquote          = require('./unquote');
+s.repeat           = require('./repeat');
+s.naturalCmp       = require('./naturalCmp');
+s.levenshtein      = require('./levenshtein');
+s.toBoolean        = require('./toBoolean');
+s.exports          = require('./exports');
+s.escapeRegExp     = require('./helper/escapeRegExp');
+s.wrap             = require('./wrap');
+s.map              = require('./map');
+
+// Aliases
+s.strip     = s.trim;
+s.lstrip    = s.ltrim;
+s.rstrip    = s.rtrim;
+s.center    = s.lrpad;
+s.rjust     = s.lpad;
+s.ljust     = s.rpad;
+s.contains  = s.include;
+s.q         = s.quote;
+s.toBool    = s.toBoolean;
+s.camelcase = s.camelize;
+s.mapChars  = s.map;
+
+
+// Implement chaining
+s.prototype = {
+  value: function value() {
+    return this._wrapped;
+  }
+};
+
+function fn2method(key, fn) {
+  if (typeof fn !== 'function') return;
+  s.prototype[key] = function() {
+    var args = [this._wrapped].concat(Array.prototype.slice.call(arguments));
+    var res = fn.apply(null, args);
+    // if the result is non-string stop the chain and return the value
+    return typeof res === 'string' ? new s(res) : res;
+  };
+}
+
+// Copy functions to instance methods for chaining
+for (var key in s) fn2method(key, s[key]);
+
+fn2method('tap', function tap(string, fn) {
+  return fn(string);
+});
+
+function prototype2method(methodName) {
+  fn2method(methodName, function(context) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return String.prototype[methodName].apply(context, args);
+  });
+}
+
+var prototypeMethods = [
+  'toUpperCase',
+  'toLowerCase',
+  'split',
+  'replace',
+  'slice',
+  'substring',
+  'substr',
+  'concat'
+];
+
+for (var method in prototypeMethods) prototype2method(prototypeMethods[method]);
+
+
+module.exports = s;
+
+},{"./camelize":1,"./capitalize":2,"./chars":3,"./chop":4,"./classify":5,"./clean":6,"./cleanDiacritics":7,"./count":8,"./dasherize":9,"./decapitalize":10,"./dedent":11,"./endsWith":12,"./escapeHTML":13,"./exports":14,"./helper/escapeRegExp":18,"./humanize":23,"./include":24,"./insert":26,"./isBlank":27,"./join":28,"./levenshtein":29,"./lines":30,"./lpad":31,"./lrpad":32,"./ltrim":33,"./map":34,"./naturalCmp":35,"./numberFormat":38,"./pad":39,"./pred":40,"./prune":41,"./quote":42,"./repeat":43,"./replaceAll":44,"./reverse":45,"./rpad":46,"./rtrim":47,"./slugify":48,"./splice":49,"./sprintf":50,"./startsWith":51,"./strLeft":52,"./strLeftBack":53,"./strRight":54,"./strRightBack":55,"./stripTags":56,"./succ":57,"./surround":58,"./swapCase":59,"./titleize":60,"./toBoolean":61,"./toNumber":62,"./toSentence":63,"./toSentenceSerial":64,"./trim":65,"./truncate":66,"./underscored":67,"./unescapeHTML":68,"./unquote":69,"./vsprintf":70,"./words":71,"./wrap":72}],26:[function(require,module,exports){
+var splice = require('./splice');
+
+module.exports = function insert(str, i, substr) {
+  return splice(str, i, 0, substr);
+};
+
+},{"./splice":49}],27:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function isBlank(str) {
+  return (/^\s*$/).test(makeString(str));
+};
+
+},{"./helper/makeString":20}],28:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+var slice = [].slice;
+
+module.exports = function join() {
+  var args = slice.call(arguments),
+    separator = args.shift();
+
+  return args.join(makeString(separator));
+};
+
+},{"./helper/makeString":20}],29:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+/**
+ * Based on the implementation here: https://github.com/hiddentao/fast-levenshtein
+ */
+module.exports = function levenshtein(str1, str2) {
   'use strict';
+  str1 = makeString(str1);
+  str2 = makeString(str2);
 
-  // Defining helper functions.
+  // Short cut cases  
+  if (str1 === str2) return 0;
+  if (!str1 || !str2) return Math.max(str1.length, str2.length);
 
-  var nativeTrim = String.prototype.trim;
-  var nativeTrimRight = String.prototype.trimRight;
-  var nativeTrimLeft = String.prototype.trimLeft;
+  // two rows
+  var prevRow = new Array(str2.length + 1);
 
-  var parseNumber = function(source) { return source * 1 || 0; };
+  // initialise previous row
+  for (var i = 0; i < prevRow.length; ++i) {
+    prevRow[i] = i;
+  }
 
-  var strRepeat = function(str, qty){
-    if (qty < 1) return '';
-    var result = '';
-    while (qty > 0) {
-      if (qty & 1) result += str;
-      qty >>= 1, str += str;
+  // calculate current row distance from previous row
+  for (i = 0; i < str1.length; ++i) {
+    var nextCol = i + 1;
+
+    for (var j = 0; j < str2.length; ++j) {
+      var curCol = nextCol;
+
+      // substution
+      nextCol = prevRow[j] + ( (str1.charAt(i) === str2.charAt(j)) ? 0 : 1 );
+      // insertion
+      var tmp = curCol + 1;
+      if (nextCol > tmp) {
+        nextCol = tmp;
+      }
+      // deletion
+      tmp = prevRow[j + 1] + 1;
+      if (nextCol > tmp) {
+        nextCol = tmp;
+      }
+
+      // copy current col value into previous (in preparation for next iteration)
+      prevRow[j] = curCol;
     }
-    return result;
-  };
 
-  var slice = [].slice;
+    // copy last col value into previous (in preparation for next iteration)
+    prevRow[j] = nextCol;
+  }
 
-  var defaultToWhiteSpace = function(characters) {
-    if (characters == null)
-      return '\\s';
-    else if (characters.source)
-      return characters.source;
-    else
-      return '[' + _s.escapeRegExp(characters) + ']';
-  };
+  return nextCol;
+};
 
-  // Helper for toBoolean
-  function boolMatch(s, matchers) {
-    var i, matcher, down = s.toLowerCase();
-    matchers = [].concat(matchers);
-    for (i = 0; i < matchers.length; i += 1) {
-      matcher = matchers[i];
-      if (!matcher) continue;
-      if (matcher.test && matcher.test(s)) return true;
-      if (matcher.toLowerCase() === down) return true;
+},{"./helper/makeString":20}],30:[function(require,module,exports){
+module.exports = function lines(str) {
+  if (str == null) return [];
+  return String(str).split(/\r\n?|\n/);
+};
+
+},{}],31:[function(require,module,exports){
+var pad = require('./pad');
+
+module.exports = function lpad(str, length, padStr) {
+  return pad(str, length, padStr);
+};
+
+},{"./pad":39}],32:[function(require,module,exports){
+var pad = require('./pad');
+
+module.exports = function lrpad(str, length, padStr) {
+  return pad(str, length, padStr, 'both');
+};
+
+},{"./pad":39}],33:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+var defaultToWhiteSpace = require('./helper/defaultToWhiteSpace');
+var nativeTrimLeft = String.prototype.trimLeft;
+
+module.exports = function ltrim(str, characters) {
+  str = makeString(str);
+  if (!characters && nativeTrimLeft) return nativeTrimLeft.call(str);
+  characters = defaultToWhiteSpace(characters);
+  return str.replace(new RegExp('^' + characters + '+'), '');
+};
+
+},{"./helper/defaultToWhiteSpace":16,"./helper/makeString":20}],34:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function(str, callback) {
+  str = makeString(str);
+
+  if (str.length === 0 || typeof callback !== 'function') return str;
+
+  return str.replace(/./g, callback);
+};
+
+},{"./helper/makeString":20}],35:[function(require,module,exports){
+module.exports = function naturalCmp(str1, str2) {
+  if (str1 == str2) return 0;
+  if (!str1) return -1;
+  if (!str2) return 1;
+
+  var cmpRegex = /(\.\d+|\d+|\D+)/g,
+    tokens1 = String(str1).match(cmpRegex),
+    tokens2 = String(str2).match(cmpRegex),
+    count = Math.min(tokens1.length, tokens2.length);
+
+  for (var i = 0; i < count; i++) {
+    var a = tokens1[i],
+      b = tokens2[i];
+
+    if (a !== b) {
+      var num1 = +a;
+      var num2 = +b;
+      if (num1 === num1 && num2 === num2) {
+        return num1 > num2 ? 1 : -1;
+      }
+      return a < b ? -1 : 1;
     }
   }
 
-  var escapeChars = {
-    lt: '<',
-    gt: '>',
-    quot: '"',
-    amp: '&',
-    apos: "'"
-  };
+  if (tokens1.length != tokens2.length)
+    return tokens1.length - tokens2.length;
 
-  var reversedEscapeChars = {};
-  for(var key in escapeChars) reversedEscapeChars[escapeChars[key]] = key;
-  reversedEscapeChars["'"] = '#39';
+  return str1 < str2 ? -1 : 1;
+};
 
-  // sprintf() for JavaScript 0.7-beta1
-  // http://www.diveintojavascript.com/projects/javascript-sprintf
-  //
-  // Copyright (c) Alexandru Marasteanu <alexaholic [at) gmail (dot] com>
-  // All rights reserved.
-
-  var sprintf = (function() {
-    function get_type(variable) {
-      return Object.prototype.toString.call(variable).slice(8, -1).toLowerCase();
+},{}],36:[function(require,module,exports){
+(function(window) {
+    var re = {
+        not_string: /[^s]/,
+        number: /[diefg]/,
+        json: /[j]/,
+        not_json: /[^j]/,
+        text: /^[^\x25]+/,
+        modulo: /^\x25{2}/,
+        placeholder: /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-gijosuxX])/,
+        key: /^([a-z_][a-z_\d]*)/i,
+        key_access: /^\.([a-z_][a-z_\d]*)/i,
+        index_access: /^\[(\d+)\]/,
+        sign: /^[\+\-]/
     }
 
-    var str_repeat = strRepeat;
-
-    var str_format = function() {
-      if (!str_format.cache.hasOwnProperty(arguments[0])) {
-        str_format.cache[arguments[0]] = str_format.parse(arguments[0]);
-      }
-      return str_format.format.call(null, str_format.cache[arguments[0]], arguments);
-    };
-
-    str_format.format = function(parse_tree, argv) {
-      var cursor = 1, tree_length = parse_tree.length, node_type = '', arg, output = [], i, k, match, pad, pad_character, pad_length;
-      for (i = 0; i < tree_length; i++) {
-        node_type = get_type(parse_tree[i]);
-        if (node_type === 'string') {
-          output.push(parse_tree[i]);
+    function sprintf() {
+        var key = arguments[0], cache = sprintf.cache
+        if (!(cache[key] && cache.hasOwnProperty(key))) {
+            cache[key] = sprintf.parse(key)
         }
-        else if (node_type === 'array') {
-          match = parse_tree[i]; // convenience purposes only
-          if (match[2]) { // keyword argument
-            arg = argv[cursor];
-            for (k = 0; k < match[2].length; k++) {
-              if (!arg.hasOwnProperty(match[2][k])) {
-                throw new Error(sprintf('[_.sprintf] property "%s" does not exist', match[2][k]));
-              }
-              arg = arg[match[2][k]];
+        return sprintf.format.call(null, cache[key], arguments)
+    }
+
+    sprintf.format = function(parse_tree, argv) {
+        var cursor = 1, tree_length = parse_tree.length, node_type = "", arg, output = [], i, k, match, pad, pad_character, pad_length, is_positive = true, sign = ""
+        for (i = 0; i < tree_length; i++) {
+            node_type = get_type(parse_tree[i])
+            if (node_type === "string") {
+                output[output.length] = parse_tree[i]
             }
-          } else if (match[1]) { // positional argument (explicit)
-            arg = argv[match[1]];
-          }
-          else { // positional argument (implicit)
-            arg = argv[cursor++];
-          }
-
-          if (/[^s]/.test(match[8]) && (get_type(arg) != 'number')) {
-            throw new Error(sprintf('[_.sprintf] expecting number but found %s', get_type(arg)));
-          }
-          switch (match[8]) {
-            case 'b': arg = arg.toString(2); break;
-            case 'c': arg = String.fromCharCode(arg); break;
-            case 'd': arg = parseInt(arg, 10); break;
-            case 'e': arg = match[7] ? arg.toExponential(match[7]) : arg.toExponential(); break;
-            case 'f': arg = match[7] ? parseFloat(arg).toFixed(match[7]) : parseFloat(arg); break;
-            case 'o': arg = arg.toString(8); break;
-            case 's': arg = ((arg = String(arg)) && match[7] ? arg.substring(0, match[7]) : arg); break;
-            case 'u': arg = Math.abs(arg); break;
-            case 'x': arg = arg.toString(16); break;
-            case 'X': arg = arg.toString(16).toUpperCase(); break;
-          }
-          arg = (/[def]/.test(match[8]) && match[3] && arg >= 0 ? '+'+ arg : arg);
-          pad_character = match[4] ? match[4] == '0' ? '0' : match[4].charAt(1) : ' ';
-          pad_length = match[6] - String(arg).length;
-          pad = match[6] ? str_repeat(pad_character, pad_length) : '';
-          output.push(match[5] ? arg + pad : pad + arg);
-        }
-      }
-      return output.join('');
-    };
-
-    str_format.cache = {};
-
-    str_format.parse = function(fmt) {
-      var _fmt = fmt, match = [], parse_tree = [], arg_names = 0;
-      while (_fmt) {
-        if ((match = /^[^\x25]+/.exec(_fmt)) !== null) {
-          parse_tree.push(match[0]);
-        }
-        else if ((match = /^\x25{2}/.exec(_fmt)) !== null) {
-          parse_tree.push('%');
-        }
-        else if ((match = /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(_fmt)) !== null) {
-          if (match[2]) {
-            arg_names |= 1;
-            var field_list = [], replacement_field = match[2], field_match = [];
-            if ((field_match = /^([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
-              field_list.push(field_match[1]);
-              while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
-                if ((field_match = /^\.([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
-                  field_list.push(field_match[1]);
+            else if (node_type === "array") {
+                match = parse_tree[i] // convenience purposes only
+                if (match[2]) { // keyword argument
+                    arg = argv[cursor]
+                    for (k = 0; k < match[2].length; k++) {
+                        if (!arg.hasOwnProperty(match[2][k])) {
+                            throw new Error(sprintf("[sprintf] property '%s' does not exist", match[2][k]))
+                        }
+                        arg = arg[match[2][k]]
+                    }
                 }
-                else if ((field_match = /^\[(\d+)\]/.exec(replacement_field)) !== null) {
-                  field_list.push(field_match[1]);
+                else if (match[1]) { // positional argument (explicit)
+                    arg = argv[match[1]]
+                }
+                else { // positional argument (implicit)
+                    arg = argv[cursor++]
+                }
+
+                if (get_type(arg) == "function") {
+                    arg = arg()
+                }
+
+                if (re.not_string.test(match[8]) && re.not_json.test(match[8]) && (get_type(arg) != "number" && isNaN(arg))) {
+                    throw new TypeError(sprintf("[sprintf] expecting number but found %s", get_type(arg)))
+                }
+
+                if (re.number.test(match[8])) {
+                    is_positive = arg >= 0
+                }
+
+                switch (match[8]) {
+                    case "b":
+                        arg = arg.toString(2)
+                    break
+                    case "c":
+                        arg = String.fromCharCode(arg)
+                    break
+                    case "d":
+                    case "i":
+                        arg = parseInt(arg, 10)
+                    break
+                    case "j":
+                        arg = JSON.stringify(arg, null, match[6] ? parseInt(match[6]) : 0)
+                    break
+                    case "e":
+                        arg = match[7] ? arg.toExponential(match[7]) : arg.toExponential()
+                    break
+                    case "f":
+                        arg = match[7] ? parseFloat(arg).toFixed(match[7]) : parseFloat(arg)
+                    break
+                    case "g":
+                        arg = match[7] ? parseFloat(arg).toPrecision(match[7]) : parseFloat(arg)
+                    break
+                    case "o":
+                        arg = arg.toString(8)
+                    break
+                    case "s":
+                        arg = ((arg = String(arg)) && match[7] ? arg.substring(0, match[7]) : arg)
+                    break
+                    case "u":
+                        arg = arg >>> 0
+                    break
+                    case "x":
+                        arg = arg.toString(16)
+                    break
+                    case "X":
+                        arg = arg.toString(16).toUpperCase()
+                    break
+                }
+                if (re.json.test(match[8])) {
+                    output[output.length] = arg
                 }
                 else {
-                  throw new Error('[_.sprintf] huh?');
+                    if (re.number.test(match[8]) && (!is_positive || match[3])) {
+                        sign = is_positive ? "+" : "-"
+                        arg = arg.toString().replace(re.sign, "")
+                    }
+                    else {
+                        sign = ""
+                    }
+                    pad_character = match[4] ? match[4] === "0" ? "0" : match[4].charAt(1) : " "
+                    pad_length = match[6] - (sign + arg).length
+                    pad = match[6] ? (pad_length > 0 ? str_repeat(pad_character, pad_length) : "") : ""
+                    output[output.length] = match[5] ? sign + arg + pad : (pad_character === "0" ? sign + pad + arg : pad + sign + arg)
                 }
-              }
+            }
+        }
+        return output.join("")
+    }
+
+    sprintf.cache = {}
+
+    sprintf.parse = function(fmt) {
+        var _fmt = fmt, match = [], parse_tree = [], arg_names = 0
+        while (_fmt) {
+            if ((match = re.text.exec(_fmt)) !== null) {
+                parse_tree[parse_tree.length] = match[0]
+            }
+            else if ((match = re.modulo.exec(_fmt)) !== null) {
+                parse_tree[parse_tree.length] = "%"
+            }
+            else if ((match = re.placeholder.exec(_fmt)) !== null) {
+                if (match[2]) {
+                    arg_names |= 1
+                    var field_list = [], replacement_field = match[2], field_match = []
+                    if ((field_match = re.key.exec(replacement_field)) !== null) {
+                        field_list[field_list.length] = field_match[1]
+                        while ((replacement_field = replacement_field.substring(field_match[0].length)) !== "") {
+                            if ((field_match = re.key_access.exec(replacement_field)) !== null) {
+                                field_list[field_list.length] = field_match[1]
+                            }
+                            else if ((field_match = re.index_access.exec(replacement_field)) !== null) {
+                                field_list[field_list.length] = field_match[1]
+                            }
+                            else {
+                                throw new SyntaxError("[sprintf] failed to parse named argument key")
+                            }
+                        }
+                    }
+                    else {
+                        throw new SyntaxError("[sprintf] failed to parse named argument key")
+                    }
+                    match[2] = field_list
+                }
+                else {
+                    arg_names |= 2
+                }
+                if (arg_names === 3) {
+                    throw new Error("[sprintf] mixing positional and named placeholders is not (yet) supported")
+                }
+                parse_tree[parse_tree.length] = match
             }
             else {
-              throw new Error('[_.sprintf] huh?');
+                throw new SyntaxError("[sprintf] unexpected placeholder")
             }
-            match[2] = field_list;
-          }
-          else {
-            arg_names |= 2;
-          }
-          if (arg_names === 3) {
-            throw new Error('[_.sprintf] mixing positional and named placeholders is not (yet) supported');
-          }
-          parse_tree.push(match);
+            _fmt = _fmt.substring(match[0].length)
         }
-        else {
-          throw new Error('[_.sprintf] huh?');
-        }
-        _fmt = _fmt.substring(match[0].length);
-      }
-      return parse_tree;
-    };
+        return parse_tree
+    }
 
-    return str_format;
-  })();
-
-
-
-  // Defining underscore.string
-
-  var _s = {
-
-    VERSION: '2.3.0',
-
-    isBlank: function(str){
-      if (str == null) str = '';
-      return (/^\s*$/).test(str);
-    },
-
-    stripTags: function(str){
-      if (str == null) return '';
-      return String(str).replace(/<\/?[^>]+>/g, '');
-    },
-
-    capitalize : function(str){
-      str = str == null ? '' : String(str);
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    },
-
-    chop: function(str, step){
-      if (str == null) return [];
-      str = String(str);
-      step = ~~step;
-      return step > 0 ? str.match(new RegExp('.{1,' + step + '}', 'g')) : [str];
-    },
-
-    clean: function(str){
-      return _s.strip(str).replace(/\s+/g, ' ');
-    },
-
-    count: function(str, substr){
-      if (str == null || substr == null) return 0;
-
-      str = String(str);
-      substr = String(substr);
-
-      var count = 0,
-        pos = 0,
-        length = substr.length;
-
-      while (true) {
-        pos = str.indexOf(substr, pos);
-        if (pos === -1) break;
-        count++;
-        pos += length;
-      }
-
-      return count;
-    },
-
-    chars: function(str) {
-      if (str == null) return [];
-      return String(str).split('');
-    },
-
-    swapCase: function(str) {
-      if (str == null) return '';
-      return String(str).replace(/\S/g, function(c){
-        return c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase();
-      });
-    },
-
-    escapeHTML: function(str) {
-      if (str == null) return '';
-      return String(str).replace(/[&<>"']/g, function(m){ return '&' + reversedEscapeChars[m] + ';'; });
-    },
-
-    unescapeHTML: function(str) {
-      if (str == null) return '';
-      return String(str).replace(/\&([^;]+);/g, function(entity, entityCode){
-        var match;
-
-        if (entityCode in escapeChars) {
-          return escapeChars[entityCode];
-        } else if (match = entityCode.match(/^#x([\da-fA-F]+)$/)) {
-          return String.fromCharCode(parseInt(match[1], 16));
-        } else if (match = entityCode.match(/^#(\d+)$/)) {
-          return String.fromCharCode(~~match[1]);
-        } else {
-          return entity;
-        }
-      });
-    },
-
-    escapeRegExp: function(str){
-      if (str == null) return '';
-      return String(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
-    },
-
-    splice: function(str, i, howmany, substr){
-      var arr = _s.chars(str);
-      arr.splice(~~i, ~~howmany, substr);
-      return arr.join('');
-    },
-
-    insert: function(str, i, substr){
-      return _s.splice(str, i, 0, substr);
-    },
-
-    include: function(str, needle){
-      if (needle === '') return true;
-      if (str == null) return false;
-      return String(str).indexOf(needle) !== -1;
-    },
-
-    join: function() {
-      var args = slice.call(arguments),
-        separator = args.shift();
-
-      if (separator == null) separator = '';
-
-      return args.join(separator);
-    },
-
-    lines: function(str) {
-      if (str == null) return [];
-      return String(str).split("\n");
-    },
-
-    reverse: function(str){
-      return _s.chars(str).reverse().join('');
-    },
-
-    startsWith: function(str, starts){
-      if (starts === '') return true;
-      if (str == null || starts == null) return false;
-      str = String(str); starts = String(starts);
-      return str.length >= starts.length && str.slice(0, starts.length) === starts;
-    },
-
-    endsWith: function(str, ends){
-      if (ends === '') return true;
-      if (str == null || ends == null) return false;
-      str = String(str); ends = String(ends);
-      return str.length >= ends.length && str.slice(str.length - ends.length) === ends;
-    },
-
-    succ: function(str){
-      if (str == null) return '';
-      str = String(str);
-      return str.slice(0, -1) + String.fromCharCode(str.charCodeAt(str.length-1) + 1);
-    },
-
-    titleize: function(str){
-      if (str == null) return '';
-      str  = String(str).toLowerCase();
-      return str.replace(/(?:^|\s|-)\S/g, function(c){ return c.toUpperCase(); });
-    },
-
-    camelize: function(str){
-      return _s.trim(str).replace(/[-_\s]+(.)?/g, function(match, c){ return c ? c.toUpperCase() : ""; });
-    },
-
-    underscored: function(str){
-      return _s.trim(str).replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/[-\s]+/g, '_').toLowerCase();
-    },
-
-    dasherize: function(str){
-      return _s.trim(str).replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
-    },
-
-    classify: function(str){
-      return _s.titleize(String(str).replace(/[\W_]/g, ' ')).replace(/\s/g, '');
-    },
-
-    humanize: function(str){
-      return _s.capitalize(_s.underscored(str).replace(/_id$/,'').replace(/_/g, ' '));
-    },
-
-    trim: function(str, characters){
-      if (str == null) return '';
-      if (!characters && nativeTrim) return nativeTrim.call(str);
-      characters = defaultToWhiteSpace(characters);
-      return String(str).replace(new RegExp('\^' + characters + '+|' + characters + '+$', 'g'), '');
-    },
-
-    ltrim: function(str, characters){
-      if (str == null) return '';
-      if (!characters && nativeTrimLeft) return nativeTrimLeft.call(str);
-      characters = defaultToWhiteSpace(characters);
-      return String(str).replace(new RegExp('^' + characters + '+'), '');
-    },
-
-    rtrim: function(str, characters){
-      if (str == null) return '';
-      if (!characters && nativeTrimRight) return nativeTrimRight.call(str);
-      characters = defaultToWhiteSpace(characters);
-      return String(str).replace(new RegExp(characters + '+$'), '');
-    },
-
-    truncate: function(str, length, truncateStr){
-      if (str == null) return '';
-      str = String(str); truncateStr = truncateStr || '...';
-      length = ~~length;
-      return str.length > length ? str.slice(0, length) + truncateStr : str;
-    },
+    var vsprintf = function(fmt, argv, _argv) {
+        _argv = (argv || []).slice(0)
+        _argv.splice(0, 0, fmt)
+        return sprintf.apply(null, _argv)
+    }
 
     /**
-     * _s.prune: a more elegant version of truncate
-     * prune extra chars, never leaving a half-chopped word.
-     * @author github.com/rwz
+     * helpers
      */
-    prune: function(str, length, pruneStr){
-      if (str == null) return '';
-
-      str = String(str); length = ~~length;
-      pruneStr = pruneStr != null ? String(pruneStr) : '...';
-
-      if (str.length <= length) return str;
-
-      var tmpl = function(c){ return c.toUpperCase() !== c.toLowerCase() ? 'A' : ' '; },
-        template = str.slice(0, length+1).replace(/.(?=\W*\w*$)/g, tmpl); // 'Hello, world' -> 'HellAA AAAAA'
-
-      if (template.slice(template.length-2).match(/\w\w/))
-        template = template.replace(/\s*\S+$/, '');
-      else
-        template = _s.rtrim(template.slice(0, template.length-1));
-
-      return (template+pruneStr).length > str.length ? str : str.slice(0, template.length)+pruneStr;
-    },
-
-    words: function(str, delimiter) {
-      if (_s.isBlank(str)) return [];
-      return _s.trim(str, delimiter).split(delimiter || /\s+/);
-    },
-
-    pad: function(str, length, padStr, type) {
-      str = str == null ? '' : String(str);
-      length = ~~length;
-
-      var padlen  = 0;
-
-      if (!padStr)
-        padStr = ' ';
-      else if (padStr.length > 1)
-        padStr = padStr.charAt(0);
-
-      switch(type) {
-        case 'right':
-          padlen = length - str.length;
-          return str + strRepeat(padStr, padlen);
-        case 'both':
-          padlen = length - str.length;
-          return strRepeat(padStr, Math.ceil(padlen/2)) + str
-                  + strRepeat(padStr, Math.floor(padlen/2));
-        default: // 'left'
-          padlen = length - str.length;
-          return strRepeat(padStr, padlen) + str;
-        }
-    },
-
-    lpad: function(str, length, padStr) {
-      return _s.pad(str, length, padStr);
-    },
-
-    rpad: function(str, length, padStr) {
-      return _s.pad(str, length, padStr, 'right');
-    },
-
-    lrpad: function(str, length, padStr) {
-      return _s.pad(str, length, padStr, 'both');
-    },
-
-    sprintf: sprintf,
-
-    vsprintf: function(fmt, argv){
-      argv.unshift(fmt);
-      return sprintf.apply(null, argv);
-    },
-
-    toNumber: function(str, decimals) {
-      if (!str) return 0;
-      str = _s.trim(str);
-      if (!str.match(/^-?\d+(?:\.\d+)?$/)) return NaN;
-      return parseNumber(parseNumber(str).toFixed(~~decimals));
-    },
-
-    numberFormat : function(number, dec, dsep, tsep) {
-      if (isNaN(number) || number == null) return '';
-
-      number = number.toFixed(~~dec);
-      tsep = typeof tsep == 'string' ? tsep : ',';
-
-      var parts = number.split('.'), fnums = parts[0],
-        decimals = parts[1] ? (dsep || '.') + parts[1] : '';
-
-      return fnums.replace(/(\d)(?=(?:\d{3})+$)/g, '$1' + tsep) + decimals;
-    },
-
-    strRight: function(str, sep){
-      if (str == null) return '';
-      str = String(str); sep = sep != null ? String(sep) : sep;
-      var pos = !sep ? -1 : str.indexOf(sep);
-      return ~pos ? str.slice(pos+sep.length, str.length) : str;
-    },
-
-    strRightBack: function(str, sep){
-      if (str == null) return '';
-      str = String(str); sep = sep != null ? String(sep) : sep;
-      var pos = !sep ? -1 : str.lastIndexOf(sep);
-      return ~pos ? str.slice(pos+sep.length, str.length) : str;
-    },
-
-    strLeft: function(str, sep){
-      if (str == null) return '';
-      str = String(str); sep = sep != null ? String(sep) : sep;
-      var pos = !sep ? -1 : str.indexOf(sep);
-      return ~pos ? str.slice(0, pos) : str;
-    },
-
-    strLeftBack: function(str, sep){
-      if (str == null) return '';
-      str += ''; sep = sep != null ? ''+sep : sep;
-      var pos = str.lastIndexOf(sep);
-      return ~pos ? str.slice(0, pos) : str;
-    },
-
-    toSentence: function(array, separator, lastSeparator, serial) {
-      separator = separator || ', ';
-      lastSeparator = lastSeparator || ' and ';
-      var a = array.slice(), lastMember = a.pop();
-
-      if (array.length > 2 && serial) lastSeparator = _s.rtrim(separator) + lastSeparator;
-
-      return a.length ? a.join(separator) + lastSeparator + lastMember : lastMember;
-    },
-
-    toSentenceSerial: function() {
-      var args = slice.call(arguments);
-      args[3] = true;
-      return _s.toSentence.apply(_s, args);
-    },
-
-    slugify: function(str) {
-      if (str == null) return '';
-
-      var from  = "ąàáäâãåæăćęèéëêìíïîłńòóöôõøśșțùúüûñçżź",
-          to    = "aaaaaaaaaceeeeeiiiilnoooooosstuuuunczz",
-          regex = new RegExp(defaultToWhiteSpace(from), 'g');
-
-      str = String(str).toLowerCase().replace(regex, function(c){
-        var index = from.indexOf(c);
-        return to.charAt(index) || '-';
-      });
-
-      return _s.dasherize(str.replace(/[^\w\s-]/g, ''));
-    },
-
-    surround: function(str, wrapper) {
-      return [wrapper, str, wrapper].join('');
-    },
-
-    quote: function(str, quoteChar) {
-      return _s.surround(str, quoteChar || '"');
-    },
-
-    unquote: function(str, quoteChar) {
-      quoteChar = quoteChar || '"';
-      if (str[0] === quoteChar && str[str.length-1] === quoteChar)
-        return str.slice(1,str.length-1);
-      else return str;
-    },
-
-    exports: function() {
-      var result = {};
-
-      for (var prop in this) {
-        if (!this.hasOwnProperty(prop) || prop.match(/^(?:include|contains|reverse)$/)) continue;
-        result[prop] = this[prop];
-      }
-
-      return result;
-    },
-
-    repeat: function(str, qty, separator){
-      if (str == null) return '';
-
-      qty = ~~qty;
-
-      // using faster implementation if separator is not needed;
-      if (separator == null) return strRepeat(String(str), qty);
-
-      // this one is about 300x slower in Google Chrome
-      for (var repeat = []; qty > 0; repeat[--qty] = str) {}
-      return repeat.join(separator);
-    },
-
-    naturalCmp: function(str1, str2){
-      if (str1 == str2) return 0;
-      if (!str1) return -1;
-      if (!str2) return 1;
-
-      var cmpRegex = /(\.\d+)|(\d+)|(\D+)/g,
-        tokens1 = String(str1).toLowerCase().match(cmpRegex),
-        tokens2 = String(str2).toLowerCase().match(cmpRegex),
-        count = Math.min(tokens1.length, tokens2.length);
-
-      for(var i = 0; i < count; i++) {
-        var a = tokens1[i], b = tokens2[i];
-
-        if (a !== b){
-          var num1 = parseInt(a, 10);
-          if (!isNaN(num1)){
-            var num2 = parseInt(b, 10);
-            if (!isNaN(num2) && num1 - num2)
-              return num1 - num2;
-          }
-          return a < b ? -1 : 1;
-        }
-      }
-
-      if (tokens1.length === tokens2.length)
-        return tokens1.length - tokens2.length;
-
-      return str1 < str2 ? -1 : 1;
-    },
-
-    levenshtein: function(str1, str2) {
-      if (str1 == null && str2 == null) return 0;
-      if (str1 == null) return String(str2).length;
-      if (str2 == null) return String(str1).length;
-
-      str1 = String(str1); str2 = String(str2);
-
-      var current = [], prev, value;
-
-      for (var i = 0; i <= str2.length; i++)
-        for (var j = 0; j <= str1.length; j++) {
-          if (i && j)
-            if (str1.charAt(j - 1) === str2.charAt(i - 1))
-              value = prev;
-            else
-              value = Math.min(current[j], current[j - 1], prev) + 1;
-          else
-            value = i + j;
-
-          prev = current[j];
-          current[j] = value;
-        }
-
-      return current.pop();
-    },
-
-    toBoolean: function(str, trueValues, falseValues) {
-      if (typeof str === "number") str = "" + str;
-      if (typeof str !== "string") return !!str;
-      str = _s.trim(str);
-      if (boolMatch(str, trueValues || ["true", "1"])) return true;
-      if (boolMatch(str, falseValues || ["false", "0"])) return false;
+    function get_type(variable) {
+        return Object.prototype.toString.call(variable).slice(8, -1).toLowerCase()
     }
-  };
 
-  // Aliases
+    function str_repeat(input, multiplier) {
+        return Array(multiplier + 1).join(input)
+    }
 
-  _s.strip    = _s.trim;
-  _s.lstrip   = _s.ltrim;
-  _s.rstrip   = _s.rtrim;
-  _s.center   = _s.lrpad;
-  _s.rjust    = _s.lpad;
-  _s.ljust    = _s.rpad;
-  _s.contains = _s.include;
-  _s.q        = _s.quote;
-  _s.toBool   = _s.toBoolean;
+    /**
+     * export to either browser or node.js
+     */
+    if (typeof exports !== "undefined") {
+        exports.sprintf = sprintf
+        exports.vsprintf = vsprintf
+    }
+    else {
+        window.sprintf = sprintf
+        window.vsprintf = vsprintf
 
-  // Exporting
+        if (typeof define === "function" && define.amd) {
+            define(function() {
+                return {
+                    sprintf: sprintf,
+                    vsprintf: vsprintf
+                }
+            })
+        }
+    }
+})(typeof window === "undefined" ? this : window);
 
-  // CommonJS module is defined
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports)
-      module.exports = _s;
+},{}],37:[function(require,module,exports){
+(function (global){
 
-    exports._s = _s;
+/**
+ * Module exports.
+ */
+
+module.exports = deprecate;
+
+/**
+ * Mark that a method should not be used.
+ * Returns a modified function which warns once by default.
+ *
+ * If `localStorage.noDeprecation = true` is set, then it is a no-op.
+ *
+ * If `localStorage.throwDeprecation = true` is set, then deprecated functions
+ * will throw an Error when invoked.
+ *
+ * If `localStorage.traceDeprecation = true` is set, then deprecated functions
+ * will invoke `console.trace()` instead of `console.error()`.
+ *
+ * @param {Function} fn - the function to deprecate
+ * @param {String} msg - the string to print to the console when `fn` is invoked
+ * @returns {Function} a new "deprecated" version of `fn`
+ * @api public
+ */
+
+function deprecate (fn, msg) {
+  if (config('noDeprecation')) {
+    return fn;
   }
 
-  // Register as a named module with AMD.
-  if (typeof define === 'function' && define.amd)
-    define('underscore.string', [], function(){ return _s; });
+  var warned = false;
+  function deprecated() {
+    if (!warned) {
+      if (config('throwDeprecation')) {
+        throw new Error(msg);
+      } else if (config('traceDeprecation')) {
+        console.trace(msg);
+      } else {
+        console.warn(msg);
+      }
+      warned = true;
+    }
+    return fn.apply(this, arguments);
+  }
 
+  return deprecated;
+}
 
-  // Integrate with Underscore.js if defined
-  // or create our own underscore object.
-  root._ = root._ || {};
-  root._.string = root._.str = _s;
-}(this, String);//     Backbone.js 1.1.2
+/**
+ * Checks `localStorage` for boolean values for the given `name`.
+ *
+ * @param {String} name
+ * @returns {Boolean}
+ * @api private
+ */
 
-//     (c) 2010-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+function config (name) {
+  // accessing global.localStorage can trigger a DOMException in sandboxed iframes
+  try {
+    if (!global.localStorage) return false;
+  } catch (_) {
+    return false;
+  }
+  var val = global.localStorage[name];
+  if (null == val) return false;
+  return String(val).toLowerCase() === 'true';
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],38:[function(require,module,exports){
+module.exports = function numberFormat(number, dec, dsep, tsep) {
+  if (isNaN(number) || number == null) return '';
+
+  number = number.toFixed(~~dec);
+  tsep = typeof tsep == 'string' ? tsep : ',';
+
+  var parts = number.split('.'),
+    fnums = parts[0],
+    decimals = parts[1] ? (dsep || '.') + parts[1] : '';
+
+  return fnums.replace(/(\d)(?=(?:\d{3})+$)/g, '$1' + tsep) + decimals;
+};
+
+},{}],39:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+var strRepeat = require('./helper/strRepeat');
+
+module.exports = function pad(str, length, padStr, type) {
+  str = makeString(str);
+  length = ~~length;
+
+  var padlen = 0;
+
+  if (!padStr)
+    padStr = ' ';
+  else if (padStr.length > 1)
+    padStr = padStr.charAt(0);
+
+  switch (type) {
+  case 'right':
+    padlen = length - str.length;
+    return str + strRepeat(padStr, padlen);
+  case 'both':
+    padlen = length - str.length;
+    return strRepeat(padStr, Math.ceil(padlen / 2)) + str + strRepeat(padStr, Math.floor(padlen / 2));
+  default: // 'left'
+    padlen = length - str.length;
+    return strRepeat(padStr, padlen) + str;
+  }
+};
+
+},{"./helper/makeString":20,"./helper/strRepeat":21}],40:[function(require,module,exports){
+var adjacent = require('./helper/adjacent');
+
+module.exports = function succ(str) {
+  return adjacent(str, -1);
+};
+
+},{"./helper/adjacent":15}],41:[function(require,module,exports){
+/**
+ * _s.prune: a more elegant version of truncate
+ * prune extra chars, never leaving a half-chopped word.
+ * @author github.com/rwz
+ */
+var makeString = require('./helper/makeString');
+var rtrim = require('./rtrim');
+
+module.exports = function prune(str, length, pruneStr) {
+  str = makeString(str);
+  length = ~~length;
+  pruneStr = pruneStr != null ? String(pruneStr) : '...';
+
+  if (str.length <= length) return str;
+
+  var tmpl = function(c) {
+      return c.toUpperCase() !== c.toLowerCase() ? 'A' : ' ';
+    },
+    template = str.slice(0, length + 1).replace(/.(?=\W*\w*$)/g, tmpl); // 'Hello, world' -> 'HellAA AAAAA'
+
+  if (template.slice(template.length - 2).match(/\w\w/))
+    template = template.replace(/\s*\S+$/, '');
+  else
+    template = rtrim(template.slice(0, template.length - 1));
+
+  return (template + pruneStr).length > str.length ? str : str.slice(0, template.length) + pruneStr;
+};
+
+},{"./helper/makeString":20,"./rtrim":47}],42:[function(require,module,exports){
+var surround = require('./surround');
+
+module.exports = function quote(str, quoteChar) {
+  return surround(str, quoteChar || '"');
+};
+
+},{"./surround":58}],43:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+var strRepeat = require('./helper/strRepeat');
+
+module.exports = function repeat(str, qty, separator) {
+  str = makeString(str);
+
+  qty = ~~qty;
+
+  // using faster implementation if separator is not needed;
+  if (separator == null) return strRepeat(str, qty);
+
+  // this one is about 300x slower in Google Chrome
+  /*eslint no-empty: 0*/
+  for (var repeat = []; qty > 0; repeat[--qty] = str) {}
+  return repeat.join(separator);
+};
+
+},{"./helper/makeString":20,"./helper/strRepeat":21}],44:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function replaceAll(str, find, replace, ignorecase) {
+  var flags = (ignorecase === true)?'gi':'g';
+  var reg = new RegExp(find, flags);
+
+  return makeString(str).replace(reg, replace);
+};
+
+},{"./helper/makeString":20}],45:[function(require,module,exports){
+var chars = require('./chars');
+
+module.exports = function reverse(str) {
+  return chars(str).reverse().join('');
+};
+
+},{"./chars":3}],46:[function(require,module,exports){
+var pad = require('./pad');
+
+module.exports = function rpad(str, length, padStr) {
+  return pad(str, length, padStr, 'right');
+};
+
+},{"./pad":39}],47:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+var defaultToWhiteSpace = require('./helper/defaultToWhiteSpace');
+var nativeTrimRight = String.prototype.trimRight;
+
+module.exports = function rtrim(str, characters) {
+  str = makeString(str);
+  if (!characters && nativeTrimRight) return nativeTrimRight.call(str);
+  characters = defaultToWhiteSpace(characters);
+  return str.replace(new RegExp(characters + '+$'), '');
+};
+
+},{"./helper/defaultToWhiteSpace":16,"./helper/makeString":20}],48:[function(require,module,exports){
+var trim = require('./trim');
+var dasherize = require('./dasherize');
+var cleanDiacritics = require('./cleanDiacritics');
+
+module.exports = function slugify(str) {
+  return trim(dasherize(cleanDiacritics(str).replace(/[^\w\s-]/g, '-').toLowerCase()), '-');
+};
+
+},{"./cleanDiacritics":7,"./dasherize":9,"./trim":65}],49:[function(require,module,exports){
+var chars = require('./chars');
+
+module.exports = function splice(str, i, howmany, substr) {
+  var arr = chars(str);
+  arr.splice(~~i, ~~howmany, substr);
+  return arr.join('');
+};
+
+},{"./chars":3}],50:[function(require,module,exports){
+var deprecate = require('util-deprecate');
+
+module.exports = deprecate(require('sprintf-js').sprintf,
+  'sprintf() will be removed in the next major release, use the sprintf-js package instead.');
+
+},{"sprintf-js":36,"util-deprecate":37}],51:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+var toPositive = require('./helper/toPositive');
+
+module.exports = function startsWith(str, starts, position) {
+  str = makeString(str);
+  starts = '' + starts;
+  position = position == null ? 0 : Math.min(toPositive(position), str.length);
+  return str.lastIndexOf(starts, position) === position;
+};
+
+},{"./helper/makeString":20,"./helper/toPositive":22}],52:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function strLeft(str, sep) {
+  str = makeString(str);
+  sep = makeString(sep);
+  var pos = !sep ? -1 : str.indexOf(sep);
+  return~ pos ? str.slice(0, pos) : str;
+};
+
+},{"./helper/makeString":20}],53:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function strLeftBack(str, sep) {
+  str = makeString(str);
+  sep = makeString(sep);
+  var pos = str.lastIndexOf(sep);
+  return~ pos ? str.slice(0, pos) : str;
+};
+
+},{"./helper/makeString":20}],54:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function strRight(str, sep) {
+  str = makeString(str);
+  sep = makeString(sep);
+  var pos = !sep ? -1 : str.indexOf(sep);
+  return~ pos ? str.slice(pos + sep.length, str.length) : str;
+};
+
+},{"./helper/makeString":20}],55:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function strRightBack(str, sep) {
+  str = makeString(str);
+  sep = makeString(sep);
+  var pos = !sep ? -1 : str.lastIndexOf(sep);
+  return~ pos ? str.slice(pos + sep.length, str.length) : str;
+};
+
+},{"./helper/makeString":20}],56:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function stripTags(str) {
+  return makeString(str).replace(/<\/?[^>]+>/g, '');
+};
+
+},{"./helper/makeString":20}],57:[function(require,module,exports){
+var adjacent = require('./helper/adjacent');
+
+module.exports = function succ(str) {
+  return adjacent(str, 1);
+};
+
+},{"./helper/adjacent":15}],58:[function(require,module,exports){
+module.exports = function surround(str, wrapper) {
+  return [wrapper, str, wrapper].join('');
+};
+
+},{}],59:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function swapCase(str) {
+  return makeString(str).replace(/\S/g, function(c) {
+    return c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase();
+  });
+};
+
+},{"./helper/makeString":20}],60:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function titleize(str) {
+  return makeString(str).toLowerCase().replace(/(?:^|\s|-)\S/g, function(c) {
+    return c.toUpperCase();
+  });
+};
+
+},{"./helper/makeString":20}],61:[function(require,module,exports){
+var trim = require('./trim');
+
+function boolMatch(s, matchers) {
+  var i, matcher, down = s.toLowerCase();
+  matchers = [].concat(matchers);
+  for (i = 0; i < matchers.length; i += 1) {
+    matcher = matchers[i];
+    if (!matcher) continue;
+    if (matcher.test && matcher.test(s)) return true;
+    if (matcher.toLowerCase() === down) return true;
+  }
+}
+
+module.exports = function toBoolean(str, trueValues, falseValues) {
+  if (typeof str === 'number') str = '' + str;
+  if (typeof str !== 'string') return !!str;
+  str = trim(str);
+  if (boolMatch(str, trueValues || ['true', '1'])) return true;
+  if (boolMatch(str, falseValues || ['false', '0'])) return false;
+};
+
+},{"./trim":65}],62:[function(require,module,exports){
+module.exports = function toNumber(num, precision) {
+  if (num == null) return 0;
+  var factor = Math.pow(10, isFinite(precision) ? precision : 0);
+  return Math.round(num * factor) / factor;
+};
+
+},{}],63:[function(require,module,exports){
+var rtrim = require('./rtrim');
+
+module.exports = function toSentence(array, separator, lastSeparator, serial) {
+  separator = separator || ', ';
+  lastSeparator = lastSeparator || ' and ';
+  var a = array.slice(),
+    lastMember = a.pop();
+
+  if (array.length > 2 && serial) lastSeparator = rtrim(separator) + lastSeparator;
+
+  return a.length ? a.join(separator) + lastSeparator + lastMember : lastMember;
+};
+
+},{"./rtrim":47}],64:[function(require,module,exports){
+var toSentence = require('./toSentence');
+
+module.exports = function toSentenceSerial(array, sep, lastSep) {
+  return toSentence(array, sep, lastSep, true);
+};
+
+},{"./toSentence":63}],65:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+var defaultToWhiteSpace = require('./helper/defaultToWhiteSpace');
+var nativeTrim = String.prototype.trim;
+
+module.exports = function trim(str, characters) {
+  str = makeString(str);
+  if (!characters && nativeTrim) return nativeTrim.call(str);
+  characters = defaultToWhiteSpace(characters);
+  return str.replace(new RegExp('^' + characters + '+|' + characters + '+$', 'g'), '');
+};
+
+},{"./helper/defaultToWhiteSpace":16,"./helper/makeString":20}],66:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+
+module.exports = function truncate(str, length, truncateStr) {
+  str = makeString(str);
+  truncateStr = truncateStr || '...';
+  length = ~~length;
+  return str.length > length ? str.slice(0, length) + truncateStr : str;
+};
+
+},{"./helper/makeString":20}],67:[function(require,module,exports){
+var trim = require('./trim');
+
+module.exports = function underscored(str) {
+  return trim(str).replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/[-\s]+/g, '_').toLowerCase();
+};
+
+},{"./trim":65}],68:[function(require,module,exports){
+var makeString = require('./helper/makeString');
+var htmlEntities = require('./helper/htmlEntities');
+
+module.exports = function unescapeHTML(str) {
+  return makeString(str).replace(/\&([^;]+);/g, function(entity, entityCode) {
+    var match;
+
+    if (entityCode in htmlEntities) {
+      return htmlEntities[entityCode];
+    /*eslint no-cond-assign: 0*/
+    } else if (match = entityCode.match(/^#x([\da-fA-F]+)$/)) {
+      return String.fromCharCode(parseInt(match[1], 16));
+    /*eslint no-cond-assign: 0*/
+    } else if (match = entityCode.match(/^#(\d+)$/)) {
+      return String.fromCharCode(~~match[1]);
+    } else {
+      return entity;
+    }
+  });
+};
+
+},{"./helper/htmlEntities":19,"./helper/makeString":20}],69:[function(require,module,exports){
+module.exports = function unquote(str, quoteChar) {
+  quoteChar = quoteChar || '"';
+  if (str[0] === quoteChar && str[str.length - 1] === quoteChar)
+    return str.slice(1, str.length - 1);
+  else return str;
+};
+
+},{}],70:[function(require,module,exports){
+var deprecate = require('util-deprecate');
+
+module.exports = deprecate(require('sprintf-js').vsprintf,
+  'vsprintf() will be removed in the next major release, use the sprintf-js package instead.');
+
+},{"sprintf-js":36,"util-deprecate":37}],71:[function(require,module,exports){
+var isBlank = require('./isBlank');
+var trim = require('./trim');
+
+module.exports = function words(str, delimiter) {
+  if (isBlank(str)) return [];
+  return trim(str, delimiter).split(delimiter || /\s+/);
+};
+
+},{"./isBlank":27,"./trim":65}],72:[function(require,module,exports){
+// Wrap
+// wraps a string by a certain width
+
+var makeString = require('./helper/makeString');
+
+module.exports = function wrap(str, options){
+  str = makeString(str);
+  
+  options = options || {};
+  
+  var width = options.width || 75;
+  var seperator = options.seperator || '\n';
+  var cut = options.cut || false;
+  var preserveSpaces = options.preserveSpaces || false;
+  var trailingSpaces = options.trailingSpaces || false;
+  
+  var result;
+  
+  if(width <= 0){
+    return str;
+  }
+  
+  else if(!cut){
+  
+    var words = str.split(' ');
+    var current_column = 0;
+    result = '';
+  
+    while(words.length > 0){
+      
+      // if adding a space and the next word would cause this line to be longer than width...
+      if(1 + words[0].length + current_column > width){
+        //start a new line if this line is not already empty
+        if(current_column > 0){
+          // add a space at the end of the line is preserveSpaces is true
+          if (preserveSpaces){
+            result += ' ';
+            current_column++;
+          }
+          // fill the rest of the line with spaces if trailingSpaces option is true
+          else if(trailingSpaces){
+            while(current_column < width){
+              result += ' ';
+              current_column++;
+            }            
+          }
+          //start new line
+          result += seperator;
+          current_column = 0;
+        }
+      }
+  
+      // if not at the begining of the line, add a space in front of the word
+      if(current_column > 0){
+        result += ' ';
+        current_column++;
+      }
+  
+      // tack on the next word, update current column, a pop words array
+      result += words[0];
+      current_column += words[0].length;
+      words.shift();
+  
+    }
+  
+    // fill the rest of the line with spaces if trailingSpaces option is true
+    if(trailingSpaces){
+      while(current_column < width){
+        result += ' ';
+        current_column++;
+      }            
+    }
+  
+    return result;
+  
+  }
+  
+  else {
+  
+    var index = 0;
+    result = '';
+  
+    // walk through each character and add seperators where appropriate
+    while(index < str.length){
+      if(index % width == 0 && index > 0){
+        result += seperator;
+      }
+      result += str.charAt(index);
+      index++;
+    }
+  
+    // fill the rest of the line with spaces if trailingSpaces option is true
+    if(trailingSpaces){
+      while(index % width > 0){
+        result += ' ';
+        index++;
+      }            
+    }
+    
+    return result;
+  }
+};
+
+},{"./helper/makeString":20}]},{},[25])(25)
+});//     Backbone.js 1.4.0
+
+//     (c) 2010-2019 Jeremy Ashkenas and DocumentCloud
 //     Backbone may be freely distributed under the MIT license.
 //     For all details and documentation:
 //     http://backbonejs.org
 
-(function(root, factory) {
+(function(factory) {
+
+  // Establish the root object, `window` (`self`) in the browser, or `global` on the server.
+  // We use `self` instead of `window` for `WebWorker` support.
+  var root = typeof self == 'object' && self.self === self && self ||
+            typeof global == 'object' && global.global === global && global;
 
   // Set up Backbone appropriately for the environment. Start with AMD.
   if (typeof define === 'function' && define.amd) {
@@ -16891,15 +17941,16 @@ else {
 
   // Next for Node.js or CommonJS. jQuery may not be needed as a module.
   } else if (typeof exports !== 'undefined') {
-    var _ = require('underscore');
-    factory(root, exports, _);
+    var _ = require('underscore'), $;
+    try { $ = require('jquery'); } catch (e) {}
+    factory(root, exports, _, $);
 
   // Finally, as a browser global.
   } else {
-    root.Backbone = factory(root, {}, root._, (root.jQuery || root.Zepto || root.ender || root.$));
+    root.Backbone = factory(root, {}, root._, root.jQuery || root.Zepto || root.ender || root.$);
   }
 
-}(this, function(root, Backbone, _, $) {
+})(function(root, Backbone, _, $) {
 
   // Initial Setup
   // -------------
@@ -16908,12 +17959,11 @@ else {
   // restored later on, if `noConflict` is used.
   var previousBackbone = root.Backbone;
 
-  // Create local references to array methods we'll want to use later.
-  var array = [];
-  var slice = array.slice;
+  // Create a local reference to a common array method we'll want to use later.
+  var slice = Array.prototype.slice;
 
   // Current version of the library. Keep in sync with `package.json`.
-  Backbone.VERSION = '1.1.2';
+  Backbone.VERSION = '1.4.0';
 
   // For Backbone's purposes, jQuery, Zepto, Ender, or My Library (kidding) owns
   // the `$` variable.
@@ -16932,7 +17982,7 @@ else {
   Backbone.emulateHTTP = false;
 
   // Turn on `emulateJSON` to support legacy servers that can't deal with direct
-  // `application/json` requests ... will encode the body as
+  // `application/json` requests ... this will encode the body as
   // `application/x-www-form-urlencoded` instead and will send the model in a
   // form param named `model`.
   Backbone.emulateJSON = false;
@@ -16941,8 +17991,8 @@ else {
   // ---------------
 
   // A module that can be mixed in to *any object* in order to provide it with
-  // custom events. You may bind with `on` or remove with `off` callback
-  // functions to an event; `trigger`-ing an event fires all callbacks in
+  // a custom event channel. You may bind a callback to an event with `on` or
+  // remove with `off`; `trigger`-ing an event fires all callbacks in
   // succession.
   //
   //     var object = {};
@@ -16950,142 +18000,248 @@ else {
   //     object.on('expand', function(){ alert('expanded'); });
   //     object.trigger('expand');
   //
-  var Events = Backbone.Events = {
-
-    // Bind an event to a `callback` function. Passing `"all"` will bind
-    // the callback to all events fired.
-    on: function(name, callback, context) {
-      if (!eventsApi(this, 'on', name, [callback, context]) || !callback) return this;
-      this._events || (this._events = {});
-      var events = this._events[name] || (this._events[name] = []);
-      events.push({callback: callback, context: context, ctx: context || this});
-      return this;
-    },
-
-    // Bind an event to only be triggered a single time. After the first time
-    // the callback is invoked, it will be removed.
-    once: function(name, callback, context) {
-      if (!eventsApi(this, 'once', name, [callback, context]) || !callback) return this;
-      var self = this;
-      var once = _.once(function() {
-        self.off(name, once);
-        callback.apply(this, arguments);
-      });
-      once._callback = callback;
-      return this.on(name, once, context);
-    },
-
-    // Remove one or many callbacks. If `context` is null, removes all
-    // callbacks with that function. If `callback` is null, removes all
-    // callbacks for the event. If `name` is null, removes all bound
-    // callbacks for all events.
-    off: function(name, callback, context) {
-      if (!this._events || !eventsApi(this, 'off', name, [callback, context])) return this;
-
-      // Remove all callbacks for all events.
-      if (!name && !callback && !context) {
-        this._events = void 0;
-        return this;
-      }
-
-      var names = name ? [name] : _.keys(this._events);
-      for (var i = 0, length = names.length; i < length; i++) {
-        name = names[i];
-
-        // Bail out if there are no events stored.
-        var events = this._events[name];
-        if (!events) continue;
-
-        // Remove all callbacks for this event.
-        if (!callback && !context) {
-          delete this._events[name];
-          continue;
-        }
-
-        // Find any remaining events.
-        var remaining = [];
-        for (var j = 0, k = events.length; j < k; j++) {
-          var event = events[j];
-          if (
-            callback && callback !== event.callback &&
-            callback !== event.callback._callback ||
-            context && context !== event.context
-          ) {
-            remaining.push(event);
-          }
-        }
-
-        // Replace events if there are any remaining.  Otherwise, clean up.
-        if (remaining.length) {
-          this._events[name] = remaining;
-        } else {
-          delete this._events[name];
-        }
-      }
-
-      return this;
-    },
-
-    // Trigger one or many events, firing all bound callbacks. Callbacks are
-    // passed the same arguments as `trigger` is, apart from the event name
-    // (unless you're listening on `"all"`, which will cause your callback to
-    // receive the true name of the event as the first argument).
-    trigger: function(name) {
-      if (!this._events) return this;
-      var args = slice.call(arguments, 1);
-      if (!eventsApi(this, 'trigger', name, args)) return this;
-      var events = this._events[name];
-      var allEvents = this._events.all;
-      if (events) triggerEvents(events, args);
-      if (allEvents) triggerEvents(allEvents, arguments);
-      return this;
-    },
-
-    // Tell this object to stop listening to either specific events ... or
-    // to every object it's currently listening to.
-    stopListening: function(obj, name, callback) {
-      var listeningTo = this._listeningTo;
-      if (!listeningTo) return this;
-      var remove = !name && !callback;
-      if (!callback && typeof name === 'object') callback = this;
-      if (obj) (listeningTo = {})[obj._listenId] = obj;
-      for (var id in listeningTo) {
-        obj = listeningTo[id];
-        obj.off(name, callback, this);
-        if (remove || _.isEmpty(obj._events)) delete this._listeningTo[id];
-      }
-      return this;
-    }
-
-  };
+  var Events = Backbone.Events = {};
 
   // Regular expression used to split event strings.
   var eventSplitter = /\s+/;
 
-  // Implement fancy features of the Events API such as multiple event
-  // names `"change blur"` and jQuery-style event maps `{change: action}`
-  // in terms of the existing API.
-  var eventsApi = function(obj, action, name, rest) {
-    if (!name) return true;
+  // A private global variable to share between listeners and listenees.
+  var _listening;
 
-    // Handle event maps.
-    if (typeof name === 'object') {
-      for (var key in name) {
-        obj[action].apply(obj, [key, name[key]].concat(rest));
+  // Iterates over the standard `event, callback` (as well as the fancy multiple
+  // space-separated events `"change blur", callback` and jQuery-style event
+  // maps `{event: callback}`).
+  var eventsApi = function(iteratee, events, name, callback, opts) {
+    var i = 0, names;
+    if (name && typeof name === 'object') {
+      // Handle event maps.
+      if (callback !== void 0 && 'context' in opts && opts.context === void 0) opts.context = callback;
+      for (names = _.keys(name); i < names.length ; i++) {
+        events = eventsApi(iteratee, events, names[i], name[names[i]], opts);
       }
-      return false;
+    } else if (name && eventSplitter.test(name)) {
+      // Handle space-separated event names by delegating them individually.
+      for (names = name.split(eventSplitter); i < names.length; i++) {
+        events = iteratee(events, names[i], callback, opts);
+      }
+    } else {
+      // Finally, standard events.
+      events = iteratee(events, name, callback, opts);
+    }
+    return events;
+  };
+
+  // Bind an event to a `callback` function. Passing `"all"` will bind
+  // the callback to all events fired.
+  Events.on = function(name, callback, context) {
+    this._events = eventsApi(onApi, this._events || {}, name, callback, {
+      context: context,
+      ctx: this,
+      listening: _listening
+    });
+
+    if (_listening) {
+      var listeners = this._listeners || (this._listeners = {});
+      listeners[_listening.id] = _listening;
+      // Allow the listening to use a counter, instead of tracking
+      // callbacks for library interop
+      _listening.interop = false;
     }
 
-    // Handle space separated event names.
-    if (eventSplitter.test(name)) {
-      var names = name.split(eventSplitter);
-      for (var i = 0, length = names.length; i < length; i++) {
-        obj[action].apply(obj, [names[i]].concat(rest));
-      }
-      return false;
+    return this;
+  };
+
+  // Inversion-of-control versions of `on`. Tell *this* object to listen to
+  // an event in another object... keeping track of what it's listening to
+  // for easier unbinding later.
+  Events.listenTo = function(obj, name, callback) {
+    if (!obj) return this;
+    var id = obj._listenId || (obj._listenId = _.uniqueId('l'));
+    var listeningTo = this._listeningTo || (this._listeningTo = {});
+    var listening = _listening = listeningTo[id];
+
+    // This object is not listening to any other events on `obj` yet.
+    // Setup the necessary references to track the listening callbacks.
+    if (!listening) {
+      this._listenId || (this._listenId = _.uniqueId('l'));
+      listening = _listening = listeningTo[id] = new Listening(this, obj);
     }
 
-    return true;
+    // Bind callbacks on obj.
+    var error = tryCatchOn(obj, name, callback, this);
+    _listening = void 0;
+
+    if (error) throw error;
+    // If the target obj is not Backbone.Events, track events manually.
+    if (listening.interop) listening.on(name, callback);
+
+    return this;
+  };
+
+  // The reducing API that adds a callback to the `events` object.
+  var onApi = function(events, name, callback, options) {
+    if (callback) {
+      var handlers = events[name] || (events[name] = []);
+      var context = options.context, ctx = options.ctx, listening = options.listening;
+      if (listening) listening.count++;
+
+      handlers.push({callback: callback, context: context, ctx: context || ctx, listening: listening});
+    }
+    return events;
+  };
+
+  // An try-catch guarded #on function, to prevent poisoning the global
+  // `_listening` variable.
+  var tryCatchOn = function(obj, name, callback, context) {
+    try {
+      obj.on(name, callback, context);
+    } catch (e) {
+      return e;
+    }
+  };
+
+  // Remove one or many callbacks. If `context` is null, removes all
+  // callbacks with that function. If `callback` is null, removes all
+  // callbacks for the event. If `name` is null, removes all bound
+  // callbacks for all events.
+  Events.off = function(name, callback, context) {
+    if (!this._events) return this;
+    this._events = eventsApi(offApi, this._events, name, callback, {
+      context: context,
+      listeners: this._listeners
+    });
+
+    return this;
+  };
+
+  // Tell this object to stop listening to either specific events ... or
+  // to every object it's currently listening to.
+  Events.stopListening = function(obj, name, callback) {
+    var listeningTo = this._listeningTo;
+    if (!listeningTo) return this;
+
+    var ids = obj ? [obj._listenId] : _.keys(listeningTo);
+    for (var i = 0; i < ids.length; i++) {
+      var listening = listeningTo[ids[i]];
+
+      // If listening doesn't exist, this object is not currently
+      // listening to obj. Break out early.
+      if (!listening) break;
+
+      listening.obj.off(name, callback, this);
+      if (listening.interop) listening.off(name, callback);
+    }
+    if (_.isEmpty(listeningTo)) this._listeningTo = void 0;
+
+    return this;
+  };
+
+  // The reducing API that removes a callback from the `events` object.
+  var offApi = function(events, name, callback, options) {
+    if (!events) return;
+
+    var context = options.context, listeners = options.listeners;
+    var i = 0, names;
+
+    // Delete all event listeners and "drop" events.
+    if (!name && !context && !callback) {
+      for (names = _.keys(listeners); i < names.length; i++) {
+        listeners[names[i]].cleanup();
+      }
+      return;
+    }
+
+    names = name ? [name] : _.keys(events);
+    for (; i < names.length; i++) {
+      name = names[i];
+      var handlers = events[name];
+
+      // Bail out if there are no events stored.
+      if (!handlers) break;
+
+      // Find any remaining events.
+      var remaining = [];
+      for (var j = 0; j < handlers.length; j++) {
+        var handler = handlers[j];
+        if (
+          callback && callback !== handler.callback &&
+            callback !== handler.callback._callback ||
+              context && context !== handler.context
+        ) {
+          remaining.push(handler);
+        } else {
+          var listening = handler.listening;
+          if (listening) listening.off(name, callback);
+        }
+      }
+
+      // Replace events if there are any remaining.  Otherwise, clean up.
+      if (remaining.length) {
+        events[name] = remaining;
+      } else {
+        delete events[name];
+      }
+    }
+
+    return events;
+  };
+
+  // Bind an event to only be triggered a single time. After the first time
+  // the callback is invoked, its listener will be removed. If multiple events
+  // are passed in using the space-separated syntax, the handler will fire
+  // once for each event, not once for a combination of all events.
+  Events.once = function(name, callback, context) {
+    // Map the event into a `{event: once}` object.
+    var events = eventsApi(onceMap, {}, name, callback, this.off.bind(this));
+    if (typeof name === 'string' && context == null) callback = void 0;
+    return this.on(events, callback, context);
+  };
+
+  // Inversion-of-control versions of `once`.
+  Events.listenToOnce = function(obj, name, callback) {
+    // Map the event into a `{event: once}` object.
+    var events = eventsApi(onceMap, {}, name, callback, this.stopListening.bind(this, obj));
+    return this.listenTo(obj, events);
+  };
+
+  // Reduces the event callbacks into a map of `{event: onceWrapper}`.
+  // `offer` unbinds the `onceWrapper` after it has been called.
+  var onceMap = function(map, name, callback, offer) {
+    if (callback) {
+      var once = map[name] = _.once(function() {
+        offer(name, once);
+        callback.apply(this, arguments);
+      });
+      once._callback = callback;
+    }
+    return map;
+  };
+
+  // Trigger one or many events, firing all bound callbacks. Callbacks are
+  // passed the same arguments as `trigger` is, apart from the event name
+  // (unless you're listening on `"all"`, which will cause your callback to
+  // receive the true name of the event as the first argument).
+  Events.trigger = function(name) {
+    if (!this._events) return this;
+
+    var length = Math.max(0, arguments.length - 1);
+    var args = Array(length);
+    for (var i = 0; i < length; i++) args[i] = arguments[i + 1];
+
+    eventsApi(triggerApi, this._events, name, void 0, args);
+    return this;
+  };
+
+  // Handles triggering the appropriate event callbacks.
+  var triggerApi = function(objEvents, name, callback, args) {
+    if (objEvents) {
+      var events = objEvents[name];
+      var allEvents = objEvents.all;
+      if (events && allEvents) allEvents = allEvents.slice();
+      if (events) triggerEvents(events, args);
+      if (allEvents) triggerEvents(allEvents, [name].concat(args));
+    }
+    return objEvents;
   };
 
   // A difficult-to-believe, but optimized internal dispatch function for
@@ -17102,21 +18258,43 @@ else {
     }
   };
 
-  var listenMethods = {listenTo: 'on', listenToOnce: 'once'};
+  // A listening class that tracks and cleans up memory bindings
+  // when all callbacks have been offed.
+  var Listening = function(listener, obj) {
+    this.id = listener._listenId;
+    this.listener = listener;
+    this.obj = obj;
+    this.interop = true;
+    this.count = 0;
+    this._events = void 0;
+  };
 
-  // Inversion-of-control versions of `on` and `once`. Tell *this* object to
-  // listen to an event in another object ... keeping track of what it's
-  // listening to.
-  _.each(listenMethods, function(implementation, method) {
-    Events[method] = function(obj, name, callback) {
-      var listeningTo = this._listeningTo || (this._listeningTo = {});
-      var id = obj._listenId || (obj._listenId = _.uniqueId('l'));
-      listeningTo[id] = obj;
-      if (!callback && typeof name === 'object') callback = this;
-      obj[implementation](name, callback, this);
-      return this;
-    };
-  });
+  Listening.prototype.on = Events.on;
+
+  // Offs a callback (or several).
+  // Uses an optimized counter if the listenee uses Backbone.Events.
+  // Otherwise, falls back to manual tracking to support events
+  // library interop.
+  Listening.prototype.off = function(name, callback) {
+    var cleanup;
+    if (this.interop) {
+      this._events = eventsApi(offApi, this._events, name, callback, {
+        context: void 0,
+        listeners: void 0
+      });
+      cleanup = !this._events;
+    } else {
+      this.count--;
+      cleanup = this.count === 0;
+    }
+    if (cleanup) this.cleanup();
+  };
+
+  // Cleans up memory bindings between the listener and the listenee.
+  Listening.prototype.cleanup = function() {
+    delete this.listener._listeningTo[this.obj._listenId];
+    if (!this.interop) delete this.obj._listeners[this.id];
+  };
 
   // Aliases for backwards compatibility.
   Events.bind   = Events.on;
@@ -17139,11 +18317,13 @@ else {
   var Model = Backbone.Model = function(attributes, options) {
     var attrs = attributes || {};
     options || (options = {});
-    this.cid = _.uniqueId('c');
+    this.preinitialize.apply(this, arguments);
+    this.cid = _.uniqueId(this.cidPrefix);
     this.attributes = {};
     if (options.collection) this.collection = options.collection;
     if (options.parse) attrs = this.parse(attrs, options) || {};
-    attrs = _.defaults({}, attrs, _.result(this, 'defaults'));
+    var defaults = _.result(this, 'defaults');
+    attrs = _.defaults(_.extend({}, defaults, attrs), defaults);
     this.set(attrs, options);
     this.changed = {};
     this.initialize.apply(this, arguments);
@@ -17161,6 +18341,14 @@ else {
     // The default name for the JSON `id` attribute is `"id"`. MongoDB and
     // CouchDB users may want to set this to `"_id"`.
     idAttribute: 'id',
+
+    // The prefix is used to create the client id which is used to identify models locally.
+    // You may want to override this if you're experiencing name clashes with model ids.
+    cidPrefix: 'c',
+
+    // preinitialize is an empty function by default. You can override it with a function
+    // or object.  preinitialize will run before any instantiation logic is run in the Model.
+    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -17193,14 +18381,19 @@ else {
       return this.get(attr) != null;
     },
 
+    // Special-cased proxy to underscore's `_.matches` method.
+    matches: function(attrs) {
+      return !!_.iteratee(attrs, this)(this.attributes);
+    },
+
     // Set a hash of model attributes on the object, firing `"change"`. This is
     // the core primitive operation of a model, updating the data and notifying
     // anyone who needs to know about the change in state. The heart of the beast.
     set: function(key, val, options) {
-      var attr, attrs, unset, changes, silent, changing, prev, current;
       if (key == null) return this;
 
       // Handle both `"key", value` and `{key: value}` -style arguments.
+      var attrs;
       if (typeof key === 'object') {
         attrs = key;
         options = val;
@@ -17214,37 +18407,40 @@ else {
       if (!this._validate(attrs, options)) return false;
 
       // Extract attributes and options.
-      unset           = options.unset;
-      silent          = options.silent;
-      changes         = [];
-      changing        = this._changing;
-      this._changing  = true;
+      var unset      = options.unset;
+      var silent     = options.silent;
+      var changes    = [];
+      var changing   = this._changing;
+      this._changing = true;
 
       if (!changing) {
         this._previousAttributes = _.clone(this.attributes);
         this.changed = {};
       }
-      current = this.attributes, prev = this._previousAttributes;
 
-      // Check for changes of `id`.
-      if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
+      var current = this.attributes;
+      var changed = this.changed;
+      var prev    = this._previousAttributes;
 
       // For each `set` attribute, update or delete the current value.
-      for (attr in attrs) {
+      for (var attr in attrs) {
         val = attrs[attr];
         if (!_.isEqual(current[attr], val)) changes.push(attr);
         if (!_.isEqual(prev[attr], val)) {
-          this.changed[attr] = val;
+          changed[attr] = val;
         } else {
-          delete this.changed[attr];
+          delete changed[attr];
         }
         unset ? delete current[attr] : current[attr] = val;
       }
 
+      // Update the `id`.
+      if (this.idAttribute in attrs) this.id = this.get(this.idAttribute);
+
       // Trigger all relevant attribute changes.
       if (!silent) {
         if (changes.length) this._pending = options;
-        for (var i = 0, length = changes.length; i < length; i++) {
+        for (var i = 0; i < changes.length; i++) {
           this.trigger('change:' + changes[i], this, current[changes[i]], options);
         }
       }
@@ -17292,13 +18488,16 @@ else {
     // determining if there *would be* a change.
     changedAttributes: function(diff) {
       if (!diff) return this.hasChanged() ? _.clone(this.changed) : false;
-      var val, changed = false;
       var old = this._changing ? this._previousAttributes : this.attributes;
+      var changed = {};
+      var hasChanged;
       for (var attr in diff) {
-        if (_.isEqual(old[attr], (val = diff[attr]))) continue;
-        (changed || (changed = {}))[attr] = val;
+        var val = diff[attr];
+        if (_.isEqual(old[attr], val)) continue;
+        changed[attr] = val;
+        hasChanged = true;
       }
-      return changed;
+      return hasChanged ? changed : false;
     },
 
     // Get the previous value of an attribute, recorded at the time the last
@@ -17314,17 +18513,16 @@ else {
       return _.clone(this._previousAttributes);
     },
 
-    // Fetch the model from the server. If the server's representation of the
-    // model differs from its current attributes, they will be overridden,
-    // triggering a `"change"` event.
+    // Fetch the model from the server, merging the response with the model's
+    // local attributes. Any changed attributes will trigger a "change" event.
     fetch: function(options) {
-      options = options ? _.clone(options) : {};
-      if (options.parse === void 0) options.parse = true;
+      options = _.extend({parse: true}, options);
       var model = this;
       var success = options.success;
       options.success = function(resp) {
-        if (!model.set(model.parse(resp, options), options)) return false;
-        if (success) success(model, resp, options);
+        var serverAttrs = options.parse ? model.parse(resp, options) : resp;
+        if (!model.set(serverAttrs, options)) return false;
+        if (success) success.call(options.context, model, resp, options);
         model.trigger('sync', model, resp, options);
       };
       wrapError(this, options);
@@ -17335,9 +18533,8 @@ else {
     // If the server returns an attributes hash that differs, the model's
     // state will be `set` again.
     save: function(key, val, options) {
-      var attrs, method, xhr, attributes = this.attributes;
-
       // Handle both `"key", value` and `{key: value}` -style arguments.
+      var attrs;
       if (key == null || typeof key === 'object') {
         attrs = key;
         options = val;
@@ -17345,46 +18542,43 @@ else {
         (attrs = {})[key] = val;
       }
 
-      options = _.extend({validate: true}, options);
+      options = _.extend({validate: true, parse: true}, options);
+      var wait = options.wait;
 
       // If we're not waiting and attributes exist, save acts as
       // `set(attr).save(null, opts)` with validation. Otherwise, check if
       // the model will be valid when the attributes, if any, are set.
-      if (attrs && !options.wait) {
+      if (attrs && !wait) {
         if (!this.set(attrs, options)) return false;
-      } else {
-        if (!this._validate(attrs, options)) return false;
-      }
-
-      // Set temporary attributes if `{wait: true}`.
-      if (attrs && options.wait) {
-        this.attributes = _.extend({}, attributes, attrs);
+      } else if (!this._validate(attrs, options)) {
+        return false;
       }
 
       // After a successful server-side save, the client is (optionally)
       // updated with the server-side state.
-      if (options.parse === void 0) options.parse = true;
       var model = this;
       var success = options.success;
+      var attributes = this.attributes;
       options.success = function(resp) {
         // Ensure attributes are restored during synchronous saves.
         model.attributes = attributes;
-        var serverAttrs = model.parse(resp, options);
-        if (options.wait) serverAttrs = _.extend(attrs || {}, serverAttrs);
-        if (_.isObject(serverAttrs) && !model.set(serverAttrs, options)) {
-          return false;
-        }
-        if (success) success(model, resp, options);
+        var serverAttrs = options.parse ? model.parse(resp, options) : resp;
+        if (wait) serverAttrs = _.extend({}, attrs, serverAttrs);
+        if (serverAttrs && !model.set(serverAttrs, options)) return false;
+        if (success) success.call(options.context, model, resp, options);
         model.trigger('sync', model, resp, options);
       };
       wrapError(this, options);
 
-      method = this.isNew() ? 'create' : (options.patch ? 'patch' : 'update');
-      if (method === 'patch') options.attrs = attrs;
-      xhr = this.sync(method, this, options);
+      // Set temporary attributes if `{wait: true}` to properly find new ids.
+      if (attrs && wait) this.attributes = _.extend({}, attributes, attrs);
+
+      var method = this.isNew() ? 'create' : options.patch ? 'patch' : 'update';
+      if (method === 'patch' && !options.attrs) options.attrs = attrs;
+      var xhr = this.sync(method, this, options);
 
       // Restore attributes.
-      if (attrs && options.wait) this.attributes = attributes;
+      this.attributes = attributes;
 
       return xhr;
     },
@@ -17396,25 +18590,27 @@ else {
       options = options ? _.clone(options) : {};
       var model = this;
       var success = options.success;
+      var wait = options.wait;
 
       var destroy = function() {
+        model.stopListening();
         model.trigger('destroy', model, model.collection, options);
       };
 
       options.success = function(resp) {
-        if (options.wait || model.isNew()) destroy();
-        if (success) success(model, resp, options);
+        if (wait) destroy();
+        if (success) success.call(options.context, model, resp, options);
         if (!model.isNew()) model.trigger('sync', model, resp, options);
       };
 
+      var xhr = false;
       if (this.isNew()) {
-        options.success();
-        return false;
+        _.defer(options.success);
+      } else {
+        wrapError(this, options);
+        xhr = this.sync('delete', this, options);
       }
-      wrapError(this, options);
-
-      var xhr = this.sync('delete', this, options);
-      if (!options.wait) destroy();
+      if (!wait) destroy();
       return xhr;
     },
 
@@ -17427,7 +18623,8 @@ else {
         _.result(this.collection, 'url') ||
         urlError();
       if (this.isNew()) return base;
-      return base.replace(/([^\/])$/, '$1/') + encodeURIComponent(this.id);
+      var id = this.get(this.idAttribute);
+      return base.replace(/[^\/]$/, '$&/') + encodeURIComponent(id);
     },
 
     // **parse** converts a response into the hash of attributes to be `set` on
@@ -17448,7 +18645,7 @@ else {
 
     // Check if the model is currently in a valid state.
     isValid: function(options) {
-      return this._validate({}, _.extend(options || {}, { validate: true }));
+      return this._validate({}, _.extend({}, options, {validate: true}));
     },
 
     // Run validation against the next complete set of model attributes,
@@ -17462,19 +18659,6 @@ else {
       return false;
     }
 
-  });
-
-  // Underscore methods that we want to implement on the Model.
-  var modelMethods = ['keys', 'values', 'pairs', 'invert', 'pick', 'omit'];
-
-  // Mix in each Underscore method as a proxy to `Model#attributes`.
-  _.each(modelMethods, function(method) {
-    if (!_[method]) return;
-    Model.prototype[method] = function() {
-      var args = slice.call(arguments);
-      args.unshift(this.attributes);
-      return _[method].apply(_, args);
-    };
   });
 
   // Backbone.Collection
@@ -17492,6 +18676,7 @@ else {
   // its models in sort order, as they're added and removed.
   var Collection = Backbone.Collection = function(models, options) {
     options || (options = {});
+    this.preinitialize.apply(this, arguments);
     if (options.model) this.model = options.model;
     if (options.comparator !== void 0) this.comparator = options.comparator;
     this._reset();
@@ -17503,12 +18688,28 @@ else {
   var setOptions = {add: true, remove: true, merge: true};
   var addOptions = {add: true, remove: false};
 
+  // Splices `insert` into `array` at index `at`.
+  var splice = function(array, insert, at) {
+    at = Math.min(Math.max(at, 0), array.length);
+    var tail = Array(array.length - at);
+    var length = insert.length;
+    var i;
+    for (i = 0; i < tail.length; i++) tail[i] = array[i + at];
+    for (i = 0; i < length; i++) array[i + at] = insert[i];
+    for (i = 0; i < tail.length; i++) array[i + length + at] = tail[i];
+  };
+
   // Define the Collection's inheritable methods.
   _.extend(Collection.prototype, Events, {
 
     // The default model for a collection is just a **Backbone.Model**.
     // This should be overridden in most cases.
     model: Model,
+
+
+    // preinitialize is an empty function by default. You can override it with a function
+    // or object.  preinitialize will run before any instantiation logic is run in the Collection.
+    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -17517,7 +18718,7 @@ else {
     // The JSON representation of a Collection is an array of the
     // models' attributes.
     toJSON: function(options) {
-      return this.map(function(model){ return model.toJSON(options); });
+      return this.map(function(model) { return model.toJSON(options); });
     },
 
     // Proxy `Backbone.sync` by default.
@@ -17525,31 +18726,24 @@ else {
       return Backbone.sync.apply(this, arguments);
     },
 
-    // Add a model, or list of models to the set.
+    // Add a model, or list of models to the set. `models` may be Backbone
+    // Models or raw JavaScript objects to be converted to Models, or any
+    // combination of the two.
     add: function(models, options) {
       return this.set(models, _.extend({merge: false}, options, addOptions));
     },
 
     // Remove a model, or a list of models from the set.
     remove: function(models, options) {
+      options = _.extend({}, options);
       var singular = !_.isArray(models);
-      models = singular ? [models] : _.clone(models);
-      options || (options = {});
-      for (var i = 0, length = models.length; i < length; i++) {
-        var model = models[i] = this.get(models[i]);
-        if (!model) continue;
-        delete this._byId[model.id];
-        delete this._byId[model.cid];
-        var index = this.indexOf(model);
-        this.models.splice(index, 1);
-        this.length--;
-        if (!options.silent) {
-          options.index = index;
-          model.trigger('remove', model, this, options);
-        }
-        this._removeReference(model, options);
+      models = singular ? [models] : models.slice();
+      var removed = this._removeModels(models, options);
+      if (!options.silent && removed.length) {
+        options.changes = {added: [], merged: [], removed: removed};
+        this.trigger('update', this, options);
       }
-      return singular ? models[0] : models;
+      return singular ? removed[0] : removed;
     },
 
     // Update a collection by `set`-ing a new list of models, adding new ones,
@@ -17557,89 +18751,114 @@ else {
     // already exist in the collection, as necessary. Similar to **Model#set**,
     // the core operation for updating the data contained by the collection.
     set: function(models, options) {
-      options = _.defaults({}, options, setOptions);
-      if (options.parse) models = this.parse(models, options);
+      if (models == null) return;
+
+      options = _.extend({}, setOptions, options);
+      if (options.parse && !this._isModel(models)) {
+        models = this.parse(models, options) || [];
+      }
+
       var singular = !_.isArray(models);
-      models = singular ? (models ? [models] : []) : models.slice();
-      var id, model, attrs, existing, sort;
+      models = singular ? [models] : models.slice();
+
       var at = options.at;
-      var sortable = this.comparator && (at == null) && options.sort !== false;
+      if (at != null) at = +at;
+      if (at > this.length) at = this.length;
+      if (at < 0) at += this.length + 1;
+
+      var set = [];
+      var toAdd = [];
+      var toMerge = [];
+      var toRemove = [];
+      var modelMap = {};
+
+      var add = options.add;
+      var merge = options.merge;
+      var remove = options.remove;
+
+      var sort = false;
+      var sortable = this.comparator && at == null && options.sort !== false;
       var sortAttr = _.isString(this.comparator) ? this.comparator : null;
-      var toAdd = [], toRemove = [], modelMap = {};
-      var add = options.add, merge = options.merge, remove = options.remove;
-      var order = !sortable && add && remove ? [] : false;
 
       // Turn bare objects into model references, and prevent invalid models
       // from being added.
-      for (var i = 0, length = models.length; i < length; i++) {
-        attrs = models[i] || {};
-        if (this._isModel(attrs)) {
-          id = model = attrs;
-        } else {
-          id = attrs[this.model.prototype.idAttribute || 'id'];
-        }
+      var model, i;
+      for (i = 0; i < models.length; i++) {
+        model = models[i];
 
         // If a duplicate is found, prevent it from being added and
         // optionally merge it into the existing model.
-        if (existing = this.get(id)) {
-          if (remove) modelMap[existing.cid] = true;
-          if (merge) {
-            attrs = attrs === model ? model.attributes : attrs;
+        var existing = this.get(model);
+        if (existing) {
+          if (merge && model !== existing) {
+            var attrs = this._isModel(model) ? model.attributes : model;
             if (options.parse) attrs = existing.parse(attrs, options);
             existing.set(attrs, options);
-            if (sortable && !sort && existing.hasChanged(sortAttr)) sort = true;
+            toMerge.push(existing);
+            if (sortable && !sort) sort = existing.hasChanged(sortAttr);
+          }
+          if (!modelMap[existing.cid]) {
+            modelMap[existing.cid] = true;
+            set.push(existing);
           }
           models[i] = existing;
 
         // If this is a new, valid model, push it to the `toAdd` list.
         } else if (add) {
-          model = models[i] = this._prepareModel(attrs, options);
-          if (!model) continue;
-          toAdd.push(model);
-          this._addReference(model, options);
+          model = models[i] = this._prepareModel(model, options);
+          if (model) {
+            toAdd.push(model);
+            this._addReference(model, options);
+            modelMap[model.cid] = true;
+            set.push(model);
+          }
         }
-
-        // Do not add multiple models with the same `id`.
-        model = existing || model;
-        if (!model) continue;
-        if (order && (model.isNew() || !modelMap[model.id])) order.push(model);
-        modelMap[model.id] = true;
       }
 
-      // Remove nonexistent models if appropriate.
+      // Remove stale models.
       if (remove) {
-        for (var i = 0, length = this.length; i < length; i++) {
-          if (!modelMap[(model = this.models[i]).cid]) toRemove.push(model);
+        for (i = 0; i < this.length; i++) {
+          model = this.models[i];
+          if (!modelMap[model.cid]) toRemove.push(model);
         }
-        if (toRemove.length) this.remove(toRemove, options);
+        if (toRemove.length) this._removeModels(toRemove, options);
       }
 
       // See if sorting is needed, update `length` and splice in new models.
-      if (toAdd.length || (order && order.length)) {
+      var orderChanged = false;
+      var replace = !sortable && add && remove;
+      if (set.length && replace) {
+        orderChanged = this.length !== set.length || _.some(this.models, function(m, index) {
+          return m !== set[index];
+        });
+        this.models.length = 0;
+        splice(this.models, set, 0);
+        this.length = this.models.length;
+      } else if (toAdd.length) {
         if (sortable) sort = true;
-        this.length += toAdd.length;
-        if (at != null) {
-          for (var i = 0, length = toAdd.length; i < length; i++) {
-            this.models.splice(at + i, 0, toAdd[i]);
-          }
-        } else {
-          if (order) this.models.length = 0;
-          var orderedModels = order || toAdd;
-          for (var i = 0, length = orderedModels.length; i < length; i++) {
-            this.models.push(orderedModels[i]);
-          }
-        }
+        splice(this.models, toAdd, at == null ? this.length : at);
+        this.length = this.models.length;
       }
 
       // Silently sort the collection if appropriate.
       if (sort) this.sort({silent: true});
 
-      // Unless silenced, it's time to fire all appropriate add/sort events.
+      // Unless silenced, it's time to fire all appropriate add/sort/update events.
       if (!options.silent) {
-        for (var i = 0, length = toAdd.length; i < length; i++) {
-          (model = toAdd[i]).trigger('add', model, this, options);
+        for (i = 0; i < toAdd.length; i++) {
+          if (at != null) options.index = at + i;
+          model = toAdd[i];
+          model.trigger('add', model, this, options);
         }
-        if (sort || (order && order.length)) this.trigger('sort', this, options);
+        if (sort || orderChanged) this.trigger('sort', this, options);
+        if (toAdd.length || toRemove.length || toMerge.length) {
+          options.changes = {
+            added: toAdd,
+            removed: toRemove,
+            merged: toMerge
+          };
+          this.trigger('update', this, options);
+        }
       }
 
       // Return the added (or merged) model (or models).
@@ -17651,8 +18870,8 @@ else {
     // any granular `add` or `remove` events. Fires `reset` when finished.
     // Useful for bulk operations and optimizations.
     reset: function(models, options) {
-      options || (options = {});
-      for (var i = 0, length = this.models.length; i < length; i++) {
+      options = options ? _.clone(options) : {};
+      for (var i = 0; i < this.models.length; i++) {
         this._removeReference(this.models[i], options);
       }
       options.previousModels = this.models;
@@ -17670,8 +18889,7 @@ else {
     // Remove a model from the end of the collection.
     pop: function(options) {
       var model = this.at(this.length - 1);
-      this.remove(model, options);
-      return model;
+      return this.remove(model, options);
     },
 
     // Add a model to the beginning of the collection.
@@ -17682,8 +18900,7 @@ else {
     // Remove a model from the beginning of the collection.
     shift: function(options) {
       var model = this.at(0);
-      this.remove(model, options);
-      return model;
+      return this.remove(model, options);
     },
 
     // Slice out a sub-array of models from the collection.
@@ -17691,27 +18908,30 @@ else {
       return slice.apply(this.models, arguments);
     },
 
-    // Get a model from the set by id.
+    // Get a model from the set by id, cid, model object with id or cid
+    // properties, or an attributes object that is transformed through modelId.
     get: function(obj) {
       if (obj == null) return void 0;
-      return this._byId[obj] || this._byId[obj.id] || this._byId[obj.cid];
+      return this._byId[obj] ||
+        this._byId[this.modelId(this._isModel(obj) ? obj.attributes : obj)] ||
+        obj.cid && this._byId[obj.cid];
+    },
+
+    // Returns `true` if the model is in the collection.
+    has: function(obj) {
+      return this.get(obj) != null;
     },
 
     // Get the model at the given index.
     at: function(index) {
+      if (index < 0) index += this.length;
       return this.models[index];
     },
 
     // Return models with matching attributes. Useful for simple cases of
     // `filter`.
     where: function(attrs, first) {
-      if (_.isEmpty(attrs)) return first ? void 0 : [];
-      return this[first ? 'find' : 'filter'](function(model) {
-        for (var key in attrs) {
-          if (attrs[key] !== model.get(key)) return false;
-        }
-        return true;
-      });
+      return this[first ? 'find' : 'filter'](attrs);
     },
 
     // Return the first model with matching attributes. Useful for simple cases
@@ -17724,37 +18944,39 @@ else {
     // normal circumstances, as the set will maintain sort order as each item
     // is added.
     sort: function(options) {
-      if (!this.comparator) throw new Error('Cannot sort a set without a comparator');
+      var comparator = this.comparator;
+      if (!comparator) throw new Error('Cannot sort a set without a comparator');
       options || (options = {});
 
-      // Run sort based on type of `comparator`.
-      if (_.isString(this.comparator) || this.comparator.length === 1) {
-        this.models = this.sortBy(this.comparator, this);
-      } else {
-        this.models.sort(_.bind(this.comparator, this));
-      }
+      var length = comparator.length;
+      if (_.isFunction(comparator)) comparator = comparator.bind(this);
 
+      // Run sort based on type of `comparator`.
+      if (length === 1 || _.isString(comparator)) {
+        this.models = this.sortBy(comparator);
+      } else {
+        this.models.sort(comparator);
+      }
       if (!options.silent) this.trigger('sort', this, options);
       return this;
     },
 
     // Pluck an attribute from each model in the collection.
     pluck: function(attr) {
-      return _.invoke(this.models, 'get', attr);
+      return this.map(attr + '');
     },
 
     // Fetch the default set of models for this collection, resetting the
     // collection when they arrive. If `reset: true` is passed, the response
     // data will be passed through the `reset` method instead of `set`.
     fetch: function(options) {
-      options = options ? _.clone(options) : {};
-      if (options.parse === void 0) options.parse = true;
+      options = _.extend({parse: true}, options);
       var success = options.success;
       var collection = this;
       options.success = function(resp) {
         var method = options.reset ? 'reset' : 'set';
         collection[method](resp, options);
-        if (success) success(collection, resp, options);
+        if (success) success.call(options.context, collection, resp, options);
         collection.trigger('sync', collection, resp, options);
       };
       wrapError(this, options);
@@ -17766,13 +18988,15 @@ else {
     // wait for the server to agree.
     create: function(model, options) {
       options = options ? _.clone(options) : {};
-      if (!(model = this._prepareModel(model, options))) return false;
-      if (!options.wait) this.add(model, options);
+      var wait = options.wait;
+      model = this._prepareModel(model, options);
+      if (!model) return false;
+      if (!wait) this.add(model, options);
       var collection = this;
       var success = options.success;
-      options.success = function(model, resp) {
-        if (options.wait) collection.add(model, options);
-        if (success) success(model, resp, options);
+      options.success = function(m, resp, callbackOpts) {
+        if (wait) collection.add(m, callbackOpts);
+        if (success) success.call(callbackOpts.context, m, resp, callbackOpts);
       };
       model.save(null, options);
       return model;
@@ -17790,6 +19014,26 @@ else {
         model: this.model,
         comparator: this.comparator
       });
+    },
+
+    // Define how to uniquely identify models in the collection.
+    modelId: function(attrs) {
+      return attrs[this.model.prototype.idAttribute || 'id'];
+    },
+
+    // Get an iterator of all models in this collection.
+    values: function() {
+      return new CollectionIterator(this, ITERATOR_VALUES);
+    },
+
+    // Get an iterator of all model IDs in this collection.
+    keys: function() {
+      return new CollectionIterator(this, ITERATOR_KEYS);
+    },
+
+    // Get an iterator of all [ID, model] tuples in this collection.
+    entries: function() {
+      return new CollectionIterator(this, ITERATOR_KEYSVALUES);
     },
 
     // Private method to reset all internal state. Called when the collection
@@ -17815,21 +19059,53 @@ else {
       return false;
     },
 
+    // Internal method called by both remove and set.
+    _removeModels: function(models, options) {
+      var removed = [];
+      for (var i = 0; i < models.length; i++) {
+        var model = this.get(models[i]);
+        if (!model) continue;
+
+        var index = this.indexOf(model);
+        this.models.splice(index, 1);
+        this.length--;
+
+        // Remove references before triggering 'remove' event to prevent an
+        // infinite loop. #3693
+        delete this._byId[model.cid];
+        var id = this.modelId(model.attributes);
+        if (id != null) delete this._byId[id];
+
+        if (!options.silent) {
+          options.index = index;
+          model.trigger('remove', model, this, options);
+        }
+
+        removed.push(model);
+        this._removeReference(model, options);
+      }
+      return removed;
+    },
+
     // Method for checking whether an object should be considered a model for
     // the purposes of adding to the collection.
-    _isModel: function (model) {
+    _isModel: function(model) {
       return model instanceof Model;
     },
 
     // Internal method to create a model's ties to a collection.
     _addReference: function(model, options) {
       this._byId[model.cid] = model;
-      if (model.id != null) this._byId[model.id] = model;
+      var id = this.modelId(model.attributes);
+      if (id != null) this._byId[id] = model;
       model.on('all', this._onModelEvent, this);
     },
 
     // Internal method to sever a model's ties to a collection.
     _removeReference: function(model, options) {
+      delete this._byId[model.cid];
+      var id = this.modelId(model.attributes);
+      if (id != null) delete this._byId[id];
       if (this === model.collection) delete model.collection;
       model.off('all', this._onModelEvent, this);
     },
@@ -17839,50 +19115,88 @@ else {
     // events simply proxy through. "add" and "remove" events that originate
     // in other collections are ignored.
     _onModelEvent: function(event, model, collection, options) {
-      if ((event === 'add' || event === 'remove') && collection !== this) return;
-      if (event === 'destroy') this.remove(model, options);
-      if (model && event === 'change:' + model.idAttribute) {
-        delete this._byId[model.previous(model.idAttribute)];
-        if (model.id != null) this._byId[model.id] = model;
+      if (model) {
+        if ((event === 'add' || event === 'remove') && collection !== this) return;
+        if (event === 'destroy') this.remove(model, options);
+        if (event === 'change') {
+          var prevId = this.modelId(model.previousAttributes());
+          var id = this.modelId(model.attributes);
+          if (prevId !== id) {
+            if (prevId != null) delete this._byId[prevId];
+            if (id != null) this._byId[id] = model;
+          }
+        }
       }
       this.trigger.apply(this, arguments);
     }
 
   });
 
-  // Underscore methods that we want to implement on the Collection.
-  // 90% of the core usefulness of Backbone Collections is actually implemented
-  // right here:
-  var methods = ['forEach', 'each', 'map', 'collect', 'reduce', 'foldl',
-    'inject', 'reduceRight', 'foldr', 'find', 'detect', 'filter', 'select',
-    'reject', 'every', 'all', 'some', 'any', 'include', 'contains', 'invoke',
-    'max', 'min', 'toArray', 'size', 'first', 'head', 'take', 'initial', 'rest',
-    'tail', 'drop', 'last', 'without', 'difference', 'indexOf', 'shuffle',
-    'lastIndexOf', 'isEmpty', 'chain', 'sample', 'partition'];
+  // Defining an @@iterator method implements JavaScript's Iterable protocol.
+  // In modern ES2015 browsers, this value is found at Symbol.iterator.
+  /* global Symbol */
+  var $$iterator = typeof Symbol === 'function' && Symbol.iterator;
+  if ($$iterator) {
+    Collection.prototype[$$iterator] = Collection.prototype.values;
+  }
 
-  // Mix in each Underscore method as a proxy to `Collection#models`.
-  _.each(methods, function(method) {
-    if (!_[method]) return;
-    Collection.prototype[method] = function() {
-      var args = slice.call(arguments);
-      args.unshift(this.models);
-      return _[method].apply(_, args);
+  // CollectionIterator
+  // ------------------
+
+  // A CollectionIterator implements JavaScript's Iterator protocol, allowing the
+  // use of `for of` loops in modern browsers and interoperation between
+  // Backbone.Collection and other JavaScript functions and third-party libraries
+  // which can operate on Iterables.
+  var CollectionIterator = function(collection, kind) {
+    this._collection = collection;
+    this._kind = kind;
+    this._index = 0;
+  };
+
+  // This "enum" defines the three possible kinds of values which can be emitted
+  // by a CollectionIterator that correspond to the values(), keys() and entries()
+  // methods on Collection, respectively.
+  var ITERATOR_VALUES = 1;
+  var ITERATOR_KEYS = 2;
+  var ITERATOR_KEYSVALUES = 3;
+
+  // All Iterators should themselves be Iterable.
+  if ($$iterator) {
+    CollectionIterator.prototype[$$iterator] = function() {
+      return this;
     };
-  });
+  }
 
-  // Underscore methods that take a property name as an argument.
-  var attributeMethods = ['groupBy', 'countBy', 'sortBy', 'indexBy'];
+  CollectionIterator.prototype.next = function() {
+    if (this._collection) {
 
-  // Use attributes instead of properties.
-  _.each(attributeMethods, function(method) {
-    if (!_[method]) return;
-    Collection.prototype[method] = function(value, context) {
-      var iterator = _.isFunction(value) ? value : function(model) {
-        return model.get(value);
-      };
-      return _[method](this.models, iterator, context);
-    };
-  });
+      // Only continue iterating if the iterated collection is long enough.
+      if (this._index < this._collection.length) {
+        var model = this._collection.at(this._index);
+        this._index++;
+
+        // Construct a value depending on what kind of values should be iterated.
+        var value;
+        if (this._kind === ITERATOR_VALUES) {
+          value = model;
+        } else {
+          var id = this._collection.modelId(model.attributes);
+          if (this._kind === ITERATOR_KEYS) {
+            value = id;
+          } else { // ITERATOR_KEYSVALUES
+            value = [id, model];
+          }
+        }
+        return {value: value, done: false};
+      }
+
+      // Once exhausted, remove the reference to the collection so future
+      // calls to the next method always return done.
+      this._collection = void 0;
+    }
+
+    return {value: void 0, done: true};
+  };
 
   // Backbone.View
   // -------------
@@ -17899,7 +19213,7 @@ else {
   // if an existing element is not provided...
   var View = Backbone.View = function(options) {
     this.cid = _.uniqueId('view');
-    options || (options = {});
+    this.preinitialize.apply(this, arguments);
     _.extend(this, _.pick(options, viewOptions));
     this._ensureElement();
     this.initialize.apply(this, arguments);
@@ -17908,7 +19222,7 @@ else {
   // Cached regex to split keys for `delegate`.
   var delegateEventSplitter = /^(\S+)\s*(.*)$/;
 
-  // List of view options to be merged as properties.
+  // List of view options to be set as properties.
   var viewOptions = ['model', 'collection', 'el', 'id', 'attributes', 'className', 'tagName', 'events'];
 
   // Set up all inheritable **Backbone.View** properties and methods.
@@ -17922,6 +19236,10 @@ else {
     $: function(selector) {
       return this.$el.find(selector);
     },
+
+    // preinitialize is an empty function by default. You can override it with a function
+    // or object.  preinitialize will run before any instantiation logic is run in the View
+    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -17959,10 +19277,10 @@ else {
     },
 
     // Creates the `this.el` and `this.$el` references for this view using the
-    // given `el` and a hash of `attributes`. `el` can be a CSS selector or an
-    // HTML string, a jQuery context or an element. Subclasses can override
-    // this to utilize an alternative DOM manipulation API and are only required
-    // to set the `this.el` property.
+    // given `el`. `el` can be a CSS selector or an HTML string, a jQuery
+    // context or an element. Subclasses can override this to utilize an
+    // alternative DOM manipulation API and are only required to set the
+    // `this.el` property.
     _setElement: function(el) {
       this.$el = el instanceof Backbone.$ ? el : Backbone.$(el);
       this.el = this.$el[0];
@@ -17982,14 +19300,15 @@ else {
     // Uses event delegation for efficiency.
     // Omitting the selector binds the event to `this.el`.
     delegateEvents: function(events) {
-      if (!(events || (events = _.result(this, 'events')))) return this;
+      events || (events = _.result(this, 'events'));
+      if (!events) return this;
       this.undelegateEvents();
       for (var key in events) {
         var method = events[key];
-        if (!_.isFunction(method)) method = this[events[key]];
+        if (!_.isFunction(method)) method = this[method];
         if (!method) continue;
         var match = key.match(delegateEventSplitter);
-        this.delegate(match[1], match[2], _.bind(method, this));
+        this.delegate(match[1], match[2], method.bind(this));
       }
       return this;
     },
@@ -17999,6 +19318,7 @@ else {
     // `blur`, and not `change`, `submit`, and `reset` in Internet Explorer.
     delegate: function(eventName, selector, listener) {
       this.$el.on(eventName + '.delegateEvents' + this.cid, selector, listener);
+      return this;
     },
 
     // Clears all callbacks previously bound to the view by `delegateEvents`.
@@ -18013,6 +19333,7 @@ else {
     // `selector` and `listener` are both optional.
     undelegate: function(eventName, selector, listener) {
       this.$el.off(eventName + '.delegateEvents' + this.cid, selector, listener);
+      return this;
     },
 
     // Produces a DOM element to be assigned to your view. Exposed for
@@ -18043,6 +19364,94 @@ else {
       this.$el.attr(attributes);
     }
 
+  });
+
+  // Proxy Backbone class methods to Underscore functions, wrapping the model's
+  // `attributes` object or collection's `models` array behind the scenes.
+  //
+  // collection.filter(function(model) { return model.get('age') > 10 });
+  // collection.each(this.addView);
+  //
+  // `Function#apply` can be slow so we use the method's arg count, if we know it.
+  var addMethod = function(base, length, method, attribute) {
+    switch (length) {
+      case 1: return function() {
+        return base[method](this[attribute]);
+      };
+      case 2: return function(value) {
+        return base[method](this[attribute], value);
+      };
+      case 3: return function(iteratee, context) {
+        return base[method](this[attribute], cb(iteratee, this), context);
+      };
+      case 4: return function(iteratee, defaultVal, context) {
+        return base[method](this[attribute], cb(iteratee, this), defaultVal, context);
+      };
+      default: return function() {
+        var args = slice.call(arguments);
+        args.unshift(this[attribute]);
+        return base[method].apply(base, args);
+      };
+    }
+  };
+
+  var addUnderscoreMethods = function(Class, base, methods, attribute) {
+    _.each(methods, function(length, method) {
+      if (base[method]) Class.prototype[method] = addMethod(base, length, method, attribute);
+    });
+  };
+
+  // Support `collection.sortBy('attr')` and `collection.findWhere({id: 1})`.
+  var cb = function(iteratee, instance) {
+    if (_.isFunction(iteratee)) return iteratee;
+    if (_.isObject(iteratee) && !instance._isModel(iteratee)) return modelMatcher(iteratee);
+    if (_.isString(iteratee)) return function(model) { return model.get(iteratee); };
+    return iteratee;
+  };
+  var modelMatcher = function(attrs) {
+    var matcher = _.matches(attrs);
+    return function(model) {
+      return matcher(model.attributes);
+    };
+  };
+
+  // Underscore methods that we want to implement on the Collection.
+  // 90% of the core usefulness of Backbone Collections is actually implemented
+  // right here:
+  var collectionMethods = {forEach: 3, each: 3, map: 3, collect: 3, reduce: 0,
+    foldl: 0, inject: 0, reduceRight: 0, foldr: 0, find: 3, detect: 3, filter: 3,
+    select: 3, reject: 3, every: 3, all: 3, some: 3, any: 3, include: 3, includes: 3,
+    contains: 3, invoke: 0, max: 3, min: 3, toArray: 1, size: 1, first: 3,
+    head: 3, take: 3, initial: 3, rest: 3, tail: 3, drop: 3, last: 3,
+    without: 0, difference: 0, indexOf: 3, shuffle: 1, lastIndexOf: 3,
+    isEmpty: 1, chain: 1, sample: 3, partition: 3, groupBy: 3, countBy: 3,
+    sortBy: 3, indexBy: 3, findIndex: 3, findLastIndex: 3};
+
+
+  // Underscore methods that we want to implement on the Model, mapped to the
+  // number of arguments they take.
+  var modelMethods = {keys: 1, values: 1, pairs: 1, invert: 1, pick: 0,
+    omit: 0, chain: 1, isEmpty: 1};
+
+  // Mix in each Underscore method as a proxy to `Collection#models`.
+
+  _.each([
+    [Collection, collectionMethods, 'models'],
+    [Model, modelMethods, 'attributes']
+  ], function(config) {
+    var Base = config[0],
+        methods = config[1],
+        attribute = config[2];
+
+    Base.mixin = function(obj) {
+      var mappings = _.reduce(_.functions(obj), function(memo, name) {
+        memo[name] = 0;
+        return memo;
+      }, {});
+      addUnderscoreMethods(Base, obj, mappings, attribute);
+    };
+
+    addUnderscoreMethods(Base, _, methods, attribute);
   });
 
   // Backbone.sync
@@ -18109,21 +19518,12 @@ else {
       params.processData = false;
     }
 
-    // If we're sending a `PATCH` request, and we're in an old Internet Explorer
-    // that still has ActiveX enabled by default, override jQuery to use that
-    // for XHR instead. Remove this line when jQuery supports `PATCH` on IE8.
-    if (params.type === 'PATCH' && noXhrPatch) {
-      params.xhr = function() {
-        return new ActiveXObject("Microsoft.XMLHTTP");
-      };
-    }
-
     // Pass along `textStatus` and `errorThrown` from jQuery.
     var error = options.error;
     options.error = function(xhr, textStatus, errorThrown) {
       options.textStatus = textStatus;
       options.errorThrown = errorThrown;
-      if (error) error.apply(this, arguments);
+      if (error) error.call(options.context, xhr, textStatus, errorThrown);
     };
 
     // Make the request, allowing the user to override any Ajax options.
@@ -18132,17 +19532,13 @@ else {
     return xhr;
   };
 
-  var noXhrPatch =
-    typeof window !== 'undefined' && !!window.ActiveXObject &&
-      !(window.XMLHttpRequest && (new XMLHttpRequest).dispatchEvent);
-
   // Map from CRUD to HTTP for our default `Backbone.sync` implementation.
   var methodMap = {
-    'create': 'POST',
-    'update': 'PUT',
-    'patch':  'PATCH',
-    'delete': 'DELETE',
-    'read':   'GET'
+    create: 'POST',
+    update: 'PUT',
+    patch: 'PATCH',
+    delete: 'DELETE',
+    read: 'GET'
   };
 
   // Set the default implementation of `Backbone.ajax` to proxy through to `$`.
@@ -18158,6 +19554,7 @@ else {
   // matched. Creating a new one sets its `routes` hash, if not set statically.
   var Router = Backbone.Router = function(options) {
     options || (options = {});
+    this.preinitialize.apply(this, arguments);
     if (options.routes) this.routes = options.routes;
     this._bindRoutes();
     this.initialize.apply(this, arguments);
@@ -18172,6 +19569,10 @@ else {
 
   // Set up all inheritable **Backbone.Router** properties and methods.
   _.extend(Router.prototype, Events, {
+
+    // preinitialize is an empty function by default. You can override it with a function
+    // or object.  preinitialize will run before any instantiation logic is run in the Router.
+    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -18230,11 +19631,11 @@ else {
     // against the current location hash.
     _routeToRegExp: function(route) {
       route = route.replace(escapeRegExp, '\\$&')
-                   .replace(optionalParam, '(?:$1)?')
-                   .replace(namedParam, function(match, optional) {
-                     return optional ? match : '([^/?]+)';
-                   })
-                   .replace(splatParam, '([^?]*?)');
+        .replace(optionalParam, '(?:$1)?')
+        .replace(namedParam, function(match, optional) {
+          return optional ? match : '([^/?]+)';
+        })
+        .replace(splatParam, '([^?]*?)');
       return new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$');
     },
 
@@ -18262,7 +19663,7 @@ else {
   // falls back to polling.
   var History = Backbone.History = function() {
     this.handlers = [];
-    _.bindAll(this, 'checkUrl');
+    this.checkUrl = this.checkUrl.bind(this);
 
     // Ensure that `History` can be used outside of the browser.
     if (typeof window !== 'undefined') {
@@ -18293,7 +19694,28 @@ else {
     // Are we at the app root?
     atRoot: function() {
       var path = this.location.pathname.replace(/[^\/]$/, '$&/');
-      return path === this.root && !this.location.search;
+      return path === this.root && !this.getSearch();
+    },
+
+    // Does the pathname match the root?
+    matchRoot: function() {
+      var path = this.decodeFragment(this.location.pathname);
+      var rootPath = path.slice(0, this.root.length - 1) + '/';
+      return rootPath === this.root;
+    },
+
+    // Unicode characters in `location.pathname` are percent encoded so they're
+    // decoded for comparison. `%25` should not be decoded since it may be part
+    // of an encoded parameter.
+    decodeFragment: function(fragment) {
+      return decodeURI(fragment.replace(/%25/g, '%2525'));
+    },
+
+    // In IE6, the hash fragment and search params are incorrect if the
+    // fragment contains `?`.
+    getSearch: function() {
+      var match = this.location.href.replace(/#.*/, '').match(/\?.+/);
+      return match ? match[0] : '';
     },
 
     // Gets the true hash value. Cannot use location.hash directly due to bug
@@ -18305,16 +19727,16 @@ else {
 
     // Get the pathname and search params, without the root.
     getPath: function() {
-      var path = decodeURI(this.location.pathname + this.location.search);
-      var root = this.root.slice(0, -1);
-      if (!path.indexOf(root)) path = path.slice(root.length);
-      return path.slice(1);
+      var path = this.decodeFragment(
+        this.location.pathname + this.getSearch()
+      ).slice(this.root.length - 1);
+      return path.charAt(0) === '/' ? path.slice(1) : path;
     },
 
     // Get the cross-browser normalized URL fragment from the path or hash.
     getFragment: function(fragment) {
       if (fragment == null) {
-        if (this._hasPushState || !this._wantsHashChange) {
+        if (this._usePushState || !this._wantsHashChange) {
           fragment = this.getPath();
         } else {
           fragment = this.getHash();
@@ -18326,7 +19748,7 @@ else {
     // Start the hash change handling, returning `true` if the current URL matches
     // an existing route, and `false` otherwise.
     start: function(options) {
-      if (History.started) throw new Error("Backbone.history has already been started");
+      if (History.started) throw new Error('Backbone.history has already been started');
       History.started = true;
 
       // Figure out the initial configuration. Do we need an iframe?
@@ -18334,42 +19756,15 @@ else {
       this.options          = _.extend({root: '/'}, this.options, options);
       this.root             = this.options.root;
       this._wantsHashChange = this.options.hashChange !== false;
-      this._hasHashChange   = 'onhashchange' in window;
+      this._hasHashChange   = 'onhashchange' in window && (document.documentMode === void 0 || document.documentMode > 7);
+      this._useHashChange   = this._wantsHashChange && this._hasHashChange;
       this._wantsPushState  = !!this.options.pushState;
-      this._hasPushState    = !!(this.options.pushState && this.history && this.history.pushState);
+      this._hasPushState    = !!(this.history && this.history.pushState);
+      this._usePushState    = this._wantsPushState && this._hasPushState;
       this.fragment         = this.getFragment();
-      
-      // Add a cross-platform `addEventListener` shim for older browsers.
-      var addEventListener = window.addEventListener || function (eventName, listener) {
-        return attachEvent('on' + eventName, listener);
-      };
 
       // Normalize root to always include a leading and trailing slash.
       this.root = ('/' + this.root + '/').replace(rootStripper, '/');
-
-      // Proxy an iframe to handle location events if the browser doesn't
-      // support the `hashchange` event, HTML5 history, or the user wants
-      // `hashChange` but not `pushState`.
-      if (!this._hasHashChange && this._wantsHashChange && (!this._wantsPushState || !this._hasPushState)) {
-        var iframe = document.createElement('iframe');
-        iframe.src = 'javascript:0';
-        iframe.style.display = 'none';
-        iframe.tabIndex = -1;
-        var body = document.body;
-        // Using `appendChild` will throw on IE < 9 if the document is not ready.
-        this.iframe = body.insertBefore(iframe, body.firstChild).contentWindow;
-        this.navigate(this.fragment);
-      }
-
-      // Depending on whether we're using pushState or hashes, and whether
-      // 'onhashchange' is supported, determine how we check the URL state.
-      if (this._hasPushState) {
-        addEventListener('popstate', this.checkUrl, false);
-      } else if (this._wantsHashChange && this._hasHashChange && !this.iframe) {
-        addEventListener('hashchange', this.checkUrl, false);
-      } else if (this._wantsHashChange) {
-        this._checkUrlInterval = setInterval(this.checkUrl, this.interval);
-      }
 
       // Transition from hashChange to pushState or vice versa if both are
       // requested.
@@ -18378,7 +19773,8 @@ else {
         // If we've started off with a route from a `pushState`-enabled
         // browser, but we're currently in a browser that doesn't support it...
         if (!this._hasPushState && !this.atRoot()) {
-          this.location.replace(this.root + '#' + this.getPath());
+          var rootPath = this.root.slice(0, -1) || '/';
+          this.location.replace(rootPath + '#' + this.getPath());
           // Return immediately as browser will do redirect to new url
           return true;
 
@@ -18390,6 +19786,37 @@ else {
 
       }
 
+      // Proxy an iframe to handle location events if the browser doesn't
+      // support the `hashchange` event, HTML5 history, or the user wants
+      // `hashChange` but not `pushState`.
+      if (!this._hasHashChange && this._wantsHashChange && !this._usePushState) {
+        this.iframe = document.createElement('iframe');
+        this.iframe.src = 'javascript:0';
+        this.iframe.style.display = 'none';
+        this.iframe.tabIndex = -1;
+        var body = document.body;
+        // Using `appendChild` will throw on IE < 9 if the document is not ready.
+        var iWindow = body.insertBefore(this.iframe, body.firstChild).contentWindow;
+        iWindow.document.open();
+        iWindow.document.close();
+        iWindow.location.hash = '#' + this.fragment;
+      }
+
+      // Add a cross-platform `addEventListener` shim for older browsers.
+      var addEventListener = window.addEventListener || function(eventName, listener) {
+        return attachEvent('on' + eventName, listener);
+      };
+
+      // Depending on whether we're using pushState or hashes, and whether
+      // 'onhashchange' is supported, determine how we check the URL state.
+      if (this._usePushState) {
+        addEventListener('popstate', this.checkUrl, false);
+      } else if (this._useHashChange && !this.iframe) {
+        addEventListener('hashchange', this.checkUrl, false);
+      } else if (this._wantsHashChange) {
+        this._checkUrlInterval = setInterval(this.checkUrl, this.interval);
+      }
+
       if (!this.options.silent) return this.loadUrl();
     },
 
@@ -18397,20 +19824,20 @@ else {
     // but possibly useful for unit testing Routers.
     stop: function() {
       // Add a cross-platform `removeEventListener` shim for older browsers.
-      var removeEventListener = window.removeEventListener || function (eventName, listener) {
+      var removeEventListener = window.removeEventListener || function(eventName, listener) {
         return detachEvent('on' + eventName, listener);
       };
 
       // Remove window listeners.
-      if (this._hasPushState) {
+      if (this._usePushState) {
         removeEventListener('popstate', this.checkUrl, false);
-      } else if (this._wantsHashChange && this._hasHashChange && !this.iframe) {
+      } else if (this._useHashChange && !this.iframe) {
         removeEventListener('hashchange', this.checkUrl, false);
       }
 
       // Clean up the iframe if necessary.
       if (this.iframe) {
-        document.body.removeChild(this.iframe.frameElement);
+        document.body.removeChild(this.iframe);
         this.iframe = null;
       }
 
@@ -18429,9 +19856,13 @@ else {
     // calls `loadUrl`, normalizing across the hidden iframe.
     checkUrl: function(e) {
       var current = this.getFragment();
+
+      // If the user pressed the back button, the iframe's hash will have
+      // changed and we should use that for comparison.
       if (current === this.fragment && this.iframe) {
-        current = this.getHash(this.iframe);
+        current = this.getHash(this.iframe.contentWindow);
       }
+
       if (current === this.fragment) return false;
       if (this.iframe) this.navigate(current);
       this.loadUrl();
@@ -18441,8 +19872,10 @@ else {
     // match, returns `true`. If no defined routes matches the fragment,
     // returns `false`.
     loadUrl: function(fragment) {
+      // If the root doesn't match, no routes can match either.
+      if (!this.matchRoot()) return false;
       fragment = this.fragment = this.getFragment(fragment);
-      return _.any(this.handlers, function(handler) {
+      return _.some(this.handlers, function(handler) {
         if (handler.route.test(fragment)) {
           handler.callback(fragment);
           return true;
@@ -18461,31 +19894,45 @@ else {
       if (!History.started) return false;
       if (!options || options === true) options = {trigger: !!options};
 
-      var url = this.root + (fragment = this.getFragment(fragment || ''));
-
-      // Strip the hash and decode for matching.
-      fragment = decodeURI(fragment.replace(pathStripper, ''));
-
-      if (this.fragment === fragment) return;
-      this.fragment = fragment;
+      // Normalize the fragment.
+      fragment = this.getFragment(fragment || '');
 
       // Don't include a trailing slash on the root.
-      if (fragment === '' && url !== '/') url = url.slice(0, -1);
+      var rootPath = this.root;
+      if (fragment === '' || fragment.charAt(0) === '?') {
+        rootPath = rootPath.slice(0, -1) || '/';
+      }
+      var url = rootPath + fragment;
+
+      // Strip the fragment of the query and hash for matching.
+      fragment = fragment.replace(pathStripper, '');
+
+      // Decode for matching.
+      var decodedFragment = this.decodeFragment(fragment);
+
+      if (this.fragment === decodedFragment) return;
+      this.fragment = decodedFragment;
 
       // If pushState is available, we use it to set the fragment as a real URL.
-      if (this._hasPushState) {
+      if (this._usePushState) {
         this.history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
 
       // If hash changes haven't been explicitly disabled, update the hash
       // fragment to store history.
       } else if (this._wantsHashChange) {
         this._updateHash(this.location, fragment, options.replace);
-        if (this.iframe && (fragment !== this.getHash(this.iframe))) {
+        if (this.iframe && fragment !== this.getHash(this.iframe.contentWindow)) {
+          var iWindow = this.iframe.contentWindow;
+
           // Opening and closing the iframe tricks IE7 and earlier to push a
           // history entry on hash-tag change.  When replace is true, we don't
           // want this.
-          if(!options.replace) this.iframe.document.open().close();
-          this._updateHash(this.iframe.location, fragment, options.replace);
+          if (!options.replace) {
+            iWindow.document.open();
+            iWindow.document.close();
+          }
+
+          this._updateHash(iWindow.location, fragment, options.replace);
         }
 
       // If you've told us that you explicitly don't want fallback hashchange-
@@ -18516,7 +19963,7 @@ else {
   // Helpers
   // -------
 
-  // Helper function to correctly set up the prototype chain, for subclasses.
+  // Helper function to correctly set up the prototype chain for subclasses.
   // Similar to `goog.inherits`, but uses a hash of prototype properties and
   // class properties to be extended.
   var extend = function(protoProps, staticProps) {
@@ -18525,7 +19972,7 @@ else {
 
     // The constructor function for the new subclass is either defined by you
     // (the "constructor" property in your `extend` definition), or defaulted
-    // by us to simply call the parent's constructor.
+    // by us to simply call the parent constructor.
     if (protoProps && _.has(protoProps, 'constructor')) {
       child = protoProps.constructor;
     } else {
@@ -18536,14 +19983,9 @@ else {
     _.extend(child, parent, staticProps);
 
     // Set the prototype chain to inherit from `parent`, without calling
-    // `parent`'s constructor function.
-    var Surrogate = function(){ this.constructor = child; };
-    Surrogate.prototype = parent.prototype;
-    child.prototype = new Surrogate;
-
-    // Add prototype properties (instance properties) to the subclass,
-    // if supplied.
-    if (protoProps) _.extend(child.prototype, protoProps);
+    // `parent`'s constructor function and add the prototype properties.
+    child.prototype = _.create(parent.prototype, protoProps);
+    child.prototype.constructor = child;
 
     // Set a convenience property in case the parent's prototype is needed
     // later.
@@ -18564,2374 +20006,3439 @@ else {
   var wrapError = function(model, options) {
     var error = options.error;
     options.error = function(resp) {
-      if (error) error(model, resp, options);
+      if (error) error.call(options.context, model, resp, options);
       model.trigger('error', model, resp, options);
     };
   };
 
   return Backbone;
+});/**
+* @license
+* MarionetteJS (Backbone.Marionette)
+* ----------------------------------
+* v4.1.2
+*
+* Copyright (c)2019 Derick Bailey, Muted Solutions, LLC.
+* Distributed under MIT license
+*
+* http://marionettejs.com
+*/
 
-}));// MarionetteJS (Backbone.Marionette)
-// ----------------------------------
-// v1.0.2
-//
-// Copyright (c)2013 Derick Bailey, Muted Solutions, LLC.
-// Distributed under MIT license
-//
-// http://marionettejs.com
 
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('backbone'), require('underscore'), require('backbone.radio')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'backbone', 'underscore', 'backbone.radio'], factory) :
+  (global = global || self, (function () {
+    var current = global.Marionette;
+    var exports = global.Marionette = {};
+    factory(exports, global.Backbone, global._, global.Backbone.Radio);
+    exports.noConflict = function () { global.Marionette = current; return exports; };
+  }()));
+}(this, function (exports, Backbone, _, Radio) { 'use strict';
 
+  Backbone = Backbone && Backbone.hasOwnProperty('default') ? Backbone['default'] : Backbone;
+  _ = _ && _.hasOwnProperty('default') ? _['default'] : _;
+  Radio = Radio && Radio.hasOwnProperty('default') ? Radio['default'] : Radio;
 
-/*!
- * Includes BabySitter
- * https://github.com/marionettejs/backbone.babysitter/
- *
- * Includes Wreqr
- * https://github.com/marionettejs/backbone.wreqr/
- */
+  var version = "4.1.2";
 
-// Backbone.BabySitter
-// -------------------
-// v0.0.5
-//
-// Copyright (c)2013 Derick Bailey, Muted Solutions, LLC.
-// Distributed under MIT license
-//
-// http://github.com/babysitterjs/backbone.babysitter
-
-// Backbone.ChildViewContainer
-// ---------------------------
-//
-// Provide a container to store, retrieve and
-// shut down child views.
-
-Backbone.ChildViewContainer = (function(Backbone, _){
-  
-  // Container Constructor
-  // ---------------------
-
-  var Container = function(initialViews){
-    this._views = {};
-    this._indexByModel = {};
-    this._indexByCollection = {};
-    this._indexByCustom = {};
-    this._updateLength();
-
-    this._addInitialViews(initialViews);
-  };
-
-  // Container Methods
-  // -----------------
-
-  _.extend(Container.prototype, {
-
-    // Add a view to this container. Stores the view
-    // by `cid` and makes it searchable by the model
-    // and/or collection of the view. Optionally specify
-    // a custom key to store an retrieve the view.
-    add: function(view, customIndex){
-      var viewCid = view.cid;
-
-      // store the view
-      this._views[viewCid] = view;
-
-      // index it by model
-      if (view.model){
-        this._indexByModel[view.model.cid] = viewCid;
+  //Internal utility for creating context style global utils
+  var proxy = function proxy(method) {
+    return function (context) {
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
       }
 
-      // index it by collection
-      if (view.collection){
-        this._indexByCollection[view.collection.cid] = viewCid;
-      }
-
-      // index by custom
-      if (customIndex){
-        this._indexByCustom[customIndex] = viewCid;
-      }
-
-      this._updateLength();
-    },
-
-    // Find a view by the model that was attached to
-    // it. Uses the model's `cid` to find it, and
-    // retrieves the view by it's `cid` from the result
-    findByModel: function(model){
-      var viewCid = this._indexByModel[model.cid];
-      return this.findByCid(viewCid);
-    },
-
-    // Find a view by the collection that was attached to
-    // it. Uses the collection's `cid` to find it, and
-    // retrieves the view by it's `cid` from the result
-    findByCollection: function(col){
-      var viewCid = this._indexByCollection[col.cid];
-      return this.findByCid(viewCid);
-    },
-
-    // Find a view by a custom indexer.
-    findByCustom: function(index){
-      var viewCid = this._indexByCustom[index];
-      return this.findByCid(viewCid);
-    },
-
-    // Find by index. This is not guaranteed to be a
-    // stable index.
-    findByIndex: function(index){
-      return _.values(this._views)[index];
-    },
-
-    // retrieve a view by it's `cid` directly
-    findByCid: function(cid){
-      return this._views[cid];
-    },
-
-    // Remove a view
-    remove: function(view){
-      var viewCid = view.cid;
-
-      // delete model index
-      if (view.model){
-        delete this._indexByModel[view.model.cid];
-      }
-
-      // delete collection index
-      if (view.collection){
-        delete this._indexByCollection[view.collection.cid];
-      }
-
-      // delete custom index
-      var cust;
-
-      for (var key in this._indexByCustom){
-        if (this._indexByCustom.hasOwnProperty(key)){
-          if (this._indexByCustom[key] === viewCid){
-            cust = key;
-            break;
-          }
-        }
-      }
-
-      if (cust){
-        delete this._indexByCustom[cust];
-      }
-
-      // remove the view from the container
-      delete this._views[viewCid];
-
-      // update the length
-      this._updateLength();
-    },
-
-    // Call a method on every view in the container,
-    // passing parameters to the call method one at a
-    // time, like `function.call`.
-    call: function(method, args){
-      args = Array.prototype.slice.call(arguments, 1);
-      this.apply(method, args);
-    },
-
-    // Apply a method on every view in the container,
-    // passing parameters to the call method one at a
-    // time, like `function.apply`.
-    apply: function(method, args){
-      var view;
-
-      // fix for IE < 9
-      args = args || [];
-
-      _.each(this._views, function(view, key){
-        if (_.isFunction(view[method])){
-          view[method].apply(view, args);
-        }
-      });
-
-    },
-
-    // Update the `.length` attribute on this container
-    _updateLength: function(){
-      this.length = _.size(this._views);
-    },
-
-    // set up an initial list of views
-    _addInitialViews: function(views){
-      if (!views){ return; }
-
-      var view, i,
-          length = views.length;
-
-      for (i=0; i<length; i++){
-        view = views[i];
-        this.add(view);
-      }
-    }
-  });
-
-  // Borrowing this code from Backbone.Collection:
-  // http://backbonejs.org/docs/backbone.html#section-106
-  //
-  // Mix in methods from Underscore, for iteration, and other
-  // collection related features.
-  var methods = ['forEach', 'each', 'map', 'find', 'detect', 'filter', 
-    'select', 'reject', 'every', 'all', 'some', 'any', 'include', 
-    'contains', 'invoke', 'toArray', 'first', 'initial', 'rest', 
-    'last', 'without', 'isEmpty', 'pluck'];
-
-  _.each(methods, function(method) {
-    Container.prototype[method] = function() {
-      var views = _.values(this._views);
-      var args = [views].concat(_.toArray(arguments));
-      return _[method].apply(_, args);
+      return method.apply(context, args);
     };
-  });
-
-  // return the public API
-  return Container;
-})(Backbone, _);
-
-// Backbone.Wreqr (Backbone.Marionette)
-// ----------------------------------
-// v0.2.0
-//
-// Copyright (c)2013 Derick Bailey, Muted Solutions, LLC.
-// Distributed under MIT license
-//
-// http://github.com/marionettejs/backbone.wreqr
-
-
-Backbone.Wreqr = (function(Backbone, Marionette, _){
-  "use strict";
-  var Wreqr = {};
-
-  // Handlers
-// --------
-// A registry of functions to call, given a name
-
-Wreqr.Handlers = (function(Backbone, _){
-  "use strict";
-  
-  // Constructor
-  // -----------
-
-  var Handlers = function(options){
-    this.options = options;
-    this._wreqrHandlers = {};
-    
-    if (_.isFunction(this.initialize)){
-      this.initialize(options);
-    }
   };
 
-  Handlers.extend = Backbone.Model.extend;
+  // Marionette.extend
 
-  // Instance Members
-  // ----------------
+  var extend = Backbone.Model.extend;
 
-  _.extend(Handlers.prototype, Backbone.Events, {
+  // ----------------------
+  // Pass in a mapping of events => functions or function names
+  // and return a mapping of events => functions
 
-    // Add multiple handlers using an object literal configuration
-    setHandlers: function(handlers){
-      _.each(handlers, function(handler, name){
-        var context = null;
+  var normalizeMethods = function normalizeMethods(hash) {
+    var _this = this;
 
-        if (_.isObject(handler) && !_.isFunction(handler)){
-          context = handler.context;
-          handler = handler.callback;
-        }
-
-        this.setHandler(name, handler, context);
-      }, this);
-    },
-
-    // Add a handler for the given name, with an
-    // optional context to run the handler within
-    setHandler: function(name, handler, context){
-      var config = {
-        callback: handler,
-        context: context
-      };
-
-      this._wreqrHandlers[name] = config;
-
-      this.trigger("handler:add", name, handler, context);
-    },
-
-    // Determine whether or not a handler is registered
-    hasHandler: function(name){
-      return !! this._wreqrHandlers[name];
-    },
-
-    // Get the currently registered handler for
-    // the specified name. Throws an exception if
-    // no handler is found.
-    getHandler: function(name){
-      var config = this._wreqrHandlers[name];
-
-      if (!config){
-        throw new Error("Handler not found for '" + name + "'");
-      }
-
-      return function(){
-        var args = Array.prototype.slice.apply(arguments);
-        return config.callback.apply(config.context, args);
-      };
-    },
-
-    // Remove a handler for the specified name
-    removeHandler: function(name){
-      delete this._wreqrHandlers[name];
-    },
-
-    // Remove all handlers from this registry
-    removeAllHandlers: function(){
-      this._wreqrHandlers = {};
-    }
-  });
-
-  return Handlers;
-})(Backbone, _);
-
-  // Wreqr.CommandStorage
-// --------------------
-//
-// Store and retrieve commands for execution.
-Wreqr.CommandStorage = (function(){
-  "use strict";
-
-  // Constructor function
-  var CommandStorage = function(options){
-    this.options = options;
-    this._commands = {};
-
-    if (_.isFunction(this.initialize)){
-      this.initialize(options);
-    }
-  };
-
-  // Instance methods
-  _.extend(CommandStorage.prototype, Backbone.Events, {
-
-    // Get an object literal by command name, that contains
-    // the `commandName` and the `instances` of all commands
-    // represented as an array of arguments to process
-    getCommands: function(commandName){
-      var commands = this._commands[commandName];
-
-      // we don't have it, so add it
-      if (!commands){
-
-        // build the configuration
-        commands = {
-          command: commandName, 
-          instances: []
-        };
-
-        // store it
-        this._commands[commandName] = commands;
-      }
-
-      return commands;
-    },
-
-    // Add a command by name, to the storage and store the
-    // args for the command
-    addCommand: function(commandName, args){
-      var command = this.getCommands(commandName);
-      command.instances.push(args);
-    },
-
-    // Clear all commands for the given `commandName`
-    clearCommands: function(commandName){
-      var command = this.getCommands(commandName);
-      command.instances = [];
-    }
-  });
-
-  return CommandStorage;
-})();
-
-  // Wreqr.Commands
-// --------------
-//
-// A simple command pattern implementation. Register a command
-// handler and execute it.
-Wreqr.Commands = (function(Wreqr){
-  "use strict";
-
-  return Wreqr.Handlers.extend({
-    // default storage type
-    storageType: Wreqr.CommandStorage,
-
-    constructor: function(options){
-      this.options = options || {};
-
-      this._initializeStorage(this.options);
-      this.on("handler:add", this._executeCommands, this);
-
-      var args = Array.prototype.slice.call(arguments);
-      Wreqr.Handlers.prototype.constructor.apply(this, args);
-    },
-
-    // Execute a named command with the supplied args
-    execute: function(name, args){
-      name = arguments[0];
-      args = Array.prototype.slice.call(arguments, 1);
-
-      if (this.hasHandler(name)){
-        this.getHandler(name).apply(this, args);
-      } else {
-        this.storage.addCommand(name, args);
-      }
-
-    },
-
-    // Internal method to handle bulk execution of stored commands
-    _executeCommands: function(name, handler, context){
-      var command = this.storage.getCommands(name);
-
-      // loop through and execute all the stored command instances
-      _.each(command.instances, function(args){
-        handler.apply(context, args);
-      });
-
-      this.storage.clearCommands(name);
-    },
-
-    // Internal method to initialize storage either from the type's
-    // `storageType` or the instance `options.storageType`.
-    _initializeStorage: function(options){
-      var storage;
-
-      var StorageType = options.storageType || this.storageType;
-      if (_.isFunction(StorageType)){
-        storage = new StorageType();
-      } else {
-        storage = StorageType;
-      }
-
-      this.storage = storage;
-    }
-  });
-
-})(Wreqr);
-
-  // Wreqr.RequestResponse
-// ---------------------
-//
-// A simple request/response implementation. Register a
-// request handler, and return a response from it
-Wreqr.RequestResponse = (function(Wreqr){
-  "use strict";
-
-  return Wreqr.Handlers.extend({
-    request: function(){
-      var name = arguments[0];
-      var args = Array.prototype.slice.call(arguments, 1);
-
-      return this.getHandler(name).apply(this, args);
-    }
-  });
-
-})(Wreqr);
-
-  // Event Aggregator
-// ----------------
-// A pub-sub object that can be used to decouple various parts
-// of an application through event-driven architecture.
-
-Wreqr.EventAggregator = (function(Backbone, _){
-  "use strict";
-  var EA = function(){};
-
-  // Copy the `extend` function used by Backbone's classes
-  EA.extend = Backbone.Model.extend;
-
-  // Copy the basic Backbone.Events on to the event aggregator
-  _.extend(EA.prototype, Backbone.Events);
-
-  return EA;
-})(Backbone, _);
-
-
-  return Wreqr;
-})(Backbone, Backbone.Marionette, _);
-
-var Marionette = (function(global, Backbone, _){
-  "use strict";
-
-  // Define and export the Marionette namespace
-  var Marionette = {};
-  Backbone.Marionette = Marionette;
-
-  // Get the DOM manipulator for later use
-  Marionette.$ = Backbone.$;
-
-// Helpers
-// -------
-
-// For slicing `arguments` in functions
-var protoSlice = Array.prototype.slice;
-function slice(args) {
-  return protoSlice.call(args);
-}
-
-function throwError(message, name) {
-  var error = new Error(message);
-  error.name = name || 'Error';
-  throw error;
-}
-
-// Marionette.extend
-// -----------------
-
-// Borrow the Backbone `extend` method so we can use it as needed
-Marionette.extend = Backbone.Model.extend;
-
-// Marionette.getOption
-// --------------------
-
-// Retrieve an object, function or other value from a target
-// object or it's `options`, with `options` taking precedence.
-Marionette.getOption = function(target, optionName){
-  if (!target || !optionName){ return; }
-  var value;
-  if (target.options && (optionName in target.options) && (target.options[optionName] !== undefined)){
-    value = target.options[optionName];
-  } else {
-    value = target[optionName];
-  }
-
-  return value;
-};
-
-// Trigger an event and a corresponding method name. Examples:
-//
-// `this.triggerMethod("foo")` will trigger the "foo" event and
-// call the "onFoo" method. 
-//
-// `this.triggerMethod("foo:bar") will trigger the "foo:bar" event and
-// call the "onFooBar" method.
-Marionette.triggerMethod = (function(){
-  
-  // split the event name on the :
-  var splitter = /(^|:)(\w)/gi;
-
-  // take the event section ("section1:section2:section3")
-  // and turn it in to uppercase name
-  function getEventName(match, prefix, eventName) { 
-    return eventName.toUpperCase();
-  }
-
-  // actual triggerMethod name
-  var triggerMethod = function(event) {
-    // get the method name from the event name
-    var methodName = 'on' + event.replace(splitter, getEventName);
-    var method = this[methodName];
-
-    // trigger the event
-    this.trigger.apply(this, arguments);
-
-    // call the onMethodName if it exists
-    if (_.isFunction(method)) {
-      // pass all arguments, except the event name
-      return method.apply(this, _.tail(arguments));
-    }
-  };
-
-  return triggerMethod;
-})();
-
-// DOMRefresh
-// ----------
-//
-// Monitor a view's state, and after it has been rendered and shown
-// in the DOM, trigger a "dom:refresh" event every time it is
-// re-rendered.
-
-Marionette.MonitorDOMRefresh = (function(){
-  // track when the view has been rendered
-  function handleShow(view){
-    view._isShown = true;
-    triggerDOMRefresh(view);
-  }
-
-  // track when the view has been shown in the DOM,
-  // using a Marionette.Region (or by other means of triggering "show")
-  function handleRender(view){
-    view._isRendered = true;
-    triggerDOMRefresh(view);
-  }
-
-  // Trigger the "dom:refresh" event and corresponding "onDomRefresh" method
-  function triggerDOMRefresh(view){
-    if (view._isShown && view._isRendered){
-      if (_.isFunction(view.triggerMethod)){
-        view.triggerMethod("dom:refresh");
-      }
-    }
-  }
-
-  // Export public API
-  return function(view){
-    view.listenTo(view, "show", function(){
-      handleShow(view);
-    });
-
-    view.listenTo(view, "render", function(){
-      handleRender(view);
-    });
-  };
-})();
-
-
-// Marionette.bindEntityEvents & unbindEntityEvents
-// ---------------------------
-//
-// These methods are used to bind/unbind a backbone "entity" (collection/model) 
-// to methods on a target object. 
-//
-// The first parameter, `target`, must have a `listenTo` method from the
-// EventBinder object.
-//
-// The second parameter is the entity (Backbone.Model or Backbone.Collection)
-// to bind the events from.
-//
-// The third parameter is a hash of { "event:name": "eventHandler" }
-// configuration. Multiple handlers can be separated by a space. A
-// function can be supplied instead of a string handler name. 
-
-(function(Marionette){
-  "use strict";
-
-  // Bind the event to handlers specified as a string of
-  // handler names on the target object
-  function bindFromStrings(target, entity, evt, methods){
-    var methodNames = methods.split(/\s+/);
-
-    _.each(methodNames,function(methodName) {
-
-      var method = target[methodName];
-      if(!method) {
-        throwError("Method '"+ methodName +"' was configured as an event handler, but does not exist.");
-      }
-
-      target.listenTo(entity, evt, method, target);
-    });
-  }
-
-  // Bind the event to a supplied callback function
-  function bindToFunction(target, entity, evt, method){
-      target.listenTo(entity, evt, method, target);
-  }
-
-  // Bind the event to handlers specified as a string of
-  // handler names on the target object
-  function unbindFromStrings(target, entity, evt, methods){
-    var methodNames = methods.split(/\s+/);
-
-    _.each(methodNames,function(methodName) {
-      var method = target[method];
-      target.stopListening(entity, evt, method, target);
-    });
-  }
-
-  // Bind the event to a supplied callback function
-  function unbindToFunction(target, entity, evt, method){
-      target.stopListening(entity, evt, method, target);
-  }
-
-  
-  // generic looping function
-  function iterateEvents(target, entity, bindings, functionCallback, stringCallback){
-    if (!entity || !bindings) { return; }
-
-    // allow the bindings to be a function
-    if (_.isFunction(bindings)){
-      bindings = bindings.call(target);
-    }
-
-    // iterate the bindings and bind them
-    _.each(bindings, function(methods, evt){
-
-      // allow for a function as the handler, 
-      // or a list of event names as a string
-      if (_.isFunction(methods)){
-        functionCallback(target, entity, evt, methods);
-      } else {
-        stringCallback(target, entity, evt, methods);
-      }
-
-    });
-  }
- 
-  // Export Public API
-  Marionette.bindEntityEvents = function(target, entity, bindings){
-    iterateEvents(target, entity, bindings, bindToFunction, bindFromStrings);
-  };
-
-  Marionette.unbindEntityEvents = function(target, entity, bindings){
-    iterateEvents(target, entity, bindings, unbindToFunction, unbindFromStrings);
-  };
-
-})(Marionette);
-
-
-// Callbacks
-// ---------
-
-// A simple way of managing a collection of callbacks
-// and executing them at a later point in time, using jQuery's
-// `Deferred` object.
-Marionette.Callbacks = function(){
-  this._deferred = Marionette.$.Deferred();
-  this._callbacks = [];
-};
-
-_.extend(Marionette.Callbacks.prototype, {
-
-  // Add a callback to be executed. Callbacks added here are
-  // guaranteed to execute, even if they are added after the 
-  // `run` method is called.
-  add: function(callback, contextOverride){
-    this._callbacks.push({cb: callback, ctx: contextOverride});
-
-    this._deferred.done(function(context, options){
-      if (contextOverride){ context = contextOverride; }
-      callback.call(context, options);
-    });
-  },
-
-  // Run all registered callbacks with the context specified. 
-  // Additional callbacks can be added after this has been run 
-  // and they will still be executed.
-  run: function(options, context){
-    this._deferred.resolve(context, options);
-  },
-
-  // Resets the list of callbacks to be run, allowing the same list
-  // to be run multiple times - whenever the `run` method is called.
-  reset: function(){
-    var callbacks = this._callbacks;
-    this._deferred = Marionette.$.Deferred();
-    this._callbacks = [];
-    
-    _.each(callbacks, function(cb){
-      this.add(cb.cb, cb.ctx);
-    }, this);
-  }
-});
-
-
-// Marionette Controller
-// ---------------------
-//
-// A multi-purpose object to use as a controller for
-// modules and routers, and as a mediator for workflow
-// and coordination of other objects, views, and more.
-Marionette.Controller = function(options){
-  this.triggerMethod = Marionette.triggerMethod;
-  this.options = options || {};
-
-  if (_.isFunction(this.initialize)){
-    this.initialize(this.options);
-  }
-};
-
-Marionette.Controller.extend = Marionette.extend;
-
-// Controller Methods
-// --------------
-
-// Ensure it can trigger events with Backbone.Events
-_.extend(Marionette.Controller.prototype, Backbone.Events, {
-  close: function(){
-    this.stopListening();
-    this.triggerMethod("close");
-    this.unbind();
-  }
-});
-
-// Region 
-// ------
-//
-// Manage the visual regions of your composite application. See
-// http://lostechies.com/derickbailey/2011/12/12/composite-js-apps-regions-and-region-managers/
-
-Marionette.Region = function(options){
-  this.options = options || {};
-
-  this.el = Marionette.getOption(this, "el");
-
-  if (!this.el){
-    var err = new Error("An 'el' must be specified for a region.");
-    err.name = "NoElError";
-    throw err;
-  }
-
-  if (this.initialize){
-    var args = Array.prototype.slice.apply(arguments);
-    this.initialize.apply(this, args);
-  }
-};
-
-
-// Region Type methods
-// -------------------
-
-_.extend(Marionette.Region, {
-
-  // Build an instance of a region by passing in a configuration object
-  // and a default region type to use if none is specified in the config.
-  //
-  // The config object should either be a string as a jQuery DOM selector,
-  // a Region type directly, or an object literal that specifies both
-  // a selector and regionType:
-  //
-  // ```js
-  // {
-  //   selector: "#foo",
-  //   regionType: MyCustomRegion
-  // }
-  // ```
-  //
-  buildRegion: function(regionConfig, defaultRegionType){
-    var regionIsString = (typeof regionConfig === "string");
-    var regionSelectorIsString = (typeof regionConfig.selector === "string");
-    var regionTypeIsUndefined = (typeof regionConfig.regionType === "undefined");
-    var regionIsType = (typeof regionConfig === "function");
-
-    if (!regionIsType && !regionIsString && !regionSelectorIsString) {
-      throw new Error("Region must be specified as a Region type, a selector string or an object with selector property");
-    }
-
-    var selector, RegionType;
-   
-    // get the selector for the region
-    
-    if (regionIsString) {
-      selector = regionConfig;
-    } 
-
-    if (regionConfig.selector) {
-      selector = regionConfig.selector;
-    }
-
-    // get the type for the region
-    
-    if (regionIsType){
-      RegionType = regionConfig;
-    }
-
-    if (!regionIsType && regionTypeIsUndefined) {
-      RegionType = defaultRegionType;
-    }
-
-    if (regionConfig.regionType) {
-      RegionType = regionConfig.regionType;
-    }
-    
-    // build the region instance
-    var region = new RegionType({
-      el: selector
-    });
-
-    // override the `getEl` function if we have a parentEl
-    // this must be overridden to ensure the selector is found
-    // on the first use of the region. if we try to assign the
-    // region's `el` to `parentEl.find(selector)` in the object
-    // literal to build the region, the element will not be
-    // guaranteed to be in the DOM already, and will cause problems
-    if (regionConfig.parentEl){
-
-      region.getEl = function(selector) {
-        var parentEl = regionConfig.parentEl;
-        if (_.isFunction(parentEl)){
-          parentEl = parentEl();
-        }
-        return parentEl.find(selector);
-      };
-    }
-
-    return region;
-  }
-
-});
-
-// Region Instance Methods
-// -----------------------
-
-_.extend(Marionette.Region.prototype, Backbone.Events, {
-
-  // Displays a backbone view instance inside of the region.
-  // Handles calling the `render` method for you. Reads content
-  // directly from the `el` attribute. Also calls an optional
-  // `onShow` and `close` method on your view, just after showing
-  // or just before closing the view, respectively.
-  show: function(view){
-
-    this.ensureEl();
-
-    if (view !== this.currentView) {
-      this.close();
-      view.render();
-      this.open(view);
-    } else {
-      view.render();
-    }
-
-    Marionette.triggerMethod.call(view, "show");
-    Marionette.triggerMethod.call(this, "show", view);
-
-    this.currentView = view;
-  },
-
-  ensureEl: function(){
-    if (!this.$el || this.$el.length === 0){
-      this.$el = this.getEl(this.el);
-    }
-  },
-
-  // Override this method to change how the region finds the
-  // DOM element that it manages. Return a jQuery selector object.
-  getEl: function(selector){
-    return Marionette.$(selector);
-  },
-
-  // Override this method to change how the new view is
-  // appended to the `$el` that the region is managing
-  open: function(view){
-    this.$el.empty().append(view.el);
-  },
-
-  // Close the current view, if there is one. If there is no
-  // current view, it does nothing and returns immediately.
-  close: function(){
-    var view = this.currentView;
-    if (!view || view.isClosed){ return; }
-
-    // call 'close' or 'remove', depending on which is found
-    if (view.close) { view.close(); }
-    else if (view.remove) { view.remove(); }
-
-    Marionette.triggerMethod.call(this, "close");
-
-    delete this.currentView;
-  },
-
-  // Attach an existing view to the region. This 
-  // will not call `render` or `onShow` for the new view, 
-  // and will not replace the current HTML for the `el`
-  // of the region.
-  attachView: function(view){
-    this.currentView = view;
-  },
-
-  // Reset the region by closing any existing view and
-  // clearing out the cached `$el`. The next time a view
-  // is shown via this region, the region will re-query the
-  // DOM for the region's `el`.
-  reset: function(){
-    this.close();
-    delete this.$el;
-  }
-});
-
-// Copy the `extend` function used by Backbone's classes
-Marionette.Region.extend = Marionette.extend;
-
-// Marionette.RegionManager
-// ------------------------
-//
-// Manage one or more related `Marionette.Region` objects.
-Marionette.RegionManager = (function(Marionette){
-
-  var RegionManager = Marionette.Controller.extend({
-    constructor: function(options){
-      this._regions = {};
-      Marionette.Controller.prototype.constructor.call(this, options);
-    },
-
-    // Add multiple regions using an object literal, where
-    // each key becomes the region name, and each value is
-    // the region definition.
-    addRegions: function(regionDefinitions, defaults){
-      var regions = {};
-
-      _.each(regionDefinitions, function(definition, name){
-        if (typeof definition === "string"){
-          definition = { selector: definition };
-        }
-
-        if (definition.selector){
-          definition = _.defaults({}, definition, defaults);
-        }
-
-        var region = this.addRegion(name, definition);
-        regions[name] = region;
-      }, this);
-
-      return regions;
-    },
-
-    // Add an individual region to the region manager,
-    // and return the region instance
-    addRegion: function(name, definition){
-      var region;
-
-      var isObject = _.isObject(definition);
-      var isString = _.isString(definition);
-      var hasSelector = !!definition.selector;
-
-      if (isString || (isObject && hasSelector)){
-        region = Marionette.Region.buildRegion(definition, Marionette.Region);
-      } else if (_.isFunction(definition)){
-        region = Marionette.Region.buildRegion(definition, Marionette.Region);
-      } else {
-        region = definition;
-      }
-
-      this._store(name, region);
-      this.triggerMethod("region:add", name, region);
-      return region;
-    },
-
-    // Get a region by name
-    get: function(name){
-      return this._regions[name];
-    },
-
-    // Remove a region by name
-    removeRegion: function(name){
-      var region = this._regions[name];
-      this._remove(name, region);
-    },
-
-    // Close all regions in the region manager, and
-    // remove them
-    removeRegions: function(){
-      _.each(this._regions, function(region, name){
-        this._remove(name, region);
-      }, this);
-    },
-
-    // Close all regions in the region manager, but
-    // leave them attached
-    closeRegions: function(){
-      _.each(this._regions, function(region, name){
-        region.close();
-      }, this);
-    },
-
-    // Close all regions and shut down the region
-    // manager entirely
-    close: function(){
-      this.removeRegions();
-      var args = Array.prototype.slice.call(arguments);
-      Marionette.Controller.prototype.close.apply(this, args);
-    },
-
-    // internal method to store regions
-    _store: function(name, region){
-      this._regions[name] = region;
-      this.length = _.size(this._regions);
-    },
-
-    // internal method to remove a region
-    _remove: function(name, region){
-      region.close();
-      delete this._regions[name];
-      this.triggerMethod("region:remove", name, region);
-    }
-
-  });
-
-  // Borrowing this code from Backbone.Collection:
-  // http://backbonejs.org/docs/backbone.html#section-106
-  //
-  // Mix in methods from Underscore, for iteration, and other
-  // collection related features.
-  var methods = ['forEach', 'each', 'map', 'find', 'detect', 'filter', 
-    'select', 'reject', 'every', 'all', 'some', 'any', 'include', 
-    'contains', 'invoke', 'toArray', 'first', 'initial', 'rest', 
-    'last', 'without', 'isEmpty', 'pluck'];
-
-  _.each(methods, function(method) {
-    RegionManager.prototype[method] = function() {
-      var regions = _.values(this._regions);
-      var args = [regions].concat(_.toArray(arguments));
-      return _[method].apply(_, args);
-    };
-  });
-
-  return RegionManager;
-})(Marionette);
-
-
-// Template Cache
-// --------------
-
-// Manage templates stored in `<script>` blocks,
-// caching them for faster access.
-Marionette.TemplateCache = function(templateId){
-  this.templateId = templateId;
-};
-
-// TemplateCache object-level methods. Manage the template
-// caches from these method calls instead of creating 
-// your own TemplateCache instances
-_.extend(Marionette.TemplateCache, {
-  templateCaches: {},
-
-  // Get the specified template by id. Either
-  // retrieves the cached version, or loads it
-  // from the DOM.
-  get: function(templateId){
-    var cachedTemplate = this.templateCaches[templateId];
-
-    if (!cachedTemplate){
-      cachedTemplate = new Marionette.TemplateCache(templateId);
-      this.templateCaches[templateId] = cachedTemplate;
-    }
-
-    return cachedTemplate.load();
-  },
-
-  // Clear templates from the cache. If no arguments
-  // are specified, clears all templates:
-  // `clear()`
-  //
-  // If arguments are specified, clears each of the 
-  // specified templates from the cache:
-  // `clear("#t1", "#t2", "...")`
-  clear: function(){
-    var i;
-    var args = slice(arguments);
-    var length = args.length;
-
-    if (length > 0){
-      for(i=0; i<length; i++){
-        delete this.templateCaches[args[i]];
-      }
-    } else {
-      this.templateCaches = {};
-    }
-  }
-});
-
-// TemplateCache instance methods, allowing each
-// template cache object to manage it's own state
-// and know whether or not it has been loaded
-_.extend(Marionette.TemplateCache.prototype, {
-
-  // Internal method to load the template
-  load: function(){
-    // Guard clause to prevent loading this template more than once
-    if (this.compiledTemplate){
-      return this.compiledTemplate;
-    }
-
-    // Load the template and compile it
-    var template = this.loadTemplate(this.templateId);
-    this.compiledTemplate = this.compileTemplate(template);
-
-    return this.compiledTemplate;
-  },
-
-  // Load a template from the DOM, by default. Override
-  // this method to provide your own template retrieval
-  // For asynchronous loading with AMD/RequireJS, consider
-  // using a template-loader plugin as described here: 
-  // https://github.com/marionettejs/backbone.marionette/wiki/Using-marionette-with-requirejs
-  loadTemplate: function(templateId){
-    var template = Marionette.$(templateId).html();
-
-    if (!template || template.length === 0){
-      throwError("Could not find template: '" + templateId + "'", "NoTemplateError");
-    }
-
-    return template;
-  },
-
-  // Pre-compile the template before caching it. Override
-  // this method if you do not need to pre-compile a template
-  // (JST / RequireJS for example) or if you want to change
-  // the template engine used (Handebars, etc).
-  compileTemplate: function(rawTemplate){
-    return _.template(rawTemplate);
-  }
-});
-
-
-// Renderer
-// --------
-
-// Render a template with data by passing in the template
-// selector and the data to render.
-Marionette.Renderer = {
-
-  // Render a template with data. The `template` parameter is
-  // passed to the `TemplateCache` object to retrieve the
-  // template function. Override this method to provide your own
-  // custom rendering and template handling for all of Marionette.
-  render: function(template, data){
-    var templateFunc = typeof template === 'function' ? template : Marionette.TemplateCache.get(template);
-    return templateFunc(data);
-  }
-};
-
-
-
-// Marionette.View
-// ---------------
-
-// The core view type that other Marionette views extend from.
-Marionette.View = Backbone.View.extend({
-
-  constructor: function(){
-    _.bindAll(this, "render");
-
-    var args = Array.prototype.slice.apply(arguments);
-    Backbone.View.prototype.constructor.apply(this, args);
-
-    Marionette.MonitorDOMRefresh(this);
-    this.listenTo(this, "show", this.onShowCalled, this);
-  },
-
-  // import the "triggerMethod" to trigger events with corresponding
-  // methods if the method exists 
-  triggerMethod: Marionette.triggerMethod,
-
-  // Get the template for this view
-  // instance. You can set a `template` attribute in the view
-  // definition or pass a `template: "whatever"` parameter in
-  // to the constructor options.
-  getTemplate: function(){
-    return Marionette.getOption(this, "template");
-  },
-
-  // Mix in template helper methods. Looks for a
-  // `templateHelpers` attribute, which can either be an
-  // object literal, or a function that returns an object
-  // literal. All methods and attributes from this object
-  // are copies to the object passed in.
-  mixinTemplateHelpers: function(target){
-    target = target || {};
-    var templateHelpers = this.templateHelpers;
-    if (_.isFunction(templateHelpers)){
-      templateHelpers = templateHelpers.call(this);
-    }
-    return _.extend(target, templateHelpers);
-  },
-
-  // Configure `triggers` to forward DOM events to view
-  // events. `triggers: {"click .foo": "do:foo"}`
-  configureTriggers: function(){
-    if (!this.triggers) { return; }
-
-    var triggerEvents = {};
-
-    // Allow `triggers` to be configured as a function
-    var triggers = _.result(this, "triggers");
-
-    // Configure the triggers, prevent default
-    // action and stop propagation of DOM events
-    _.each(triggers, function(value, key){
-
-      // build the event handler function for the DOM event
-      triggerEvents[key] = function(e){
-
-        // stop the event in it's tracks
-        if (e && e.preventDefault){ e.preventDefault(); }
-        if (e && e.stopPropagation){ e.stopPropagation(); }
-
-        // build the args for the event
-        var args = {
-          view: this,
-          model: this.model,
-          collection: this.collection
-        };
-
-        // trigger the event
-        this.triggerMethod(value, args);
-      };
-
-    }, this);
-
-    return triggerEvents;
-  },
-
-  // Overriding Backbone.View's delegateEvents to handle 
-  // the `triggers`, `modelEvents`, and `collectionEvents` configuration
-  delegateEvents: function(events){
-    this._delegateDOMEvents(events);
-    Marionette.bindEntityEvents(this, this.model, Marionette.getOption(this, "modelEvents"));
-    Marionette.bindEntityEvents(this, this.collection, Marionette.getOption(this, "collectionEvents"));
-  },
-
-  // internal method to delegate DOM events and triggers
-  _delegateDOMEvents: function(events){
-    events = events || this.events;
-    if (_.isFunction(events)){ events = events.call(this); }
-
-    var combinedEvents = {};
-    var triggers = this.configureTriggers();
-    _.extend(combinedEvents, events, triggers);
-
-    Backbone.View.prototype.delegateEvents.call(this, combinedEvents);
-  },
-
-  // Overriding Backbone.View's undelegateEvents to handle unbinding
-  // the `triggers`, `modelEvents`, and `collectionEvents` config
-  undelegateEvents: function(){
-    var args = Array.prototype.slice.call(arguments);
-    Backbone.View.prototype.undelegateEvents.apply(this, args);
-
-    Marionette.unbindEntityEvents(this, this.model, Marionette.getOption(this, "modelEvents"));
-    Marionette.unbindEntityEvents(this, this.collection, Marionette.getOption(this, "collectionEvents"));
-  },
-
-  // Internal method, handles the `show` event.
-  onShowCalled: function(){},
-
-  // Default `close` implementation, for removing a view from the
-  // DOM and unbinding it. Regions will call this method
-  // for you. You can specify an `onClose` method in your view to
-  // add custom code that is called after the view is closed.
-  close: function(){
-    if (this.isClosed) { return; }
-
-    // allow the close to be stopped by returning `false`
-    // from the `onBeforeClose` method
-    var shouldClose = this.triggerMethod("before:close");
-    if (shouldClose === false){
+    if (!hash) {
       return;
     }
 
-    // mark as closed before doing the actual close, to
-    // prevent infinite loops within "close" event handlers
-    // that are trying to close other views
-    this.isClosed = true;
-    this.triggerMethod("close");
-
-    // unbind UI elements
-    this.unbindUIElements();
-
-    // remove the view from the DOM
-    this.remove();
-  },
-
-  // This method binds the elements specified in the "ui" hash inside the view's code with
-  // the associated jQuery selectors.
-  bindUIElements: function(){
-    if (!this.ui) { return; }
-
-    // store the ui hash in _uiBindings so they can be reset later
-    // and so re-rendering the view will be able to find the bindings
-    if (!this._uiBindings){
-      this._uiBindings = this.ui;
-    }
-
-    // get the bindings result, as a function or otherwise
-    var bindings = _.result(this, "_uiBindings");
-
-    // empty the ui so we don't have anything to start with
-    this.ui = {};
-
-    // bind each of the selectors
-    _.each(_.keys(bindings), function(key) {
-      var selector = bindings[key];
-      this.ui[key] = this.$(selector);
-    }, this);
-  },
-
-  // This method unbinds the elements specified in the "ui" hash
-  unbindUIElements: function(){
-    if (!this.ui){ return; }
-
-    // delete all of the existing ui bindings
-    _.each(this.ui, function($el, name){
-      delete this.ui[name];
-    }, this);
-
-    // reset the ui element to the original bindings configuration
-    this.ui = this._uiBindings;
-    delete this._uiBindings;
-  }
-});
-
-// Item View
-// ---------
-
-// A single item view implementation that contains code for rendering
-// with underscore.js templates, serializing the view's model or collection,
-// and calling several methods on extended views, such as `onRender`.
-Marionette.ItemView =  Marionette.View.extend({
-  constructor: function(){
-    Marionette.View.prototype.constructor.apply(this, slice(arguments));
-  },
-
-  // Serialize the model or collection for the view. If a model is
-  // found, `.toJSON()` is called. If a collection is found, `.toJSON()`
-  // is also called, but is used to populate an `items` array in the
-  // resulting data. If both are found, defaults to the model.
-  // You can override the `serializeData` method in your own view
-  // definition, to provide custom serialization for your view's data.
-  serializeData: function(){
-    var data = {};
-
-    if (this.model) {
-      data = this.model.toJSON();
-    }
-    else if (this.collection) {
-      data = { items: this.collection.toJSON() };
-    }
-
-    return data;
-  },
-
-  // Render the view, defaulting to underscore.js templates.
-  // You can override this in your view definition to provide
-  // a very specific rendering for your view. In general, though,
-  // you should override the `Marionette.Renderer` object to
-  // change how Marionette renders views.
-  render: function(){
-    this.isClosed = false;
-
-    this.triggerMethod("before:render", this);
-    this.triggerMethod("item:before:render", this);
-
-    var data = this.serializeData();
-    data = this.mixinTemplateHelpers(data);
-
-    var template = this.getTemplate();
-    var html = Marionette.Renderer.render(template, data);
-    this.$el.html(html);
-    this.bindUIElements();
-
-    this.triggerMethod("render", this);
-    this.triggerMethod("item:rendered", this);
-
-    return this;
-  },
-
-  // Override the default close event to add a few
-  // more events that are triggered.
-  close: function(){
-    if (this.isClosed){ return; }
-
-    this.triggerMethod('item:before:close');
-
-    Marionette.View.prototype.close.apply(this, slice(arguments));
-
-    this.triggerMethod('item:closed');
-  }
-});
-
-// Collection View
-// ---------------
-
-// A view that iterates over a Backbone.Collection
-// and renders an individual ItemView for each model.
-Marionette.CollectionView = Marionette.View.extend({
-  // used as the prefix for item view events
-  // that are forwarded through the collectionview
-  itemViewEventPrefix: "itemview",
-
-  // constructor
-  constructor: function(options){
-    this._initChildViewStorage();
-
-    Marionette.View.prototype.constructor.apply(this, slice(arguments));
-    
-    this._initialEvents();
-  },
-
-  // Configured the initial events that the collection view
-  // binds to. Override this method to prevent the initial
-  // events, or to add your own initial events.
-  _initialEvents: function(){
-    if (this.collection){
-      this.listenTo(this.collection, "add", this.addChildView, this);
-      this.listenTo(this.collection, "remove", this.removeItemView, this);
-      this.listenTo(this.collection, "reset", this.render, this);
-    }
-  },
-
-  // Handle a child item added to the collection
-  addChildView: function(item, collection, options){
-    this.closeEmptyView();
-    var ItemView = this.getItemView(item);
-    var index = this.collection.indexOf(item);
-    this.addItemView(item, ItemView, index);
-  },
-
-  // Override from `Marionette.View` to guarantee the `onShow` method
-  // of child views is called.
-  onShowCalled: function(){
-    this.children.each(function(child){
-      Marionette.triggerMethod.call(child, "show");
-    });
-  },
-
-  // Internal method to trigger the before render callbacks
-  // and events
-  triggerBeforeRender: function(){
-    this.triggerMethod("before:render", this);
-    this.triggerMethod("collection:before:render", this);
-  },
-
-  // Internal method to trigger the rendered callbacks and
-  // events
-  triggerRendered: function(){
-    this.triggerMethod("render", this);
-    this.triggerMethod("collection:rendered", this);
-  },
-
-  // Render the collection of items. Override this method to
-  // provide your own implementation of a render function for
-  // the collection view.
-  render: function(){
-    this.isClosed = false;
-    this.triggerBeforeRender();
-    this._renderChildren();
-    this.triggerRendered();
-    return this;
-  },
-
-  // Internal method. Separated so that CompositeView can have
-  // more control over events being triggered, around the rendering
-  // process
-  _renderChildren: function(){
-    this.closeEmptyView();
-    this.closeChildren();
-
-    if (this.collection && this.collection.length > 0) {
-      this.showCollection();
-    } else {
-      this.showEmptyView();
-    }
-  },
-
-  // Internal method to loop through each item in the
-  // collection view and show it
-  showCollection: function(){
-    var ItemView;
-    this.collection.each(function(item, index){
-      ItemView = this.getItemView(item);
-      this.addItemView(item, ItemView, index);
-    }, this);
-  },
-
-  // Internal method to show an empty view in place of
-  // a collection of item views, when the collection is
-  // empty
-  showEmptyView: function(){
-    var EmptyView = Marionette.getOption(this, "emptyView");
-    if (EmptyView && !this._showingEmptyView){
-      this._showingEmptyView = true;
-      var model = new Backbone.Model();
-      this.addItemView(model, EmptyView, 0);
-    }
-  },
-
-  // Internal method to close an existing emptyView instance
-  // if one exists. Called when a collection view has been
-  // rendered empty, and then an item is added to the collection.
-  closeEmptyView: function(){
-    if (this._showingEmptyView){
-      this.closeChildren();
-      delete this._showingEmptyView;
-    }
-  },
-
-  // Retrieve the itemView type, either from `this.options.itemView`
-  // or from the `itemView` in the object definition. The "options"
-  // takes precedence.
-  getItemView: function(item){
-    var itemView = Marionette.getOption(this, "itemView");
-
-    if (!itemView){
-      throwError("An `itemView` must be specified", "NoItemViewError");
-    }
-
-    return itemView;
-  },
-
-  // Render the child item's view and add it to the
-  // HTML for the collection view.
-  addItemView: function(item, ItemView, index){
-    // get the itemViewOptions if any were specified
-    var itemViewOptions = Marionette.getOption(this, "itemViewOptions");
-    if (_.isFunction(itemViewOptions)){
-      itemViewOptions = itemViewOptions.call(this, item, index);
-    }
-
-    // build the view 
-    var view = this.buildItemView(item, ItemView, itemViewOptions);
-    
-    // set up the child view event forwarding
-    this.addChildViewEventForwarding(view);
-
-    // this view is about to be added
-    this.triggerMethod("before:item:added", view);
-
-    // Store the child view itself so we can properly
-    // remove and/or close it later
-    this.children.add(view);
-
-    // Render it and show it
-    this.renderItemView(view, index);
-
-    // call the "show" method if the collection view
-    // has already been shown
-    if (this._isShown){
-      Marionette.triggerMethod.call(view, "show");
-    }
-
-    // this view was added
-    this.triggerMethod("after:item:added", view);
-  },
-
-  // Set up the child view event forwarding. Uses an "itemview:"
-  // prefix in front of all forwarded events.
-  addChildViewEventForwarding: function(view){
-    var prefix = Marionette.getOption(this, "itemViewEventPrefix");
-
-    // Forward all child item view events through the parent,
-    // prepending "itemview:" to the event name
-    this.listenTo(view, "all", function(){
-      var args = slice(arguments);
-      args[0] = prefix + ":" + args[0];
-      args.splice(1, 0, view);
-
-      Marionette.triggerMethod.apply(this, args);
-    }, this);
-  },
-
-  // render the item view
-  renderItemView: function(view, index) {
-    view.render();
-    this.appendHtml(this, view, index);
-  },
-
-  // Build an `itemView` for every model in the collection.
-  buildItemView: function(item, ItemViewType, itemViewOptions){
-    var options = _.extend({model: item}, itemViewOptions);
-    return new ItemViewType(options);
-  },
-
-  // get the child view by item it holds, and remove it
-  removeItemView: function(item){
-    var view = this.children.findByModel(item);
-    this.removeChildView(view);
-    this.checkEmpty();
-  },
-
-  // Remove the child view and close it
-  removeChildView: function(view){
-
-    // shut down the child view properly,
-    // including events that the collection has from it
-    if (view){
-      this.stopListening(view);
-
-      // call 'close' or 'remove', depending on which is found
-      if (view.close) { view.close(); }
-      else if (view.remove) { view.remove(); }
-
-      this.children.remove(view);
-    }
-
-    this.triggerMethod("item:removed", view);
-  },
-
-  // helper to show the empty view if the collection is empty
-  checkEmpty: function() {
-    // check if we're empty now, and if we are, show the
-    // empty view
-    if (!this.collection || this.collection.length === 0){
-      this.showEmptyView();
-    }
-  },
-
-  // Append the HTML to the collection's `el`.
-  // Override this method to do something other
-  // then `.append`.
-  appendHtml: function(collectionView, itemView, index){
-    collectionView.$el.append(itemView.el);
-  },
-
-  // Internal method to set up the `children` object for
-  // storing all of the child views
-  _initChildViewStorage: function(){
-    this.children = new Backbone.ChildViewContainer();
-  },
-
-  // Handle cleanup and other closing needs for
-  // the collection of views.
-  close: function(){
-    if (this.isClosed){ return; }
-
-    this.triggerMethod("collection:before:close");
-    this.closeChildren();
-    this.triggerMethod("collection:closed");
-
-    Marionette.View.prototype.close.apply(this, slice(arguments));
-  },
-
-  // Close the child views that this collection view
-  // is holding on to, if any
-  closeChildren: function(){
-    this.children.each(function(child){
-      this.removeChildView(child);
-    }, this);
-    this.checkEmpty();
-  }
-});
-
-
-// Composite View
-// --------------
-
-// Used for rendering a branch-leaf, hierarchical structure.
-// Extends directly from CollectionView and also renders an
-// an item view as `modelView`, for the top leaf
-Marionette.CompositeView = Marionette.CollectionView.extend({
-  constructor: function(options){
-    Marionette.CollectionView.apply(this, slice(arguments));
-
-    this.itemView = this.getItemView();
-  },
-
-  // Configured the initial events that the composite view
-  // binds to. Override this method to prevent the initial
-  // events, or to add your own initial events.
-  _initialEvents: function(){
-    if (this.collection){
-      this.listenTo(this.collection, "add", this.addChildView, this);
-      this.listenTo(this.collection, "remove", this.removeItemView, this);
-      this.listenTo(this.collection, "reset", this._renderChildren, this);
-    }
-  },
-
-  // Retrieve the `itemView` to be used when rendering each of
-  // the items in the collection. The default is to return
-  // `this.itemView` or Marionette.CompositeView if no `itemView`
-  // has been defined
-  getItemView: function(item){
-    var itemView = Marionette.getOption(this, "itemView") || this.constructor;
-
-    if (!itemView){
-      throwError("An `itemView` must be specified", "NoItemViewError");
-    }
-
-    return itemView;
-  },
-
-  // Serialize the collection for the view. 
-  // You can override the `serializeData` method in your own view
-  // definition, to provide custom serialization for your view's data.
-  serializeData: function(){
-    var data = {};
-
-    if (this.model){
-      data = this.model.toJSON();
-    }
-
-    return data;
-  },
-
-  // Renders the model once, and the collection once. Calling
-  // this again will tell the model's view to re-render itself
-  // but the collection will not re-render.
-  render: function(){
-    this.isRendered = true;
-    this.isClosed = false;
-    this.resetItemViewContainer();
-
-    this.triggerBeforeRender();
-    var html = this.renderModel();
-    this.$el.html(html);
-    // the ui bindings is done here and not at the end of render since they 
-    // will not be available until after the model is rendered, but should be
-    // available before the collection is rendered.
-    this.bindUIElements();
-    this.triggerMethod("composite:model:rendered");
-
-    this._renderChildren();
-
-    this.triggerMethod("composite:rendered");
-    this.triggerRendered();
-    return this;
-  },
-
-  _renderChildren: function(){
-    if (this.isRendered){
-      Marionette.CollectionView.prototype._renderChildren.call(this);
-      this.triggerMethod("composite:collection:rendered");
-    }
-  },
-
-  // Render an individual model, if we have one, as
-  // part of a composite view (branch / leaf). For example:
-  // a treeview.
-  renderModel: function(){
-    var data = {};
-    data = this.serializeData();
-    data = this.mixinTemplateHelpers(data);
-
-    var template = this.getTemplate();
-    return Marionette.Renderer.render(template, data);
-  },
-
-  // Appends the `el` of itemView instances to the specified
-  // `itemViewContainer` (a jQuery selector). Override this method to
-  // provide custom logic of how the child item view instances have their
-  // HTML appended to the composite view instance.
-  appendHtml: function(cv, iv){
-    var $container = this.getItemViewContainer(cv);
-    $container.append(iv.el);
-  },
-
-  // Internal method to ensure an `$itemViewContainer` exists, for the
-  // `appendHtml` method to use.
-  getItemViewContainer: function(containerView){
-    if ("$itemViewContainer" in containerView){
-      return containerView.$itemViewContainer;
-    }
-
-    var container;
-    if (containerView.itemViewContainer){
-
-      var selector = _.result(containerView, "itemViewContainer");
-      container = containerView.$(selector);
-      if (container.length <= 0) {
-        throwError("The specified `itemViewContainer` was not found: " + containerView.itemViewContainer, "ItemViewContainerMissingError");
+    return _.reduce(hash, function (normalizedHash, method, name) {
+      if (!_.isFunction(method)) {
+        method = _this[method];
       }
 
-    } else {
-      container = containerView.$el;
+      if (method) {
+        normalizedHash[name] = method;
+      }
+
+      return normalizedHash;
+    }, {});
+  };
+
+  // Error
+  var errorProps = ['description', 'fileName', 'lineNumber', 'name', 'message', 'number', 'url'];
+  var MarionetteError = extend.call(Error, {
+    urlRoot: "http://marionettejs.com/docs/v".concat(version, "/"),
+    url: '',
+    constructor: function constructor(options) {
+      var error = Error.call(this, options.message);
+
+      _.extend(this, _.pick(error, errorProps), _.pick(options, errorProps));
+
+      if (Error.captureStackTrace) {
+        this.captureStackTrace();
+      }
+
+      this.url = this.urlRoot + this.url;
+    },
+    captureStackTrace: function captureStackTrace() {
+      Error.captureStackTrace(this, MarionetteError);
+    },
+    toString: function toString() {
+      return "".concat(this.name, ": ").concat(this.message, " See: ").concat(this.url);
+    }
+  });
+
+  // Bind Entity Events & Unbind Entity Events
+
+  function normalizeBindings(context, bindings) {
+    if (!_.isObject(bindings)) {
+      throw new MarionetteError({
+        message: 'Bindings must be an object.',
+        url: 'common.html#bindevents'
+      });
     }
 
-    containerView.$itemViewContainer = container;
-    return container;
-  },
+    return normalizeMethods.call(context, bindings);
+  }
 
-  // Internal method to reset the `$itemViewContainer` on render
-  resetItemViewContainer: function(){
-    if (this.$itemViewContainer){
-      delete this.$itemViewContainer;
+  function bindEvents(entity, bindings) {
+    if (!entity || !bindings) {
+      return this;
+    }
+
+    this.listenTo(entity, normalizeBindings(this, bindings));
+    return this;
+  }
+
+  function unbindEvents(entity, bindings) {
+    if (!entity) {
+      return this;
+    }
+
+    if (!bindings) {
+      this.stopListening(entity);
+      return this;
+    }
+
+    this.stopListening(entity, normalizeBindings(this, bindings));
+    return this;
+  } // Export Public API
+
+  // Bind/Unbind Radio Requests
+
+  function normalizeBindings$1(context, bindings) {
+    if (!_.isObject(bindings)) {
+      throw new MarionetteError({
+        message: 'Bindings must be an object.',
+        url: 'common.html#bindrequests'
+      });
+    }
+
+    return normalizeMethods.call(context, bindings);
+  }
+
+  function bindRequests(channel, bindings) {
+    if (!channel || !bindings) {
+      return this;
+    }
+
+    channel.reply(normalizeBindings$1(this, bindings), this);
+    return this;
+  }
+
+  function unbindRequests(channel, bindings) {
+    if (!channel) {
+      return this;
+    }
+
+    if (!bindings) {
+      channel.stopReplying(null, null, this);
+      return this;
+    }
+
+    channel.stopReplying(normalizeBindings$1(this, bindings));
+    return this;
+  }
+
+  // Marionette.getOption
+  // --------------------
+  // Retrieve an object, function or other value from the
+  // object or its `options`, with `options` taking precedence.
+  var getOption = function getOption(optionName) {
+    if (!optionName) {
+      return;
+    }
+
+    if (this.options && this.options[optionName] !== undefined) {
+      return this.options[optionName];
+    } else {
+      return this[optionName];
+    }
+  };
+
+  var mergeOptions = function mergeOptions(options, keys) {
+    var _this = this;
+
+    if (!options) {
+      return;
+    }
+
+    _.each(keys, function (key) {
+      var option = options[key];
+
+      if (option !== undefined) {
+        _this[key] = option;
+      }
+    });
+  };
+
+  // DOM Refresh
+
+  function triggerMethodChildren(view, event, shouldTrigger) {
+    if (!view._getImmediateChildren) {
+      return;
+    }
+
+    _.each(view._getImmediateChildren(), function (child) {
+      if (!shouldTrigger(child)) {
+        return;
+      }
+
+      child.triggerMethod(event, child);
+    });
+  }
+
+  function shouldTriggerAttach(view) {
+    return !view._isAttached;
+  }
+
+  function shouldAttach(view) {
+    if (!shouldTriggerAttach(view)) {
+      return false;
+    }
+
+    view._isAttached = true;
+    return true;
+  }
+
+  function shouldTriggerDetach(view) {
+    return view._isAttached;
+  }
+
+  function shouldDetach(view) {
+    view._isAttached = false;
+    return true;
+  }
+
+  function triggerDOMRefresh(view) {
+    if (view._isAttached && view._isRendered) {
+      view.triggerMethod('dom:refresh', view);
     }
   }
-});
+
+  function triggerDOMRemove(view) {
+    if (view._isAttached && view._isRendered) {
+      view.triggerMethod('dom:remove', view);
+    }
+  }
+
+  function handleBeforeAttach() {
+    triggerMethodChildren(this, 'before:attach', shouldTriggerAttach);
+  }
+
+  function handleAttach() {
+    triggerMethodChildren(this, 'attach', shouldAttach);
+    triggerDOMRefresh(this);
+  }
+
+  function handleBeforeDetach() {
+    triggerMethodChildren(this, 'before:detach', shouldTriggerDetach);
+    triggerDOMRemove(this);
+  }
+
+  function handleDetach() {
+    triggerMethodChildren(this, 'detach', shouldDetach);
+  }
+
+  function handleBeforeRender() {
+    triggerDOMRemove(this);
+  }
+
+  function handleRender() {
+    triggerDOMRefresh(this);
+  } // Monitor a view's state, propagating attach/detach events to children and firing dom:refresh
+  // whenever a rendered view is attached or an attached view is rendered.
 
 
-// Layout
-// ------
-
-// Used for managing application layouts, nested layouts and
-// multiple regions within an application or sub-application.
-//
-// A specialized view type that renders an area of HTML and then
-// attaches `Region` instances to the specified `regions`.
-// Used for composite view management and sub-application areas.
-Marionette.Layout = Marionette.ItemView.extend({
-  regionType: Marionette.Region,
-  
-  // Ensure the regions are available when the `initialize` method
-  // is called.
-  constructor: function (options) {
-    options = options || {};
-
-    this._firstRender = true;
-    this._initializeRegions(options);
-    
-    Marionette.ItemView.call(this, options);
-  },
-
-  // Layout's render will use the existing region objects the
-  // first time it is called. Subsequent calls will close the
-  // views that the regions are showing and then reset the `el`
-  // for the regions to the newly rendered DOM elements.
-  render: function(){
-
-    if (this._firstRender){
-      // if this is the first render, don't do anything to
-      // reset the regions
-      this._firstRender = false;
-    } else if (this.isClosed){
-      // a previously closed layout means we need to 
-      // completely re-initialize the regions
-      this._initializeRegions();
-    } else {
-      // If this is not the first render call, then we need to 
-      // re-initializing the `el` for each region
-      this._reInitializeRegions();
+  function monitorViewEvents(view) {
+    if (view._areViewEventsMonitored || view.monitorViewEvents === false) {
+      return;
     }
 
-    var args = Array.prototype.slice.apply(arguments);
-    var result = Marionette.ItemView.prototype.render.apply(this, args);
+    view._areViewEventsMonitored = true;
+    view.on({
+      'before:attach': handleBeforeAttach,
+      'attach': handleAttach,
+      'before:detach': handleBeforeDetach,
+      'detach': handleDetach,
+      'before:render': handleBeforeRender,
+      'render': handleRender
+    });
+  }
 
+  // Trigger Method
+
+  var splitter = /(^|:)(\w)/gi; // Only calc getOnMethodName once
+
+  var methodCache = {}; // take the event section ("section1:section2:section3")
+  // and turn it in to uppercase name onSection1Section2Section3
+
+  function getEventName(match, prefix, eventName) {
+    return eventName.toUpperCase();
+  }
+
+  var getOnMethodName = function getOnMethodName(event) {
+    if (!methodCache[event]) {
+      methodCache[event] = 'on' + event.replace(splitter, getEventName);
+    }
+
+    return methodCache[event];
+  }; // Trigger an event and/or a corresponding method name. Examples:
+  //
+  // `this.triggerMethod("foo")` will trigger the "foo" event and
+  // call the "onFoo" method.
+  //
+  // `this.triggerMethod("foo:bar")` will trigger the "foo:bar" event and
+  // call the "onFooBar" method.
+
+
+  function triggerMethod(event) {
+    // get the method name from the event name
+    var methodName = getOnMethodName(event);
+    var method = getOption.call(this, methodName);
+    var result; // call the onMethodName if it exists
+
+    if (_.isFunction(method)) {
+      // pass all args, except the event name
+      result = method.apply(this, _.drop(arguments));
+    } // trigger the event
+
+
+    this.trigger.apply(this, arguments);
     return result;
-  },
+  }
 
-  // Handle closing regions, and then close the view itself.
-  close: function () {
-    if (this.isClosed){ return; }
-    this.regionManager.close();
-    var args = Array.prototype.slice.apply(arguments);
-    Marionette.ItemView.prototype.close.apply(this, args);
-  },
+  var Events = {
+    triggerMethod: triggerMethod
+  };
 
-  // Add a single region, by name, to the layout
-  addRegion: function(name, definition){
-    var regions = {};
-    regions[name] = definition;
-    return this.addRegions(regions)[name];
-  },
+  var CommonMixin = {
+    // Imports the "normalizeMethods" to transform hashes of
+    // events=>function references/names to a hash of events=>function references
+    normalizeMethods: normalizeMethods,
+    _setOptions: function _setOptions(options, classOptions) {
+      this.options = _.extend({}, _.result(this, 'options'), options);
+      this.mergeOptions(options, classOptions);
+    },
+    // A handy way to merge passed-in options onto the instance
+    mergeOptions: mergeOptions,
+    // Enable getting options from this or this.options by name.
+    getOption: getOption,
+    // Enable binding view's events from another entity.
+    bindEvents: bindEvents,
+    // Enable unbinding view's events from another entity.
+    unbindEvents: unbindEvents,
+    // Enable binding view's requests.
+    bindRequests: bindRequests,
+    // Enable unbinding view's requests.
+    unbindRequests: unbindRequests,
+    triggerMethod: triggerMethod
+  };
 
-  // Add multiple regions as a {name: definition, name2: def2} object literal
-  addRegions: function(regions){
-    this.regions = _.extend(this.regions || {}, regions);
-    return this._buildRegions(regions);
-  },
+  _.extend(CommonMixin, Backbone.Events);
 
-  // Remove a single region from the Layout, by name
-  removeRegion: function(name){
-    return this.regionManager.removeRegion(name);
-  },
+  var DestroyMixin = {
+    _isDestroyed: false,
+    isDestroyed: function isDestroyed() {
+      return this._isDestroyed;
+    },
+    destroy: function destroy(options) {
+      if (this._isDestroyed) {
+        return this;
+      }
 
-  // internal method to build regions
-  _buildRegions: function(regions){
-    var that = this;
+      this.triggerMethod('before:destroy', this, options);
+      this._isDestroyed = true;
+      this.triggerMethod('destroy', this, options);
+      this.stopListening();
+      return this;
+    }
+  };
 
-    var defaults = {
-      parentEl: function(){ return that.$el; }
+  // - channelName
+  // - radioEvents
+  // - radioRequests
+
+  var RadioMixin = {
+    _initRadio: function _initRadio() {
+      var channelName = _.result(this, 'channelName');
+
+      if (!channelName) {
+        return;
+      }
+      /* istanbul ignore next */
+
+
+      if (!Radio) {
+        throw new MarionetteError({
+          message: 'The dependency "backbone.radio" is missing.',
+          url: 'backbone.radio.html#marionette-integration'
+        });
+      }
+
+      var channel = this._channel = Radio.channel(channelName);
+
+      var radioEvents = _.result(this, 'radioEvents');
+
+      this.bindEvents(channel, radioEvents);
+
+      var radioRequests = _.result(this, 'radioRequests');
+
+      this.bindRequests(channel, radioRequests);
+      this.on('destroy', this._destroyRadio);
+    },
+    _destroyRadio: function _destroyRadio() {
+      this._channel.stopReplying(null, null, this);
+    },
+    getChannel: function getChannel() {
+      return this._channel;
+    }
+  };
+
+  // Object
+  var ClassOptions = ['channelName', 'radioEvents', 'radioRequests']; // Object borrows many conventions and utilities from Backbone.
+
+  var MarionetteObject = function MarionetteObject(options) {
+    this._setOptions(options, ClassOptions);
+
+    this.cid = _.uniqueId(this.cidPrefix);
+
+    this._initRadio();
+
+    this.initialize.apply(this, arguments);
+  };
+
+  MarionetteObject.extend = extend; // Object Methods
+  // --------------
+
+  _.extend(MarionetteObject.prototype, CommonMixin, DestroyMixin, RadioMixin, {
+    cidPrefix: 'mno',
+    // This is a noop method intended to be overridden
+    initialize: function initialize() {}
+  });
+
+  // Implementation of the invoke method (http://underscorejs.org/#invoke) with support for
+  var _invoke = _.invokeMap || _.invoke;
+
+  // - behaviors
+  // Takes care of getting the behavior class
+  // given options and a key.
+  // If a user passes in options.behaviorClass
+  // default to using that.
+  // If a user passes in a Behavior Class directly, use that
+  // Otherwise an error is thrown
+
+  function getBehaviorClass(options) {
+    if (options.behaviorClass) {
+      return {
+        BehaviorClass: options.behaviorClass,
+        options: options
+      };
+    } //treat functions as a Behavior constructor
+
+
+    if (_.isFunction(options)) {
+      return {
+        BehaviorClass: options,
+        options: {}
+      };
+    }
+
+    throw new MarionetteError({
+      message: 'Unable to get behavior class. A Behavior constructor should be passed directly or as behaviorClass property of options',
+      url: 'marionette.behavior.html#defining-and-attaching-behaviors'
+    });
+  } // Iterate over the behaviors object, for each behavior
+  // instantiate it and get its grouped behaviors.
+  // This accepts a list of behaviors in either an object or array form
+
+
+  function parseBehaviors(view, behaviors, allBehaviors) {
+    return _.reduce(behaviors, function (reducedBehaviors, behaviorDefiniton) {
+      var _getBehaviorClass = getBehaviorClass(behaviorDefiniton),
+          BehaviorClass = _getBehaviorClass.BehaviorClass,
+          options = _getBehaviorClass.options;
+
+      var behavior = new BehaviorClass(options, view);
+      reducedBehaviors.push(behavior);
+      return parseBehaviors(view, _.result(behavior, 'behaviors'), reducedBehaviors);
+    }, allBehaviors);
+  }
+
+  var BehaviorsMixin = {
+    _initBehaviors: function _initBehaviors() {
+      this._behaviors = parseBehaviors(this, _.result(this, 'behaviors'), []);
+    },
+    _getBehaviorTriggers: function _getBehaviorTriggers() {
+      var triggers = _invoke(this._behaviors, '_getTriggers');
+
+      return _.reduce(triggers, function (memo, _triggers) {
+        return _.extend(memo, _triggers);
+      }, {});
+    },
+    _getBehaviorEvents: function _getBehaviorEvents() {
+      var events = _invoke(this._behaviors, '_getEvents');
+
+      return _.reduce(events, function (memo, _events) {
+        return _.extend(memo, _events);
+      }, {});
+    },
+    // proxy behavior $el to the view's $el.
+    _proxyBehaviorViewProperties: function _proxyBehaviorViewProperties() {
+      _invoke(this._behaviors, 'proxyViewProperties');
+    },
+    // delegate modelEvents and collectionEvents
+    _delegateBehaviorEntityEvents: function _delegateBehaviorEntityEvents() {
+      _invoke(this._behaviors, 'delegateEntityEvents');
+    },
+    // undelegate modelEvents and collectionEvents
+    _undelegateBehaviorEntityEvents: function _undelegateBehaviorEntityEvents() {
+      _invoke(this._behaviors, 'undelegateEntityEvents');
+    },
+    _destroyBehaviors: function _destroyBehaviors(options) {
+      // Call destroy on each behavior after
+      // destroying the view.
+      // This unbinds event listeners
+      // that behaviors have registered for.
+      _invoke(this._behaviors, 'destroy', options);
+    },
+    // Remove a behavior
+    _removeBehavior: function _removeBehavior(behavior) {
+      // Don't worry about the clean up if the view is destroyed
+      if (this._isDestroyed) {
+        return;
+      } // Remove behavior-only triggers and events
+
+
+      this.undelegate(".trig".concat(behavior.cid, " .").concat(behavior.cid));
+      this._behaviors = _.without(this._behaviors, behavior);
+    },
+    _bindBehaviorUIElements: function _bindBehaviorUIElements() {
+      _invoke(this._behaviors, 'bindUIElements');
+    },
+    _unbindBehaviorUIElements: function _unbindBehaviorUIElements() {
+      _invoke(this._behaviors, 'unbindUIElements');
+    },
+    _triggerEventOnBehaviors: function _triggerEventOnBehaviors(eventName, view, options) {
+      _invoke(this._behaviors, 'triggerMethod', eventName, view, options);
+    }
+  };
+
+  // - collectionEvents
+  // - modelEvents
+
+  var DelegateEntityEventsMixin = {
+    // Handle `modelEvents`, and `collectionEvents` configuration
+    _delegateEntityEvents: function _delegateEntityEvents(model, collection) {
+      if (model) {
+        this._modelEvents = _.result(this, 'modelEvents');
+        this.bindEvents(model, this._modelEvents);
+      }
+
+      if (collection) {
+        this._collectionEvents = _.result(this, 'collectionEvents');
+        this.bindEvents(collection, this._collectionEvents);
+      }
+    },
+    // Remove any previously delegate entity events
+    _undelegateEntityEvents: function _undelegateEntityEvents(model, collection) {
+      if (this._modelEvents) {
+        this.unbindEvents(model, this._modelEvents);
+        delete this._modelEvents;
+      }
+
+      if (this._collectionEvents) {
+        this.unbindEvents(collection, this._collectionEvents);
+        delete this._collectionEvents;
+      }
+    },
+    // Remove cached event handlers
+    _deleteEntityEventHandlers: function _deleteEntityEventHandlers() {
+      delete this._modelEvents;
+      delete this._collectionEvents;
+    }
+  };
+
+  // - template
+  // - templateContext
+
+  var TemplateRenderMixin = {
+    // Internal method to render the template with the serialized data
+    // and template context
+    _renderTemplate: function _renderTemplate(template) {
+      // Add in entity data and template context
+      var data = this.mixinTemplateContext(this.serializeData()) || {}; // Render and add to el
+
+      var html = this._renderHtml(template, data);
+
+      if (typeof html !== 'undefined') {
+        this.attachElContent(html);
+      }
+    },
+    // Get the template for this view instance.
+    // You can set a `template` attribute in the view definition
+    // or pass a `template: TemplateFunction` parameter in
+    // to the constructor options.
+    getTemplate: function getTemplate() {
+      return this.template;
+    },
+    // Mix in template context methods. Looks for a
+    // `templateContext` attribute, which can either be an
+    // object literal, or a function that returns an object
+    // literal. All methods and attributes from this object
+    // are copies to the object passed in.
+    mixinTemplateContext: function mixinTemplateContext(serializedData) {
+      var templateContext = _.result(this, 'templateContext');
+
+      if (!templateContext) {
+        return serializedData;
+      }
+
+      if (!serializedData) {
+        return templateContext;
+      }
+
+      return _.extend({}, serializedData, templateContext);
+    },
+    // Serialize the view's model *or* collection, if
+    // it exists, for the template
+    serializeData: function serializeData() {
+      // If we have a model, we serialize that
+      if (this.model) {
+        return this.serializeModel();
+      } // Otherwise, we serialize the collection,
+      // making it available under the `items` property
+
+
+      if (this.collection) {
+        return {
+          items: this.serializeCollection()
+        };
+      }
+    },
+    // Prepares the special `model` property of a view
+    // for being displayed in the template. Override this if
+    // you need a custom transformation for your view's model
+    serializeModel: function serializeModel() {
+      return this.model.attributes;
+    },
+    // Serialize a collection
+    serializeCollection: function serializeCollection() {
+      return _.map(this.collection.models, function (model) {
+        return model.attributes;
+      });
+    },
+    // Renders the data into the template
+    _renderHtml: function _renderHtml(template, data) {
+      return template(data);
+    },
+    // Attaches the content of a given view.
+    // This method can be overridden to optimize rendering,
+    // or to render in a non standard way.
+    //
+    // For example, using `innerHTML` instead of `$el.html`
+    //
+    // ```js
+    // attachElContent(html) {
+    //   this.el.innerHTML = html;
+    // }
+    // ```
+    attachElContent: function attachElContent(html) {
+      this.Dom.setContents(this.el, html, this.$el);
+    }
+  };
+
+  // Borrow event splitter from Backbone
+  var delegateEventSplitter = /^(\S+)\s*(.*)$/; // Set event name to be namespaced using a unique index
+  // to generate a non colliding event namespace
+  // http://api.jquery.com/event.namespace/
+
+  var getNamespacedEventName = function getNamespacedEventName(eventName, namespace) {
+    var match = eventName.match(delegateEventSplitter);
+    return "".concat(match[1], ".").concat(namespace, " ").concat(match[2]);
+  };
+
+  // Add Feature flags here
+  // e.g. 'class' => false
+  var FEATURES = {
+    childViewEventPrefix: false,
+    triggersStopPropagation: true,
+    triggersPreventDefault: true,
+    DEV_MODE: false
+  };
+
+  function isEnabled(name) {
+    return !!FEATURES[name];
+  }
+
+  function setEnabled(name, state) {
+    return FEATURES[name] = state;
+  }
+
+  // 'click:foo'
+
+  function buildViewTrigger(view, triggerDef) {
+    if (_.isString(triggerDef)) {
+      triggerDef = {
+        event: triggerDef
+      };
+    }
+
+    var eventName = triggerDef.event;
+    var shouldPreventDefault = !!triggerDef.preventDefault;
+
+    if (isEnabled('triggersPreventDefault')) {
+      shouldPreventDefault = triggerDef.preventDefault !== false;
+    }
+
+    var shouldStopPropagation = !!triggerDef.stopPropagation;
+
+    if (isEnabled('triggersStopPropagation')) {
+      shouldStopPropagation = triggerDef.stopPropagation !== false;
+    }
+
+    return function (event) {
+      if (shouldPreventDefault) {
+        event.preventDefault();
+      }
+
+      if (shouldStopPropagation) {
+        event.stopPropagation();
+      }
+
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      view.triggerMethod.apply(view, [eventName, view, event].concat(args));
     };
-
-    return this.regionManager.addRegions(regions, defaults);
-  },
-
-  // Internal method to initialize the regions that have been defined in a
-  // `regions` attribute on this layout. 
-  _initializeRegions: function (options) {
-    var regions;
-    this._initRegionManager();
-
-    if (_.isFunction(this.regions)) {
-      regions = this.regions(options);
-    } else {
-      regions = this.regions || {};
-    }
-
-    this.addRegions(regions);
-  },
-
-  // Internal method to re-initialize all of the regions by updating the `el` that
-  // they point to
-  _reInitializeRegions: function(){
-    this.regionManager.closeRegions();
-    this.regionManager.each(function(region){
-      region.reset();
-    });
-  },
-
-  // Internal method to initialize the region manager
-  // and all regions in it
-  _initRegionManager: function(){
-    this.regionManager = new Marionette.RegionManager();
-
-    this.listenTo(this.regionManager, "region:add", function(name, region){
-      this[name] = region;
-      this.trigger("region:add", name, region);
-    });
-
-    this.listenTo(this.regionManager, "region:remove", function(name, region){
-      delete this[name];
-      this.trigger("region:remove", name, region);
-    });
   }
-});
 
+  var TriggersMixin = {
+    // Configure `triggers` to forward DOM events to view
+    // events. `triggers: {"click .foo": "do:foo"}`
+    _getViewTriggers: function _getViewTriggers(view, triggers) {
+      var _this = this;
 
-// AppRouter
-// ---------
-
-// Reduce the boilerplate code of handling route events
-// and then calling a single method on another object.
-// Have your routers configured to call the method on
-// your object, directly.
-//
-// Configure an AppRouter with `appRoutes`.
-//
-// App routers can only take one `controller` object. 
-// It is recommended that you divide your controller
-// objects in to smaller pieces of related functionality
-// and have multiple routers / controllers, instead of
-// just one giant router and controller.
-//
-// You can also add standard routes to an AppRouter.
-
-Marionette.AppRouter = Backbone.Router.extend({
-
-  constructor: function(options){
-    Backbone.Router.prototype.constructor.apply(this, slice(arguments));
-
-    this.options = options;
-
-    if (this.appRoutes){
-      var controller = Marionette.getOption(this, "controller");
-      this.processAppRoutes(controller, this.appRoutes);
+      // Configure the triggers, prevent default
+      // action and stop propagation of DOM events
+      return _.reduce(triggers, function (events, value, key) {
+        key = getNamespacedEventName(key, "trig".concat(_this.cid));
+        events[key] = buildViewTrigger(view, value);
+        return events;
+      }, {});
     }
-  },
+  };
 
-  // Internal method to process the `appRoutes` for the
-  // router, and turn them in to routes that trigger the
-  // specified method on the specified `controller`.
-  processAppRoutes: function(controller, appRoutes) {
-    var routeNames = _.keys(appRoutes).reverse(); // Backbone requires reverted order of routes
+  // a given key for triggers and events
+  // swaps the @ui with the associated selector.
+  // Returns a new, non-mutated, parsed events hash.
 
-    _.each(routeNames, function(route) {
-      var methodName = appRoutes[route];
-      var method = controller[methodName];
+  var _normalizeUIKeys = function normalizeUIKeys(hash, ui) {
+    return _.reduce(hash, function (memo, val, key) {
+      var normalizedKey = _normalizeUIString(key, ui);
 
-      if (!method) {
-        throw new Error("Method '" + methodName + "' was not found on the controller");
-      }
+      memo[normalizedKey] = val;
+      return memo;
+    }, {});
+  };
 
-      this.route(route, methodName, _.bind(method, controller));
-    }, this);
-  }
-});
+  var uiRegEx = /@ui\.[a-zA-Z-_$0-9]*/g; // utility method for parsing @ui. syntax strings
+  // into associated selector
 
-
-// Application
-// -----------
-
-// Contain and manage the composite application as a whole.
-// Stores and starts up `Region` objects, includes an
-// event aggregator as `app.vent`
-Marionette.Application = function(options){
-  this._initRegionManager();
-  this._initCallbacks = new Marionette.Callbacks();
-  this.vent = new Backbone.Wreqr.EventAggregator();
-  this.commands = new Backbone.Wreqr.Commands();
-  this.reqres = new Backbone.Wreqr.RequestResponse();
-  this.submodules = {};
-
-  _.extend(this, options);
-
-  this.triggerMethod = Marionette.triggerMethod;
-};
-
-_.extend(Marionette.Application.prototype, Backbone.Events, {
-  // Command execution, facilitated by Backbone.Wreqr.Commands
-  execute: function(){
-    var args = Array.prototype.slice.apply(arguments);
-    this.commands.execute.apply(this.commands, args);
-  },
-
-  // Request/response, facilitated by Backbone.Wreqr.RequestResponse
-  request: function(){
-    var args = Array.prototype.slice.apply(arguments);
-    return this.reqres.request.apply(this.reqres, args);
-  },
-
-  // Add an initializer that is either run at when the `start`
-  // method is called, or run immediately if added after `start`
-  // has already been called.
-  addInitializer: function(initializer){
-    this._initCallbacks.add(initializer);
-  },
-
-  // kick off all of the application's processes.
-  // initializes all of the regions that have been added
-  // to the app, and runs all of the initializer functions
-  start: function(options){
-    this.triggerMethod("initialize:before", options);
-    this._initCallbacks.run(options, this);
-    this.triggerMethod("initialize:after", options);
-
-    this.triggerMethod("start", options);
-  },
-
-  // Add regions to your app. 
-  // Accepts a hash of named strings or Region objects
-  // addRegions({something: "#someRegion"})
-  // addRegions({something: Region.extend({el: "#someRegion"}) });
-  addRegions: function(regions){
-    return this._regionManager.addRegions(regions);
-  },
-
-  // Removes a region from your app.
-  // Accepts the regions name
-  // removeRegion('myRegion')
-  removeRegion: function(region) {
-    this._regionManager.removeRegion(region);
-  },
-
-  // Create a module, attached to the application
-  module: function(moduleNames, moduleDefinition){
-    // slice the args, and add this application object as the
-    // first argument of the array
-    var args = slice(arguments);
-    args.unshift(this);
-
-    // see the Marionette.Module object for more information
-    return Marionette.Module.create.apply(Marionette.Module, args);
-  },
-
-  // Internal method to set up the region manager
-  _initRegionManager: function(){
-    this._regionManager = new Marionette.RegionManager();
-
-    this.listenTo(this._regionManager, "region:add", function(name, region){
-      this[name] = region;
+  var _normalizeUIString = function normalizeUIString(uiString, ui) {
+    return uiString.replace(uiRegEx, function (r) {
+      return ui[r.slice(4)];
     });
+  }; // allows for the use of the @ui. syntax within
+  // a given value for regions
+  // swaps the @ui with the associated selector
 
-    this.listenTo(this._regionManager, "region:remove", function(name, region){
-      delete this[name];
-    });
-  }
-});
 
-// Copy the `extend` function used by Backbone's classes
-Marionette.Application.extend = Marionette.extend;
+  var _normalizeUIValues = function normalizeUIValues(hash, ui, property) {
+    _.each(hash, function (val, key) {
+      if (_.isString(val)) {
+        hash[key] = _normalizeUIString(val, ui);
+      } else if (val) {
+        var propertyVal = val[property];
 
-// Module
-// ------
-
-// A simple module system, used to create privacy and encapsulation in
-// Marionette applications
-Marionette.Module = function(moduleName, app){
-  this.moduleName = moduleName;
-
-  // store sub-modules
-  this.submodules = {};
-
-  this._setupInitializersAndFinalizers();
-
-  // store the configuration for this module
-  this.app = app;
-  this.startWithParent = true;
-
-  this.triggerMethod = Marionette.triggerMethod;
-};
-
-// Extend the Module prototype with events / listenTo, so that the module
-// can be used as an event aggregator or pub/sub.
-_.extend(Marionette.Module.prototype, Backbone.Events, {
-
-  // Initializer for a specific module. Initializers are run when the
-  // module's `start` method is called.
-  addInitializer: function(callback){
-    this._initializerCallbacks.add(callback);
-  },
-
-  // Finalizers are run when a module is stopped. They are used to teardown
-  // and finalize any variables, references, events and other code that the
-  // module had set up.
-  addFinalizer: function(callback){
-    this._finalizerCallbacks.add(callback);
-  },
-
-  // Start the module, and run all of its initializers
-  start: function(options){
-    // Prevent re-starting a module that is already started
-    if (this._isInitialized){ return; }
-
-    // start the sub-modules (depth-first hierarchy)
-    _.each(this.submodules, function(mod){
-      // check to see if we should start the sub-module with this parent
-      if (mod.startWithParent){
-        mod.start(options);
-      }
-    });
-
-    // run the callbacks to "start" the current module
-    this.triggerMethod("before:start", options);
-
-    this._initializerCallbacks.run(options, this);
-    this._isInitialized = true;
-
-    this.triggerMethod("start", options);
-  },
-
-  // Stop this module by running its finalizers and then stop all of
-  // the sub-modules for this module
-  stop: function(){
-    // if we are not initialized, don't bother finalizing
-    if (!this._isInitialized){ return; }
-    this._isInitialized = false;
-
-    Marionette.triggerMethod.call(this, "before:stop");
-
-    // stop the sub-modules; depth-first, to make sure the
-    // sub-modules are stopped / finalized before parents
-    _.each(this.submodules, function(mod){ mod.stop(); });
-
-    // run the finalizers
-    this._finalizerCallbacks.run(undefined,this);
-
-    // reset the initializers and finalizers
-    this._initializerCallbacks.reset();
-    this._finalizerCallbacks.reset();
-
-    Marionette.triggerMethod.call(this, "stop");
-  },
-
-  // Configure the module with a definition function and any custom args
-  // that are to be passed in to the definition function
-  addDefinition: function(moduleDefinition, customArgs){
-    this._runModuleDefinition(moduleDefinition, customArgs);
-  },
-
-  // Internal method: run the module definition function with the correct
-  // arguments
-  _runModuleDefinition: function(definition, customArgs){
-    if (!definition){ return; }
-
-    // build the correct list of arguments for the module definition
-    var args = _.flatten([
-      this,
-      this.app,
-      Backbone,
-      Marionette,
-      Marionette.$, _,
-      customArgs
-    ]);
-
-    definition.apply(this, args);
-  },
-
-  // Internal method: set up new copies of initializers and finalizers.
-  // Calling this method will wipe out all existing initializers and
-  // finalizers.
-  _setupInitializersAndFinalizers: function(){
-    this._initializerCallbacks = new Marionette.Callbacks();
-    this._finalizerCallbacks = new Marionette.Callbacks();
-  }
-});
-
-// Type methods to create modules
-_.extend(Marionette.Module, {
-
-  // Create a module, hanging off the app parameter as the parent object.
-  create: function(app, moduleNames, moduleDefinition){
-    var module = app;
-
-    // get the custom args passed in after the module definition and
-    // get rid of the module name and definition function
-    var customArgs = slice(arguments);
-    customArgs.splice(0, 3);
-
-    // split the module names and get the length
-    moduleNames = moduleNames.split(".");
-    var length = moduleNames.length;
-
-    // store the module definition for the last module in the chain
-    var moduleDefinitions = [];
-    moduleDefinitions[length-1] = moduleDefinition;
-
-    // Loop through all the parts of the module definition
-    _.each(moduleNames, function(moduleName, i){
-      var parentModule = module;
-      module = this._getModule(parentModule, moduleName, app);
-      this._addModuleDefinition(parentModule, module, moduleDefinitions[i], customArgs);
-    }, this);
-
-    // Return the last module in the definition chain
-    return module;
-  },
-
-  _getModule: function(parentModule, moduleName, app, def, args){
-    // Get an existing module of this name if we have one
-    var module = parentModule[moduleName];
-
-    if (!module){
-      // Create a new module if we don't have one
-      module = new Marionette.Module(moduleName, app);
-      parentModule[moduleName] = module;
-      // store the module on the parent
-      parentModule.submodules[moduleName] = module;
-    }
-
-    return module;
-  },
-
-  _addModuleDefinition: function(parentModule, module, def, args){
-    var fn; 
-    var startWithParent;
-
-    if (_.isFunction(def)){
-      // if a function is supplied for the module definition
-      fn = def;
-      startWithParent = true;
-
-    } else if (_.isObject(def)){
-      // if an object is supplied
-      fn = def.define;
-      startWithParent = def.startWithParent;
-      
-    } else {
-      // if nothing is supplied
-      startWithParent = true;
-    }
-
-    // add module definition if needed
-    if (fn){
-      module.addDefinition(fn, args);
-    }
-
-    // `and` the two together, ensuring a single `false` will prevent it
-    // from starting with the parent
-    module.startWithParent = module.startWithParent && startWithParent;
-
-    // setup auto-start if needed
-    if (module.startWithParent && !module.startWithParentIsConfigured){
-
-      // only configure this once
-      module.startWithParentIsConfigured = true;
-
-      // add the module initializer config
-      parentModule.addInitializer(function(options){
-        if (module.startWithParent){
-          module.start(options);
+        if (_.isString(propertyVal)) {
+          val[property] = _normalizeUIString(propertyVal, ui);
         }
+      }
+    });
+
+    return hash;
+  };
+
+  var UIMixin = {
+    // normalize the keys of passed hash with the views `ui` selectors.
+    // `{"@ui.foo": "bar"}`
+    normalizeUIKeys: function normalizeUIKeys(hash) {
+      var uiBindings = this._getUIBindings();
+
+      return _normalizeUIKeys(hash, uiBindings);
+    },
+    // normalize the passed string with the views `ui` selectors.
+    // `"@ui.bar"`
+    normalizeUIString: function normalizeUIString(uiString) {
+      var uiBindings = this._getUIBindings();
+
+      return _normalizeUIString(uiString, uiBindings);
+    },
+    // normalize the values of passed hash with the views `ui` selectors.
+    // `{foo: "@ui.bar"}`
+    normalizeUIValues: function normalizeUIValues(hash, property) {
+      var uiBindings = this._getUIBindings();
+
+      return _normalizeUIValues(hash, uiBindings, property);
+    },
+    _getUIBindings: function _getUIBindings() {
+      var uiBindings = _.result(this, '_uiBindings');
+
+      return uiBindings || _.result(this, 'ui');
+    },
+    // This method binds the elements specified in the "ui" hash inside the view's code with
+    // the associated jQuery selectors.
+    _bindUIElements: function _bindUIElements() {
+      var _this = this;
+
+      if (!this.ui) {
+        return;
+      } // store the ui hash in _uiBindings so they can be reset later
+      // and so re-rendering the view will be able to find the bindings
+
+
+      if (!this._uiBindings) {
+        this._uiBindings = this.ui;
+      } // get the bindings result, as a function or otherwise
+
+
+      var bindings = _.result(this, '_uiBindings'); // empty the ui so we don't have anything to start with
+
+
+      this._ui = {}; // bind each of the selectors
+
+      _.each(bindings, function (selector, key) {
+        _this._ui[key] = _this.$(selector);
       });
 
+      this.ui = this._ui;
+    },
+    _unbindUIElements: function _unbindUIElements() {
+      var _this2 = this;
+
+      if (!this.ui || !this._uiBindings) {
+        return;
+      } // delete all of the existing ui bindings
+
+
+      _.each(this.ui, function ($el, name) {
+        delete _this2.ui[name];
+      }); // reset the ui element to the original bindings configuration
+
+
+      this.ui = this._uiBindings;
+      delete this._uiBindings;
+      delete this._ui;
+    },
+    _getUI: function _getUI(name) {
+      return this._ui[name];
+    }
+  };
+
+  // DomApi
+
+  function _getEl(el) {
+    return el instanceof Backbone.$ ? el : Backbone.$(el);
+  } // Static setter
+
+
+  function setDomApi(mixin) {
+    this.prototype.Dom = _.extend({}, this.prototype.Dom, mixin);
+    return this;
+  }
+  var DomApi = {
+    // Returns a new HTML DOM node instance
+    createBuffer: function createBuffer() {
+      return document.createDocumentFragment();
+    },
+    // Returns the document element for a given DOM element
+    getDocumentEl: function getDocumentEl(el) {
+      return el.ownerDocument.documentElement;
+    },
+    // Lookup the `selector` string
+    // Selector may also be a DOM element
+    // Returns an array-like object of nodes
+    getEl: function getEl(selector) {
+      return _getEl(selector);
+    },
+    // Finds the `selector` string with the el
+    // Returns an array-like object of nodes
+    findEl: function findEl(el, selector) {
+      return _getEl(el).find(selector);
+    },
+    // Returns true if the el contains the node childEl
+    hasEl: function hasEl(el, childEl) {
+      return el.contains(childEl && childEl.parentNode);
+    },
+    // Detach `el` from the DOM without removing listeners
+    detachEl: function detachEl(el) {
+      var _$el = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _getEl(el);
+
+      _$el.detach();
+    },
+    // Remove `oldEl` from the DOM and put `newEl` in its place
+    replaceEl: function replaceEl(newEl, oldEl) {
+      if (newEl === oldEl) {
+        return;
+      }
+
+      var parent = oldEl.parentNode;
+
+      if (!parent) {
+        return;
+      }
+
+      parent.replaceChild(newEl, oldEl);
+    },
+    // Swaps the location of `el1` and `el2` in the DOM
+    swapEl: function swapEl(el1, el2) {
+      if (el1 === el2) {
+        return;
+      }
+
+      var parent1 = el1.parentNode;
+      var parent2 = el2.parentNode;
+
+      if (!parent1 || !parent2) {
+        return;
+      }
+
+      var next1 = el1.nextSibling;
+      var next2 = el2.nextSibling;
+      parent1.insertBefore(el2, next1);
+      parent2.insertBefore(el1, next2);
+    },
+    // Replace the contents of `el` with the HTML string of `html`
+    setContents: function setContents(el, html) {
+      var _$el = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _getEl(el);
+
+      _$el.html(html);
+    },
+    // Takes the DOM node `el` and appends the DOM node `contents`
+    // to the end of the element's contents.
+    appendContents: function appendContents(el, contents) {
+      var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+          _ref$_$el = _ref._$el,
+          _$el = _ref$_$el === void 0 ? _getEl(el) : _ref$_$el,
+          _ref$_$contents = _ref._$contents,
+          _$contents = _ref$_$contents === void 0 ? _getEl(contents) : _ref$_$contents;
+
+      _$el.append(_$contents);
+    },
+    // Does the el have child nodes
+    hasContents: function hasContents(el) {
+      return !!el && el.hasChildNodes();
+    },
+    // Remove the inner contents of `el` from the DOM while leaving
+    // `el` itself in the DOM.
+    detachContents: function detachContents(el) {
+      var _$el = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _getEl(el);
+
+      _$el.contents().detach();
+    }
+  };
+
+  // ViewMixin
+  // - behaviors
+  // - childViewEventPrefix
+  // - childViewEvents
+  // - childViewTriggers
+  // - collectionEvents
+  // - modelEvents
+  // - triggers
+  // - ui
+
+  var ViewMixin = {
+    Dom: DomApi,
+    _isElAttached: function _isElAttached() {
+      return !!this.el && this.Dom.hasEl(this.Dom.getDocumentEl(this.el), this.el);
+    },
+    supportsRenderLifecycle: true,
+    supportsDestroyLifecycle: true,
+    _isDestroyed: false,
+    isDestroyed: function isDestroyed() {
+      return !!this._isDestroyed;
+    },
+    _isRendered: false,
+    isRendered: function isRendered() {
+      return !!this._isRendered;
+    },
+    _isAttached: false,
+    isAttached: function isAttached() {
+      return !!this._isAttached;
+    },
+    // Overriding Backbone.View's `delegateEvents` to handle
+    // `events` and `triggers`
+    delegateEvents: function delegateEvents(events) {
+      this._proxyBehaviorViewProperties();
+
+      this._buildEventProxies();
+
+      var combinedEvents = _.extend({}, this._getBehaviorEvents(), this._getEvents(events), this._getBehaviorTriggers(), this._getTriggers());
+
+      Backbone.View.prototype.delegateEvents.call(this, combinedEvents);
+      return this;
+    },
+    // Allows Backbone.View events to utilize `@ui.` selectors
+    _getEvents: function _getEvents(events) {
+      if (events) {
+        return this.normalizeUIKeys(events);
+      }
+
+      if (!this.events) {
+        return;
+      }
+
+      return this.normalizeUIKeys(_.result(this, 'events'));
+    },
+    // Configure `triggers` to forward DOM events to view
+    // events. `triggers: {"click .foo": "do:foo"}`
+    _getTriggers: function _getTriggers() {
+      if (!this.triggers) {
+        return;
+      } // Allow `triggers` to be configured as a function
+
+
+      var triggers = this.normalizeUIKeys(_.result(this, 'triggers')); // Configure the triggers, prevent default
+      // action and stop propagation of DOM events
+
+      return this._getViewTriggers(this, triggers);
+    },
+    // Handle `modelEvents`, and `collectionEvents` configuration
+    delegateEntityEvents: function delegateEntityEvents() {
+      this._delegateEntityEvents(this.model, this.collection); // bind each behaviors model and collection events
+
+
+      this._delegateBehaviorEntityEvents();
+
+      return this;
+    },
+    // Handle unbinding `modelEvents`, and `collectionEvents` configuration
+    undelegateEntityEvents: function undelegateEntityEvents() {
+      this._undelegateEntityEvents(this.model, this.collection); // unbind each behaviors model and collection events
+
+
+      this._undelegateBehaviorEntityEvents();
+
+      return this;
+    },
+    // Handle destroying the view and its children.
+    destroy: function destroy(options) {
+      if (this._isDestroyed || this._isDestroying) {
+        return this;
+      }
+
+      this._isDestroying = true;
+      var shouldTriggerDetach = this._isAttached && !this._disableDetachEvents;
+      this.triggerMethod('before:destroy', this, options);
+
+      if (shouldTriggerDetach) {
+        this.triggerMethod('before:detach', this);
+      } // unbind UI elements
+
+
+      this.unbindUIElements(); // remove the view from the DOM
+
+      this._removeElement();
+
+      if (shouldTriggerDetach) {
+        this._isAttached = false;
+        this.triggerMethod('detach', this);
+      } // remove children after the remove to prevent extra paints
+
+
+      this._removeChildren();
+
+      this._isDestroyed = true;
+      this._isRendered = false; // Destroy behaviors after _isDestroyed flag
+
+      this._destroyBehaviors(options);
+
+      this._deleteEntityEventHandlers();
+
+      this.triggerMethod('destroy', this, options);
+
+      this._triggerEventOnBehaviors('destroy', this, options);
+
+      this.stopListening();
+      return this;
+    },
+    // Equates to this.$el.remove
+    _removeElement: function _removeElement() {
+      this.$el.off().removeData();
+      this.Dom.detachEl(this.el, this.$el);
+    },
+    // This method binds the elements specified in the "ui" hash
+    bindUIElements: function bindUIElements() {
+      this._bindUIElements();
+
+      this._bindBehaviorUIElements();
+
+      return this;
+    },
+    // This method unbinds the elements specified in the "ui" hash
+    unbindUIElements: function unbindUIElements() {
+      this._unbindUIElements();
+
+      this._unbindBehaviorUIElements();
+
+      return this;
+    },
+    getUI: function getUI(name) {
+      return this._getUI(name);
+    },
+    // Cache `childViewEvents` and `childViewTriggers`
+    _buildEventProxies: function _buildEventProxies() {
+      this._childViewEvents = this.normalizeMethods(_.result(this, 'childViewEvents'));
+      this._childViewTriggers = _.result(this, 'childViewTriggers');
+      this._eventPrefix = this._getEventPrefix();
+    },
+    _getEventPrefix: function _getEventPrefix() {
+      var defaultPrefix = isEnabled('childViewEventPrefix') ? 'childview' : false;
+
+      var prefix = _.result(this, 'childViewEventPrefix', defaultPrefix);
+
+      return prefix === false ? prefix : prefix + ':';
+    },
+    _proxyChildViewEvents: function _proxyChildViewEvents(view) {
+      if (this._childViewEvents || this._childViewTriggers || this._eventPrefix) {
+        this.listenTo(view, 'all', this._childViewEventHandler);
+      }
+    },
+    _childViewEventHandler: function _childViewEventHandler(eventName) {
+      var childViewEvents = this._childViewEvents; // call collectionView childViewEvent if defined
+
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      if (childViewEvents && childViewEvents[eventName]) {
+        childViewEvents[eventName].apply(this, args);
+      } // use the parent view's proxyEvent handlers
+
+
+      var childViewTriggers = this._childViewTriggers; // Call the event with the proxy name on the parent layout
+
+      if (childViewTriggers && childViewTriggers[eventName]) {
+        this.triggerMethod.apply(this, [childViewTriggers[eventName]].concat(args));
+      }
+
+      if (this._eventPrefix) {
+        this.triggerMethod.apply(this, [this._eventPrefix + eventName].concat(args));
+      }
+    }
+  };
+
+  _.extend(ViewMixin, BehaviorsMixin, CommonMixin, DelegateEntityEventsMixin, TemplateRenderMixin, TriggersMixin, UIMixin);
+
+  function renderView(view) {
+    if (view._isRendered) {
+      return;
     }
 
+    if (!view.supportsRenderLifecycle) {
+      view.triggerMethod('before:render', view);
+    }
+
+    view.render();
+    view._isRendered = true;
+
+    if (!view.supportsRenderLifecycle) {
+      view.triggerMethod('render', view);
+    }
   }
-});
+  function destroyView(view, disableDetachEvents) {
+    if (view.destroy) {
+      // Attach flag for public destroy function internal check
+      view._disableDetachEvents = disableDetachEvents;
+      view.destroy();
+      return;
+    } // Destroy for non-Marionette Views
 
 
+    if (!view.supportsDestroyLifecycle) {
+      view.triggerMethod('before:destroy', view);
+    }
 
-  return Marionette;
-})(this, Backbone, _);// Backbone.Stickit v0.8.0, MIT Licensed
-// Copyright (c) 2012 The New York Times, CMS Group, Matthew DeLambo <delambo@gmail.com>
+    var shouldTriggerDetach = view._isAttached && !disableDetachEvents;
+
+    if (shouldTriggerDetach) {
+      view.triggerMethod('before:detach', view);
+    }
+
+    view.remove();
+
+    if (shouldTriggerDetach) {
+      view._isAttached = false;
+      view.triggerMethod('detach', view);
+    }
+
+    view._isDestroyed = true;
+
+    if (!view.supportsDestroyLifecycle) {
+      view.triggerMethod('destroy', view);
+    }
+  }
+
+  // Region
+  var classErrorName = 'RegionError';
+  var ClassOptions$1 = ['allowMissingEl', 'parentEl', 'replaceElement'];
+
+  var Region = function Region(options) {
+    this._setOptions(options, ClassOptions$1);
+
+    this.cid = _.uniqueId(this.cidPrefix); // getOption necessary because options.el may be passed as undefined
+
+    this._initEl = this.el = this.getOption('el'); // Handle when this.el is passed in as a $ wrapped element.
+
+    this.el = this.el instanceof Backbone.$ ? this.el[0] : this.el;
+    this.$el = this._getEl(this.el);
+    this.initialize.apply(this, arguments);
+  };
+
+  Region.extend = extend;
+  Region.setDomApi = setDomApi; // Region Methods
+  // --------------
+
+  _.extend(Region.prototype, CommonMixin, {
+    Dom: DomApi,
+    cidPrefix: 'mnr',
+    replaceElement: false,
+    _isReplaced: false,
+    _isSwappingView: false,
+    // This is a noop method intended to be overridden
+    initialize: function initialize() {},
+    // Displays a view instance inside of the region. If necessary handles calling the `render`
+    // method for you. Reads content directly from the `el` attribute.
+    show: function show(view, options) {
+      if (!this._ensureElement(options)) {
+        return;
+      }
+
+      view = this._getView(view, options);
+
+      if (view === this.currentView) {
+        return this;
+      }
+
+      if (view._isShown) {
+        throw new MarionetteError({
+          name: classErrorName,
+          message: 'View is already shown in a Region or CollectionView',
+          url: 'marionette.region.html#showing-a-view'
+        });
+      }
+
+      this._isSwappingView = !!this.currentView;
+      this.triggerMethod('before:show', this, view, options); // Assume an attached view is already in the region for pre-existing DOM
+
+      if (this.currentView || !view._isAttached) {
+        this.empty(options);
+      }
+
+      this._setupChildView(view);
+
+      this.currentView = view;
+      renderView(view);
+
+      this._attachView(view, options);
+
+      this.triggerMethod('show', this, view, options);
+      this._isSwappingView = false;
+      return this;
+    },
+    _getEl: function _getEl(el) {
+      if (!el) {
+        throw new MarionetteError({
+          name: classErrorName,
+          message: 'An "el" must be specified for a region.',
+          url: 'marionette.region.html#additional-options'
+        });
+      }
+
+      return this.getEl(el);
+    },
+    _setEl: function _setEl() {
+      this.$el = this._getEl(this.el);
+
+      if (this.$el.length) {
+        this.el = this.$el[0];
+      } // Make sure the $el contains only the el
+
+
+      if (this.$el.length > 1) {
+        this.$el = this.Dom.getEl(this.el);
+      }
+    },
+    // Set the `el` of the region and move any current view to the new `el`.
+    _setElement: function _setElement(el) {
+      if (el === this.el) {
+        return this;
+      }
+
+      var shouldReplace = this._isReplaced;
+
+      this._restoreEl();
+
+      this.el = el;
+
+      this._setEl();
+
+      if (this.currentView) {
+        var view = this.currentView;
+
+        if (shouldReplace) {
+          this._replaceEl(view);
+        } else {
+          this.attachHtml(view);
+        }
+      }
+
+      return this;
+    },
+    _setupChildView: function _setupChildView(view) {
+      monitorViewEvents(view);
+
+      this._proxyChildViewEvents(view); // We need to listen for if a view is destroyed in a way other than through the region.
+      // If this happens we need to remove the reference to the currentView since once a view
+      // has been destroyed we can not reuse it.
+
+
+      view.on('destroy', this._empty, this);
+    },
+    _proxyChildViewEvents: function _proxyChildViewEvents(view) {
+      var parentView = this._parentView;
+
+      if (!parentView) {
+        return;
+      }
+
+      parentView._proxyChildViewEvents(view);
+    },
+    // If the regions parent view is not monitoring its attach/detach events
+    _shouldDisableMonitoring: function _shouldDisableMonitoring() {
+      return this._parentView && this._parentView.monitorViewEvents === false;
+    },
+    _isElAttached: function _isElAttached() {
+      return this.Dom.hasEl(this.Dom.getDocumentEl(this.el), this.el);
+    },
+    _attachView: function _attachView(view) {
+      var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+          replaceElement = _ref.replaceElement;
+
+      var shouldTriggerAttach = !view._isAttached && this._isElAttached() && !this._shouldDisableMonitoring();
+      var shouldReplaceEl = typeof replaceElement === 'undefined' ? !!_.result(this, 'replaceElement') : !!replaceElement;
+
+      if (shouldTriggerAttach) {
+        view.triggerMethod('before:attach', view);
+      }
+
+      if (shouldReplaceEl) {
+        this._replaceEl(view);
+      } else {
+        this.attachHtml(view);
+      }
+
+      if (shouldTriggerAttach) {
+        view._isAttached = true;
+        view.triggerMethod('attach', view);
+      } // Corresponds that view is shown in a marionette Region or CollectionView
+
+
+      view._isShown = true;
+    },
+    _ensureElement: function _ensureElement() {
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      if (!_.isObject(this.el)) {
+        this._setEl();
+      }
+
+      if (!this.$el || this.$el.length === 0) {
+        var allowMissingEl = typeof options.allowMissingEl === 'undefined' ? !!_.result(this, 'allowMissingEl') : !!options.allowMissingEl;
+
+        if (allowMissingEl) {
+          return false;
+        } else {
+          throw new MarionetteError({
+            name: classErrorName,
+            message: "An \"el\" must exist in DOM for this region ".concat(this.cid),
+            url: 'marionette.region.html#additional-options'
+          });
+        }
+      }
+
+      return true;
+    },
+    _getView: function _getView(view) {
+      if (!view) {
+        throw new MarionetteError({
+          name: classErrorName,
+          message: 'The view passed is undefined and therefore invalid. You must pass a view instance to show.',
+          url: 'marionette.region.html#showing-a-view'
+        });
+      }
+
+      if (view._isDestroyed) {
+        throw new MarionetteError({
+          name: classErrorName,
+          message: "View (cid: \"".concat(view.cid, "\") has already been destroyed and cannot be used."),
+          url: 'marionette.region.html#showing-a-view'
+        });
+      }
+
+      if (view instanceof Backbone.View) {
+        return view;
+      }
+
+      var viewOptions = this._getViewOptions(view);
+
+      return new View(viewOptions);
+    },
+    // This allows for a template or a static string to be
+    // used as a template
+    _getViewOptions: function _getViewOptions(viewOptions) {
+      if (_.isFunction(viewOptions)) {
+        return {
+          template: viewOptions
+        };
+      }
+
+      if (_.isObject(viewOptions)) {
+        return viewOptions;
+      }
+
+      var template = function template() {
+        return viewOptions;
+      };
+
+      return {
+        template: template
+      };
+    },
+    // Override this method to change how the region finds the DOM element that it manages. Return
+    // a jQuery selector object scoped to a provided parent el or the document if none exists.
+    getEl: function getEl(el) {
+      var context = _.result(this, 'parentEl');
+
+      if (context && _.isString(el)) {
+        return this.Dom.findEl(context, el);
+      }
+
+      return this.Dom.getEl(el);
+    },
+    _replaceEl: function _replaceEl(view) {
+      // Always restore the el to ensure the regions el is present before replacing
+      this._restoreEl();
+
+      view.on('before:destroy', this._restoreEl, this);
+      this.Dom.replaceEl(view.el, this.el);
+      this._isReplaced = true;
+    },
+    // Restore the region's element in the DOM.
+    _restoreEl: function _restoreEl() {
+      // There is nothing to replace
+      if (!this._isReplaced) {
+        return;
+      }
+
+      var view = this.currentView;
+
+      if (!view) {
+        return;
+      }
+
+      this._detachView(view);
+
+      this._isReplaced = false;
+    },
+    // Check to see if the region's el was replaced.
+    isReplaced: function isReplaced() {
+      return !!this._isReplaced;
+    },
+    // Check to see if a view is being swapped by another
+    isSwappingView: function isSwappingView() {
+      return !!this._isSwappingView;
+    },
+    // Override this method to change how the new view is appended to the `$el` that the
+    // region is managing
+    attachHtml: function attachHtml(view) {
+      this.Dom.appendContents(this.el, view.el, {
+        _$el: this.$el,
+        _$contents: view.$el
+      });
+    },
+    // Destroy the current view, if there is one. If there is no current view,
+    // it will detach any html inside the region's `el`.
+    empty: function empty() {
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
+        allowMissingEl: true
+      };
+      var view = this.currentView; // If there is no view in the region we should only detach current html
+
+      if (!view) {
+        if (this._ensureElement(options)) {
+          this.detachHtml();
+        }
+
+        return this;
+      }
+
+      this._empty(view, true);
+
+      return this;
+    },
+    _empty: function _empty(view, shouldDestroy) {
+      view.off('destroy', this._empty, this);
+      this.triggerMethod('before:empty', this, view);
+
+      this._restoreEl();
+
+      delete this.currentView;
+
+      if (!view._isDestroyed) {
+        if (shouldDestroy) {
+          this.removeView(view);
+        } else {
+          this._detachView(view);
+        }
+
+        view._isShown = false;
+
+        this._stopChildViewEvents(view);
+      }
+
+      this.triggerMethod('empty', this, view);
+    },
+    _stopChildViewEvents: function _stopChildViewEvents(view) {
+      var parentView = this._parentView;
+
+      if (!parentView) {
+        return;
+      }
+
+      this._parentView.stopListening(view);
+    },
+    // Non-Marionette safe view.destroy
+    destroyView: function destroyView$1(view) {
+      if (view._isDestroyed) {
+        return view;
+      }
+
+      destroyView(view, this._shouldDisableMonitoring());
+
+      return view;
+    },
+    // Override this method to determine what happens when the view
+    // is removed from the region when the view is not being detached
+    removeView: function removeView(view) {
+      this.destroyView(view);
+    },
+    // Empties the Region without destroying the view
+    // Returns the detached view
+    detachView: function detachView() {
+      var view = this.currentView;
+
+      if (!view) {
+        return;
+      }
+
+      this._empty(view);
+
+      return view;
+    },
+    _detachView: function _detachView(view) {
+      var shouldTriggerDetach = view._isAttached && !this._shouldDisableMonitoring();
+      var shouldRestoreEl = this._isReplaced;
+
+      if (shouldTriggerDetach) {
+        view.triggerMethod('before:detach', view);
+      }
+
+      if (shouldRestoreEl) {
+        this.Dom.replaceEl(this.el, view.el);
+      } else {
+        this.detachHtml();
+      }
+
+      if (shouldTriggerDetach) {
+        view._isAttached = false;
+        view.triggerMethod('detach', view);
+      }
+    },
+    // Override this method to change how the region detaches current content
+    detachHtml: function detachHtml() {
+      this.Dom.detachContents(this.el, this.$el);
+    },
+    // Checks whether a view is currently present within the region. Returns `true` if there is
+    // and `false` if no view is present.
+    hasView: function hasView() {
+      return !!this.currentView;
+    },
+    // Reset the region by destroying any existing view and clearing out the cached `$el`.
+    // The next time a view is shown via this region, the region will re-query the DOM for
+    // the region's `el`.
+    reset: function reset(options) {
+      this.empty(options);
+      this.el = this._initEl;
+      delete this.$el;
+      return this;
+    },
+    _isDestroyed: false,
+    isDestroyed: function isDestroyed() {
+      return this._isDestroyed;
+    },
+    // Destroy the region, remove any child view
+    // and remove the region from any associated view
+    destroy: function destroy(options) {
+      if (this._isDestroyed) {
+        return this;
+      }
+
+      this.triggerMethod('before:destroy', this, options);
+      this._isDestroyed = true;
+      this.reset(options);
+
+      if (this._name) {
+        this._parentView._removeReferences(this._name);
+      }
+
+      delete this._parentView;
+      delete this._name;
+      this.triggerMethod('destroy', this, options);
+      this.stopListening();
+      return this;
+    }
+  });
+
+  function buildRegion (definition, defaults) {
+    if (definition instanceof Region) {
+      return definition;
+    }
+
+    if (_.isString(definition)) {
+      return buildRegionFromObject(defaults, {
+        el: definition
+      });
+    }
+
+    if (_.isFunction(definition)) {
+      return buildRegionFromObject(defaults, {
+        regionClass: definition
+      });
+    }
+
+    if (_.isObject(definition)) {
+      return buildRegionFromObject(defaults, definition);
+    }
+
+    throw new MarionetteError({
+      message: 'Improper region configuration type.',
+      url: 'marionette.region.html#defining-regions'
+    });
+  }
+
+  function buildRegionFromObject(defaults, definition) {
+    var options = _.extend({}, defaults, definition);
+
+    var RegionClass = options.regionClass;
+    delete options.regionClass;
+    return new RegionClass(options);
+  }
+
+  // - regions
+  // - regionClass
+
+  var RegionsMixin = {
+    regionClass: Region,
+    // Internal method to initialize the regions that have been defined in a
+    // `regions` attribute on this View.
+    _initRegions: function _initRegions() {
+      // init regions hash
+      this.regions = this.regions || {};
+      this._regions = {};
+      this.addRegions(_.result(this, 'regions'));
+    },
+    // Internal method to re-initialize all of the regions by updating
+    // the `el` that they point to
+    _reInitRegions: function _reInitRegions() {
+      _invoke(this._regions, 'reset');
+    },
+    // Add a single region, by name, to the View
+    addRegion: function addRegion(name, definition) {
+      var regions = {};
+      regions[name] = definition;
+      return this.addRegions(regions)[name];
+    },
+    // Add multiple regions as a {name: definition, name2: def2} object literal
+    addRegions: function addRegions(regions) {
+      // If there's nothing to add, stop here.
+      if (_.isEmpty(regions)) {
+        return;
+      } // Normalize region selectors hash to allow
+      // a user to use the @ui. syntax.
+
+
+      regions = this.normalizeUIValues(regions, 'el'); // Add the regions definitions to the regions property
+
+      this.regions = _.extend({}, this.regions, regions);
+      return this._addRegions(regions);
+    },
+    // internal method to build and add regions
+    _addRegions: function _addRegions(regionDefinitions) {
+      var _this = this;
+
+      var defaults = {
+        regionClass: this.regionClass,
+        parentEl: _.partial(_.result, this, 'el')
+      };
+      return _.reduce(regionDefinitions, function (regions, definition, name) {
+        regions[name] = buildRegion(definition, defaults);
+
+        _this._addRegion(regions[name], name);
+
+        return regions;
+      }, {});
+    },
+    _addRegion: function _addRegion(region, name) {
+      this.triggerMethod('before:add:region', this, name, region);
+      region._parentView = this;
+      region._name = name;
+      this._regions[name] = region;
+      this.triggerMethod('add:region', this, name, region);
+    },
+    // Remove a single region from the View, by name
+    removeRegion: function removeRegion(name) {
+      var region = this._regions[name];
+
+      this._removeRegion(region, name);
+
+      return region;
+    },
+    // Remove all regions from the View
+    removeRegions: function removeRegions() {
+      var regions = this._getRegions();
+
+      _.each(this._regions, this._removeRegion.bind(this));
+
+      return regions;
+    },
+    _removeRegion: function _removeRegion(region, name) {
+      this.triggerMethod('before:remove:region', this, name, region);
+      region.destroy();
+      this.triggerMethod('remove:region', this, name, region);
+    },
+    // Called in a region's destroy
+    _removeReferences: function _removeReferences(name) {
+      delete this.regions[name];
+      delete this._regions[name];
+    },
+    // Empty all regions in the region manager, but
+    // leave them attached
+    emptyRegions: function emptyRegions() {
+      var regions = this.getRegions();
+
+      _invoke(regions, 'empty');
+
+      return regions;
+    },
+    // Checks to see if view contains region
+    // Accepts the region name
+    // hasRegion('main')
+    hasRegion: function hasRegion(name) {
+      return !!this.getRegion(name);
+    },
+    // Provides access to regions
+    // Accepts the region name
+    // getRegion('main')
+    getRegion: function getRegion(name) {
+      if (!this._isRendered) {
+        this.render();
+      }
+
+      return this._regions[name];
+    },
+    _getRegions: function _getRegions() {
+      return _.clone(this._regions);
+    },
+    // Get all regions
+    getRegions: function getRegions() {
+      if (!this._isRendered) {
+        this.render();
+      }
+
+      return this._getRegions();
+    },
+    showChildView: function showChildView(name, view, options) {
+      var region = this.getRegion(name);
+      region.show(view, options);
+      return view;
+    },
+    detachChildView: function detachChildView(name) {
+      return this.getRegion(name).detachView();
+    },
+    getChildView: function getChildView(name) {
+      return this.getRegion(name).currentView;
+    }
+  };
+
+  // Static setter for the renderer
+  function setRenderer(renderer) {
+    this.prototype._renderHtml = renderer;
+    return this;
+  }
+
+  // View
+  var ClassOptions$2 = ['behaviors', 'childViewEventPrefix', 'childViewEvents', 'childViewTriggers', 'collectionEvents', 'events', 'modelEvents', 'regionClass', 'regions', 'template', 'templateContext', 'triggers', 'ui']; // Used by _getImmediateChildren
+
+  function childReducer(children, region) {
+    if (region.currentView) {
+      children.push(region.currentView);
+    }
+
+    return children;
+  } // The standard view. Includes view events, automatic rendering
+  // templates, nested views, and more.
+
+
+  var View = Backbone.View.extend({
+    constructor: function constructor(options) {
+      this._setOptions(options, ClassOptions$2);
+
+      monitorViewEvents(this);
+
+      this._initBehaviors();
+
+      this._initRegions();
+
+      Backbone.View.prototype.constructor.apply(this, arguments);
+      this.delegateEntityEvents();
+
+      this._triggerEventOnBehaviors('initialize', this, options);
+    },
+    // Overriding Backbone.View's `setElement` to handle
+    // if an el was previously defined. If so, the view might be
+    // rendered or attached on setElement.
+    setElement: function setElement() {
+      Backbone.View.prototype.setElement.apply(this, arguments);
+      this._isRendered = this.Dom.hasContents(this.el);
+      this._isAttached = this._isElAttached();
+
+      if (this._isRendered) {
+        this.bindUIElements();
+      }
+
+      return this;
+    },
+    // If a template is available, renders it into the view's `el`
+    // Re-inits regions and binds UI.
+    render: function render() {
+      var template = this.getTemplate();
+
+      if (template === false || this._isDestroyed) {
+        return this;
+      }
+
+      this.triggerMethod('before:render', this); // If this is not the first render call, then we need to
+      // re-initialize the `el` for each region
+
+      if (this._isRendered) {
+        this._reInitRegions();
+      }
+
+      this._renderTemplate(template);
+
+      this.bindUIElements();
+      this._isRendered = true;
+      this.triggerMethod('render', this);
+      return this;
+    },
+    // called by ViewMixin destroy
+    _removeChildren: function _removeChildren() {
+      this.removeRegions();
+    },
+    _getImmediateChildren: function _getImmediateChildren() {
+      return _.reduce(this._regions, childReducer, []);
+    }
+  }, {
+    setRenderer: setRenderer,
+    setDomApi: setDomApi
+  });
+
+  _.extend(View.prototype, ViewMixin, RegionsMixin);
+
+  // shut down child views.
+
+  var Container = function Container() {
+    this._init();
+  }; // Mix in methods from Underscore, for iteration, and other
+  // collection related features.
+  // Borrowing this code from Backbone.Collection:
+  // https://github.com/jashkenas/backbone/blob/1.1.2/backbone.js#L962
+
+
+  var methods = ['forEach', 'each', 'map', 'find', 'detect', 'filter', 'select', 'reject', 'every', 'all', 'some', 'any', 'include', 'contains', 'invoke', 'toArray', 'first', 'initial', 'rest', 'last', 'without', 'isEmpty', 'pluck', 'reduce', 'partition'];
+
+  _.each(methods, function (method) {
+    Container.prototype[method] = function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return _[method].apply(_, [this._views].concat(args));
+    };
+  });
+
+  function stringComparator(comparator, view) {
+    return view.model && view.model.get(comparator);
+  } // Container Methods
+  // -----------------
+
+
+  _.extend(Container.prototype, {
+    // Initializes an empty container
+    _init: function _init() {
+      this._views = [];
+      this._viewsByCid = {};
+      this._indexByModel = {};
+
+      this._updateLength();
+    },
+    // Add a view to this container. Stores the view
+    // by `cid` and makes it searchable by the model
+    // cid (and model itself). Additionally it stores
+    // the view by index in the _views array
+    _add: function _add(view) {
+      var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._views.length;
+
+      this._addViewIndexes(view); // add to end by default
+
+
+      this._views.splice(index, 0, view);
+
+      this._updateLength();
+    },
+    _addViewIndexes: function _addViewIndexes(view) {
+      // store the view
+      this._viewsByCid[view.cid] = view; // index it by model
+
+      if (view.model) {
+        this._indexByModel[view.model.cid] = view;
+      }
+    },
+    // Sort (mutate) and return the array of the child views.
+    _sort: function _sort(comparator, context) {
+      if (typeof comparator === 'string') {
+        comparator = _.partial(stringComparator, comparator);
+        return this._sortBy(comparator);
+      }
+
+      if (comparator.length === 1) {
+        return this._sortBy(comparator.bind(context));
+      }
+
+      return this._views.sort(comparator.bind(context));
+    },
+    // Makes `_.sortBy` mutate the array to match `this._views.sort`
+    _sortBy: function _sortBy(comparator) {
+      var sortedViews = _.sortBy(this._views, comparator);
+
+      this._set(sortedViews);
+
+      return sortedViews;
+    },
+    // Replace array contents without overwriting the reference.
+    // Should not add/remove views
+    _set: function _set(views, shouldReset) {
+      this._views.length = 0;
+
+      this._views.push.apply(this._views, views.slice(0));
+
+      if (shouldReset) {
+        this._viewsByCid = {};
+        this._indexByModel = {};
+
+        _.each(views, this._addViewIndexes.bind(this));
+
+        this._updateLength();
+      }
+    },
+    // Swap views by index
+    _swap: function _swap(view1, view2) {
+      var view1Index = this.findIndexByView(view1);
+      var view2Index = this.findIndexByView(view2);
+
+      if (view1Index === -1 || view2Index === -1) {
+        return;
+      }
+
+      var swapView = this._views[view1Index];
+      this._views[view1Index] = this._views[view2Index];
+      this._views[view2Index] = swapView;
+    },
+    // Find a view by the model that was attached to it.
+    // Uses the model's `cid` to find it.
+    findByModel: function findByModel(model) {
+      return this.findByModelCid(model.cid);
+    },
+    // Find a view by the `cid` of the model that was attached to it.
+    findByModelCid: function findByModelCid(modelCid) {
+      return this._indexByModel[modelCid];
+    },
+    // Find a view by index.
+    findByIndex: function findByIndex(index) {
+      return this._views[index];
+    },
+    // Find the index of a view instance
+    findIndexByView: function findIndexByView(view) {
+      return this._views.indexOf(view);
+    },
+    // Retrieve a view by its `cid` directly
+    findByCid: function findByCid(cid) {
+      return this._viewsByCid[cid];
+    },
+    hasView: function hasView(view) {
+      return !!this.findByCid(view.cid);
+    },
+    // Remove a view and clean up index references.
+    _remove: function _remove(view) {
+      if (!this._viewsByCid[view.cid]) {
+        return;
+      } // delete model index
+
+
+      if (view.model) {
+        delete this._indexByModel[view.model.cid];
+      } // remove the view from the container
+
+
+      delete this._viewsByCid[view.cid];
+      var index = this.findIndexByView(view);
+
+      this._views.splice(index, 1);
+
+      this._updateLength();
+    },
+    // Update the `.length` attribute on this container
+    _updateLength: function _updateLength() {
+      this.length = this._views.length;
+    }
+  });
+
+  // Collection View
+  var classErrorName$1 = 'CollectionViewError';
+  var ClassOptions$3 = ['behaviors', 'childView', 'childViewContainer', 'childViewEventPrefix', 'childViewEvents', 'childViewOptions', 'childViewTriggers', 'collectionEvents', 'emptyView', 'emptyViewOptions', 'events', 'modelEvents', 'sortWithCollection', 'template', 'templateContext', 'triggers', 'ui', 'viewComparator', 'viewFilter']; // A view that iterates over a Backbone.Collection
+  // and renders an individual child view for each model.
+
+  var CollectionView = Backbone.View.extend({
+    // flag for maintaining the sorted order of the collection
+    sortWithCollection: true,
+    // constructor
+    constructor: function constructor(options) {
+      this._setOptions(options, ClassOptions$3);
+
+      monitorViewEvents(this);
+
+      this._initChildViewStorage();
+
+      this._initBehaviors();
+
+      Backbone.View.prototype.constructor.apply(this, arguments); // Init empty region
+
+      this.getEmptyRegion();
+      this.delegateEntityEvents();
+
+      this._triggerEventOnBehaviors('initialize', this, options);
+    },
+    // Internal method to set up the `children` object for storing all of the child views
+    // `_children` represents all child views
+    // `children` represents only views filtered to be shown
+    _initChildViewStorage: function _initChildViewStorage() {
+      this._children = new Container();
+      this.children = new Container();
+    },
+    // Create an region to show the emptyView
+    getEmptyRegion: function getEmptyRegion() {
+      var $emptyEl = this.$container || this.$el;
+
+      if (this._emptyRegion && !this._emptyRegion.isDestroyed()) {
+        this._emptyRegion._setElement($emptyEl[0]);
+
+        return this._emptyRegion;
+      }
+
+      this._emptyRegion = new Region({
+        el: $emptyEl[0],
+        replaceElement: false
+      });
+      this._emptyRegion._parentView = this;
+      return this._emptyRegion;
+    },
+    // Configured the initial events that the collection view binds to.
+    _initialEvents: function _initialEvents() {
+      if (this._isRendered) {
+        return;
+      }
+
+      this.listenTo(this.collection, {
+        'sort': this._onCollectionSort,
+        'reset': this._onCollectionReset,
+        'update': this._onCollectionUpdate
+      });
+    },
+    // Internal method. This checks for any changes in the order of the collection.
+    // If the index of any view doesn't match, it will re-sort.
+    _onCollectionSort: function _onCollectionSort(collection, _ref) {
+      var add = _ref.add,
+          merge = _ref.merge,
+          remove = _ref.remove;
+
+      if (!this.sortWithCollection || this.viewComparator === false) {
+        return;
+      } // If the data is changing we will handle the sort later in `_onCollectionUpdate`
+
+
+      if (add || remove || merge) {
+        return;
+      } // If the only thing happening here is sorting, sort.
+
+
+      this.sort();
+    },
+    _onCollectionReset: function _onCollectionReset() {
+      this._destroyChildren();
+
+      this._addChildModels(this.collection.models);
+
+      this.sort();
+    },
+    // Handle collection update model additions and  removals
+    _onCollectionUpdate: function _onCollectionUpdate(collection, options) {
+      var changes = options.changes; // Remove first since it'll be a shorter array lookup.
+
+      var removedViews = changes.removed.length && this._removeChildModels(changes.removed);
+
+      this._addedViews = changes.added.length && this._addChildModels(changes.added);
+
+      this._detachChildren(removedViews);
+
+      this.sort(); // Destroy removed child views after all of the render is complete
+
+      this._removeChildViews(removedViews);
+    },
+    _removeChildModels: function _removeChildModels(models) {
+      var _this = this;
+
+      return _.reduce(models, function (views, model) {
+        var removeView = _this._removeChildModel(model);
+
+        if (removeView) {
+          views.push(removeView);
+        }
+
+        return views;
+      }, []);
+    },
+    _removeChildModel: function _removeChildModel(model) {
+      var view = this._children.findByModel(model);
+
+      if (view) {
+        this._removeChild(view);
+      }
+
+      return view;
+    },
+    _removeChild: function _removeChild(view) {
+      this.triggerMethod('before:remove:child', this, view);
+
+      this.children._remove(view);
+
+      this._children._remove(view);
+
+      this.triggerMethod('remove:child', this, view);
+    },
+    // Added views are returned for consistency with _removeChildModels
+    _addChildModels: function _addChildModels(models) {
+      return _.map(models, this._addChildModel.bind(this));
+    },
+    _addChildModel: function _addChildModel(model) {
+      var view = this._createChildView(model);
+
+      this._addChild(view);
+
+      return view;
+    },
+    _createChildView: function _createChildView(model) {
+      var ChildView = this._getChildView(model);
+
+      var childViewOptions = this._getChildViewOptions(model);
+
+      var view = this.buildChildView(model, ChildView, childViewOptions);
+      return view;
+    },
+    _addChild: function _addChild(view, index) {
+      this.triggerMethod('before:add:child', this, view);
+
+      this._setupChildView(view);
+
+      this._children._add(view, index);
+
+      this.children._add(view, index);
+
+      this.triggerMethod('add:child', this, view);
+    },
+    // Retrieve the `childView` class
+    // The `childView` property can be either a view class or a function that
+    // returns a view class. If it is a function, it will receive the model that
+    // will be passed to the view instance (created from the returned view class)
+    _getChildView: function _getChildView(child) {
+      var childView = this.childView;
+
+      if (!childView) {
+        throw new MarionetteError({
+          name: classErrorName$1,
+          message: 'A "childView" must be specified',
+          url: 'marionette.collectionview.html#collectionviews-childview'
+        });
+      }
+
+      childView = this._getView(childView, child);
+
+      if (!childView) {
+        throw new MarionetteError({
+          name: classErrorName$1,
+          message: '"childView" must be a view class or a function that returns a view class',
+          url: 'marionette.collectionview.html#collectionviews-childview'
+        });
+      }
+
+      return childView;
+    },
+    // First check if the `view` is a view class (the common case)
+    // Then check if it's a function (which we assume that returns a view class)
+    _getView: function _getView(view, child) {
+      if (view.prototype instanceof Backbone.View || view === Backbone.View) {
+        return view;
+      } else if (_.isFunction(view)) {
+        return view.call(this, child);
+      }
+    },
+    _getChildViewOptions: function _getChildViewOptions(child) {
+      if (_.isFunction(this.childViewOptions)) {
+        return this.childViewOptions(child);
+      }
+
+      return this.childViewOptions;
+    },
+    // Build a `childView` for a model in the collection.
+    // Override to customize the build
+    buildChildView: function buildChildView(child, ChildViewClass, childViewOptions) {
+      var options = _.extend({
+        model: child
+      }, childViewOptions);
+
+      return new ChildViewClass(options);
+    },
+    _setupChildView: function _setupChildView(view) {
+      monitorViewEvents(view); // We need to listen for if a view is destroyed in a way other
+      // than through the CollectionView.
+      // If this happens we need to remove the reference to the view
+      // since once a view has been destroyed we can not reuse it.
+
+      view.on('destroy', this.removeChildView, this); // set up the child view event forwarding
+
+      this._proxyChildViewEvents(view);
+    },
+    // used by ViewMixin's `_childViewEventHandler`
+    _getImmediateChildren: function _getImmediateChildren() {
+      return this.children._views;
+    },
+    // Overriding Backbone.View's `setElement` to handle
+    // if an el was previously defined. If so, the view might be
+    // attached on setElement.
+    setElement: function setElement() {
+      Backbone.View.prototype.setElement.apply(this, arguments);
+      this._isAttached = this._isElAttached();
+      return this;
+    },
+    // Render children views.
+    render: function render() {
+      if (this._isDestroyed) {
+        return this;
+      }
+
+      this.triggerMethod('before:render', this);
+
+      this._destroyChildren();
+
+      if (this.collection) {
+        this._addChildModels(this.collection.models);
+
+        this._initialEvents();
+      }
+
+      var template = this.getTemplate();
+
+      if (template) {
+        this._renderTemplate(template);
+
+        this.bindUIElements();
+      }
+
+      this._getChildViewContainer();
+
+      this.sort();
+      this._isRendered = true;
+      this.triggerMethod('render', this);
+      return this;
+    },
+    // Get a container within the template to add the children within
+    _getChildViewContainer: function _getChildViewContainer() {
+      var childViewContainer = _.result(this, 'childViewContainer');
+
+      this.$container = childViewContainer ? this.$(childViewContainer) : this.$el;
+
+      if (!this.$container.length) {
+        throw new MarionetteError({
+          name: classErrorName$1,
+          message: "The specified \"childViewContainer\" was not found: ".concat(childViewContainer),
+          url: 'marionette.collectionview.html#defining-the-childviewcontainer'
+        });
+      }
+    },
+    // Sorts the children then filters and renders the results.
+    sort: function sort() {
+      this._sortChildren();
+
+      this.filter();
+      return this;
+    },
+    // Sorts views by viewComparator and sets the children to the new order
+    _sortChildren: function _sortChildren() {
+      if (!this._children.length) {
+        return;
+      }
+
+      var viewComparator = this.getComparator();
+
+      if (!viewComparator) {
+        return;
+      } // If children are sorted prevent added to end perf
+
+
+      delete this._addedViews;
+      this.triggerMethod('before:sort', this);
+
+      this._children._sort(viewComparator, this);
+
+      this.triggerMethod('sort', this);
+    },
+    // Sets the view's `viewComparator` and applies the sort if the view is ready.
+    // To prevent the render pass `{ preventRender: true }` as the 2nd argument.
+    setComparator: function setComparator(comparator) {
+      var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+          preventRender = _ref2.preventRender;
+
+      var comparatorChanged = this.viewComparator !== comparator;
+      var shouldSort = comparatorChanged && !preventRender;
+      this.viewComparator = comparator;
+
+      if (shouldSort) {
+        this.sort();
+      }
+
+      return this;
+    },
+    // Clears the `viewComparator` and follows the same rules for rendering as `setComparator`.
+    removeComparator: function removeComparator(options) {
+      return this.setComparator(null, options);
+    },
+    // If viewComparator is overriden it will be returned here.
+    // Additionally override this function to provide custom
+    // viewComparator logic
+    getComparator: function getComparator() {
+      if (this.viewComparator) {
+        return this.viewComparator;
+      }
+
+      if (!this.sortWithCollection || this.viewComparator === false || !this.collection) {
+        return false;
+      }
+
+      return this._viewComparator;
+    },
+    // Default internal view comparator that order the views by
+    // the order of the collection
+    _viewComparator: function _viewComparator(view) {
+      return this.collection.indexOf(view.model);
+    },
+    // This method filters the children views and renders the results
+    filter: function filter() {
+      if (this._isDestroyed) {
+        return this;
+      }
+
+      this._filterChildren();
+
+      this._renderChildren();
+
+      return this;
+    },
+    _filterChildren: function _filterChildren() {
+      var _this2 = this;
+
+      if (!this._children.length) {
+        return;
+      }
+
+      var viewFilter = this._getFilter();
+
+      if (!viewFilter) {
+        var shouldReset = this.children.length !== this._children.length;
+
+        this.children._set(this._children._views, shouldReset);
+
+        return;
+      } // If children are filtered prevent added to end perf
+
+
+      delete this._addedViews;
+      this.triggerMethod('before:filter', this);
+      var attachViews = [];
+      var detachViews = [];
+
+      _.each(this._children._views, function (view, key, children) {
+        (viewFilter.call(_this2, view, key, children) ? attachViews : detachViews).push(view);
+      });
+
+      this._detachChildren(detachViews); // reset children
+
+
+      this.children._set(attachViews, true);
+
+      this.triggerMethod('filter', this, attachViews, detachViews);
+    },
+    // This method returns a function for the viewFilter
+    _getFilter: function _getFilter() {
+      var viewFilter = this.getFilter();
+
+      if (!viewFilter) {
+        return false;
+      }
+
+      if (_.isFunction(viewFilter)) {
+        return viewFilter;
+      } // Support filter predicates `{ fooFlag: true }`
+
+
+      if (_.isObject(viewFilter)) {
+        var matcher = _.matches(viewFilter);
+
+        return function (view) {
+          return matcher(view.model && view.model.attributes);
+        };
+      } // Filter by model attribute
+
+
+      if (_.isString(viewFilter)) {
+        return function (view) {
+          return view.model && view.model.get(viewFilter);
+        };
+      }
+
+      throw new MarionetteError({
+        name: classErrorName$1,
+        message: '"viewFilter" must be a function, predicate object literal, a string indicating a model attribute, or falsy',
+        url: 'marionette.collectionview.html#defining-the-viewfilter'
+      });
+    },
+    // Override this function to provide custom
+    // viewFilter logic
+    getFilter: function getFilter() {
+      return this.viewFilter;
+    },
+    // Sets the view's `viewFilter` and applies the filter if the view is ready.
+    // To prevent the render pass `{ preventRender: true }` as the 2nd argument.
+    setFilter: function setFilter(filter) {
+      var _ref3 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+          preventRender = _ref3.preventRender;
+
+      var filterChanged = this.viewFilter !== filter;
+      var shouldRender = filterChanged && !preventRender;
+      this.viewFilter = filter;
+
+      if (shouldRender) {
+        this.filter();
+      }
+
+      return this;
+    },
+    // Clears the `viewFilter` and follows the same rules for rendering as `setFilter`.
+    removeFilter: function removeFilter(options) {
+      return this.setFilter(null, options);
+    },
+    _detachChildren: function _detachChildren(detachingViews) {
+      _.each(detachingViews, this._detachChildView.bind(this));
+    },
+    _detachChildView: function _detachChildView(view) {
+      var shouldTriggerDetach = view._isAttached && this.monitorViewEvents !== false;
+
+      if (shouldTriggerDetach) {
+        view.triggerMethod('before:detach', view);
+      }
+
+      this.detachHtml(view);
+
+      if (shouldTriggerDetach) {
+        view._isAttached = false;
+        view.triggerMethod('detach', view);
+      }
+
+      view._isShown = false;
+    },
+    // Override this method to change how the collectionView detaches a child view
+    detachHtml: function detachHtml(view) {
+      this.Dom.detachEl(view.el, view.$el);
+    },
+    _renderChildren: function _renderChildren() {
+      // If there are unrendered views prevent add to end perf
+      if (this._hasUnrenderedViews) {
+        delete this._addedViews;
+        delete this._hasUnrenderedViews;
+      }
+
+      var views = this._addedViews || this.children._views;
+      this.triggerMethod('before:render:children', this, views);
+
+      if (this.isEmpty()) {
+        this._showEmptyView();
+      } else {
+        this._destroyEmptyView();
+
+        var els = this._getBuffer(views);
+
+        this._attachChildren(els, views);
+      }
+
+      delete this._addedViews;
+      this.triggerMethod('render:children', this, views);
+    },
+    // Renders each view and creates a fragment buffer from them
+    _getBuffer: function _getBuffer(views) {
+      var _this3 = this;
+
+      var elBuffer = this.Dom.createBuffer();
+
+      _.each(views, function (view) {
+        renderView(view); // corresponds that view is shown in a Region or CollectionView
+
+        view._isShown = true;
+
+        _this3.Dom.appendContents(elBuffer, view.el, {
+          _$contents: view.$el
+        });
+      });
+
+      return elBuffer;
+    },
+    _attachChildren: function _attachChildren(els, views) {
+      var shouldTriggerAttach = this._isAttached && this.monitorViewEvents !== false;
+      views = shouldTriggerAttach ? views : [];
+
+      _.each(views, function (view) {
+        if (view._isAttached) {
+          return;
+        }
+
+        view.triggerMethod('before:attach', view);
+      });
+
+      this.attachHtml(els, this.$container);
+
+      _.each(views, function (view) {
+        if (view._isAttached) {
+          return;
+        }
+
+        view._isAttached = true;
+        view.triggerMethod('attach', view);
+      });
+    },
+    // Override this method to do something other than `.append`.
+    // You can attach any HTML at this point including the els.
+    attachHtml: function attachHtml(els, $container) {
+      this.Dom.appendContents($container[0], els, {
+        _$el: $container
+      });
+    },
+    isEmpty: function isEmpty() {
+      return !this.children.length;
+    },
+    _showEmptyView: function _showEmptyView() {
+      var EmptyView = this._getEmptyView();
+
+      if (!EmptyView) {
+        return;
+      }
+
+      var options = this._getEmptyViewOptions();
+
+      var emptyRegion = this.getEmptyRegion();
+      emptyRegion.show(new EmptyView(options));
+    },
+    // Retrieve the empty view class
+    _getEmptyView: function _getEmptyView() {
+      var emptyView = this.emptyView;
+
+      if (!emptyView) {
+        return;
+      }
+
+      return this._getView(emptyView);
+    },
+    // Remove the emptyView
+    _destroyEmptyView: function _destroyEmptyView() {
+      var emptyRegion = this.getEmptyRegion(); // Only empty if a view is show so the region
+      // doesn't detach any other unrelated HTML
+
+      if (emptyRegion.hasView()) {
+        emptyRegion.empty();
+      }
+    },
+    //
+    _getEmptyViewOptions: function _getEmptyViewOptions() {
+      var emptyViewOptions = this.emptyViewOptions || this.childViewOptions;
+
+      if (_.isFunction(emptyViewOptions)) {
+        return emptyViewOptions.call(this);
+      }
+
+      return emptyViewOptions;
+    },
+    swapChildViews: function swapChildViews(view1, view2) {
+      if (!this._children.hasView(view1) || !this._children.hasView(view2)) {
+        throw new MarionetteError({
+          name: classErrorName$1,
+          message: 'Both views must be children of the collection view to swap.',
+          url: 'marionette.collectionview.html#swapping-child-views'
+        });
+      }
+
+      this._children._swap(view1, view2);
+
+      this.Dom.swapEl(view1.el, view2.el); // If the views are not filtered the same, refilter
+
+      if (this.children.hasView(view1) !== this.children.hasView(view2)) {
+        this.filter();
+      } else {
+        this.children._swap(view1, view2);
+      }
+
+      return this;
+    },
+    // Render the child's view and add it to the HTML for the collection view at a given index, based on the current sort
+    addChildView: function addChildView(view, index) {
+      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      if (!view || view._isDestroyed) {
+        return view;
+      }
+
+      if (view._isShown) {
+        throw new MarionetteError({
+          name: classErrorName$1,
+          message: 'View is already shown in a Region or CollectionView',
+          url: 'marionette.region.html#showing-a-view'
+        });
+      }
+
+      if (_.isObject(index)) {
+        options = index;
+      } // If options has defined index we should use it
+
+
+      if (options.index != null) {
+        index = options.index;
+      }
+
+      if (!this._isRendered) {
+        this.render();
+      }
+
+      this._addChild(view, index);
+
+      if (options.preventRender) {
+        this._hasUnrenderedViews = true;
+        return view;
+      }
+
+      var hasIndex = typeof index !== 'undefined';
+      var isAddedToEnd = !hasIndex || index >= this._children.length; // Only cache views if added to the end and there is no unrendered views
+
+      if (isAddedToEnd && !this._hasUnrenderedViews) {
+        this._addedViews = [view];
+      }
+
+      if (hasIndex) {
+        this._renderChildren();
+      } else {
+        this.sort();
+      }
+
+      return view;
+    },
+    // Detach a view from the children.  Best used when adding a
+    // childView from `addChildView`
+    detachChildView: function detachChildView(view) {
+      this.removeChildView(view, {
+        shouldDetach: true
+      });
+      return view;
+    },
+    // Remove the child view and destroy it.  Best used when adding a
+    // childView from `addChildView`
+    // The options argument is for internal use only
+    removeChildView: function removeChildView(view, options) {
+      if (!view) {
+        return view;
+      }
+
+      this._removeChildView(view, options);
+
+      this._removeChild(view);
+
+      if (this.isEmpty()) {
+        this._showEmptyView();
+      }
+
+      return view;
+    },
+    _removeChildViews: function _removeChildViews(views) {
+      _.each(views, this._removeChildView.bind(this));
+    },
+    _removeChildView: function _removeChildView(view) {
+      var _ref4 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+          shouldDetach = _ref4.shouldDetach;
+
+      view.off('destroy', this.removeChildView, this);
+
+      if (shouldDetach) {
+        this._detachChildView(view);
+      } else {
+        this._destroyChildView(view);
+      }
+
+      this.stopListening(view);
+    },
+    _destroyChildView: function _destroyChildView(view) {
+      if (view._isDestroyed) {
+        return;
+      }
+
+      var shouldDisableEvents = this.monitorViewEvents === false;
+      destroyView(view, shouldDisableEvents);
+    },
+    // called by ViewMixin destroy
+    _removeChildren: function _removeChildren() {
+      this._destroyChildren();
+
+      var emptyRegion = this.getEmptyRegion();
+      emptyRegion.destroy();
+      delete this._addedViews;
+    },
+    // Destroy the child views that this collection view is holding on to, if any
+    _destroyChildren: function _destroyChildren() {
+      if (!this._children.length) {
+        return;
+      }
+
+      this.triggerMethod('before:destroy:children', this);
+
+      if (this.monitorViewEvents === false) {
+        this.Dom.detachContents(this.el, this.$el);
+      }
+
+      this._removeChildViews(this._children._views); // After all children have been destroyed re-init the container
+
+
+      this._children._init();
+
+      this.children._init();
+
+      this.triggerMethod('destroy:children', this);
+    }
+  }, {
+    setDomApi: setDomApi,
+    setRenderer: setRenderer
+  });
+
+  _.extend(CollectionView.prototype, ViewMixin);
+
+  // Behavior
+  var ClassOptions$4 = ['collectionEvents', 'events', 'modelEvents', 'triggers', 'ui'];
+
+  var Behavior = function Behavior(options, view) {
+    // Setup reference to the view.
+    // this comes in handle when a behavior
+    // wants to directly talk up the chain
+    // to the view.
+    this.view = view;
+
+    this._setOptions(options, ClassOptions$4);
+
+    this.cid = _.uniqueId(this.cidPrefix); // Construct an internal UI hash using the behaviors UI
+    // hash combined and overridden by the view UI hash.
+    // This allows the user to use UI hash elements defined
+    // in the parent view as well as those defined in the behavior.
+    // This order will help the reuse and share of a behavior
+    // between multiple views, while letting a view override
+    // a selector under an UI key.
+
+    this.ui = _.extend({}, _.result(this, 'ui'), _.result(view, 'ui')); // Proxy view triggers
+
+    this.listenTo(view, 'all', this.triggerMethod);
+    this.initialize.apply(this, arguments);
+  };
+
+  Behavior.extend = extend; // Behavior Methods
+  // --------------
+
+  _.extend(Behavior.prototype, CommonMixin, DelegateEntityEventsMixin, TriggersMixin, UIMixin, {
+    cidPrefix: 'mnb',
+    // This is a noop method intended to be overridden
+    initialize: function initialize() {},
+    // proxy behavior $ method to the view
+    // this is useful for doing jquery DOM lookups
+    // scoped to behaviors view.
+    $: function $() {
+      return this.view.$.apply(this.view, arguments);
+    },
+    // Stops the behavior from listening to events.
+    destroy: function destroy() {
+      this.stopListening();
+
+      this.view._removeBehavior(this);
+
+      this._deleteEntityEventHandlers();
+
+      return this;
+    },
+    proxyViewProperties: function proxyViewProperties() {
+      this.$el = this.view.$el;
+      this.el = this.view.el;
+      return this;
+    },
+    bindUIElements: function bindUIElements() {
+      this._bindUIElements();
+
+      return this;
+    },
+    unbindUIElements: function unbindUIElements() {
+      this._unbindUIElements();
+
+      return this;
+    },
+    getUI: function getUI(name) {
+      return this._getUI(name);
+    },
+    // Handle `modelEvents`, and `collectionEvents` configuration
+    delegateEntityEvents: function delegateEntityEvents() {
+      this._delegateEntityEvents(this.view.model, this.view.collection);
+
+      return this;
+    },
+    undelegateEntityEvents: function undelegateEntityEvents() {
+      this._undelegateEntityEvents(this.view.model, this.view.collection);
+
+      return this;
+    },
+    _getEvents: function _getEvents() {
+      var _this = this;
+
+      if (!this.events) {
+        return;
+      } // Normalize behavior events hash to allow
+      // a user to use the @ui. syntax.
+
+
+      var behaviorEvents = this.normalizeUIKeys(_.result(this, 'events')); // binds the handler to the behavior and builds a unique eventName
+
+      return _.reduce(behaviorEvents, function (events, behaviorHandler, key) {
+        if (!_.isFunction(behaviorHandler)) {
+          behaviorHandler = _this[behaviorHandler];
+        }
+
+        if (!behaviorHandler) {
+          return events;
+        }
+
+        key = getNamespacedEventName(key, _this.cid);
+        events[key] = behaviorHandler.bind(_this);
+        return events;
+      }, {});
+    },
+    // Internal method to build all trigger handlers for a given behavior
+    _getTriggers: function _getTriggers() {
+      if (!this.triggers) {
+        return;
+      } // Normalize behavior triggers hash to allow
+      // a user to use the @ui. syntax.
+
+
+      var behaviorTriggers = this.normalizeUIKeys(_.result(this, 'triggers'));
+      return this._getViewTriggers(this.view, behaviorTriggers);
+    }
+  });
+
+  // Application
+  var ClassOptions$5 = ['channelName', 'radioEvents', 'radioRequests', 'region', 'regionClass'];
+
+  var Application = function Application(options) {
+    this._setOptions(options, ClassOptions$5);
+
+    this.cid = _.uniqueId(this.cidPrefix);
+
+    this._initRegion();
+
+    this._initRadio();
+
+    this.initialize.apply(this, arguments);
+  };
+
+  Application.extend = extend; // Application Methods
+  // --------------
+
+  _.extend(Application.prototype, CommonMixin, DestroyMixin, RadioMixin, {
+    cidPrefix: 'mna',
+    // This is a noop method intended to be overridden
+    initialize: function initialize() {},
+    // Kick off all of the application's processes.
+    start: function start(options) {
+      this.triggerMethod('before:start', this, options);
+      this.triggerMethod('start', this, options);
+      return this;
+    },
+    regionClass: Region,
+    _initRegion: function _initRegion() {
+      var region = this.region;
+
+      if (!region) {
+        return;
+      }
+
+      var defaults = {
+        regionClass: this.regionClass
+      };
+      this._region = buildRegion(region, defaults);
+    },
+    getRegion: function getRegion() {
+      return this._region;
+    },
+    showView: function showView(view) {
+      var region = this.getRegion();
+
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      region.show.apply(region, [view].concat(args));
+      return view;
+    },
+    getView: function getView() {
+      return this.getRegion().currentView;
+    }
+  });
+
+  var bindEvents$1 = proxy(bindEvents);
+  var unbindEvents$1 = proxy(unbindEvents);
+  var bindRequests$1 = proxy(bindRequests);
+  var unbindRequests$1 = proxy(unbindRequests);
+  var mergeOptions$1 = proxy(mergeOptions);
+  var getOption$1 = proxy(getOption);
+  var normalizeMethods$1 = proxy(normalizeMethods);
+  var triggerMethod$1 = proxy(triggerMethod); // Configuration
+
+  var setDomApi$1 = function setDomApi(mixin) {
+    CollectionView.setDomApi(mixin);
+    Region.setDomApi(mixin);
+    View.setDomApi(mixin);
+  };
+  var setRenderer$1 = function setRenderer(renderer) {
+    CollectionView.setRenderer(renderer);
+    View.setRenderer(renderer);
+  };
+  var backbone_marionette = {
+    View: View,
+    CollectionView: CollectionView,
+    MnObject: MarionetteObject,
+    Object: MarionetteObject,
+    Region: Region,
+    Behavior: Behavior,
+    Application: Application,
+    isEnabled: isEnabled,
+    setEnabled: setEnabled,
+    monitorViewEvents: monitorViewEvents,
+    Events: Events,
+    extend: extend,
+    DomApi: DomApi,
+    VERSION: version
+  };
+
+  exports.Application = Application;
+  exports.Behavior = Behavior;
+  exports.CollectionView = CollectionView;
+  exports.DomApi = DomApi;
+  exports.Events = Events;
+  exports.MnObject = MarionetteObject;
+  exports.Region = Region;
+  exports.VERSION = version;
+  exports.View = View;
+  exports.bindEvents = bindEvents$1;
+  exports.bindRequests = bindRequests$1;
+  exports.default = backbone_marionette;
+  exports.extend = extend;
+  exports.getOption = getOption$1;
+  exports.isEnabled = isEnabled;
+  exports.mergeOptions = mergeOptions$1;
+  exports.monitorViewEvents = monitorViewEvents;
+  exports.normalizeMethods = normalizeMethods$1;
+  exports.setDomApi = setDomApi$1;
+  exports.setEnabled = setEnabled;
+  exports.setRenderer = setRenderer$1;
+  exports.triggerMethod = triggerMethod$1;
+  exports.unbindEvents = unbindEvents$1;
+  exports.unbindRequests = unbindRequests$1;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+
+}));
+this && this.Marionette && (this.Mn = this.Marionette);
+//# sourceMappingURL=backbone.marionette.js.map
+;
+// Backbone.Radio v2.0.0
+
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('underscore'), require('backbone')) :
+  typeof define === 'function' && define.amd ? define(['underscore', 'backbone'], factory) :
+  (global.Backbone = global.Backbone || {}, global.Backbone.Radio = factory(global._,global.Backbone));
+}(this, function (_,Backbone) { 'use strict';
+
+  _ = 'default' in _ ? _['default'] : _;
+  Backbone = 'default' in Backbone ? Backbone['default'] : Backbone;
+
+  var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+    return typeof obj;
+  } : function (obj) {
+    return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+  };
+
+  var previousRadio = Backbone.Radio;
+
+  var Radio = Backbone.Radio = {};
+
+  Radio.VERSION = '2.0.0';
+
+  // This allows you to run multiple instances of Radio on the same
+  // webapp. After loading the new version, call `noConflict()` to
+  // get a reference to it. At the same time the old version will be
+  // returned to Backbone.Radio.
+  Radio.noConflict = function () {
+    Backbone.Radio = previousRadio;
+    return this;
+  };
+
+  // Whether or not we're in DEBUG mode or not. DEBUG mode helps you
+  // get around the issues of lack of warnings when events are mis-typed.
+  Radio.DEBUG = false;
+
+  // Format debug text.
+  Radio._debugText = function (warning, eventName, channelName) {
+    return warning + (channelName ? ' on the ' + channelName + ' channel' : '') + ': "' + eventName + '"';
+  };
+
+  // This is the method that's called when an unregistered event was called.
+  // By default, it logs warning to the console. By overriding this you could
+  // make it throw an Error, for instance. This would make firing a nonexistent event
+  // have the same consequence as firing a nonexistent method on an Object.
+  Radio.debugLog = function (warning, eventName, channelName) {
+    if (Radio.DEBUG && console && console.warn) {
+      console.warn(Radio._debugText(warning, eventName, channelName));
+    }
+  };
+
+  var eventSplitter = /\s+/;
+
+  // An internal method used to handle Radio's method overloading for Requests.
+  // It's borrowed from Backbone.Events. It differs from Backbone's overload
+  // API (which is used in Backbone.Events) in that it doesn't support space-separated
+  // event names.
+  Radio._eventsApi = function (obj, action, name, rest) {
+    if (!name) {
+      return false;
+    }
+
+    var results = {};
+
+    // Handle event maps.
+    if ((typeof name === 'undefined' ? 'undefined' : _typeof(name)) === 'object') {
+      for (var key in name) {
+        var result = obj[action].apply(obj, [key, name[key]].concat(rest));
+        eventSplitter.test(key) ? _.extend(results, result) : results[key] = result;
+      }
+      return results;
+    }
+
+    // Handle space separated event names.
+    if (eventSplitter.test(name)) {
+      var names = name.split(eventSplitter);
+      for (var i = 0, l = names.length; i < l; i++) {
+        results[names[i]] = obj[action].apply(obj, [names[i]].concat(rest));
+      }
+      return results;
+    }
+
+    return false;
+  };
+
+  // An optimized way to execute callbacks.
+  Radio._callHandler = function (callback, context, args) {
+    var a1 = args[0],
+        a2 = args[1],
+        a3 = args[2];
+    switch (args.length) {
+      case 0:
+        return callback.call(context);
+      case 1:
+        return callback.call(context, a1);
+      case 2:
+        return callback.call(context, a1, a2);
+      case 3:
+        return callback.call(context, a1, a2, a3);
+      default:
+        return callback.apply(context, args);
+    }
+  };
+
+  // A helper used by `off` methods to the handler from the store
+  function removeHandler(store, name, callback, context) {
+    var event = store[name];
+    if ((!callback || callback === event.callback || callback === event.callback._callback) && (!context || context === event.context)) {
+      delete store[name];
+      return true;
+    }
+  }
+
+  function removeHandlers(store, name, callback, context) {
+    store || (store = {});
+    var names = name ? [name] : _.keys(store);
+    var matched = false;
+
+    for (var i = 0, length = names.length; i < length; i++) {
+      name = names[i];
+
+      // If there's no event by this name, log it and continue
+      // with the loop
+      if (!store[name]) {
+        continue;
+      }
+
+      if (removeHandler(store, name, callback, context)) {
+        matched = true;
+      }
+    }
+
+    return matched;
+  }
+
+  /*
+   * tune-in
+   * -------
+   * Get console logs of a channel's activity
+   *
+   */
+
+  var _logs = {};
+
+  // This is to produce an identical function in both tuneIn and tuneOut,
+  // so that Backbone.Events unregisters it.
+  function _partial(channelName) {
+    return _logs[channelName] || (_logs[channelName] = _.bind(Radio.log, Radio, channelName));
+  }
+
+  _.extend(Radio, {
+
+    // Log information about the channel and event
+    log: function log(channelName, eventName) {
+      if (typeof console === 'undefined') {
+        return;
+      }
+      var args = _.toArray(arguments).slice(2);
+      console.log('[' + channelName + '] "' + eventName + '"', args);
+    },
+
+    // Logs all events on this channel to the console. It sets an
+    // internal value on the channel telling it we're listening,
+    // then sets a listener on the Backbone.Events
+    tuneIn: function tuneIn(channelName) {
+      var channel = Radio.channel(channelName);
+      channel._tunedIn = true;
+      channel.on('all', _partial(channelName));
+      return this;
+    },
+
+    // Stop logging all of the activities on this channel to the console
+    tuneOut: function tuneOut(channelName) {
+      var channel = Radio.channel(channelName);
+      channel._tunedIn = false;
+      channel.off('all', _partial(channelName));
+      delete _logs[channelName];
+      return this;
+    }
+  });
+
+  /*
+   * Backbone.Radio.Requests
+   * -----------------------
+   * A messaging system for requesting data.
+   *
+   */
+
+  function makeCallback(callback) {
+    return _.isFunction(callback) ? callback : function () {
+      return callback;
+    };
+  }
+
+  Radio.Requests = {
+
+    // Make a request
+    request: function request(name) {
+      var args = _.toArray(arguments).slice(1);
+      var results = Radio._eventsApi(this, 'request', name, args);
+      if (results) {
+        return results;
+      }
+      var channelName = this.channelName;
+      var requests = this._requests;
+
+      // Check if we should log the request, and if so, do it
+      if (channelName && this._tunedIn) {
+        Radio.log.apply(this, [channelName, name].concat(args));
+      }
+
+      // If the request isn't handled, log it in DEBUG mode and exit
+      if (requests && (requests[name] || requests['default'])) {
+        var handler = requests[name] || requests['default'];
+        args = requests[name] ? args : arguments;
+        return Radio._callHandler(handler.callback, handler.context, args);
+      } else {
+        Radio.debugLog('An unhandled request was fired', name, channelName);
+      }
+    },
+
+    // Set up a handler for a request
+    reply: function reply(name, callback, context) {
+      if (Radio._eventsApi(this, 'reply', name, [callback, context])) {
+        return this;
+      }
+
+      this._requests || (this._requests = {});
+
+      if (this._requests[name]) {
+        Radio.debugLog('A request was overwritten', name, this.channelName);
+      }
+
+      this._requests[name] = {
+        callback: makeCallback(callback),
+        context: context || this
+      };
+
+      return this;
+    },
+
+    // Set up a handler that can only be requested once
+    replyOnce: function replyOnce(name, callback, context) {
+      if (Radio._eventsApi(this, 'replyOnce', name, [callback, context])) {
+        return this;
+      }
+
+      var self = this;
+
+      var once = _.once(function () {
+        self.stopReplying(name);
+        return makeCallback(callback).apply(this, arguments);
+      });
+
+      return this.reply(name, once, context);
+    },
+
+    // Remove handler(s)
+    stopReplying: function stopReplying(name, callback, context) {
+      if (Radio._eventsApi(this, 'stopReplying', name)) {
+        return this;
+      }
+
+      // Remove everything if there are no arguments passed
+      if (!name && !callback && !context) {
+        delete this._requests;
+      } else if (!removeHandlers(this._requests, name, callback, context)) {
+        Radio.debugLog('Attempted to remove the unregistered request', name, this.channelName);
+      }
+
+      return this;
+    }
+  };
+
+  /*
+   * Backbone.Radio.channel
+   * ----------------------
+   * Get a reference to a channel by name.
+   *
+   */
+
+  Radio._channels = {};
+
+  Radio.channel = function (channelName) {
+    if (!channelName) {
+      throw new Error('You must provide a name for the channel.');
+    }
+
+    if (Radio._channels[channelName]) {
+      return Radio._channels[channelName];
+    } else {
+      return Radio._channels[channelName] = new Radio.Channel(channelName);
+    }
+  };
+
+  /*
+   * Backbone.Radio.Channel
+   * ----------------------
+   * A Channel is an object that extends from Backbone.Events,
+   * and Radio.Requests.
+   *
+   */
+
+  Radio.Channel = function (channelName) {
+    this.channelName = channelName;
+  };
+
+  _.extend(Radio.Channel.prototype, Backbone.Events, Radio.Requests, {
+
+    // Remove all handlers from the messaging systems of this channel
+    reset: function reset() {
+      this.off();
+      this.stopListening();
+      this.stopReplying();
+      return this;
+    }
+  });
+
+  /*
+   * Top-level API
+   * -------------
+   * Supplies the 'top-level API' for working with Channels directly
+   * from Backbone.Radio.
+   *
+   */
+
+  var channel;
+  var args;
+  var systems = [Backbone.Events, Radio.Requests];
+  _.each(systems, function (system) {
+    _.each(system, function (method, methodName) {
+      Radio[methodName] = function (channelName) {
+        args = _.toArray(arguments).slice(1);
+        channel = this.channel(channelName);
+        return channel[methodName].apply(channel, args);
+      };
+    });
+  });
+
+  Radio.reset = function (channelName) {
+    var channels = !channelName ? this._channels : [this._channels[channelName]];
+    _.each(channels, function (channel) {
+      channel.reset();
+    });
+  };
+
+  return Radio;
+
+}));
+//# sourceMappingURL=./backbone.radio.js.map
+;
+// Backbone.Stickit v0.9.2, MIT Licensed
+// Copyright (c) 2012-2015 The New York Times, CMS Group, Matthew DeLambo <delambo@gmail.com>
 
 (function (factory) {
 
   // Set up Stickit appropriately for the environment. Start with AMD.
-  if (typeof define === 'function' && define.amd) {
+  if (typeof define === 'function' && define.amd)
     define(['underscore', 'backbone', 'exports'], factory);
-  }
 
   // Next for Node.js or CommonJS.
-  else if (typeof exports === 'object') {
+  else if (typeof exports === 'object')
     factory(require('underscore'), require('backbone'), exports);
-  }
 
   // Finally, as a browser global.
-  else {
+  else
     factory(_, Backbone, {});
-  }
 
 }(function (_, Backbone, Stickit) {
 
   // Stickit Namespace
   // --------------------------
+
+  // Export onto Backbone object
+  Backbone.Stickit = Stickit;
 
   Stickit._handlers = [];
 
@@ -20969,25 +23476,22 @@ _.extend(Marionette.Module, {
         return;
       }
 
-      var models = [], destroyFns = [], bindings = _.clone(this._modelBindings);
-      _.each(bindings, function(binding, i) {
+      var models = [], destroyFns = [];
+      this._modelBindings = _.reject(this._modelBindings, function(binding) {
         if (model && binding.model !== model) return;
         if (bindingSelector && binding.config.selector != bindingSelector) return;
 
         binding.model.off(binding.event, binding.fn);
         destroyFns.push(binding.config._destroy);
         models.push(binding.model);
-        delete this._modelBindings[i];
-      }, this);
+        return true;
+      });
 
       // Trigger an event for each model that was unbound.
       _.invoke(_.uniq(models), 'trigger', 'stickit:unstuck', this.cid);
 
       // Call `_destroy` on a unique list of the binding callbacks.
       _.each(_.uniq(destroyFns), function(fn) { fn.call(this); }, this);
-
-      // Cleanup the null values.
-      this._modelBindings = _.compact(this._modelBindings);
 
       this.$el.off('.stickit' + (model ? '.' + model.cid : ''), bindingSelector);
     },
@@ -21022,8 +23526,9 @@ _.extend(Marionette.Module, {
     // `optionalModel` is ommitted, will default to the view's `model` property.
     addBinding: function(optionalModel, selector, binding) {
       var model = optionalModel || this.model,
-          namespace = '.stickit.' + model.cid,
-          binding = binding || {};
+          namespace = '.stickit.' + model.cid;
+
+      binding = binding || {};
 
       // Support jQuery-style {key: val} event maps.
       if (_.isObject(selector)) {
@@ -21340,7 +23845,7 @@ _.extend(Marionette.Module, {
   // ----------------
 
   Stickit.addHandler([{
-    selector: '[contenteditable="true"]',
+    selector: '[contenteditable]',
     updateMethod: 'html',
     events: ['input', 'change']
   }, {
@@ -21415,8 +23920,14 @@ _.extend(Marionette.Module, {
       if (!selectConfig) {
         selectConfig = {};
         var getList = function($el) {
-          return $el.map(function() {
-            return {value:this.value, label:this.text};
+          return $el.map(function(index, option) {
+            // Retrieve the text and value of the option, preferring "stickit-bind-val"
+            // data attribute over value property.
+            var dataVal = Backbone.$(option).data('stickit-bind-val');
+            return {
+              value: dataVal !== undefined ? dataVal : option.value,
+              label: option.text
+            };
           }).get();
         };
         if ($el.find('optgroup').length) {
@@ -21441,28 +23952,33 @@ _.extend(Marionette.Module, {
       // Fill in default label and path values.
       selectConfig.valuePath = selectConfig.valuePath || 'value';
       selectConfig.labelPath = selectConfig.labelPath || 'label';
+      selectConfig.disabledPath = selectConfig.disabledPath || 'disabled';
 
       var addSelectOptions = function(optList, $el, fieldVal) {
         _.each(optList, function(obj) {
           var option = Backbone.$('<option/>'), optionVal = obj;
 
-          var fillOption = function(text, val) {
+          var fillOption = function(text, val, disabled) {
             option.text(text);
             optionVal = val;
             // Save the option value as data so that we can reference it later.
-            option.data('stickit_bind_val', optionVal);
+            option.data('stickit-bind-val', optionVal);
             if (!_.isArray(optionVal) && !_.isObject(optionVal)) option.val(optionVal);
+
+            if (disabled === true) option.prop('disabled', 'disabled');
           };
 
-          var text, val;
+          var text, val, disabled;
           if (obj === '__default__') {
             text = fieldVal.label,
-            val = fieldVal.value;
+            val = fieldVal.value,
+            disabled = fieldVal.disabled;
           } else {
             text = evaluatePath(obj, selectConfig.labelPath),
-            val = evaluatePath(obj, selectConfig.valuePath);
+            val = evaluatePath(obj, selectConfig.valuePath),
+            disabled = evaluatePath(obj, selectConfig.disabledPath);
           }
-          fillOption(text, val);
+          fillOption(text, val, disabled);
 
           // Determine if this option is selected.
           var isSelected = function() {
@@ -21580,21 +24096,1231 @@ _.extend(Marionette.Module, {
 
       if ($el.prop('multiple')) {
         return _.map(selected, function(el) {
-          return Backbone.$(el).data('stickit_bind_val');
+          return Backbone.$(el).data('stickit-bind-val');
         });
       } else {
-        return selected.data('stickit_bind_val');
+        return selected.data('stickit-bind-val');
       }
     }
   }]);
 
+  return Stickit;
 
-  // Export onto Backbone object
-  Backbone.Stickit = Stickit;
+}));/*! MapStick (backbone.mapstick) - v0.2.4 - 2018-06-12
+* Copyright (c) 2018 William Ross; Distributed under MIT license */
 
-  return Backbone.Stickit;
+(function() {
+  var MapStick,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
 
-}));var Notification = Backbone.View.extend({
+  MapStick = window.MapStick = function() {
+    return {
+      extend: Backbone.Model.extend
+    };
+  };
+
+  MapStick.ChildViewContainer = (function() {
+    function ChildViewContainer(views) {
+      this._updateLength = bind(this._updateLength, this);
+      this.apply = bind(this.apply, this);
+      this.call = bind(this.call, this);
+      this.remove = bind(this.remove, this);
+      this.findByCid = bind(this.findByCid, this);
+      this.findByIndex = bind(this.findByIndex, this);
+      this.findByCustom = bind(this.findByCustom, this);
+      this.findByModelCid = bind(this.findByModelCid, this);
+      this.findByModel = bind(this.findByModel, this);
+      this.add = bind(this.add, this);
+      this._views = {};
+      this._indexByModel = {};
+      this._indexByCustom = {};
+      this._methods = ["forEach", "each", "map", "find", "detect", "filter", "select", "reject", "every", "all", "some", "any", "include", "contains", "invoke", "toArray", "first", "initial", "rest", "last", "without", "isEmpty", "pluck"];
+      _.each(this._methods, (function(_this) {
+        return function(method) {
+          return _this[method] = function() {
+            var args;
+            views = _.values(_this._views);
+            args = [views].concat(_.toArray(arguments));
+            return _[method].apply(_, args);
+          };
+        };
+      })(this));
+      this._updateLength();
+      _.each(views, this.add);
+    }
+
+    ChildViewContainer.prototype.add = function(view, customIndex) {
+      var model, viewCid;
+      viewCid = view.cid;
+      this._views[viewCid] = view;
+      if (model = view.model) {
+        this._indexByModel[model.cid] = viewCid;
+      }
+      if (customIndex) {
+        this._indexByCustom[customIndex] = viewCid;
+      }
+      this._updateLength();
+      return this;
+    };
+
+    ChildViewContainer.prototype.findByModel = function(model) {
+      return this.findByModelCid(model.cid);
+    };
+
+    ChildViewContainer.prototype.findByModelCid = function(modelCid) {
+      var viewCid;
+      viewCid = this._indexByModel[modelCid];
+      return this.findByCid(viewCid);
+    };
+
+    ChildViewContainer.prototype.findByCustom = function(index) {
+      var viewCid;
+      viewCid = this._indexByCustom[index];
+      return this.findByCid(viewCid);
+    };
+
+    ChildViewContainer.prototype.findByIndex = function(index) {
+      return _.values(this._views)[index];
+    };
+
+    ChildViewContainer.prototype.findByCid = function(cid) {
+      return this._views[cid];
+    };
+
+    ChildViewContainer.prototype.remove = function(view) {
+      var viewCid;
+      viewCid = view.cid;
+      if (view.model) {
+        delete this._indexByModel[view.model.cid];
+      }
+      _.any(this._indexByCustom, (function(_this) {
+        return function(cid, key) {
+          if (cid === viewCid) {
+            delete _this._indexByCustom[key];
+            return true;
+          }
+        };
+      })(this), this);
+      delete this._views[viewCid];
+      this._updateLength();
+      return this;
+    };
+
+    ChildViewContainer.prototype.call = function(method) {
+      return this.apply(method, _.tail(arguments));
+    };
+
+    ChildViewContainer.prototype.apply = function(method, args) {
+      return _.each(this._views, function(view) {
+        if (_.isFunction(view[method])) {
+          return view[method].apply(view, args || []);
+        }
+      });
+    };
+
+    ChildViewContainer.prototype._updateLength = function() {
+      return this.length = _.size(this._views);
+    };
+
+    return ChildViewContainer;
+
+  })();
+
+  MapStick.getOption = function(target, optionName) {
+    if (!target || !optionName) {
+      return null;
+    } else if (target.options && (indexOf.call(target.options, optionName) >= 0) && (target.options[optionName] !== void 0)) {
+      return target.options[optionName];
+    } else {
+      return target[optionName];
+    }
+  };
+
+  MapStick.triggerMethod = function() {
+    var getEventName, splitter, triggerMethod;
+    splitter = /(^|:)(\w)/gi;
+    getEventName = function(match, prefix, eventName) {
+      return eventName.toUpperCase();
+    };
+    triggerMethod = (function(_this) {
+      return function(event) {
+        var method, methodName;
+        methodName = 'on' + event.replace(splitter, getEventName);
+        method = _this[methodName];
+        if (_.isFunction(_this.trigger)) {
+          _this.trigger.apply(_this, arguments);
+        }
+        if (_.isFunction(method)) {
+          return method.apply(_this, _.tail(arguments));
+        }
+      };
+    })(this);
+    return triggerMethod;
+  };
+
+  MapStick.actAsCollection = function(object, listProperty) {
+    var methods;
+    methods = ['forEach', 'each', 'map', 'find', 'detect', 'filter', 'select', 'reject', 'every', 'all', 'some', 'any', 'include', 'contains', 'invoke', 'toArray', 'first', 'initial', 'rest', 'last', 'without', 'isEmpty', 'pluck'];
+    return _.each(methods, (function(_this) {
+      return function(method) {
+        return object[method] = function() {
+          var args, list;
+          list = _.values(_.result(_this, listProperty));
+          args = [list].concat(_.toArray(arguments));
+          return _[method].apply(_, args);
+        };
+      };
+    })(this));
+  };
+
+  MapStick.decodePathString = function(string) {
+    if (google.maps.geometry) {
+      if (string && _.isString(string) && string !== "") {
+        return google.maps.geometry.encoding.decodePath(string);
+      } else {
+        return [];
+      }
+    } else {
+      return console.error("please include google.maps.geometry library");
+    }
+  };
+
+  MapStick.encodePathString = function(array) {
+    if (google.maps.geometry) {
+      if (array) {
+        return google.maps.geometry.encoding.encodePath(array);
+      }
+    } else {
+      return console.error("please include google.maps.geometry library");
+    }
+  };
+
+  MapStick.isClockwise = function(path) {
+    var l, previous_lat, previous_lng, r;
+    if (!_.isArray(path)) {
+      path = path.getArray();
+    }
+    path.push(path[0]);
+    l = 0;
+    r = 0;
+    previous_lat = null;
+    previous_lng = null;
+    _.each(path, function(latlng) {
+      var lat, lng;
+      lng = latlng.lng();
+      lat = latlng.lat();
+      if (previous_lng && previous_lat) {
+        l += lng * previous_lat;
+        r += lat * previous_lng;
+      }
+      previous_lng = lng;
+      return previous_lat = lat;
+    });
+    return l - r > 0;
+  };
+
+  MapStick.Overlay = (function(superClass) {
+    extend(Overlay, superClass);
+
+    Overlay.prototype.googleOverlayType = function() {
+      return this.overlayType.split("_").map(function(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }).join("");
+    };
+
+    Overlay.prototype.googleDrawingOverlayType = function() {
+      return google.maps.drawing.OverlayType["" + (this.overlayType.split("_").map(function(string) {
+        return string.toUpperCase();
+      }).join(""))];
+    };
+
+    Overlay.prototype.defaultOptions = {};
+
+    Overlay.prototype.properties = [];
+
+    Overlay.prototype.overlayEvents = {};
+
+    Overlay.prototype.viewOptions = ['model', 'events', 'map'];
+
+    Overlay.prototype.bindings = {};
+
+    Overlay.prototype.defaultOverlayEvents = [];
+
+    Overlay.prototype.modelEvents = {};
+
+    Overlay.prototype.triggerMethod = MapStick.triggerMethod;
+
+    Overlay.prototype.showing = false;
+
+    Overlay.prototype.cidPrefid = "o";
+
+    Overlay.prototype.buildOverlay = function(options) {
+      return new google.maps[this.googleOverlayType()](options);
+    };
+
+    function Overlay(options) {
+      var content_view;
+      if (options == null) {
+        options = {};
+      }
+      this.getDrawnOptions = bind(this.getDrawnOptions, this);
+      this.abandonOverlay = bind(this.abandonOverlay, this);
+      this.saveOverlay = bind(this.saveOverlay, this);
+      this.stopDrawing = bind(this.stopDrawing, this);
+      this.completeDraw = bind(this.completeDraw, this);
+      this.cancelDraw = bind(this.cancelDraw, this);
+      this.handleKey = bind(this.handleKey, this);
+      this.draw = bind(this.draw, this);
+      this.render = bind(this.render, this);
+      this.clearModelListeners = bind(this.clearModelListeners, this);
+      this.clearListeners = bind(this.clearListeners, this);
+      this.remove = bind(this.remove, this);
+      this.hide = bind(this.hide, this);
+      this.show = bind(this.show, this);
+      this.set = bind(this.set, this);
+      this.get = bind(this.get, this);
+      this.triggerOverlayEvent = bind(this.triggerOverlayEvent, this);
+      this.setBoundOverlayAttributes = bind(this.setBoundOverlayAttributes, this);
+      this.setBoundModelAttributes = bind(this.setBoundModelAttributes, this);
+      this.listenToBoundOverlayEvents = bind(this.listenToBoundOverlayEvents, this);
+      this.listenToBoundModelChanges = bind(this.listenToBoundModelChanges, this);
+      this.bindPosition = bind(this.bindPosition, this);
+      this.setBindings = bind(this.setBindings, this);
+      this.listenToModel = bind(this.listenToModel, this);
+      this.attachOverlayEvents = bind(this.attachOverlayEvents, this);
+      this.buildOverlay = bind(this.buildOverlay, this);
+      this.googleDrawingOverlayType = bind(this.googleDrawingOverlayType, this);
+      this.googleOverlayType = bind(this.googleOverlayType, this);
+      this.cid = _.uniqueId(this.cidPrefix);
+      this.options = _.extend({}, _.result(this, 'options'), _.isFunction(options) ? options.call(this) : options);
+      this.overlayOptions = _.pick(options, this.properties);
+      _.defaults(this.overlayOptions, this.defaultOptions);
+      this[this.overlayType] = this.overlay = this.buildOverlay(this.overlayOptions);
+      _.extend(this, _.pick(options, this.viewOptions));
+      this.attachOverlayEvents();
+      this.listenToModel();
+      this.setBindings();
+      if (_.isFunction(this.initialize)) {
+        this.initialize(this.options);
+      }
+      this.model.on("destroy", this.remove);
+      if (this.overlayType === "info_window") {
+        if (content_view = this.options.content_view) {
+          this.setContentView(content_view);
+        }
+      } else {
+        this.model.on("draw", this.draw);
+      }
+    }
+
+    Overlay.prototype.attachOverlayEvents = function() {
+      return _.each(this.overlayEventNames, (function(_this) {
+        return function(event_name) {
+          return google.maps.event.addListener(_this.overlay, event_name, function(e) {
+            if (_.isFunction(_this.trigger)) {
+              _this.trigger(event_name, e);
+            }
+            return _this.triggerOverlayEvent(event_name, e);
+          });
+        };
+      })(this));
+    };
+
+    Overlay.prototype.listenToModel = function() {
+      if (this.model) {
+        return _.each(this.modelEvents, (function(_this) {
+          return function(function_name, event_name) {
+            var method;
+            if (_.isFunction(method = _this[function_name])) {
+              return _this.model.on(event_name, method);
+            }
+          };
+        })(this));
+      }
+    };
+
+    Overlay.prototype.setBindings = function() {
+      return _.each(this.bindings, (function(_this) {
+        return function(opts, overlay_attribute) {
+          var model_attributes;
+          if (_.isString(opts)) {
+            opts = {
+              attribute: opts,
+              overlayChanged: true
+            };
+          }
+          if (_.isObject(opts)) {
+            opts.overlay_attribute = overlay_attribute;
+            if (overlay_attribute === "position" && _.isString(opts.lat) && _.isString(opts.lng)) {
+              return _this.bindPosition(opts);
+            } else if (model_attributes = opts.attributes || opts.attribute) {
+              if (_.isString(model_attributes)) {
+                opts.attributes = model_attributes = [model_attributes];
+              }
+              _this.setBoundOverlayAttributes(opts);
+              _this.listenToBoundModelChanges(opts);
+              if (indexOf.call(_this.twoWayProperties, overlay_attribute) >= 0) {
+                return _this.listenToBoundOverlayEvents(opts);
+              }
+            }
+          }
+        };
+      })(this));
+    };
+
+    Overlay.prototype.bindPosition = function(opts) {
+      var lat_attr, lng_attr, overlay_events, setLatLng;
+      if (opts == null) {
+        opts = {};
+      }
+      lat_attr = opts.lat;
+      lng_attr = opts.lng;
+      setLatLng = (function(_this) {
+        return function() {
+          if (_this.model.has(lat_attr) && _this.model.has(lng_attr)) {
+            return _this.set({
+              position: new google.maps.LatLng(_this.model.get(lat_attr), _this.model.get(lng_attr))
+            });
+          }
+        };
+      })(this);
+      setLatLng();
+      this.model.on("change:" + lat_attr + " change:" + lng_attr, function(model, value, arg) {
+        var m_change;
+        m_change = (arg != null ? arg : {}).mapstickChange;
+        if (!m_change) {
+          return setLatLng();
+        }
+      });
+      overlay_events = opts.overlayEvents || this.defaultOverlayEvents;
+      return _.each(overlay_events, (function(_this) {
+        return function(event_name) {
+          return google.maps.event.addListener(_this.overlay, event_name, function() {
+            var latlng, pos;
+            if (pos = _this.get("position")) {
+              latlng = {};
+              latlng[lat_attr] = pos.lat();
+              latlng[lng_attr] = pos.lng();
+              return _this.model.set(latlng, {
+                mapstickChange: true
+              });
+            }
+          });
+        };
+      })(this));
+    };
+
+    Overlay.prototype.listenToBoundModelChanges = function(opts) {
+      var model_attributes, observers;
+      if (opts == null) {
+        opts = {};
+      }
+      model_attributes = opts.attributes;
+      observers = model_attributes.map(function(ob) {
+        return "change:" + ob;
+      }).join(" ");
+      return this.model.on(observers, (function(_this) {
+        return function(model, value, arg) {
+          var m_change;
+          m_change = (arg != null ? arg : {}).mapstickChange;
+          if (!m_change) {
+            return _this.setBoundOverlayAttributes(opts);
+          }
+        };
+      })(this));
+    };
+
+    Overlay.prototype.listenToBoundOverlayEvents = function(opts) {
+      var events, overlay_attribute;
+      if (opts == null) {
+        opts = {};
+      }
+      overlay_attribute = opts.overlay_attribute;
+      if (events = opts.overlayEvents) {
+        if (_.isString(events)) {
+          events = [events];
+        }
+      }
+      if (events == null) {
+        events = this.defaultOverlayEvents;
+      }
+      return _.each(events, (function(_this) {
+        return function(event_name) {
+          return google.maps.event.addListener(_this.overlay, event_name, function(e) {
+            if (event_name === "drawn") {
+              if (overlay_attribute === "paths") {
+                _this._listenToPaths(opts);
+              } else if (overlay_attribute === "path") {
+                _this._listenToPath(opts);
+              }
+            }
+            return _this.setBoundModelAttributes(opts, e);
+          });
+        };
+      })(this));
+    };
+
+    Overlay.prototype.setBoundModelAttributes = function(opts, e) {
+      var data, model_attributes, on_set, overlay_attribute, result;
+      if (opts == null) {
+        opts = {};
+      }
+      if (opts.overlayChanged) {
+        overlay_attribute = opts.overlay_attribute;
+        model_attributes = opts.attributes;
+        if (overlay_attribute === "paths") {
+          data = this.overlay.getPaths();
+        } else if (overlay_attribute === "path") {
+          data = this.overlay.getPath();
+        } else {
+          data = this.get(overlay_attribute);
+        }
+        result = {};
+        on_set = opts.overlayChanged;
+        if (_.isFunction(on_set)) {
+          result = on_set(data, e);
+        } else if (_.isString(on_set) && _.isFunction(this[on_set])) {
+          result = this[on_set](data, e);
+        } else if (on_set === true && model_attributes.length === 1) {
+          result[model_attributes[0]] = data;
+        }
+        return this.model.set(result, {
+          mapstickChange: true
+        });
+      }
+    };
+
+    Overlay.prototype.setBoundOverlayAttributes = function(opts) {
+      var model_attributes, model_data, on_get, overlay_attribute, overlay_options, result;
+      if (opts == null) {
+        opts = {};
+      }
+      model_attributes = opts.attributes;
+      overlay_attribute = opts.overlay_attribute;
+      model_data = {};
+      _.each(model_attributes, (function(_this) {
+        return function(attr) {
+          return model_data[attr] = _this.model.get(attr);
+        };
+      })(this));
+      overlay_options = {};
+      if (on_get = opts.modelChanged) {
+        result = null;
+        if (_.isFunction(on_get)) {
+          result = on_get(model_data);
+        } else if (_.isFunction(this[on_get])) {
+          result = this[on_get](model_data);
+        }
+        overlay_options[overlay_attribute] = result;
+      } else if (model_attributes.length === 1) {
+        overlay_options[overlay_attribute] = this.model.get(model_attributes[0]);
+      }
+      this.set(overlay_options);
+      if (overlay_attribute === "paths") {
+        return this._listenToPaths(opts);
+      } else if (overlay_attribute === "path") {
+        return this._listenToPath(opts);
+      }
+    };
+
+    Overlay.prototype.triggerOverlayEvent = function(event_name, e) {
+      var event, method;
+      if (event = this.overlayEvents[event_name]) {
+        method = this[event];
+        if (_.isFunction(method)) {
+          method(e);
+        } else {
+          console.error("no such handler for event: '" + event_name + "'");
+        }
+      }
+      method = this["on" + (event_name.split("_").map(function(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }).join(""))];
+      if (_.isFunction(method)) {
+        return method(e);
+      }
+    };
+
+    Overlay.prototype.get = function(attribute) {
+      return this.overlay.get(attribute);
+    };
+
+    Overlay.prototype.set = function(attribute, value) {
+      if (_.isObject(attribute)) {
+        return this.overlay.setOptions(attribute);
+      } else if (_.isString(attribute)) {
+        return this.overlay.set(attribute, value);
+      } else {
+        return console.error("can't set that");
+      }
+    };
+
+    Overlay.prototype.show = function(map) {
+      this.showing = true;
+      if (map) {
+        this.map = map;
+      }
+      return this.set("map", this.map);
+    };
+
+    Overlay.prototype.hide = function() {
+      this.showing = false;
+      return this.set("map", null);
+    };
+
+    Overlay.prototype.remove = function() {
+      this.clearListeners();
+      this.clearModelListeners();
+      return this.set("map", null);
+    };
+
+    Overlay.prototype.clearListeners = function() {
+      if (this.overlay) {
+        return google.maps.event.clearListeners(this.overlay);
+      }
+    };
+
+    Overlay.prototype.clearModelListeners = function() {
+      if (this.model) {
+        return _.each(this.modelEvents, (function(_this) {
+          return function(function_name, event_name) {
+            var method;
+            if (_.isFunction(method = _this[function_name])) {
+              return _this.model.off(event_name, method);
+            }
+          };
+        })(this));
+      }
+    };
+
+    Overlay.prototype.render = function() {
+      if (this.showing) {
+        return this.overlay.setMap(this.map);
+      }
+    };
+
+    Overlay.prototype.draw = function(map) {
+      if (map == null) {
+        map = this.map;
+      }
+      if (google.maps.drawing) {
+        this._cancelled = false;
+        if (MapStick.drawingManager == null) {
+          MapStick.drawingManager = new google.maps.drawing.DrawingManager({
+            map: map,
+            drawingControl: false
+          });
+        }
+        MapStick.drawingManager.setMap(map);
+        MapStick.drawingManager.setDrawingMode(this.overlayType);
+        google.maps.event.clearInstanceListeners(MapStick.drawingManager);
+        google.maps.event.addListener(MapStick.drawingManager, "overlaycomplete", (function(_this) {
+          return function(e) {
+            if (MapStick.drawingManager.getDrawingMode()) {
+              _this.stopDrawing();
+            }
+            if (_this._cancelled) {
+              return _this.abandonOverlay(e.overlay);
+            } else {
+              return _this.saveOverlay(e.overlay);
+            }
+          };
+        })(this));
+        return this._key_listener = google.maps.event.addDomListener(document, 'keyup', this.handleKey);
+      } else {
+        return console.error("please include google.maps.drawing library");
+      }
+    };
+
+    Overlay.prototype.handleKey = function(e) {
+      if (e.keyCode === 27) {
+        this.cancelDraw();
+      }
+      if (e.keyCode === 13) {
+        return this.completeDraw();
+      }
+    };
+
+    Overlay.prototype.cancelDraw = function() {
+      this._cancelled = true;
+      return this.stopDrawing();
+    };
+
+    Overlay.prototype.completeDraw = function() {
+      this._cancelled = false;
+      return this.stopDrawing();
+    };
+
+    Overlay.prototype.stopDrawing = function() {
+      if (this._key_listener) {
+        google.maps.event.removeListener(this._key_listener);
+      }
+      MapStick.drawingManager.setDrawingMode(null);
+      return MapStick.drawingManager.setMap(null);
+    };
+
+    Overlay.prototype.saveOverlay = function(overlay) {
+      this.overlay.setOptions(this.getDrawnOptions(overlay));
+      this.model.trigger("overlay:drawn");
+      google.maps.event.trigger(this.overlay, "drawn");
+      overlay.setMap(null);
+      return this.show();
+    };
+
+    Overlay.prototype.abandonOverlay = function(overlay) {
+      this.model.trigger("overlay:cancelled");
+      google.maps.event.trigger(this.overlay, "cancelled");
+      return overlay.setMap(null);
+    };
+
+    Overlay.prototype.getDrawnOptions = function() {
+      return {};
+    };
+
+    return Overlay;
+
+  })(Backbone.View);
+
+  MapStick.Marker = (function(superClass) {
+    extend(Marker, superClass);
+
+    function Marker() {
+      this.getDrawnOptions = bind(this.getDrawnOptions, this);
+      return Marker.__super__.constructor.apply(this, arguments);
+    }
+
+    Marker.prototype.overlayType = "marker";
+
+    Marker.prototype.overlayEventNames = ["animation_changed", "click", "clickable_changed", "cursor_changed", "dblclick", "drag", "dragend", "draggable_changed", "dragstart", "flat_changed", "icon_changed", "mousedown", "mouseout", "mouseover", "mouseup", "position_changed", "rightclick", "shape_changed", "title_changed", "visible_changed", "zindex_changed"];
+
+    Marker.prototype.defaultOverlayEvents = ["drag", "dragend", "dragstart", "drawn"];
+
+    Marker.prototype.twoWayProperties = ["position"];
+
+    Marker.prototype.properties = ["anchorPoint", "animation", "clickable", "crossOnDrag", "cursor", "draggable", "icon", "map", "opacity", "optimized", "position", "shape", "title", "visible", "zIndex"];
+
+    Marker.prototype.getDrawnOptions = function(overlay) {
+      return {
+        position: overlay.getPosition()
+      };
+    };
+
+    return Marker;
+
+  })(MapStick.Overlay);
+
+  MapStick.OverlayWithPath = (function(superClass) {
+    extend(OverlayWithPath, superClass);
+
+    function OverlayWithPath() {
+      this._listenToPath = bind(this._listenToPath, this);
+      this.getDrawnOptions = bind(this.getDrawnOptions, this);
+      this.setOverlayPathFromEncodedString = bind(this.setOverlayPathFromEncodedString, this);
+      this.getEncodedPathFromOverlay = bind(this.getEncodedPathFromOverlay, this);
+      return OverlayWithPath.__super__.constructor.apply(this, arguments);
+    }
+
+    OverlayWithPath.prototype.defaultOptions = {
+      path: new google.maps.MVCArray()
+    };
+
+    OverlayWithPath.prototype.getEncodedPathFromOverlay = function() {
+      return MapStick.encodePathString(this.overlay.getPath());
+    };
+
+    OverlayWithPath.prototype.setOverlayPathFromEncodedString = function(string) {
+      return this.overlay.setPath(MapStick.decodePathString(string));
+    };
+
+    OverlayWithPath.prototype.getDrawnOptions = function(overlay) {
+      return {
+        path: overlay.getPath()
+      };
+    };
+
+    OverlayWithPath.prototype._listenToPath = function(opts) {
+      var path;
+      if (opts == null) {
+        opts = {};
+      }
+      path = this.overlay.getPath();
+      return _.each(["insert_at", "remove_at", "set_at"], (function(_this) {
+        return function(event_name) {
+          return google.maps.event.addListener(path, event_name, function(e) {
+            return _this.setBoundModelAttributes(opts, e);
+          });
+        };
+      })(this));
+    };
+
+    return OverlayWithPath;
+
+  })(MapStick.Overlay);
+
+  MapStick.Polyline = (function(superClass) {
+    extend(Polyline, superClass);
+
+    function Polyline() {
+      this.getBounds = bind(this.getBounds, this);
+      return Polyline.__super__.constructor.apply(this, arguments);
+    }
+
+    Polyline.prototype.overlayType = "polyline";
+
+    Polyline.prototype.overlayEventNames = ["click", "dblclick", "drag", "dragend", "dragstart", "mousedown", "mousemove", "mouseout", "mouseover", "mouseup", "rightclick"];
+
+    Polyline.prototype.defaultOverlayEvents = ["drag", "dragend", "drawn"];
+
+    Polyline.prototype.twoWayProperties = ["path"];
+
+    Polyline.prototype.properties = ["clickable", "draggable", "editable", "geodesic", "icons", "map", "path", "strokeColor", "strokeOpacity", "strokeWeight", "visible", "zIndex"];
+
+    Polyline.prototype.getBounds = function() {
+      var bounds;
+      bounds = new google.maps.LatLngBounds();
+      this.overlay.getPath().forEach(function(point) {
+        return bounds.extend(point);
+      });
+      return bounds;
+    };
+
+    return Polyline;
+
+  })(MapStick.OverlayWithPath);
+
+  MapStick.Polygon = (function(superClass) {
+    extend(Polygon, superClass);
+
+    function Polygon() {
+      this.getBounds = bind(this.getBounds, this);
+      this._listenToPaths = bind(this._listenToPaths, this);
+      this.setOverlayPathsFromEncodedStrings = bind(this.setOverlayPathsFromEncodedStrings, this);
+      this.getEncodedPathsFromOverlay = bind(this.getEncodedPathsFromOverlay, this);
+      this.finishExclusion = bind(this.finishExclusion, this);
+      this.drawExclusion = bind(this.drawExclusion, this);
+      return Polygon.__super__.constructor.apply(this, arguments);
+    }
+
+    Polygon.prototype.overlayType = "polygon";
+
+    Polygon.prototype.overlayEventNames = ["click", "dblclick", "drag", "dragend", "dragstart", "mousedown", "mousemove", "mouseout", "mouseover", "mouseup", "rightclick"];
+
+    Polygon.prototype.defaultOverlayEvents = ["drag", "dragend", "drawn"];
+
+    Polygon.prototype.twoWayProperties = ["paths"];
+
+    Polygon.prototype.properties = ["zIndex", "visible", "strokeWeight", "strokePosition", "strokeOpacity", "strokeColor", "paths", "map", "geodesic", "fillOpacity", "fillColor", "editable", "draggable", "clickable"];
+
+    Polygon.prototype.drawExclusion = function() {
+      if (google.maps.drawing) {
+        if (!(MapStick.drawingManager && MapStick.drawingManager.getMap() === this.map)) {
+          MapStick.drawingManager = new google.maps.drawing.DrawingManager({
+            map: this.map,
+            drawingControl: false
+          });
+        }
+        MapStick.drawingManager.setDrawingMode("polygon");
+        google.maps.event.clearInstanceListeners(MapStick.drawingManager);
+        return google.maps.event.addListener(MapStick.drawingManager, "polygoncomplete", (function(_this) {
+          return function(polygon) {
+            return _this.finishExclusion(polygon);
+          };
+        })(this));
+      } else {
+        return console.error("please include google.maps.drawing library");
+      }
+    };
+
+    Polygon.prototype.finishExclusion = function(polygon) {
+      var path, paths;
+      path = polygon.getPath();
+      if (MapStick.isClockwise(path) === MapStick.isClockwise(this.overlay.getPath())) {
+        path = new google.maps.MVCArray(path.getArray().reverse());
+      }
+      paths = this.overlay.getPaths();
+      paths.push(path);
+      this.overlay.setPaths(paths);
+      polygon.setMap(null);
+      MapStick.drawingManager.setDrawingMode(null);
+      return google.maps.event.trigger(this.overlay, "drawn");
+    };
+
+    Polygon.prototype.getEncodedPathsFromOverlay = function() {
+      return _.collect(this.overlay.getPaths().getArray(), function(path) {
+        return MapStick.encodePathString(path);
+      });
+    };
+
+    Polygon.prototype.setOverlayPathsFromEncodedStrings = function(paths) {
+      if (_.isString(paths)) {
+        paths = paths.split(",");
+      }
+      paths = _.collect(paths, function(string) {
+        return MapStick.decodePathString(string);
+      });
+      return this.overlay.setPaths(paths);
+    };
+
+    Polygon.prototype._listenToPaths = function(opts) {
+      var paths;
+      if (opts == null) {
+        opts = {};
+      }
+      paths = this.overlay.getPaths();
+      return _.each(["insert_at", "remove_at", "set_at"], (function(_this) {
+        return function(event_name) {
+          return paths.forEach(function(path) {
+            return google.maps.event.addListener(path, event_name, function() {
+              return _this.setBoundModelAttributes(opts);
+            });
+          });
+        };
+      })(this));
+    };
+
+    Polygon.prototype.getBounds = function() {
+      var bounds;
+      bounds = new google.maps.LatLngBounds();
+      this.overlay.getPaths().forEach(function(path) {
+        return path.forEach(function(point) {
+          return bounds.extend(point);
+        });
+      });
+      return bounds;
+    };
+
+    return Polygon;
+
+  })(MapStick.OverlayWithPath);
+
+  MapStick.Rectangle = (function(superClass) {
+    extend(Rectangle, superClass);
+
+    function Rectangle() {
+      this.getDrawnOptions = bind(this.getDrawnOptions, this);
+      return Rectangle.__super__.constructor.apply(this, arguments);
+    }
+
+    Rectangle.prototype.overlayType = "rectangle";
+
+    Rectangle.prototype.overlayEventNames = ["bounds_changed", "click", "dblclick", "drag", "dragend", "dragstart", "mousedown", "mousemove", "mouseout", "mouseover", "mouseup", "rightclick"];
+
+    Rectangle.prototype.defaultOverlayEvents = ["drag", "dragend", "dragstart", "drawn"];
+
+    Rectangle.prototype.twoWayProperties = ["bounds"];
+
+    Rectangle.prototype.properties = ["bounds", "clickable", "draggable", "editable", "fillColor", "fillOpacity", "map", "strokeColor", "strokeOpacity", "strokePosition", "strokeWeight", "visible", "zIndex"];
+
+    Rectangle.prototype.getDrawnOptions = function(overlay) {
+      return {
+        bounds: overlay.getBounds()
+      };
+    };
+
+    return Rectangle;
+
+  })(MapStick.Overlay);
+
+  MapStick.Circle = (function(superClass) {
+    extend(Circle, superClass);
+
+    function Circle() {
+      this.getDrawnOptions = bind(this.getDrawnOptions, this);
+      return Circle.__super__.constructor.apply(this, arguments);
+    }
+
+    Circle.prototype.overlayType = "circle";
+
+    Circle.prototype.overlayEventNames = ["center_changed", "click", "dblclick", "drag", "dragend", "dragstart", "mousedown", "mousemove", "mouseout", "mouseup", "mouseover", "radius_changed", "rightclick"];
+
+    Circle.prototype.defaultOverlayEvents = ["drag", "dragend", "dragstart", "drawn"];
+
+    Circle.prototype.twoWayProperties = ["center", "radius"];
+
+    Circle.prototype.properties = ["center", "clickable", "draggable", "editable", "fillColor", "fillOpacity", "map", "radius", "strokeColor", "strokeOpacity", "strokePosition", "strokeWeight", "visible", "zIndex"];
+
+    Circle.prototype.getDrawnOptions = function(overlay) {
+      return {
+        center: overlay.getCenter(),
+        radius: overlay.getRadius()
+      };
+    };
+
+    return Circle;
+
+  })(MapStick.Overlay);
+
+  MapStick.InfoWindow = (function(superClass) {
+    extend(InfoWindow, superClass);
+
+    function InfoWindow() {
+      this.setContentView = bind(this.setContentView, this);
+      this.remove = bind(this.remove, this);
+      this.close = bind(this.close, this);
+      this.open = bind(this.open, this);
+      this.isOpen = bind(this.isOpen, this);
+      return InfoWindow.__super__.constructor.apply(this, arguments);
+    }
+
+    InfoWindow.prototype.overlayType = "info_window";
+
+    InfoWindow.prototype.overlayEventNames = ["closeclick", "content_changed", "domready", "position_changed", "zindex_changed"];
+
+    InfoWindow.prototype.twoWayProperties = ["content"];
+
+    InfoWindow.prototype.properties = ["content", "disableAutoPan", "maxWidth", "pixelOffset", "position", "zIndex"];
+
+    InfoWindow.prototype.isOpen = function() {
+      var map;
+      map = this.get("map");
+      return map !== null && typeof map !== "undefined";
+    };
+
+    InfoWindow.prototype.open = function(arg) {
+      var anchor, map, position, ref;
+      ref = arg != null ? arg : {}, map = ref.map, anchor = ref.anchor, position = ref.position;
+      if (anchor) {
+        return this.overlay.open(map || (map = anchor.getMap()), anchor);
+      } else if (position) {
+        this.overlay.setPosition(position);
+        if (map || (map = this.map)) {
+          return this.overlay.open(map);
+        }
+      }
+    };
+
+    InfoWindow.prototype.close = function() {
+      return this.overlay.close();
+    };
+
+    InfoWindow.prototype.remove = function() {
+      this.close();
+      return InfoWindow.__super__.remove.apply(this, arguments);
+    };
+
+    InfoWindow.prototype.setContentView = function(content_view) {
+      if (content_view == null) {
+        content_view = this.content_view;
+      }
+      content_view.render();
+      return this.overlay.setContent(content_view.$el[0]);
+    };
+
+    return InfoWindow;
+
+  })(MapStick.Overlay);
+
+  MapStick.OverlayCollection = (function(superClass) {
+    extend(OverlayCollection, superClass);
+
+    OverlayCollection.prototype.itemType = "model";
+
+    OverlayCollection.prototype.triggerMethod = MapStick.triggerMethod;
+
+    OverlayCollection.prototype.viewOptions = ['collection', 'model', 'map'];
+
+    OverlayCollection.prototype.showing = false;
+
+    OverlayCollection.prototype.collectionEvents = {};
+
+    OverlayCollection.prototype.cidPrefix = 'oc';
+
+    function OverlayCollection(options) {
+      this.closeChildren = bind(this.closeChildren, this);
+      this.close = bind(this.close, this);
+      this.triggerRendered = bind(this.triggerRendered, this);
+      this.triggerBeforeRender = bind(this.triggerBeforeRender, this);
+      this._initChildViewStorage = bind(this._initChildViewStorage, this);
+      this.removeChildView = bind(this.removeChildView, this);
+      this.removeItemView = bind(this.removeItemView, this);
+      this.buildItemView = bind(this.buildItemView, this);
+      this.addItemView = bind(this.addItemView, this);
+      this.getItemView = bind(this.getItemView, this);
+      this.showCollection = bind(this.showCollection, this);
+      this._renderChildren = bind(this._renderChildren, this);
+      this.render = bind(this.render, this);
+      this.hide = bind(this.hide, this);
+      this.show = bind(this.show, this);
+      this.addChildView = bind(this.addChildView, this);
+      this.removeListeners = bind(this.removeListeners, this);
+      this.listenToCollection = bind(this.listenToCollection, this);
+      this._initialEvents = bind(this._initialEvents, this);
+      this.cid = _.uniqueId(this.cidPrefix);
+      this.options = _.extend({}, _.result(this, 'options'), _.isFunction(options) ? options.call(this) : options);
+      _.extend(this, _.pick(options, this.viewOptions));
+      this._initChildViewStorage();
+      this._initialEvents();
+      this.listenToCollection();
+      if (_.isFunction(this.initialize)) {
+        this.initialize(this.options);
+      }
+    }
+
+    OverlayCollection.prototype._initialEvents = function() {
+      if (this.collection) {
+        this.listenTo(this.collection, "add", this.addChildView);
+        this.listenTo(this.collection, "remove", this.removeItemView);
+        return this.listenTo(this.collection, "reset", this.render);
+      }
+    };
+
+    OverlayCollection.prototype.listenToCollection = function() {
+      if (this.collection) {
+        return _.each(this.collectionEvents, (function(_this) {
+          return function(function_name, event_name) {
+            var method;
+            if (_.isFunction(method = _this[function_name])) {
+              return _this.collection.on(event_name, method);
+            }
+          };
+        })(this));
+      }
+    };
+
+    OverlayCollection.prototype.removeListeners = function() {
+      if (this.collection) {
+        this.stopListening(this.collection, "add");
+        this.stopListening(this.collection, "remove");
+        return this.stopListening(this.collection, "reset");
+      }
+    };
+
+    OverlayCollection.prototype.addChildView = function(item) {
+      var ItemView;
+      if (ItemView = this.getItemView(item)) {
+        return this.addItemView(item, ItemView);
+      }
+    };
+
+    OverlayCollection.prototype.show = function(map) {
+      this.showing = true;
+      if (map) {
+        this.map = map;
+      }
+      return this.children.apply("show");
+    };
+
+    OverlayCollection.prototype.hide = function() {
+      this.showing = false;
+      return this.children.apply("hide");
+    };
+
+    OverlayCollection.prototype.render = function() {
+      this.isClosed = false;
+      this.triggerBeforeRender();
+      this._renderChildren();
+      this.triggerRendered();
+      return this;
+    };
+
+    OverlayCollection.prototype._renderChildren = function() {
+      this.closeChildren();
+      return this.showCollection();
+    };
+
+    OverlayCollection.prototype.showCollection = function() {
+      return this.collection.each((function(_this) {
+        return function(item) {
+          var ItemView;
+          if (ItemView = _this.getItemView(item)) {
+            return _this.addItemView(item, ItemView);
+          }
+        };
+      })(this));
+    };
+
+    OverlayCollection.prototype.getItemView = function() {
+      var itemView;
+      itemView = MapStick.getOption(this, "itemView");
+      if (!itemView) {
+        console.error("An 'itemView' must be specified for class: " + this.constructor.name);
+      }
+      return itemView;
+    };
+
+    OverlayCollection.prototype.addItemView = function(item, ItemView, index) {
+      var itemViewOptions, view;
+      itemViewOptions = MapStick.getOption(this, "itemViewOptions");
+      if (_.isFunction(itemViewOptions)) {
+        itemViewOptions = itemViewOptions.call(this, item, index);
+      }
+      view = this.buildItemView(item, ItemView, itemViewOptions);
+      this.triggerMethod("before:item:added", view);
+      this.children.add(view);
+      if (this.showing) {
+        view.show();
+      } else {
+        view.hide();
+      }
+      this.triggerMethod("after:item:added", view);
+      return view;
+    };
+
+    OverlayCollection.prototype.buildItemView = function(item, ItemViewType, itemViewOptions) {
+      var options, view;
+      options = _.extend({
+        model: item,
+        map: this.map
+      }, itemViewOptions);
+      view = new ItemViewType(options);
+      return view;
+    };
+
+    OverlayCollection.prototype.removeItemView = function(item) {
+      var view;
+      view = this.children.findByModel(item);
+      return this.removeChildView(view);
+    };
+
+    OverlayCollection.prototype.removeChildView = function(view) {
+      if (view) {
+        if (view.close) {
+          view.close();
+        } else if (view.remove) {
+          view.remove();
+        }
+        this.stopListening(view);
+        this.children.remove(view);
+      }
+      return this.triggerMethod("item:removed", view);
+    };
+
+    OverlayCollection.prototype._initChildViewStorage = function() {
+      return this.children = new MapStick.ChildViewContainer();
+    };
+
+    OverlayCollection.prototype.triggerBeforeRender = function() {
+      this.triggerMethod("before:render", this);
+      return this.triggerMethod("collection:before:render", this);
+    };
+
+    OverlayCollection.prototype.triggerRendered = function() {
+      this.triggerMethod("render", this);
+      return this.triggerMethod("collection:rendered", this);
+    };
+
+    OverlayCollection.prototype.close = function() {
+      if (this.isClosed) {
+        return;
+      }
+      this.triggerMethod("collection:before:close");
+      this.closeChildren();
+      this.removeListeners();
+      return this.triggerMethod("collection:closed");
+    };
+
+    OverlayCollection.prototype.closeChildren = function() {
+      return this.children.each(this.removeChildView);
+    };
+
+    return OverlayCollection;
+
+  })(Backbone.View);
+
+}).call(this);var Notification = Backbone.View.extend({
   tagName: "div",
   className: "notification",
   initialize: function(A) {
@@ -21720,1134 +25446,7 @@ var ProgressBar = Loader.extend({
     this.$el.find("em").width(A + "%");
     return this
   }
-});var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-window.MapStick = function() {
-  return {
-    extend: Backbone.Model.extend
-  };
-};
-
-MapStick.ChildViewContainer = (function() {
-  function ChildViewContainer(views) {
-    this._updateLength = bind(this._updateLength, this);
-    this.apply = bind(this.apply, this);
-    this.call = bind(this.call, this);
-    this.remove = bind(this.remove, this);
-    this.findByCid = bind(this.findByCid, this);
-    this.findByIndex = bind(this.findByIndex, this);
-    this.findByCustom = bind(this.findByCustom, this);
-    this.findByModelCid = bind(this.findByModelCid, this);
-    this.findByModel = bind(this.findByModel, this);
-    this.add = bind(this.add, this);
-    this._views = {};
-    this._indexByModel = {};
-    this._indexByCustom = {};
-    this._methods = ["forEach", "each", "map", "find", "detect", "filter", "select", "reject", "every", "all", "some", "any", "include", "contains", "invoke", "toArray", "first", "initial", "rest", "last", "without", "isEmpty", "pluck"];
-    _.each(this._methods, (function(_this) {
-      return function(method) {
-        return _this[method] = function() {
-          var args;
-          views = _.values(_this._views);
-          args = [views].concat(_.toArray(arguments));
-          return _[method].apply(_, args);
-        };
-      };
-    })(this));
-    this._updateLength();
-    _.each(views, this.add);
-  }
-
-  ChildViewContainer.prototype.add = function(view, customIndex) {
-    var model, viewCid;
-    viewCid = view.cid;
-    this._views[viewCid] = view;
-    if (model = view.model) {
-      this._indexByModel[model.cid] = viewCid;
-    }
-    if (customIndex) {
-      this._indexByCustom[customIndex] = viewCid;
-    }
-    this._updateLength();
-    return this;
-  };
-
-  ChildViewContainer.prototype.findByModel = function(model) {
-    return this.findByModelCid(model.cid);
-  };
-
-  ChildViewContainer.prototype.findByModelCid = function(modelCid) {
-    var viewCid;
-    viewCid = this._indexByModel[modelCid];
-    return this.findByCid(viewCid);
-  };
-
-  ChildViewContainer.prototype.findByCustom = function(index) {
-    var viewCid;
-    viewCid = this._indexByCustom[index];
-    return this.findByCid(viewCid);
-  };
-
-  ChildViewContainer.prototype.findByIndex = function(index) {
-    return _.values(this._views)[index];
-  };
-
-  ChildViewContainer.prototype.findByCid = function(cid) {
-    return this._views[cid];
-  };
-
-  ChildViewContainer.prototype.remove = function(view) {
-    var viewCid;
-    viewCid = view.cid;
-    if (view.model) {
-      delete this._indexByModel[view.model.cid];
-    }
-    _.any(this._indexByCustom, (function(_this) {
-      return function(cid, key) {
-        if (cid === viewCid) {
-          delete _this._indexByCustom[key];
-          return true;
-        }
-      };
-    })(this), this);
-    delete this._views[viewCid];
-    this._updateLength();
-    return this;
-  };
-
-  ChildViewContainer.prototype.call = function(method) {
-    return this.apply(method, _.tail(arguments));
-  };
-
-  ChildViewContainer.prototype.apply = function(method, args) {
-    return _.each(this._views, (function(_this) {
-      return function(view) {
-        if (_.isFunction(view[method])) {
-          return view[method].apply(view, args || []);
-        }
-      };
-    })(this));
-  };
-
-  ChildViewContainer.prototype._updateLength = function() {
-    return this.length = _.size(this._views);
-  };
-
-  return ChildViewContainer;
-
-})();
-
-MapStick.getOption = function(target, optionName) {
-  if (!target || !optionName) {
-    return null;
-  } else if (target.options && (indexOf.call(target.options, optionName) >= 0) && (target.options[optionName] !== void 0)) {
-    return target.options[optionName];
-  } else {
-    return target[optionName];
-  }
-};
-
-MapStick.triggerMethod = function() {
-  var splitter, triggerMethod;
-  splitter = /(^|:)(\w)/gi;
-  getEventName(match, prefix, eventName)(function() {
-    return eventName.toUpperCase();
-  });
-  triggerMethod = (function(_this) {
-    return function(event) {
-      var method, methodName;
-      methodName = 'on' + event.replace(splitter, getEventName);
-      method = _this[methodName];
-      if (_.isFunction(_this.trigger)) {
-        _this.trigger.apply(_this, arguments);
-      }
-      if (_.isFunction(method)) {
-        return method.apply(_this, _.tail(arguments));
-      }
-    };
-  })(this);
-  return triggerMethod;
-};
-
-MapStick.actAsCollection = function(object, listProperty) {
-  var methods;
-  methods = ['forEach', 'each', 'map', 'find', 'detect', 'filter', 'select', 'reject', 'every', 'all', 'some', 'any', 'include', 'contains', 'invoke', 'toArray', 'first', 'initial', 'rest', 'last', 'without', 'isEmpty', 'pluck'];
-  return _.each(methods, (function(_this) {
-    return function(method) {
-      return object[method] = function() {
-        var args, list;
-        list = _.values(_.result(_this, listProperty));
-        args = [list].concat(_.toArray(arguments));
-        return _[method].apply(_, args);
-      };
-    };
-  })(this));
-};
-
-MapStick.decodePathString = function(string) {
-  if (google.maps.geometry) {
-    if (string && _.isString(string) && string !== "") {
-      return google.maps.geometry.encoding.decodePath(string);
-    } else {
-      return [];
-    }
-  } else {
-    return console.error("please include google.maps.geometry library");
-  }
-};
-
-MapStick.encodePathString = function(array) {
-  if (google.maps.geometry) {
-    if (array) {
-      return google.maps.geometry.encoding.encodePath(array);
-    }
-  } else {
-    return console.error("please include google.maps.geometry library");
-  }
-};
-
-MapStick.isClockwise = function(path) {
-  var l, previous_lat, previous_lng, r;
-  if (!_.isArray(path)) {
-    path = path.getArray();
-  }
-  path.push(path[0]);
-  l = 0;
-  r = 0;
-  previous_lat = null;
-  previous_lng = null;
-  _.each(path, function(latlng) {
-    var lat, lng;
-    lng = latlng.lng();
-    lat = latlng.lat();
-    if (previous_lng && previous_lat) {
-      l += lng * previous_lat;
-      r += lat * previous_lng;
-    }
-    previous_lng = lng;
-    return previous_lat = lat;
-  });
-  return l - r > 0;
-};
-
-MapStick.Overlay = (function(superClass) {
-  extend(Overlay, superClass);
-
-  Overlay.prototype.googleOverlayType = function() {
-    return this.overlayType.split("_").map(function(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
-    }).join("");
-  };
-
-  Overlay.prototype.googleDrawingOverlayType = function() {
-    return google.maps.drawing.OverlayType["" + (this.overlayType.split("_").map(function(string) {
-      return string.toUpperCase();
-    }).join(""))];
-  };
-
-  Overlay.prototype.defaultOptions = {};
-
-  Overlay.prototype.properties = [];
-
-  Overlay.prototype.overlayEvents = {};
-
-  Overlay.prototype.viewOptions = ['model', 'events', 'map'];
-
-  Overlay.prototype.bindings = {};
-
-  Overlay.prototype.defaultOverlayEvents = [];
-
-  Overlay.prototype.modelEvents = {};
-
-  Overlay.prototype.triggerMethod = Marionette.triggerMethod;
-
-  Overlay.prototype.showing = false;
-
-  Overlay.prototype.buildOverlay = function(options) {
-    return new google.maps[this.googleOverlayType()](options);
-  };
-
-  function Overlay(options) {
-    if (options == null) {
-      options = {};
-    }
-    this.updateFromDrawn = bind(this.updateFromDrawn, this);
-    this.getDrawnOptions = bind(this.getDrawnOptions, this);
-    this.finishDrawing = bind(this.finishDrawing, this);
-    this.draw = bind(this.draw, this);
-    this.render = bind(this.render, this);
-    this.clearListeners = bind(this.clearListeners, this);
-    this.remove = bind(this.remove, this);
-    this.hide = bind(this.hide, this);
-    this.show = bind(this.show, this);
-    this.set = bind(this.set, this);
-    this.get = bind(this.get, this);
-    this.triggerOverlayEvent = bind(this.triggerOverlayEvent, this);
-    this.setBoundOverlayAttributes = bind(this.setBoundOverlayAttributes, this);
-    this.setBoundModelAttributes = bind(this.setBoundModelAttributes, this);
-    this.listenToBoundOverlayEvents = bind(this.listenToBoundOverlayEvents, this);
-    this.listenToBoundModelChanges = bind(this.listenToBoundModelChanges, this);
-    this.bindPosition = bind(this.bindPosition, this);
-    this.setBindings = bind(this.setBindings, this);
-    this.listenToModel = bind(this.listenToModel, this);
-    this.attachOverlayEvents = bind(this.attachOverlayEvents, this);
-    this.buildOverlay = bind(this.buildOverlay, this);
-    this.googleDrawingOverlayType = bind(this.googleDrawingOverlayType, this);
-    this.googleOverlayType = bind(this.googleOverlayType, this);
-    this.cid = _.uniqueId('overlay');
-    this.options = _.extend({}, _.result(this, 'options'), _.isFunction(options) ? options.call(this) : options);
-    this.overlayOptions = _.pick(options, this.properties);
-    _.defaults(this.overlayOptions, this.defaultOptions);
-    this[this.overlayType] = this.overlay = this.buildOverlay(this.overlayOptions);
-    _.extend(this, _.pick(options, this.viewOptions));
-    this.attachOverlayEvents();
-    this.listenToModel();
-    this.setBindings();
-    if (_.isFunction(this.initialize)) {
-      this.initialize(this.options);
-    }
-    this.model.on("destroy", this.remove);
-    this.model.on("draw", this.draw);
-  }
-
-  Overlay.prototype.attachOverlayEvents = function() {
-    return _.each(this.overlayEventNames, (function(_this) {
-      return function(event_name) {
-        return google.maps.event.addListener(_this.overlay, event_name, function(e) {
-          if (_.isFunction(_this.trigger)) {
-            _this.trigger(event_name, e);
-          }
-          return _this.triggerOverlayEvent(event_name, e);
-        });
-      };
-    })(this));
-  };
-
-  Overlay.prototype.listenToModel = function() {
-    if (this.model) {
-      return _.each(this.modelEvents, (function(_this) {
-        return function(function_name, event_name) {
-          var method;
-          if (_.isFunction(method = _this[function_name])) {
-            return _this.model.on(event_name, method);
-          }
-        };
-      })(this));
-    }
-  };
-
-  Overlay.prototype.setBindings = function() {
-    return _.each(this.bindings, (function(_this) {
-      return function(opts, overlay_attribute) {
-        var model_attributes;
-        if (_.isString(opts)) {
-          opts = {
-            attribute: opts,
-            overlayChanged: true
-          };
-        }
-        if (_.isObject(opts)) {
-          opts.overlay_attribute = overlay_attribute;
-          if (overlay_attribute === "position" && _.isString(opts.lat) && _.isString(opts.lng)) {
-            return _this.bindPosition(opts);
-          } else if (model_attributes = opts.attributes || opts.attribute) {
-            if (_.isString(model_attributes)) {
-              opts.attributes = model_attributes = [model_attributes];
-            }
-            _this.setBoundOverlayAttributes(opts);
-            _this.listenToBoundModelChanges(opts);
-            return _this.listenToBoundOverlayEvents(opts);
-          }
-        }
-      };
-    })(this));
-  };
-
-  Overlay.prototype.bindPosition = function(opts) {
-    var lat_attr, lng_attr, overlay_events, setLatLng;
-    if (opts == null) {
-      opts = {};
-    }
-    lat_attr = opts.lat;
-    lng_attr = opts.lng;
-    setLatLng = (function(_this) {
-      return function() {
-        if (_this.model.has(lat_attr) && _this.model.has(lng_attr)) {
-          return _this.set({
-            position: new google.maps.LatLng(_this.model.get(lat_attr), _this.model.get(lng_attr))
-          });
-        }
-      };
-    })(this);
-    setLatLng();
-    this.model.on("change:" + lat_attr + " change:" + lng_attr, (function(_this) {
-      return function(model, value, arg) {
-        var m_change;
-        m_change = (arg != null ? arg : {}).mapstickChange;
-        if (!m_change) {
-          return setLatLng();
-        }
-      };
-    })(this));
-    overlay_events = opts.overlayEvents || this.defaultOverlayEvents;
-    return _.each(overlay_events, (function(_this) {
-      return function(event_name) {
-        return google.maps.event.addListener(_this.overlay, event_name, function(e) {
-          var latlng, pos;
-          if (pos = _this.get("position")) {
-            latlng = {};
-            latlng[lat_attr] = pos.lat();
-            latlng[lng_attr] = pos.lng();
-            return _this.model.set(latlng, {
-              mapstickChange: true
-            });
-          }
-        });
-      };
-    })(this));
-  };
-
-  Overlay.prototype.listenToBoundModelChanges = function(opts) {
-    var model_attributes, observers;
-    if (opts == null) {
-      opts = {};
-    }
-    model_attributes = opts.attributes;
-    observers = model_attributes.map(function(ob) {
-      return "change:" + ob;
-    }).join(" ");
-    return this.model.on(observers, (function(_this) {
-      return function(model, value, arg) {
-        var m_change;
-        m_change = (arg != null ? arg : {}).mapstickChange;
-        if (!m_change) {
-          return _this.setBoundOverlayAttributes(opts);
-        }
-      };
-    })(this));
-  };
-
-  Overlay.prototype.listenToBoundOverlayEvents = function(opts) {
-    var events, overlay_attribute;
-    if (opts == null) {
-      opts = {};
-    }
-    overlay_attribute = opts.overlay_attribute;
-    if (events = opts.overlayEvents) {
-      if (_.isString(events)) {
-        events = [events];
-      }
-    } else {
-      events || (events = this.defaultOverlayEvents);
-    }
-    return _.each(events, (function(_this) {
-      return function(event_name) {
-        return google.maps.event.addListener(_this.overlay, event_name, function(e) {
-          if (event_name === "drawn") {
-            if (overlay_attribute === "paths") {
-              _this._listenToPaths(opts);
-            } else if (overlay_attribute === "path") {
-              _this._listenToPath(opts);
-            }
-          }
-          return _this.setBoundModelAttributes(opts, e);
-        });
-      };
-    })(this));
-  };
-
-  Overlay.prototype.setBoundModelAttributes = function(opts, e) {
-    var data, model_attributes, on_set, overlay_attribute, result;
-    if (opts == null) {
-      opts = {};
-    }
-    if (opts.overlayChanged) {
-      overlay_attribute = opts.overlay_attribute;
-      model_attributes = opts.attributes;
-      if (overlay_attribute === "paths") {
-        data = this.overlay.getPaths();
-      } else if (overlay_attribute === "path") {
-        data = this.overlay.getPath();
-      } else {
-        data = this.get(overlay_attribute);
-      }
-      result = {};
-      on_set = opts.overlayChanged;
-      if (_.isFunction(on_set)) {
-        result = on_set(data, e);
-      } else if (_.isString(on_set) && _.isFunction(this[on_set])) {
-        result = this[on_set](data, e);
-      } else if (on_set === true && model_attributes.length === 1) {
-        result[model_attributes[0]] = data;
-      }
-      return this.model.set(result, {
-        mapstickChange: true
-      });
-    }
-  };
-
-  Overlay.prototype.setBoundOverlayAttributes = function(opts) {
-    var model_attributes, model_data, on_get, overlay_attribute, overlay_options, result;
-    if (opts == null) {
-      opts = {};
-    }
-    model_attributes = opts.attributes;
-    overlay_attribute = opts.overlay_attribute;
-    model_data = {};
-    _.each(model_attributes, (function(_this) {
-      return function(attr) {
-        return model_data[attr] = _this.model.get(attr);
-      };
-    })(this));
-    overlay_options = {};
-    if (on_get = opts.modelChanged) {
-      result = null;
-      if (_.isFunction(on_get)) {
-        result = on_get(model_data);
-      } else if (_.isFunction(this[on_get])) {
-        result = this[on_get](model_data);
-      }
-      overlay_options[overlay_attribute] = result;
-    } else if (model_attributes.length === 1) {
-      overlay_options[overlay_attribute] = this.model.get(model_attributes[0]);
-    }
-    this.set(overlay_options);
-    if (overlay_attribute === "paths") {
-      return this._listenToPaths(opts);
-    } else if (overlay_attribute === "path") {
-      return this._listenToPath(opts);
-    }
-  };
-
-  Overlay.prototype.triggerOverlayEvent = function(event_name, e) {
-    var event, method;
-    if (event = this.overlayEvents[event_name]) {
-      method = this[event];
-      if (_.isFunction(method)) {
-        method(e);
-      } else {
-        console.error("no such handler for event: '" + event_name + "'");
-      }
-    }
-    method = this["on" + (event_name.split("_").map(function(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
-    }).join(""))];
-    if (_.isFunction(method)) {
-      return method(e);
-    }
-  };
-
-  Overlay.prototype.get = function(attribute) {
-    return this.overlay.get(attribute);
-  };
-
-  Overlay.prototype.set = function(attribute, value) {
-    if (_.isObject(attribute)) {
-      return this.overlay.setOptions(attribute);
-    } else if (_.isString(attribute)) {
-      return this.overlay.set(attribute, value);
-    } else {
-      return console.error("can't set that");
-    }
-  };
-
-  Overlay.prototype.show = function(map) {
-    this.showing = true;
-    if (map) {
-      this.map = map;
-    }
-    return this.set("map", this.map);
-  };
-
-  Overlay.prototype.hide = function() {
-    this.showing = false;
-    return this.set("map", null);
-  };
-
-  Overlay.prototype.remove = function() {
-    this.clearListeners();
-    return this.set("map", null);
-  };
-
-  Overlay.prototype.clearListeners = function() {
-    if (this.overlay) {
-      return google.maps.event.clearListeners(this.overlay);
-    }
-  };
-
-  Overlay.prototype.render = function() {
-    if (this.showing) {
-      return this.overlay.setMap(this.map);
-    }
-  };
-
-  Overlay.prototype.draw = function(map) {
-    if (map == null) {
-      map = this.map;
-    }
-    if (google.maps.drawing) {
-      if (MapStick.drawingManager == null) {
-        MapStick.drawingManager = new google.maps.drawing.DrawingManager({
-          map: map,
-          drawingControl: false
-        });
-      }
-      MapStick.drawingManager.setDrawingMode(this.overlayType);
-      google.maps.event.clearInstanceListeners(MapStick.drawingManager);
-      return google.maps.event.addListener(MapStick.drawingManager, "overlaycomplete", (function(_this) {
-        return function(e) {
-          return _this.finishDrawing(e.overlay);
-        };
-      })(this));
-    } else {
-      return console.error("please include google.maps.drawing library");
-    }
-  };
-
-  Overlay.prototype.finishDrawing = function(overlay) {
-    this.updateFromDrawn(overlay);
-    overlay.setMap(null);
-    return MapStick.drawingManager.setDrawingMode(null);
-  };
-
-  Overlay.prototype.getDrawnOptions = function(overlay) {
-    return {};
-  };
-
-  Overlay.prototype.updateFromDrawn = function(overlay) {
-    this.overlay.setOptions(this.getDrawnOptions(overlay));
-    this.model.trigger("overlay:drawn");
-    return google.maps.event.trigger(this.overlay, "drawn");
-  };
-
-  return Overlay;
-
-})(Backbone.View);
-
-MapStick.Marker = (function(superClass) {
-  extend(Marker, superClass);
-
-  function Marker() {
-    this.getDrawnOptions = bind(this.getDrawnOptions, this);
-    return Marker.__super__.constructor.apply(this, arguments);
-  }
-
-  Marker.prototype.overlayType = "marker";
-
-  Marker.prototype.overlayEventNames = ["animation_changed", "click", "clickable_changed", "cursor_changed", "dblclick", "drag", "dragend", "draggable_changed", "dragstart", "flat_changed", "icon_changed", "mousedown", "mouseout", "mouseover", "mouseup", "position_changed", "rightclick", "shape_changed", "title_changed", "visible_changed", "zindex_changed"];
-
-  Marker.prototype.defaultOverlayEvents = ["drag", "dragend", "dragstart", "drawn"];
-
-  Marker.prototype.properties = ["anchorPoint", "animation", "clickable", "crossOnDrag", "cursor", "draggable", "icon", "map", "opacity", "optimized", "position", "shape", "title", "visible", "zIndex"];
-
-  Marker.prototype.getDrawnOptions = function(overlay) {
-    return {
-      position: overlay.getPosition()
-    };
-  };
-
-  return Marker;
-
-})(MapStick.Overlay);
-
-MapStick.OverlayWithPath = (function(superClass) {
-  extend(OverlayWithPath, superClass);
-
-  function OverlayWithPath() {
-    this._listenToPath = bind(this._listenToPath, this);
-    this.getDrawnOptions = bind(this.getDrawnOptions, this);
-    this.setOverlayPathFromEncodedString = bind(this.setOverlayPathFromEncodedString, this);
-    this.getEncodedPathFromOverlay = bind(this.getEncodedPathFromOverlay, this);
-    return OverlayWithPath.__super__.constructor.apply(this, arguments);
-  }
-
-  OverlayWithPath.prototype.defaultOptions = {
-    path: new google.maps.MVCArray
-  };
-
-  OverlayWithPath.prototype.getEncodedPathFromOverlay = function() {
-    return MapStick.encodePathString(this.overlay.getPath());
-  };
-
-  OverlayWithPath.prototype.setOverlayPathFromEncodedString = function(string) {
-    return this.overlay.setPath(MapStick.decodePathString(string));
-  };
-
-  OverlayWithPath.prototype.getDrawnOptions = function(overlay) {
-    return {
-      path: overlay.getPath()
-    };
-  };
-
-  OverlayWithPath.prototype._listenToPath = function(opts) {
-    var path;
-    if (opts == null) {
-      opts = {};
-    }
-    path = this.overlay.getPath();
-    return _.each(["insert_at", "remove_at", "set_at"], (function(_this) {
-      return function(event_name) {
-        return google.maps.event.addListener(path, event_name, function(e) {
-          return _this.setBoundModelAttributes(opts, e);
-        });
-      };
-    })(this));
-  };
-
-  return OverlayWithPath;
-
-})(MapStick.Overlay);
-
-MapStick.Polyline = (function(superClass) {
-  extend(Polyline, superClass);
-
-  function Polyline() {
-    return Polyline.__super__.constructor.apply(this, arguments);
-  }
-
-  Polyline.prototype.overlayType = "polyline";
-
-  Polyline.prototype.overlayEventNames = ["click", "dblclick", "drag", "dragend", "dragstart", "mousedown", "mousemove", "mouseout", "mouseover", "mouseup", "rightclick"];
-
-  Polyline.prototype.defaultOverlayEvents = ["drag", "dragend", "drawn"];
-
-  Polyline.prototype.properties = ["clickable", "draggable", "editable", "geodesic", "icons", "map", "path", "strokeColor", "strokeOpacity", "strokeWeight", "visible", "zIndex"];
-
-  return Polyline;
-
-})(MapStick.OverlayWithPath);
-
-MapStick.Polygon = (function(superClass) {
-  extend(Polygon, superClass);
-
-  function Polygon() {
-    this._listenToPaths = bind(this._listenToPaths, this);
-    this.setOverlayPathsFromEncodedStrings = bind(this.setOverlayPathsFromEncodedStrings, this);
-    this.getEncodedPathsFromOverlay = bind(this.getEncodedPathsFromOverlay, this);
-    this.finishExclusion = bind(this.finishExclusion, this);
-    this.drawExclusion = bind(this.drawExclusion, this);
-    return Polygon.__super__.constructor.apply(this, arguments);
-  }
-
-  Polygon.prototype.overlayType = "polygon";
-
-  Polygon.prototype.overlayEventNames = ["click", "dblclick", "drag", "dragend", "dragstart", "mousedown", "mousemove", "mouseout", "mouseover", "mouseup", "rightclick"];
-
-  Polygon.prototype.defaultOverlayEvents = ["drag", "dragend", "drawn"];
-
-  Polygon.prototype.properties = ["zIndex", "visible", "strokeWeight", "strokePosition", "strokeOpacity", "strokeColor", "paths", "map", "geodesic", "fillOpacity", "fillColor", "editable", "draggable", "clickable"];
-
-  Polygon.prototype.drawExclusion = function() {
-    if (google.maps.drawing) {
-      if (MapStick.drawingManager == null) {
-        MapStick.drawingManager = new google.maps.drawing.DrawingManager({
-          map: this.map,
-          drawingControl: false
-        });
-      }
-      MapStick.drawingManager.setDrawingMode("polygon");
-      google.maps.event.clearInstanceListeners(MapStick.drawingManager);
-      return google.maps.event.addListener(MapStick.drawingManager, "polygoncomplete", (function(_this) {
-        return function(polygon) {
-          return _this.finishExclusion(polygon);
-        };
-      })(this));
-    } else {
-      return console.error("please include google.maps.drawing library");
-    }
-  };
-
-  Polygon.prototype.finishExclusion = function(polygon) {
-    var path, paths;
-    path = polygon.getPath();
-    if (MapStick.isClockwise(path) === MapStick.isClockwise(this.overlay.getPath())) {
-      path = new google.maps.MVCArray(path.getArray().reverse());
-    }
-    paths = this.overlay.getPaths();
-    paths.push(path);
-    this.overlay.setPaths(paths);
-    polygon.setMap(null);
-    MapStick.drawingManager.setDrawingMode(null);
-    return google.maps.event.trigger(this.overlay, "drawn");
-  };
-
-  Polygon.prototype.getEncodedPathsFromOverlay = function() {
-    return _.collect(this.overlay.getPaths().getArray(), (function(_this) {
-      return function(path) {
-        return MapStick.encodePathString(path);
-      };
-    })(this));
-  };
-
-  Polygon.prototype.setOverlayPathsFromEncodedStrings = function(paths) {
-    if (_.isString(paths)) {
-      paths = paths.split(",");
-    }
-    paths = _.collect(paths, (function(_this) {
-      return function(string) {
-        return MapStick.decodePathString(string);
-      };
-    })(this));
-    return this.overlay.setPaths(paths);
-  };
-
-  Polygon.prototype._listenToPaths = function(opts) {
-    var paths;
-    if (opts == null) {
-      opts = {};
-    }
-    paths = this.overlay.getPaths();
-    return _.each(["insert_at", "remove_at", "set_at"], (function(_this) {
-      return function(event_name) {
-        return paths.forEach(function(path) {
-          return google.maps.event.addListener(path, event_name, function(e) {
-            return _this.setBoundModelAttributes(opts);
-          });
-        });
-      };
-    })(this));
-  };
-
-  return Polygon;
-
-})(MapStick.OverlayWithPath);
-
-MapStick.Rectangle = (function(superClass) {
-  extend(Rectangle, superClass);
-
-  function Rectangle() {
-    this.getDrawnOptions = bind(this.getDrawnOptions, this);
-    return Rectangle.__super__.constructor.apply(this, arguments);
-  }
-
-  Rectangle.prototype.overlayType = "rectangle";
-
-  Rectangle.prototype.overlayEventNames = ["bounds_changed", "click", "dblclick", "drag", "dragend", "dragstart", "mousedown", "mousemove", "mouseout", "mouseover", "mouseup", "rightclick"];
-
-  Rectangle.prototype.defaultOverlayEvents = ["drag", "dragend", "dragstart", "drawn"];
-
-  Rectangle.prototype.properties = ["bounds", "clickable", "draggable", "editable", "fillColor", "fillOpacity", "map", "strokeColor", "strokeOpacity", "strokePosition", "strokeWeight", "visible", "zIndex"];
-
-  Rectangle.prototype.getDrawnOptions = function(overlay) {
-    return {
-      bounds: overlay.getBounds()
-    };
-  };
-
-  return Rectangle;
-
-})(MapStick.Overlay);
-
-MapStick.Circle = (function(superClass) {
-  extend(Circle, superClass);
-
-  function Circle() {
-    this.getDrawnOptions = bind(this.getDrawnOptions, this);
-    return Circle.__super__.constructor.apply(this, arguments);
-  }
-
-  Circle.prototype.overlayType = "circle";
-
-  Circle.prototype.overlayEventNames = ["center_changed", "click", "dblclick", "drag", "dragend", "dragstart", "mousedown", "mousemove", "mouseout", "mouseup", "mouseover", "radius_changed", "rightclick"];
-
-  Circle.prototype.defaultOverlayEvents = ["drag", "dragend", "dragstart", "drawn"];
-
-  Circle.prototype.properties = ["center", "clickable", "draggable", "editable", "fillColor", "fillOpacity", "map", "radius", "strokeColor", "strokeOpacity", "strokePosition", "strokeWeight", "visible", "zIndex"];
-
-  Circle.prototype.getDrawnOptions = function(overlay) {
-    return {
-      center: overlay.getCenter(),
-      radius: overlay.getRadius()
-    };
-  };
-
-  return Circle;
-
-})(MapStick.Overlay);
-
-MapStick.InfoWindow = (function(superClass) {
-  extend(InfoWindow, superClass);
-
-  function InfoWindow() {
-    this.setContentView = bind(this.setContentView, this);
-    this.close = bind(this.close, this);
-    this.open = bind(this.open, this);
-    this.isOpen = bind(this.isOpen, this);
-    return InfoWindow.__super__.constructor.apply(this, arguments);
-  }
-
-  InfoWindow.prototype.overlayType = "info_window";
-
-  InfoWindow.prototype.overlayEventNames = ["closeclick", "content_changed", "domready", "position_changed", "zindex_changed"];
-
-  InfoWindow.prototype.properties = ["content", "disableAutoPan", "maxWidth", "pixelOffset", "position", "zIndex"];
-
-  InfoWindow.prototype.initialize = function(arg) {
-    this.content_view = (arg != null ? arg : {}).content_view;
-    InfoWindow.__super__.initialize.apply(this, arguments);
-    if (this.content_view) {
-      return this.setContentView();
-    }
-  };
-
-  InfoWindow.prototype.isOpen = function() {
-    var map;
-    map = this.get("map");
-    return map !== null && typeof map !== "undefined";
-  };
-
-  InfoWindow.prototype.open = function(arg) {
-    var anchor, map, position, ref;
-    ref = arg != null ? arg : {}, map = ref.map, anchor = ref.anchor, position = ref.position;
-    if (anchor) {
-      return this.overlay.open(map || (map = anchor.getMap()), anchor);
-    } else if (position) {
-      this.overlay.setPosition(position);
-      if (map || (map = this.map)) {
-        return this.overlay.open(map);
-      }
-    }
-  };
-
-  InfoWindow.prototype.close = function() {
-    return this.overlay.close();
-  };
-
-  InfoWindow.prototype.setContentView = function(content_view) {
-    if (content_view == null) {
-      content_view = this.content_view;
-    }
-    content_view.render();
-    return this.overlay.setContent(content_view.$el[0]);
-  };
-
-  return InfoWindow;
-
-})(MapStick.Overlay);
-
-MapStick.OverlayCollection = (function(superClass) {
-  extend(OverlayCollection, superClass);
-
-  OverlayCollection.prototype.itemType = "model";
-
-  OverlayCollection.prototype.triggerMethod = Marionette.triggerMethod;
-
-  OverlayCollection.prototype.viewOptions = ['collection', 'model', 'map'];
-
-  OverlayCollection.prototype.showing = false;
-
-  OverlayCollection.prototype.collectionEvents = {};
-
-  function OverlayCollection(options) {
-    this.closeChildren = bind(this.closeChildren, this);
-    this.close = bind(this.close, this);
-    this.triggerRendered = bind(this.triggerRendered, this);
-    this.triggerBeforeRender = bind(this.triggerBeforeRender, this);
-    this._initChildViewStorage = bind(this._initChildViewStorage, this);
-    this.removeChildView = bind(this.removeChildView, this);
-    this.removeItemView = bind(this.removeItemView, this);
-    this.buildItemView = bind(this.buildItemView, this);
-    this.addItemView = bind(this.addItemView, this);
-    this.getItemView = bind(this.getItemView, this);
-    this.showCollection = bind(this.showCollection, this);
-    this._renderChildren = bind(this._renderChildren, this);
-    this.render = bind(this.render, this);
-    this.hide = bind(this.hide, this);
-    this.show = bind(this.show, this);
-    this.addChildView = bind(this.addChildView, this);
-    this.removeListeners = bind(this.removeListeners, this);
-    this.listenToCollection = bind(this.listenToCollection, this);
-    this._initialEvents = bind(this._initialEvents, this);
-    this._initialCollection = bind(this._initialCollection, this);
-    this.options = _.extend({}, _.result(this, 'options'), _.isFunction(options) ? options.call(this) : options);
-    _.extend(this, _.pick(options, this.viewOptions));
-    this._initChildViewStorage();
-    this._initialCollection();
-    this._initialEvents();
-    this.listenToCollection();
-    if (_.isFunction(this.initialize)) {
-      this.initialize(this.options);
-    }
-  }
-
-  OverlayCollection.prototype._initialCollection = function() {
-    return this.collection.each((function(_this) {
-      return function(item, index) {
-        var ItemView;
-        if (ItemView = _this.getItemView(item)) {
-          return _this.addItemView(item, ItemView, index);
-        }
-      };
-    })(this));
-  };
-
-  OverlayCollection.prototype._initialEvents = function() {
-    if (this.collection) {
-      this.listenTo(this.collection, "add", this.addChildView);
-      this.listenTo(this.collection, "remove", this.removeItemView);
-      return this.listenTo(this.collection, "reset", this.render);
-    }
-  };
-
-  OverlayCollection.prototype.listenToCollection = function() {
-    if (this.collection) {
-      return _.each(this.collectionEvents, (function(_this) {
-        return function(function_name, event_name) {
-          var method;
-          if (_.isFunction(method = _this[function_name])) {
-            return _this.collection.on(event_name, method);
-          }
-        };
-      })(this));
-    }
-  };
-
-  OverlayCollection.prototype.removeListeners = function() {
-    if (this.collection) {
-      this.stopListening(this.collection, "add");
-      this.stopListening(this.collection, "remove");
-      return this.stopListening(this.collection, "reset");
-    }
-  };
-
-  OverlayCollection.prototype.addChildView = function(item, collection, options) {
-    var ItemView;
-    if (ItemView = this.getItemView(item)) {
-      return this.addItemView(item, ItemView);
-    }
-  };
-
-  OverlayCollection.prototype.show = function(map) {
-    this.showing = true;
-    if (map) {
-      this.map = map;
-    }
-    return this.children.apply("show");
-  };
-
-  OverlayCollection.prototype.hide = function() {
-    this.showing = false;
-    return this.children.apply("hide");
-  };
-
-  OverlayCollection.prototype.render = function() {
-    this.isClosed = false;
-    this.triggerBeforeRender();
-    this._renderChildren();
-    this.triggerRendered();
-    return this;
-  };
-
-  OverlayCollection.prototype._renderChildren = function() {
-    this.closeChildren();
-    return this.showCollection();
-  };
-
-  OverlayCollection.prototype.showCollection = function() {
-    return this.collection.each((function(_this) {
-      return function(item) {
-        var ItemView;
-        if (ItemView = _this.getItemView(item)) {
-          return _this.addItemView(item, ItemView);
-        }
-      };
-    })(this));
-  };
-
-  OverlayCollection.prototype.getItemView = function(item) {
-    var itemView;
-    itemView = MapStick.getOption(this, "itemView");
-    if (!itemView) {
-      console.error("An 'itemView' must be specified for class: " + this.constructor.name);
-    }
-    return itemView;
-  };
-
-  OverlayCollection.prototype.addItemView = function(item, ItemView, index) {
-    var itemViewOptions, view;
-    itemViewOptions = MapStick.getOption(this, "itemViewOptions");
-    if (_.isFunction(itemViewOptions)) {
-      itemViewOptions = itemViewOptions.call(this, item, index);
-    }
-    view = this.buildItemView(item, ItemView, itemViewOptions);
-    this.triggerMethod("before:item:added", view);
-    this.children.add(view);
-    if (this.showing) {
-      view.show();
-    } else {
-      view.hide();
-    }
-    this.triggerMethod("after:item:added", view);
-    return view;
-  };
-
-  OverlayCollection.prototype.buildItemView = function(item, ItemViewType, itemViewOptions) {
-    var options, view;
-    options = _.extend({
-      model: item,
-      map: this.map
-    }, itemViewOptions);
-    view = new ItemViewType(options);
-    return view;
-  };
-
-  OverlayCollection.prototype.removeItemView = function(item) {
-    var view;
-    view = this.children.findByModel(item);
-    return this.removeChildView(view);
-  };
-
-  OverlayCollection.prototype.removeChildView = function(view) {
-    if (view) {
-      if (view.close) {
-        view.close();
-      } else if (view.remove) {
-        view.remove();
-      }
-      this.stopListening(view);
-      this.children.remove(view);
-    }
-    return this.triggerMethod("item:removed", view);
-  };
-
-  OverlayCollection.prototype._initChildViewStorage = function() {
-    return this.children = new MapStick.ChildViewContainer;
-  };
-
-  OverlayCollection.prototype.triggerBeforeRender = function() {
-    this.triggerMethod("before:render", this);
-    return this.triggerMethod("collection:before:render", this);
-  };
-
-  OverlayCollection.prototype.triggerRendered = function() {
-    this.triggerMethod("render", this);
-    return this.triggerMethod("collection:rendered", this);
-  };
-
-  OverlayCollection.prototype.close = function() {
-    if (this.isClosed) {
-      return;
-    }
-    this.triggerMethod("collection:before:close");
-    this.closeChildren();
-    this.removeListeners();
-    return this.triggerMethod("collection:closed");
-  };
-
-  OverlayCollection.prototype.closeChildren = function() {
-    return this.children.each((function(_this) {
-      return function(child, index) {
-        return _this.removeChildView(child);
-      };
-    })(this));
-  };
-
-  return OverlayCollection;
-
-})(Backbone.View);// Backbone.Validation v0.11.3
+});// Backbone.Validation v0.11.3
 //
 // Copyright (c) 2011-2015 Thomas Pedersen
 // Distributed under MIT License
@@ -33241,7 +35840,8 @@ jQuery(function($) {
 });var FellRace, root,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  hasProp = {}.hasOwnProperty,
+  slice = [].slice;
 
 FellRace = {};
 
@@ -33259,56 +35859,43 @@ FellRace.Application = (function(superClass) {
   extend(Application, superClass);
 
   function Application() {
+    this.log = bind(this.log, this);
+    this.notify = bind(this.notify, this);
+    this.warn = bind(this.warn, this);
+    this.complain = bind(this.complain, this);
+    this.confirm = bind(this.confirm, this);
+    this.reportError = bind(this.reportError, this);
+    this.broadcast = bind(this.broadcast, this);
+    this.stopComplaining = bind(this.stopComplaining, this);
+    this.startComplaining = bind(this.startComplaining, this);
+    this.stopLogging = bind(this.stopLogging, this);
+    this.startLogging = bind(this.startLogging, this);
+    this.logging = bind(this.logging, this);
     this.sendAuthenticationHeader = bind(this.sendAuthenticationHeader, this);
     this.navigate = bind(this.navigate, this);
     this.render = bind(this.render, this);
     this.domain = bind(this.domain, this);
     this.apiUrl = bind(this.apiUrl, this);
     this.sync = bind(this.sync, this);
+    this.user_actions = bind(this.user_actions, this);
+    this.offsetX = bind(this.offsetX, this);
     this.getCurrentCompetitor = bind(this.getCurrentCompetitor, this);
     this.authPending = bind(this.authPending, this);
     this.userConfirmed = bind(this.userConfirmed, this);
     this.userSignedIn = bind(this.userSignedIn, this);
     this.currentUser = bind(this.currentUser, this);
-    this.moveMapTo = bind(this.moveMapTo, this);
-    this.setMapOptions = bind(this.setMapOptions, this);
-    this.getMap = bind(this.getMap, this);
-    this.user_actions = bind(this.user_actions, this);
     this.getCategories = bind(this.getCategories, this);
     this.config = bind(this.config, this);
-    this.closeRight = bind(this.closeRight, this);
-    this.actionRegionSetup = bind(this.actionRegionSetup, this);
-    this.toPublicOrHome = bind(this.toPublicOrHome, this);
-    this.adminMapView = bind(this.adminMapView, this);
-    this.publicMapView = bind(this.publicMapView, this);
-    this.indexMapView = bind(this.indexMapView, this);
-    this.showRace = bind(this.showRace, this);
-    this.offsetX = bind(this.offsetX, this);
-    this.listenToToggle = bind(this.listenToToggle, this);
     this.onStart = bind(this.onStart, this);
+    this.onBeforeStart = bind(this.onBeforeStart, this);
     return Application.__super__.constructor.apply(this, arguments);
   }
 
-  Application.prototype.regions = {
-    gmap: '#gmap',
-    content: '#content',
-    main: 'main',
-    user_controls: '#user_controls',
-    notice: '#notice',
-    action: '#action',
-    extraContent: 'section#extra'
-  };
+  Application.prototype.region = "#ui";
 
   Application.prototype.months = {
     full: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     short: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-  };
-
-  Application.prototype.open_drawer = true;
-
-  Application.prototype.open_css = {
-    top: '',
-    left: ''
   };
 
   Application.prototype.initialize = function(opts) {
@@ -33318,20 +35905,16 @@ FellRace.Application = (function(superClass) {
     root._fr = this;
     this.original_backbone_sync = Backbone.sync;
     Backbone.sync = this.sync;
-    Backbone.Marionette.Renderer.render = this.render;
+    Marionette.setRenderer(this.render);
     $(document).ajaxSend(this.sendAuthenticationHeader);
-    $.notify = (function(_this) {
-      return function(type, argument) {
-        return _this.vent.trigger(type, argument);
-      };
-    })(this);
-    this.actionRegionSetup();
-    this._config = new FellRace.Config(options.config);
+    this._config = new FellRace.Config;
+    this._radio = Backbone.Radio.channel('fell_race');
     this._api_url = this.config("api_url");
     this._domain = this.config("domain");
-    if (typeof Stripe !== "undefined" && Stripe !== null) {
-      Stripe.setPublishableKey(this.config("stripe_publishable_key"));
-    }
+    return typeof Stripe !== "undefined" && Stripe !== null ? Stripe.setPublishableKey(this.config("stripe_publishable_key")) : void 0;
+  };
+
+  Application.prototype.onBeforeStart = function() {
     this.session = new FellRace.Models.UserSession();
     this.clubs = new FellRace.Collections.Clubs([]);
     this.categories = new FellRace.Collections.Categories([]);
@@ -33347,96 +35930,18 @@ FellRace.Application = (function(superClass) {
   };
 
   Application.prototype.onStart = function() {
-    this.mapView = new FellRace.Views.Map();
-    this.getRegion('gmap').show(this.mapView);
-    this.getRegion('user_controls').show(new FellRace.Views.UserControls());
-    this.listenToToggle();
-    this.getRegion('notice').show(new Notifier({
-      model: this.vent,
-      wait: 4000
-    }));
-    this.session.load();
-    this.router = new FellRace.BaseRouter;
-    this.content = $('#content');
-    return Backbone.history.start({
+    this._ui = new FellRace.Views.UILayout({
+      model: this._session
+    });
+    this.showView(this._ui);
+    this.router = new FellRace.AppRouter({
+      ui: this._ui
+    });
+    Backbone.history.start({
       pushState: true,
       root: '/'
     });
-  };
-
-  Application.prototype.listenToToggle = function() {
-    return $("#view_toggle").on("click", (function(_this) {
-      return function() {
-        if (_this.content.hasClass("collapsed")) {
-          return _this.content.removeClass("collapsed");
-        } else {
-          return _this.content.addClass("collapsed");
-        }
-      };
-    })(this));
-  };
-
-  Application.prototype.offsetX = function() {
-    if (this.open_drawer) {
-      return -(this.content.width() - 10) / 2;
-    } else {
-      return -10 / 2;
-    }
-  };
-
-  Application.prototype.showRace = function(race) {
-    return this.mapView.showRace(race);
-  };
-
-  Application.prototype.indexMapView = function() {
-    return this.mapView.indexView();
-  };
-
-  Application.prototype.publicMapView = function() {
-    return this.mapView.publicView();
-  };
-
-  Application.prototype.adminMapView = function() {
-    return this.mapView.adminView();
-  };
-
-  Application.prototype.toPublicOrHome = function() {
-    var ref;
-    return _fr.navigate(((ref = Backbone.history.fragment.match(/admin(.+)/)) != null ? ref[1] : void 0) || "/");
-  };
-
-  Application.prototype.actionRegionSetup = function() {
-    var action_region;
-    action_region = this.getRegion('action');
-    action_region.on("show", function(view) {
-      this.$el.show();
-      return this.$el.find("a.close, a.hide, a.cancel").on("click", (function(_this) {
-        return function() {
-          return _this.trigger("close");
-        };
-      })(this));
-    }).on("hide", function(view) {
-      return this.$el.hide();
-    }).on("close", function(view) {
-      return this.$el.hide();
-    });
-    return $(document).keyup((function(_this) {
-      return function(e) {
-        var code;
-        code = e.keyCode || e.which;
-        if (code === 27) {
-          return action_region.close();
-        } else if (code === 13) {
-          if (action_region.currentView) {
-            return action_region.currentView.trigger("submit");
-          }
-        }
-      };
-    })(this));
-  };
-
-  Application.prototype.closeRight = function() {
-    return this.extraContentRegion.close();
+    return $(document).on("click", "a:not([data-bypass])", this.handleLinkClick);
   };
 
   Application.prototype.config = function(key) {
@@ -33445,92 +35950,6 @@ FellRace.Application = (function(superClass) {
 
   Application.prototype.getCategories = function() {
     return this.categories;
-  };
-
-  Application.prototype.user_actions = function() {
-    return {
-      resetPassword: (function(_this) {
-        return function(uid, token) {
-          return _this.actionRegion.show(new FellRace.Views.SessionPasswordForm({
-            uid: uid,
-            token: token
-          }));
-        };
-      })(this),
-      requestReset: (function(_this) {
-        return function() {
-          return _this.actionRegion.show(new FellRace.Views.SessionResetForm());
-        };
-      })(this),
-      signOut: (function(_this) {
-        return function() {
-          return _this.session.reset();
-        };
-      })(this),
-      signUp: (function(_this) {
-        return function(opts) {
-          return _this.actionRegion.show(new FellRace.Views.UserSignupForm(opts));
-        };
-      })(this),
-      signUpForEvent: (function(_this) {
-        return function() {
-          return _this.actionRegion.show(new FellRace.Views.UserSignupFormForRace());
-        };
-      })(this),
-      signIn: (function(_this) {
-        return function(opts) {
-          return _this.actionRegion.show(new FellRace.Views.SessionLoginForm(opts));
-        };
-      })(this),
-      confirm: (function(_this) {
-        return function(uid, token) {
-          return _this.actionRegion.show(new FellRace.Views.SessionConfirmationForm({
-            uid: uid,
-            token: token
-          }));
-        };
-      })(this),
-      reconfirm: (function(_this) {
-        return function() {
-          return _this.actionRegion.show(new FellRace.Views.SessionReconfirmationForm());
-        };
-      })(this),
-      requestConfirmation: (function(_this) {
-        return function() {
-          return _this.actionRegion.show(new FellRace.Views.ConfirmationRequired());
-        };
-      })(this),
-      signedUp: (function(_this) {
-        return function() {
-          $.notify("success", "User account created");
-          return _this.actionRegion.close();
-        };
-      })(this),
-      hideAction: (function(_this) {
-        return function() {
-          return _this.actionRegion.close();
-        };
-      })(this),
-      menu: (function(_this) {
-        return function() {
-          return _this.actionRegion.show(new FellRace.Views.UserActionMenu());
-        };
-      })(this)
-    };
-  };
-
-  Application.prototype.getMap = function() {
-    var ref;
-    return (ref = this.mapView) != null ? ref.getMap() : void 0;
-  };
-
-  Application.prototype.setMapOptions = function(opts) {
-    var ref;
-    return (ref = this.mapView) != null ? ref.setOptions(opts) : void 0;
-  };
-
-  Application.prototype.moveMapTo = function(model, zoom) {
-    return this.mapView.moveTo(model, zoom);
   };
 
   Application.prototype.currentUser = function() {
@@ -33552,6 +35971,14 @@ FellRace.Application = (function(superClass) {
   Application.prototype.getCurrentCompetitor = function() {
     var ref;
     return (ref = this.currentUser()) != null ? ref.getCompetitor() : void 0;
+  };
+
+  Application.prototype.offsetX = function() {
+    return this.ui.offsetX();
+  };
+
+  Application.prototype.user_actions = function() {
+    return this.ui.user_actions();
   };
 
   Application.prototype.sync = function(method, model, opts) {
@@ -33584,6 +36011,18 @@ FellRace.Application = (function(superClass) {
     }
   };
 
+  Application.prototype.handleLinkClick = function(e) {
+    var has_target, href;
+    href = $(this).attr("href");
+    if (href && href[0] !== "#" && href.slice(0, 4) !== 'http' && href.slice(0, 6) !== 'mailto') {
+      e.preventDefault();
+      has_target = _.includes(href, "#");
+      return _fr.navigate(href, {
+        trigger: !has_target
+      });
+    }
+  };
+
   Application.prototype.navigate = function(route, arg) {
     var ref, replace, trigger;
     ref = arg != null ? arg : {}, trigger = ref.trigger, replace = ref.replace;
@@ -33607,25 +36046,197 @@ FellRace.Application = (function(superClass) {
     }
   };
 
+  Application.prototype.logging = function() {
+    return !!this._logging;
+  };
+
+  Application.prototype.startLogging = function() {
+    return this._logging = true;
+  };
+
+  Application.prototype.stopLogging = function() {
+    return this._logging = false;
+  };
+
+  Application.prototype.startComplaining = function() {
+    this._config.set('report_errors', true);
+    return this._config.set('trap_errors', false);
+  };
+
+  Application.prototype.stopComplaining = function() {
+    this._config.set('report_errors', false);
+    return this._config.set('trap_errors', true);
+  };
+
+  Application.prototype.broadcast = function(event_type, argument) {
+    return this._radio.trigger(event_type, argument);
+  };
+
+  Application.prototype.reportError = function(message, source, lineno, colno, error) {
+    var complaint;
+    if (error === "not_allowed") {
+      this.complain('<p><strong>' + t('problems.not_allowed') + '</strong>.' + t('notes.view_denied') + t('please_go_home') + '</p>', 100000);
+      return true;
+    } else if (error === "not_found") {
+      this.complain('<p><strong>' + t('problems.not_found') + '</strong>.' + t('notes.item_denied') + t('please_go_home') + '</p>', 100000);
+      return true;
+    } else {
+      complaint = "<strong>" + message + "</strong> " + (t('at')) + " " + source + " " + (t('line')) + " " + lineno + " " + (t('col')) + " " + colno + ".";
+      if (this.config('report_errors')) {
+        this.notify(complaint, 100000, null, 'error');
+      }
+      if (this.config('trap_errors')) {
+        return true;
+      }
+    }
+  };
+
+  Application.prototype.confirm = function(message, href) {
+    return this.notify(message, 4000, href, 'confirmation');
+  };
+
+  Application.prototype.complain = function(message, href) {
+    return this.notify(message, 10000, href, 'error');
+  };
+
+  Application.prototype.warn = function(message, href) {
+    return this.notify(message, 10000, href, 'warning');
+  };
+
+  Application.prototype.notify = function(html_or_text, duration, href, notice_type) {
+    var failure_notice;
+    if (duration == null) {
+      duration = 4000;
+    }
+    if (href == null) {
+      href = null;
+    }
+    if (notice_type == null) {
+      notice_type = 'information';
+    }
+    if (this._ui_view) {
+      return this._notices.add({
+        message: html_or_text,
+        href: href,
+        duration: duration,
+        notice_type: notice_type
+      });
+    } else {
+      failure_notice = $('<div class="complete_failure" />').appendTo($("#notices"));
+      return failure_notice.html(html_or_text);
+    }
+  };
+
+  Application.prototype.log = function() {
+    if (this.logging() && ((typeof console !== "undefined" && console !== null ? console.log : void 0) != null)) {
+      return console.log.apply(console, ["[FR]"].concat(slice.call(arguments)));
+    }
+  };
+
   return Application;
 
-})(Backbone.Marionette.Application);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.Application);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
-FellRace.Router = (function(superClass) {
-  extend(Router, superClass);
+FellRace.AppRouter = (function(superClass) {
+  extend(AppRouter, superClass);
 
-  Router.prototype._previous = {};
-
-  function Router() {
-    this.route = bind(this.route, this);
-    this.handle = bind(this.handle, this);
-    this.handlers = [];
-    Router.__super__.constructor.apply(this, arguments);
+  function AppRouter() {
+    this.adminRunners = bind(this.adminRunners, this);
+    this.adminClubs = bind(this.adminClubs, this);
+    this.adminRace = bind(this.adminRace, this);
+    this.resetPassword = bind(this.resetPassword, this);
+    this.confirmUser = bind(this.confirmUser, this);
+    this.user = bind(this.user, this);
+    this.runner = bind(this.runner, this);
+    this.race = bind(this.race, this);
+    this.page = bind(this.page, this);
+    this.index = bind(this.index, this);
+    return AppRouter.__super__.constructor.apply(this, arguments);
   }
 
-  Router.prototype.handle = function(fragment) {
+  AppRouter.prototype.routes = {
+    "(/)": "index",
+    "faq/:page_name(/)": "page",
+    "races(/*path)": "race",
+    "runners(/*path)": "runner",
+    "users(/*path)": "user",
+    "confirm/:uid/:token(/)": "confirmUser",
+    "reset_password/:uid/:token(/)": "resetPassword",
+    "admin/races(/*path)": "adminRace",
+    "admin/clubs(/*path)": "adminClubs",
+    "admin/runners(/*path)": "adminRunners",
+    "*path": "index"
+  };
+
+  AppRouter.prototype.initialize = function(opts) {
+    if (opts == null) {
+      opts = {};
+    }
+    return this._ui = opts.ui;
+  };
+
+  AppRouter.prototype.index = function() {
+    return this._ui.showIndexView();
+  };
+
+  AppRouter.prototype.page = function(page_name) {
+    return this._ui.showPage(page_name);
+  };
+
+  AppRouter.prototype.race = function(path) {
+    return this._ui.showRace(path);
+  };
+
+  AppRouter.prototype.runner = function(path) {
+    return this._ui.showRunner(path);
+  };
+
+  AppRouter.prototype.user = function(path) {
+    return this._ui.showUser(path);
+  };
+
+  AppRouter.prototype.confirmUser = function(uid, token) {
+    return this._ui.confirmUser(uid, token);
+  };
+
+  AppRouter.prototype.resetPassword = function(uid, token) {
+    return this._ui.resetPassword(uid, token);
+  };
+
+  AppRouter.prototype.adminRace = function(path) {
+    return this._ui.showAdminRace(path);
+  };
+
+  AppRouter.prototype.adminClubs = function(path) {
+    return this._ui.showAdminClubs(path);
+  };
+
+  AppRouter.prototype.adminRunners = function(path) {
+    return this._ui.showAdminRunners(path);
+  };
+
+  return AppRouter;
+
+})(Backbone.Router);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+FellRace.ViewRouter = (function(superClass) {
+  extend(ViewRouter, superClass);
+
+  function ViewRouter() {
+    this.route = bind(this.route, this);
+    this.handle = bind(this.handle, this);
+    return ViewRouter.__super__.constructor.apply(this, arguments);
+  }
+
+  ViewRouter.prototype.initialize = function(options) {
+    return this._view = options.view;
+  };
+
+  ViewRouter.prototype.handle = function(fragment) {
     if (fragment == null) {
       fragment = "/";
     }
@@ -33637,7 +36248,7 @@ FellRace.Router = (function(superClass) {
     });
   };
 
-  Router.prototype.route = function(route, name, fn) {
+  ViewRouter.prototype.route = function(route, name, fn) {
     if (!_.isRegExp(route)) {
       route = this._routeToRegExp(route);
     }
@@ -33648,6 +36259,7 @@ FellRace.Router = (function(superClass) {
     if (fn == null) {
       fn = this[name];
     }
+    this.handlers = [];
     return this.handlers.unshift({
       route: route,
       callback: (function(_this) {
@@ -33660,303 +36272,9 @@ FellRace.Router = (function(superClass) {
     });
   };
 
-  return Router;
+  return ViewRouter;
 
-})(Backbone.Router);
-
-FellRace.BaseRouter = (function(superClass) {
-  extend(BaseRouter, superClass);
-
-  function BaseRouter() {
-    this.admin = bind(this.admin, this);
-    this["public"] = bind(this["public"], this);
-    return BaseRouter.__super__.constructor.apply(this, arguments);
-  }
-
-  BaseRouter.prototype.routes = {
-    "(/)": "public",
-    "admin(/*path)": "admin",
-    "*path": "public"
-  };
-
-  BaseRouter.prototype._previous = {};
-
-  BaseRouter.prototype["public"] = function(path) {
-    var router;
-    if (this._previous.route === "public") {
-      router = this._previous.router;
-    } else {
-      router = new FellRace.PublicRouter;
-    }
-    this._previous = {
-      route: "public",
-      router: router
-    };
-    return router.handle(path);
-  };
-
-  BaseRouter.prototype.admin = function(path) {
-    var router;
-    if (_fr.userSignedIn()) {
-      if (this._previous.route === "admin") {
-        this._previous.router.handle(path);
-      } else {
-        router = new FellRace.AdminRouter;
-        router.handle(path);
-        this._previous = {
-          route: "admin",
-          router: router
-        };
-      }
-      return _fr.vent.once("login:changed", (function(_this) {
-        return function() {
-          return _fr.toPublicOrHome();
-        };
-      })(this));
-    } else if (_fr.authPending()) {
-      return _fr.vent.once("login:changed", (function(_this) {
-        return function() {
-          return _this.admin(path);
-        };
-      })(this));
-    } else {
-      return _fr.toPublicOrHome();
-    }
-  };
-
-  return BaseRouter;
-
-})(Backbone.Router);
-
-FellRace.PublicRouter = (function(superClass) {
-  extend(PublicRouter, superClass);
-
-  function PublicRouter() {
-    this.page = bind(this.page, this);
-    this.resetPassword = bind(this.resetPassword, this);
-    this.confirmUser = bind(this.confirmUser, this);
-    this.users = bind(this.users, this);
-    this.clubs = bind(this.clubs, this);
-    this.competitors = bind(this.competitors, this);
-    this.racePublications = bind(this.racePublications, this);
-    this.events = bind(this.events, this);
-    this.index = bind(this.index, this);
-    return PublicRouter.__super__.constructor.apply(this, arguments);
-  }
-
-  PublicRouter.prototype.routes = {
-    "(/)": "index",
-    "events(/*path)": "events",
-    "races(/*path)": "racePublications",
-    "runners(/*path)": "competitors",
-    "clubs(/*path)": "clubs",
-    "users(/*path)": "users",
-    "confirm/:uid/:token(/)": "confirmUser",
-    "reset_password/:uid/:token(/)": "resetPassword",
-    "faq/:page_name(/)": "page",
-    "*path": "index"
-  };
-
-  PublicRouter.prototype.initialize = function() {
-    _fr.publicMapView();
-    return PublicRouter.__super__.initialize.apply(this, arguments);
-  };
-
-  PublicRouter.prototype.index = function() {
-    var view;
-    if (this._previous.route !== "index") {
-      _fr.indexMapView();
-      view = new FellRace.Views.IndexView;
-      _fr.mainRegion.show(view);
-      _fr.closeRight();
-      return this._previous = {
-        route: "index"
-      };
-    }
-  };
-
-  PublicRouter.prototype.events = function(path) {
-    return _fr.navigate("/races/" + path, {
-      replace: true
-    });
-  };
-
-  PublicRouter.prototype.racePublications = function(path) {
-    var view;
-    if (this._previous.route === "race_publications") {
-      return this._previous.view.handle(path);
-    } else {
-      view = new FellRace.Views.RacePublicationsLayout({
-        path: path
-      });
-      return this._previous = {
-        route: "race_publications",
-        view: view
-      };
-    }
-  };
-
-  PublicRouter.prototype.competitors = function(path) {
-    var view;
-    if (this._previous.route === "competitors") {
-      return this._previous.view.handle(path);
-    } else {
-      view = new FellRace.Views.CompetitorsLayout({
-        path: path
-      });
-      return this._previous = {
-        route: "competitors",
-        view: view
-      };
-    }
-  };
-
-  PublicRouter.prototype.clubs = function(path) {
-    var view;
-    if (this._previous.route === "clubs") {
-      return this._previous.view.handle(path);
-    } else {
-      view = new FellRace.Views.ClubsLayout({
-        path: path
-      });
-      return this._previous = {
-        route: "clubs",
-        view: view
-      };
-    }
-  };
-
-  PublicRouter.prototype.users = function(path) {
-    var view;
-    if (_fr.userSignedIn()) {
-      if (this._previous.route === "users") {
-        this._previous.view.handle(path);
-      } else {
-        view = new FellRace.Views.UsersLayout({
-          path: path
-        });
-        this._previous = {
-          route: "users",
-          view: view
-        };
-      }
-      return _fr.vent.on("login:changed", (function(_this) {
-        return function() {
-          return _fr.navigate("/");
-        };
-      })(this));
-    } else {
-      if (_fr.authPending()) {
-        return _fr.vent.once("login:changed", (function(_this) {
-          return function() {
-            return _this.users(path);
-          };
-        })(this));
-      } else {
-        return _fr.navigate("/");
-      }
-    }
-  };
-
-  PublicRouter.prototype.confirmUser = function(uid, token) {
-    this.index();
-    return _fr.actionRegion.show(new FellRace.Views.SessionConfirmationForm({
-      uid: uid,
-      token: token
-    }));
-  };
-
-  PublicRouter.prototype.resetPassword = function(uid, token) {
-    this.index();
-    return _fr.actionRegion.show(new FellRace.Views.SessionPasswordForm({
-      uid: uid,
-      token: token
-    }));
-  };
-
-  PublicRouter.prototype.page = function(page_name) {
-    var view;
-    view = new FellRace.Views.Page({
-      template: "pages/" + page_name
-    });
-    _fr.indexMapView();
-    _fr.mainRegion.show(view);
-    return _fr.closeRight();
-  };
-
-  return PublicRouter;
-
-})(FellRace.Router);
-
-FellRace.AdminRouter = (function(superClass) {
-  extend(AdminRouter, superClass);
-
-  function AdminRouter() {
-    this.competitors = bind(this.competitors, this);
-    this.clubs = bind(this.clubs, this);
-    this.races = bind(this.races, this);
-    return AdminRouter.__super__.constructor.apply(this, arguments);
-  }
-
-  AdminRouter.prototype.routes = {
-    "races(/*path)": "races",
-    "clubs(/*path)": "clubs",
-    "runners(/*path)": "competitors"
-  };
-
-  AdminRouter.prototype.initialize = function() {
-    _fr.adminMapView();
-    return AdminRouter.__super__.initialize.apply(this, arguments);
-  };
-
-  AdminRouter.prototype.races = function(path) {
-    var view;
-    if (this._previous.route === "races") {
-      return this._previous.view.handle(path);
-    } else {
-      view = new FellRace.Views.RacesLayout({
-        path: path
-      });
-      return this._previous = {
-        route: "races",
-        view: view
-      };
-    }
-  };
-
-  AdminRouter.prototype.clubs = function(path) {
-    var view;
-    if (this._previous.route === "clubs") {
-      return this._previous.view.handle(path);
-    } else {
-      view = new FellRace.Views.AdminClubsLayout({
-        path: path
-      });
-      return this._previous = {
-        route: "clubs",
-        view: view
-      };
-    }
-  };
-
-  AdminRouter.prototype.competitors = function(path) {
-    var view;
-    if (this._previous.route === "competitors") {
-      return this._previous.view.handle(path);
-    } else {
-      view = new FellRace.Views.AdminCompetitorsLayout({
-        path: path
-      });
-      return this._previous = {
-        route: "competitors",
-        view: view
-      };
-    }
-  };
-
-  return AdminRouter;
-
-})(FellRace.Router);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+})(Backbone.Router);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Modernizr.addTest('filereader', function() {
   return !!(window.File && window.FileList && window.FileReader);
@@ -34261,7 +36579,7 @@ FellRace.Models.Attachment = (function(superClass) {
 
   Attachment.prototype.upload_begin = function() {
     this.trigger("freeze");
-    $.notify("start:progress", "Uploading " + (this.filename()));
+    _fr.broadcast("start:progress", "Uploading " + (this.filename()));
     return this.set("editable", false);
   };
 
@@ -34269,19 +36587,19 @@ FellRace.Models.Attachment = (function(superClass) {
     var percentage;
     if (e && e.lengthComputable) {
       percentage = parseInt(e.loaded / e.total * 100, 10);
-      return $.notify("progress", percentage);
+      return _fr.broadcast("progress", percentage);
     }
   };
 
   Attachment.prototype.upload_end = function() {
-    $.notify("finish:progress");
+    _fr.broadcast("finish:progress");
     this.set('file', null);
     this.set("editable", true);
     return this.trigger("thaw");
   };
 
   Attachment.prototype.upload_error = function(model, xhr, options) {
-    return $.notify("error", "upload failed for " + this.filename);
+    return _fr.broadcast("error", "upload failed for " + this.filename);
   };
 
   return Attachment;
@@ -34881,19 +37199,19 @@ FellRace.Models.Instance = (function(superClass) {
 
   Instance.prototype.upload_begin = function() {
     this.trigger("freeze");
-    return $.notify("start:progress", "Uploading " + (this.filename()));
+    return _fr.broadcast("start:progress", "Uploading " + (this.filename()));
   };
 
   Instance.prototype.upload_progress = function(e) {
     var percentage;
     if (e && e.lengthComputable) {
       percentage = parseInt(e.loaded / e.total * 100, 10);
-      return $.notify("progress", percentage);
+      return _fr.broadcast("progress", percentage);
     }
   };
 
   Instance.prototype.upload_end = function() {
-    $.notify("finish:progress");
+    _fr.broadcast("finish:progress");
     this.set({
       file_changed: false,
       entry_form_changed: false
@@ -34904,7 +37222,7 @@ FellRace.Models.Instance = (function(superClass) {
   };
 
   Instance.prototype.upload_error = function(model, xhr, options) {
-    return $.notify("error", "upload failed");
+    return _fr.broadcast("error", "upload failed");
   };
 
   Instance.prototype.getPerformancesCount = function() {
@@ -35724,7 +38042,7 @@ FellRace.Models.Race = (function(superClass) {
     data = {
       published_json: this.jsonForPublication()
     };
-    $.notify("publishing race");
+    _fr.broadcast("publishing race");
     return $.post((this.url()) + "/publish", data, (function(_this) {
       return function(response) {
         return _fr.navigate("/races/" + (_this.get("slug")));
@@ -36842,30 +39160,58 @@ FellRace.Collections.Records = (function(superClass) {
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
+FellRace.View = (function(superClass) {
+  extend(View, superClass);
+
+  function View() {
+    this.onRender = bind(this.onRender, this);
+    return View.__super__.constructor.apply(this, arguments);
+  }
+
+  View.prototype.onRender = function() {
+    return this.triggerMethod('ready', this);
+  };
+
+  return View;
+
+})(Marionette.View);
+
+FellRace.CollectionView = (function(superClass) {
+  extend(CollectionView, superClass);
+
+  function CollectionView() {
+    this.onRender = bind(this.onRender, this);
+    return CollectionView.__super__.constructor.apply(this, arguments);
+  }
+
+  CollectionView.prototype.onRender = function() {
+    return this.triggerMethod('ready', this);
+  };
+
+  return CollectionView;
+
+})(Marionette.CollectionView);
+
 FellRace.Views.LayoutView = (function(superClass) {
   extend(LayoutView, superClass);
 
   function LayoutView() {
-    this.routes = bind(this.routes, this);
     return LayoutView.__super__.constructor.apply(this, arguments);
   }
 
-  LayoutView.prototype.routes = function() {
-    return {};
-  };
+  LayoutView.prototype.routes = {};
 
-  LayoutView.prototype._previous = {};
-
-  LayoutView.prototype.initialize = function(arg) {
-    var path;
-    path = (arg != null ? arg : {}).path;
-    this._router = new FellRace.Router({
+  LayoutView.prototype.initialize = function(opts) {
+    if (opts == null) {
+      opts = {};
+    }
+    return this._router = new FellRace.ViewRouter({
+      view: this,
       routes: _.result(this, 'routes')
     });
-    return this.handle(path);
   };
 
-  LayoutView.prototype.handle = function(path) {
+  LayoutView.prototype.setPath = function(path) {
     if (path == null) {
       path = "/";
     }
@@ -36874,7 +39220,7 @@ FellRace.Views.LayoutView = (function(superClass) {
 
   return LayoutView;
 
-})(Backbone.Marionette.Layout);
+})(Marionette.View);
 
 FellRace.Views.CollectionFilter = (function(superClass) {
   extend(CollectionFilter, superClass);
@@ -36929,7 +39275,7 @@ FellRace.Views.CollectionFilter = (function(superClass) {
 
   return CollectionFilter;
 
-})(Backbone.Marionette.ItemView);var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+})(FellRace.View);var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 FellRace.Views.AddFirstAttachment = (function(superClass) {
@@ -36947,7 +39293,7 @@ FellRace.Views.AddFirstAttachment = (function(superClass) {
 
   return AddFirstAttachment;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -37035,7 +39381,7 @@ FellRace.Views.AdminAttachment = (function(superClass) {
 
   return AdminAttachment;
 
-})(Backbone.Marionette.ItemView);var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+})(FellRace.View);var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 FellRace.Views.AdminAttachmentsList = (function(superClass) {
@@ -37051,7 +39397,7 @@ FellRace.Views.AdminAttachmentsList = (function(superClass) {
 
   return AdminAttachmentsList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -37105,7 +39451,7 @@ FellRace.Views.Attachment = (function(superClass) {
 
   return Attachment;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.AttachmentsList = (function(superClass) {
   extend(AttachmentsList, superClass);
@@ -37118,7 +39464,7 @@ FellRace.Views.AttachmentsList = (function(superClass) {
 
   return AttachmentsList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -37152,7 +39498,7 @@ FellRace.Views.CategoryOption = (function(superClass) {
 
   return CategoryOption;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.CategoryPicker = (function(superClass) {
   extend(CategoryPicker, superClass);
@@ -37199,7 +39545,7 @@ FellRace.Views.CategoryPicker = (function(superClass) {
 
   return CategoryPicker;
 
-})(Backbone.Marionette.CompositeView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -37310,7 +39656,7 @@ FellRace.Views.AdminCheckpoint = (function(superClass) {
 
   return AdminCheckpoint;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.AddFirstCheckpoint = (function(superClass) {
   extend(AddFirstCheckpoint, superClass);
@@ -37327,7 +39673,7 @@ FellRace.Views.AddFirstCheckpoint = (function(superClass) {
 
   return AddFirstCheckpoint;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.AdminCheckpointsList = (function(superClass) {
   extend(AdminCheckpointsList, superClass);
@@ -37399,7 +39745,7 @@ FellRace.Views.AdminCheckpointsList = (function(superClass) {
 
   return AdminCheckpointsList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -37628,7 +39974,7 @@ FellRace.Views.Checkpoint = (function(superClass) {
 
   return Checkpoint;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.CheckpointsList = (function(superClass) {
   extend(CheckpointsList, superClass);
@@ -37653,7 +39999,7 @@ FellRace.Views.CheckpointsList = (function(superClass) {
 
   return CheckpointsList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -37878,7 +40224,7 @@ FellRace.Views.AdminClubRow = (function(superClass) {
       return $.post((this.model.url()) + "/merge", (function(_this) {
         return function(data) {
           _fr.clubs.remove(_this.model);
-          return $.notify("success", "Merged '" + alias + "' into '" + club_name);
+          return _fr.broadcast("success", "Merged '" + alias + "' into '" + club_name);
         };
       })(this));
     }
@@ -37931,7 +40277,7 @@ FellRace.Views.AdminClubRow = (function(superClass) {
 
   return AdminClubRow;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.AdminClubsTable = (function(superClass) {
   extend(AdminClubsTable, superClass);
@@ -37957,7 +40303,7 @@ FellRace.Views.AdminClubsTable = (function(superClass) {
 
   return AdminClubsTable;
 
-})(Backbone.Marionette.CompositeView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -38087,7 +40433,7 @@ FellRace.Views.ClubSuggestion = (function(superClass) {
 
   return ClubSuggestion;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.ClubChooser = (function(superClass) {
   extend(ClubChooser, superClass);
@@ -38305,7 +40651,7 @@ FellRace.Views.ClubChooser = (function(superClass) {
 
   return ClubChooser;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -38347,7 +40693,7 @@ FellRace.Views.Club = (function(superClass) {
 
   return Club;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -38382,7 +40728,7 @@ FellRace.Views.ClubLink = (function(superClass) {
 
   return ClubLink;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -38424,7 +40770,7 @@ FellRace.Views.ClubListItem = (function(superClass) {
 
   return ClubListItem;
 
-})(Backbone.Marionette.ItemView);var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+})(FellRace.View);var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 FellRace.Views.ClubsList = (function(superClass) {
@@ -38444,7 +40790,7 @@ FellRace.Views.ClubsList = (function(superClass) {
 
   return ClubsList;
 
-})(Backbone.Marionette.CompositeView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -38519,7 +40865,7 @@ FellRace.Views.ClubsLayout = (function(superClass) {
 
   ClubsLayout.prototype["default"] = function() {
     _fr.closeRight();
-    $.notify("error", "no 'runners' page yet");
+    _fr.broadcast("error", "no 'runners' page yet");
     return this._previous = {
       route: "default"
     };
@@ -38660,7 +41006,7 @@ FellRace.Views.AdminCompetitor = (function(superClass) {
 
   return AdminCompetitor;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -38833,7 +41179,7 @@ FellRace.Views.CompetitorEntryRow = (function(superClass) {
 
   return CompetitorEntryRow;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.CompetitorEntriesTable = (function(superClass) {
   extend(CompetitorEntriesTable, superClass);
@@ -38869,7 +41215,7 @@ FellRace.Views.CompetitorEntriesTable = (function(superClass) {
 
   return CompetitorEntriesTable;
 
-})(Backbone.Marionette.CompositeView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -38957,7 +41303,7 @@ FellRace.Views.CompetitorsLayout = (function(superClass) {
 
   CompetitorsLayout.prototype["default"] = function() {
     _fr.closeRight();
-    $.notify("error", "no 'runners' page yet");
+    _fr.broadcast("error", "no 'runners' page yet");
     return this._previous = {
       route: "default"
     };
@@ -39035,7 +41381,7 @@ FellRace.Views.CompetitorListItem = (function(superClass) {
 
   return CompetitorListItem;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.CompetitorsList = (function(superClass) {
   extend(CompetitorsList, superClass);
@@ -39048,7 +41394,7 @@ FellRace.Views.CompetitorsList = (function(superClass) {
 
   return CompetitorsList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -39107,7 +41453,7 @@ FellRace.Views.MatchRow = (function(superClass) {
       success: (function(_this) {
         return function() {
           _this.model.collection.remove(_this.model);
-          return $.notify("success", "Merge request sent to admin");
+          return _fr.broadcast("success", "Merge request sent to admin");
         };
       })(this)
     });
@@ -39115,7 +41461,7 @@ FellRace.Views.MatchRow = (function(superClass) {
 
   return MatchRow;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.MatchTable = (function(superClass) {
   extend(MatchTable, superClass);
@@ -39162,7 +41508,7 @@ FellRace.Views.MatchTable = (function(superClass) {
 
   return MatchTable;
 
-})(Backbone.Marionette.CompositeView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -39227,7 +41573,7 @@ FellRace.Views.CompetitorMergeRow = (function(superClass) {
       success: (function(_this) {
         return function(data) {
           _this.remove();
-          return $.notify("success", "Merge rejected");
+          return _fr.broadcast("success", "Merge rejected");
         };
       })(this)
     });
@@ -39241,7 +41587,7 @@ FellRace.Views.CompetitorMergeRow = (function(superClass) {
       success: (function(_this) {
         return function() {
           _this.remove();
-          return $.notify("success", "Merge successful");
+          return _fr.broadcast("success", "Merge successful");
         };
       })(this)
     });
@@ -39249,7 +41595,7 @@ FellRace.Views.CompetitorMergeRow = (function(superClass) {
 
   return CompetitorMergeRow;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.MainCompetitor = (function(superClass) {
   extend(MainCompetitor, superClass);
@@ -39295,7 +41641,7 @@ FellRace.Views.MainCompetitor = (function(superClass) {
 
   return MainCompetitor;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.CompetitorsMergeTable = (function(superClass) {
   extend(CompetitorsMergeTable, superClass);
@@ -39314,7 +41660,7 @@ FellRace.Views.CompetitorsMergeTable = (function(superClass) {
 
   return CompetitorsMergeTable;
 
-})(Backbone.Marionette.CompositeView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -39411,7 +41757,7 @@ FellRace.Views.CompetitorPerformanceRow = (function(superClass) {
 
   return CompetitorPerformanceRow;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.CompetitorPerformancesTable = (function(superClass) {
   extend(CompetitorPerformancesTable, superClass);
@@ -39444,7 +41790,7 @@ FellRace.Views.CompetitorPerformancesTable = (function(superClass) {
 
   return CompetitorPerformancesTable;
 
-})(Backbone.Marionette.CompositeView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -39464,7 +41810,7 @@ FellRace.Views.CompetitorRaceView = (function(superClass) {
 
   return CompetitorRaceView;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.CompetitorRaceLayout = (function(superClass) {
   extend(CompetitorRaceLayout, superClass);
@@ -39639,7 +41985,7 @@ FellRace.Views.Competitor = (function(superClass) {
 
   return Competitor;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -39696,7 +42042,7 @@ FellRace.Views.CompetitorRow = (function(superClass) {
 
   return CompetitorRow;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.CompetitorsTable = (function(superClass) {
   extend(CompetitorsTable, superClass);
@@ -39770,7 +42116,7 @@ FellRace.Views.CompetitorsTable = (function(superClass) {
 
   return CompetitorsTable;
 
-})(Backbone.Marionette.CompositeView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -39848,7 +42194,7 @@ FellRace.Views.AdminEntryRow = (function(superClass) {
 
   return AdminEntryRow;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.NoEntryRow = (function(superClass) {
   extend(NoEntryRow, superClass);
@@ -39904,7 +42250,7 @@ FellRace.Views.AdminEntriesTable = (function(superClass) {
 
   return AdminEntriesTable;
 
-})(Backbone.Marionette.CompositeView);
+})(FellRace.CollectionView);
 
 FellRace.Views.CancelledAdminEntryRow = (function(superClass) {
   extend(CancelledAdminEntryRow, superClass);
@@ -40022,7 +42368,7 @@ FellRace.Views.EditEntryCompetitor = (function(superClass) {
 
   return EditEntryCompetitor;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -40100,7 +42446,7 @@ FellRace.Views.NewEntry = (function(superClass) {
 
   return NewEntry;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -40261,7 +42607,7 @@ FellRace.Views.EditEntryPayment = (function(superClass) {
 
   return EditEntryPayment;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -40344,7 +42690,7 @@ FellRace.Views.EntryRow = (function(superClass) {
 
   return EntryRow;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.EntriesTable = (function(superClass) {
   extend(EntriesTable, superClass);
@@ -40370,7 +42716,7 @@ FellRace.Views.EntriesTable = (function(superClass) {
 
   return EntriesTable;
 
-})(Backbone.Marionette.CompositeView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -40439,7 +42785,7 @@ FellRace.Views.IndexView = (function(superClass) {
 
   return IndexView;
 
-})(Backbone.Marionette.Layout);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -40576,7 +42922,7 @@ FellRace.Views.AdminEntriesImport = (function(superClass) {
 
   return AdminEntriesImport;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -40978,7 +43324,7 @@ FellRace.Views.AdminFutureInstance = (function(superClass) {
 
   return AdminFutureInstance;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -41011,7 +43357,7 @@ FellRace.Views.AdminListedInstance = (function(superClass) {
 
   return AdminListedInstance;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.AdminFutureListedInstance = (function(superClass) {
   extend(AdminFutureListedInstance, superClass);
@@ -41119,7 +43465,7 @@ FellRace.Views.AddPastInstance = (function(superClass) {
 
   return AddPastInstance;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.AdminPastInstancesList = (function(superClass) {
   extend(AdminPastInstancesList, superClass);
@@ -41134,7 +43480,7 @@ FellRace.Views.AdminPastInstancesList = (function(superClass) {
 
   return AdminPastInstancesList;
 
-})(Backbone.Marionette.CollectionView);
+})(Marionette.CollectionView);
 
 FellRace.Views.AdminFutureInstancesList = (function(superClass) {
   extend(AdminFutureInstancesList, superClass);
@@ -41147,7 +43493,7 @@ FellRace.Views.AdminFutureInstancesList = (function(superClass) {
 
   return AdminFutureInstancesList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -41264,7 +43610,7 @@ FellRace.Views.AdminPastInstance = (function(superClass) {
 
   return AdminPastInstance;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -41445,7 +43791,7 @@ FellRace.Views.AdminPostalEntryForm = (function(superClass) {
 
   return AdminPostalEntryForm;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -41501,7 +43847,7 @@ FellRace.Views.InstanceEnter = (function(superClass) {
 
   return InstanceEnter;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -41689,7 +44035,7 @@ FellRace.Views.ResultsFile = (function(superClass) {
 
   return ResultsFile;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -41990,7 +44336,7 @@ FellRace.Views.FutureInstance = (function(superClass) {
 
   return FutureInstance;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -42079,7 +44425,7 @@ FellRace.Views.IndexInstance = (function(superClass) {
 
   return IndexInstance;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.FutureIndexInstance = (function(superClass) {
   extend(FutureIndexInstance, superClass);
@@ -42152,7 +44498,7 @@ FellRace.Views.FutureIndexInstances = (function(superClass) {
 
   return FutureIndexInstances;
 
-})(Backbone.Marionette.CompositeView);
+})(FellRace.CollectionView);
 
 FellRace.Views.PastIndexInstances = (function(superClass) {
   extend(PastIndexInstances, superClass);
@@ -42165,7 +44511,7 @@ FellRace.Views.PastIndexInstances = (function(superClass) {
 
   return PastIndexInstances;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -42363,7 +44709,7 @@ FellRace.Views.FutureListedInstance = (function(superClass) {
 
   return FutureListedInstance;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.PastListedInstance = (function(superClass) {
   extend(PastListedInstance, superClass);
@@ -42432,7 +44778,7 @@ FellRace.Views.PastListedInstance = (function(superClass) {
 
   return PastListedInstance;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.FutureInstancesList = (function(superClass) {
   extend(FutureInstancesList, superClass);
@@ -42445,7 +44791,7 @@ FellRace.Views.FutureInstancesList = (function(superClass) {
 
   return FutureInstancesList;
 
-})(Backbone.Marionette.CollectionView);
+})(Marionette.CollectionView);
 
 FellRace.Views.PastInstancesList = (function(superClass) {
   extend(PastInstancesList, superClass);
@@ -42458,7 +44804,7 @@ FellRace.Views.PastInstancesList = (function(superClass) {
 
   return PastInstancesList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -42513,7 +44859,7 @@ FellRace.Views.MyEntry = (function(superClass) {
 
   return MyEntry;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -42717,7 +45063,7 @@ FellRace.Views.NewInstance = (function(superClass) {
 
   return NewInstance;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -42916,7 +45262,7 @@ FellRace.Views.InstanceResults = (function(superClass) {
 
   return InstanceResults;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -42939,7 +45285,7 @@ FellRace.Views.ResultsPreview = (function(superClass) {
 
   return ResultsPreview;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -43072,7 +45418,7 @@ FellRace.Views.Instance = (function(superClass) {
 
   return Instance;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -43115,7 +45461,7 @@ FellRace.Views.AdminLink = (function(superClass) {
 
   return AdminLink;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.AddLink = (function(superClass) {
   extend(AddLink, superClass);
@@ -43132,7 +45478,7 @@ FellRace.Views.AddLink = (function(superClass) {
 
   return AddLink;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.AdminLinksList = (function(superClass) {
   extend(AdminLinksList, superClass);
@@ -43147,7 +45493,7 @@ FellRace.Views.AdminLinksList = (function(superClass) {
 
   return AdminLinksList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -43205,7 +45551,7 @@ FellRace.Views.Link = (function(superClass) {
 
   return Link;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.LinksList = (function(superClass) {
   extend(LinksList, superClass);
@@ -43218,7 +45564,7 @@ FellRace.Views.LinksList = (function(superClass) {
 
   return LinksList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -43462,7 +45808,7 @@ FellRace.Views.Map = (function(superClass) {
 
   return Map;
 
-})(Backbone.Marionette.ItemView);var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+})(FellRace.View);var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 FellRace.Views.Page = (function(superClass) {
@@ -43478,7 +45824,7 @@ FellRace.Views.Page = (function(superClass) {
 
   return Page;
 
-})(Backbone.Marionette.Layout);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -43572,7 +45918,7 @@ FellRace.Views.HistoryRow = (function(superClass) {
 
   return HistoryRow;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.NoHistory = (function(superClass) {
   extend(NoHistory, superClass);
@@ -43587,7 +45933,7 @@ FellRace.Views.NoHistory = (function(superClass) {
 
   return NoHistory;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.HistoryTable = (function(superClass) {
   extend(HistoryTable, superClass);
@@ -43611,7 +45957,7 @@ FellRace.Views.HistoryTable = (function(superClass) {
 
   return HistoryTable;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -43761,7 +46107,7 @@ FellRace.Views.ResultRow = (function(superClass) {
 
   return ResultRow;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.ResultsTable = (function(superClass) {
   extend(ResultsTable, superClass);
@@ -43829,7 +46175,7 @@ FellRace.Views.ResultsTable = (function(superClass) {
 
   return ResultsTable;
 
-})(Backbone.Marionette.CompositeView);
+})(FellRace.CollectionView);
 
 FellRace.Views.CheckpointCell = (function(superClass) {
   extend(CheckpointCell, superClass);
@@ -43870,7 +46216,7 @@ FellRace.Views.CheckpointCell = (function(superClass) {
 
   return CheckpointCell;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -44012,7 +46358,7 @@ FellRace.Views.RaceHistory = (function(superClass) {
 
   return RaceHistory;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -44100,7 +46446,7 @@ FellRace.Views.RacePublicationIndexItem = (function(superClass) {
 
   return RacePublicationIndexItem;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.RacePublicationsIndex = (function(superClass) {
   extend(RacePublicationsIndex, superClass);
@@ -44119,7 +46465,7 @@ FellRace.Views.RacePublicationsIndex = (function(superClass) {
 
   return RacePublicationsIndex;
 
-})(Backbone.Marionette.CompositeView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -44209,7 +46555,7 @@ FellRace.Views.RacePublicationLayout = (function(superClass) {
           })(this));
         }
       } else {
-        $.notify("error", "This instance doesn't exist. Redirecting to the race page.");
+        _fr.broadcast("error", "This instance doesn't exist. Redirecting to the race page.");
         return _fr.navigate("/races/" + (this.model.get("slug")), {
           replace: true
         });
@@ -44301,12 +46647,12 @@ FellRace.Views.RacePublicationsLayout = (function(superClass) {
         return function(model, response) {
           return $.getJSON((_fr.apiUrl()) + "/races/" + slug + "/permissions", function(data) {
             if (data.permissions.can_edit) {
-              $.notify('error', "This race needs to be published.");
+              _fr.broadcast('error', "This race needs to be published.");
               return _fr.navigate("/admin/races/" + slug, {
                 replace: true
               });
             } else {
-              $.notify('error', slug + ".fellrace.org.uk does not exist.");
+              _fr.broadcast('error', slug + ".fellrace.org.uk does not exist.");
               return _fr.navigate("/", {
                 replace: true
               });
@@ -44552,7 +46898,7 @@ FellRace.Views.NextOrRecentInstance = (function(superClass) {
 
   return NextOrRecentInstance;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -45080,7 +47426,7 @@ FellRace.Views.RacePublication = (function(superClass) {
 
   return RacePublication;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.RacePublicationsList = (function(superClass) {
   extend(RacePublicationsList, superClass);
@@ -45093,7 +47439,7 @@ FellRace.Views.RacePublicationsList = (function(superClass) {
 
   return RacePublicationsList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -45349,7 +47695,7 @@ FellRace.Views.Race = (function(superClass) {
   };
 
   Race.prototype.error = function(args) {
-    return $.notify("Error fetching record", args);
+    return _fr.broadcast("Error fetching record", args);
   };
 
   Race.prototype.peify = function($el, value, model, options) {
@@ -45397,7 +47743,7 @@ FellRace.Views.Race = (function(superClass) {
 
   return Race;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -45452,7 +47798,7 @@ FellRace.Views.RaceLayout = (function(superClass) {
       instance.fetch();
       return _fr.extraContentRegion.show(view);
     } else {
-      $.notify("error", "This instance doesn't exist");
+      _fr.broadcast("error", "This instance doesn't exist");
       return _fr.navigate("/admin/races/" + (this.model.get("slug")), {
         replace: true
       });
@@ -45602,7 +47948,7 @@ FellRace.Views.NextRaceInstance = (function(superClass) {
 
   return NextRaceInstance;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -45888,7 +48234,7 @@ FellRace.Views.Picture = (function(superClass) {
 
   return Picture;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -46026,7 +48372,7 @@ FellRace.Views.AdminRecord = (function(superClass) {
 
   return AdminRecord;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.AddFirstRecord = (function(superClass) {
   extend(AddFirstRecord, superClass);
@@ -46043,7 +48389,7 @@ FellRace.Views.AddFirstRecord = (function(superClass) {
 
   return AddFirstRecord;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.AdminRecordsList = (function(superClass) {
   extend(AdminRecordsList, superClass);
@@ -46058,7 +48404,7 @@ FellRace.Views.AdminRecordsList = (function(superClass) {
 
   return AdminRecordsList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -46089,7 +48435,7 @@ FellRace.Views.Record = (function(superClass) {
 
   return Record;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.RecordsList = (function(superClass) {
   extend(RecordsList, superClass);
@@ -46102,7 +48448,7 @@ FellRace.Views.RecordsList = (function(superClass) {
 
   return RecordsList;
 
-})(Backbone.Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(Marionette.CollectionView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -46285,7 +48631,7 @@ FellRace.Views.SessionConfirmationForm = (function(superClass) {
 
   return SessionConfirmationForm;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -46359,7 +48705,7 @@ FellRace.Views.SessionLoginForm = (function(superClass) {
 
   SessionLoginForm.prototype.succeed = function(json) {
     _fr.actionRegion.close();
-    $.notify("success", "Sign in successful");
+    _fr.broadcast("success", "Sign in successful");
     if (this.opts.destination_url) {
       _fr.navigate(this.opts.destination_url, {
         replace: true
@@ -46390,7 +48736,7 @@ FellRace.Views.SessionLoginForm = (function(superClass) {
 
   return SessionLoginForm;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -46480,7 +48826,7 @@ FellRace.Views.SessionPasswordForm = (function(superClass) {
         return function(json) {
           _fr.actionRegion.close();
           _fr.navigate('/');
-          $.notify("success", "Password successfully changed");
+          _fr.broadcast("success", "Password successfully changed");
           return _fr.session.setUser(json);
         };
       })(this)
@@ -46547,7 +48893,7 @@ FellRace.Views.SessionPasswordForm = (function(superClass) {
 
   return SessionPasswordForm;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -46588,7 +48934,7 @@ FellRace.Views.ConfirmationRequired = (function(superClass) {
 
   return ConfirmationRequired;
 
-})(Backbone.Marionette.ItemView);
+})(FellRace.View);
 
 FellRace.Views.SessionReconfirmationForm = (function(superClass) {
   extend(SessionReconfirmationForm, superClass);
@@ -46651,7 +48997,7 @@ FellRace.Views.SessionReconfirmationForm = (function(superClass) {
   };
 
   SessionReconfirmationForm.prototype.succeed = function() {
-    $.notify("success", "Reconfirmation instructions sent to " + (this.model.get("email")));
+    _fr.broadcast("success", "Reconfirmation instructions sent to " + (this.model.get("email")));
     return _fr.actionRegion.close();
   };
 
@@ -46691,7 +49037,7 @@ FellRace.Views.SessionReconfirmationForm = (function(superClass) {
 
   return SessionReconfirmationForm;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -46756,7 +49102,7 @@ FellRace.Views.SessionResetForm = (function(superClass) {
   };
 
   SessionResetForm.prototype.succeed = function() {
-    $.notify("success", "Password reset instructions sent to " + (this.model.get("email")));
+    _fr.broadcast("success", "Password reset instructions sent to " + (this.model.get("email")));
     return _fr.actionRegion.close();
   };
 
@@ -46796,7 +49142,285 @@ FellRace.Views.SessionResetForm = (function(superClass) {
 
   return SessionResetForm;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+FellRace.Views.UILayout = (function(superClass) {
+  extend(UILayout, superClass);
+
+  function UILayout() {
+    this.offsetX = bind(this.offsetX, this);
+    this.listenToToggle = bind(this.listenToToggle, this);
+    this.user_actions = bind(this.user_actions, this);
+    this.closeRight = bind(this.closeRight, this);
+    this.toPublicOrHome = bind(this.toPublicOrHome, this);
+    this.adminMapView = bind(this.adminMapView, this);
+    this.publicMapView = bind(this.publicMapView, this);
+    this.indexMapView = bind(this.indexMapView, this);
+    this.showRace = bind(this.showRace, this);
+    this.showActionView = bind(this.showActionView, this);
+    this.showView = bind(this.showView, this);
+    this.showAdminRunners = bind(this.showAdminRunners, this);
+    this.showAdminClubs = bind(this.showAdminClubs, this);
+    this.showAdminRace = bind(this.showAdminRace, this);
+    this.resetPassword = bind(this.resetPassword, this);
+    this.confirmUser = bind(this.confirmUser, this);
+    this.showUser = bind(this.showUser, this);
+    this.showRunner = bind(this.showRunner, this);
+    this.showRace = bind(this.showRace, this);
+    this.showPage = bind(this.showPage, this);
+    this.showIndex = bind(this.showIndex, this);
+    this.onRender = bind(this.onRender, this);
+    return UILayout.__super__.constructor.apply(this, arguments);
+  }
+
+  UILayout.prototype.template = "ui";
+
+  UILayout.prototype.regions = {
+    gmap: '#gmap',
+    content: '#content',
+    main: 'main',
+    user_controls: '#user_controls',
+    notice: '#notice',
+    action: '#action',
+    extraContent: 'section#extra'
+  };
+
+  UILayout.prototype.ui = {
+    content: "#content"
+  };
+
+  UILayout.prototype.open_drawer = true;
+
+  UILayout.prototype.open_css = {
+    top: '',
+    left: ''
+  };
+
+  UILayout.prototype.onRender = function() {
+    this._map_view = new FellRace.Views.Map();
+    this.showChildView('gmap', this._map_view);
+    this._user_controls = new FellRace.Views.UserControls();
+    this.showChildView('user_controls', this._user_controls);
+    this._notifier = new Notifier({
+      model: _fr._radio,
+      wait: 4000
+    });
+    this.showChildView('notice', this._notifier);
+    this.listenToToggle();
+    return this.session.load();
+  };
+
+  UILayout.prototype.showIndex = function() {
+    this.closeRight();
+    this.indexMapView();
+    return this.showView(FellRace.Views.IndexView);
+  };
+
+  UILayout.prototype.showPage = function(page_name) {
+    this.closeRight();
+    this.indexMapView();
+    return this.showView(FellRace.Views.Page, {
+      template: "pages/" + page_name
+    });
+  };
+
+  UILayout.prototype.showRace = function(path) {
+    return this.showView(FellRace.Views.RacePublicationsLayout, {
+      path: path
+    });
+  };
+
+  UILayout.prototype.showRunner = function(path) {
+    return this.showView(FellRace.Views.CompetitorsLayout, {
+      path: path
+    });
+  };
+
+  UILayout.prototype.showUser = function(path) {
+    return this.showView(FellRace.Views.UsersLayout, {
+      path: path
+    });
+  };
+
+  UILayout.prototype.confirmUser = function(uid, token) {
+    return this.showActionView(FellRace.Views.SessionConfirmationForm, {
+      uid: uid,
+      token: token
+    });
+  };
+
+  UILayout.prototype.resetPassword = function(uid, token) {
+    return this.showActionView(FellRace.Views.SessionPasswordForm, {
+      uid: uid,
+      token: token
+    });
+  };
+
+  UILayout.prototype.showAdminRace = function(path) {
+    return this.showView(FellRace.Views.RacesLayout, {
+      path: path
+    });
+  };
+
+  UILayout.prototype.showAdminClubs = function(path) {
+    return this.showView(FellRace.Views.AdminClubsLayout, {
+      path: path
+    });
+  };
+
+  UILayout.prototype.showAdminRunners = function(path) {
+    return this.showView(FellRace.Views.AdminCompetitorsLayout, {
+      path: path
+    });
+  };
+
+  UILayout.prototype.showView = function(view_class, options) {
+    if (options == null) {
+      options = {};
+    }
+    if (this._view && this._view(instanceOf(view_class))) {
+      if (options.path) {
+        return this._view.handle(options.path);
+      }
+    } else {
+      this._view = new view_class(options);
+      return this.showChildView('content', this._view);
+    }
+  };
+
+  UILayout.prototype.showActionView = function(view_class, options) {
+    if (options == null) {
+      options = {};
+    }
+    this._action_view = new view_class(options);
+    this.showChildView('action', this._action_view);
+    if (!this._view) {
+      return this.showIndex();
+    }
+  };
+
+  UILayout.prototype.showRace = function(race) {
+    return this._map_view.showRace(race);
+  };
+
+  UILayout.prototype.indexMapView = function() {
+    return this._map_view.indexView();
+  };
+
+  UILayout.prototype.publicMapView = function() {
+    return this._map_view.publicView();
+  };
+
+  UILayout.prototype.adminMapView = function() {
+    return this._map_view.adminView();
+  };
+
+  UILayout.prototype.toPublicOrHome = function() {
+    var ref;
+    return _fr.navigate(((ref = Backbone.history.fragment.match(/admin(.+)/)) != null ? ref[1] : void 0) || "/");
+  };
+
+  UILayout.prototype.closeRight = function() {
+    return this.extraContentRegion.close();
+  };
+
+  UILayout.prototype.user_actions = function() {
+    return {
+      resetPassword: (function(_this) {
+        return function(uid, token) {
+          return _this.actionRegion.show(new FellRace.Views.SessionPasswordForm({
+            uid: uid,
+            token: token
+          }));
+        };
+      })(this),
+      requestReset: (function(_this) {
+        return function() {
+          return _this.actionRegion.show(new FellRace.Views.SessionResetForm());
+        };
+      })(this),
+      signOut: (function(_this) {
+        return function() {
+          return _this.session.reset();
+        };
+      })(this),
+      signUp: (function(_this) {
+        return function(opts) {
+          return _this.actionRegion.show(new FellRace.Views.UserSignupForm(opts));
+        };
+      })(this),
+      signUpForEvent: (function(_this) {
+        return function() {
+          return _this.actionRegion.show(new FellRace.Views.UserSignupFormForRace());
+        };
+      })(this),
+      signIn: (function(_this) {
+        return function(opts) {
+          return _this.actionRegion.show(new FellRace.Views.SessionLoginForm(opts));
+        };
+      })(this),
+      confirm: (function(_this) {
+        return function(uid, token) {
+          return _this.actionRegion.show(new FellRace.Views.SessionConfirmationForm({
+            uid: uid,
+            token: token
+          }));
+        };
+      })(this),
+      reconfirm: (function(_this) {
+        return function() {
+          return _this.actionRegion.show(new FellRace.Views.SessionReconfirmationForm());
+        };
+      })(this),
+      requestConfirmation: (function(_this) {
+        return function() {
+          return _this.actionRegion.show(new FellRace.Views.ConfirmationRequired());
+        };
+      })(this),
+      signedUp: (function(_this) {
+        return function() {
+          _fr.broadcast("success", "User account created");
+          return _this.actionRegion.close();
+        };
+      })(this),
+      hideAction: (function(_this) {
+        return function() {
+          return _this.actionRegion.close();
+        };
+      })(this),
+      menu: (function(_this) {
+        return function() {
+          return _this.actionRegion.show(new FellRace.Views.UserActionMenu());
+        };
+      })(this)
+    };
+  };
+
+  UILayout.prototype.listenToToggle = function() {
+    return $("#view_toggle").on("click", (function(_this) {
+      return function() {
+        if (_this.ui.content.hasClass("collapsed")) {
+          return _this.ui.content.removeClass("collapsed");
+        } else {
+          return _this.ui.content.addClass("collapsed");
+        }
+      };
+    })(this));
+  };
+
+  UILayout.prototype.offsetX = function() {
+    if (this.open_drawer) {
+      return -(this.ui.content.width() - 10) / 2;
+    } else {
+      return -10 / 2;
+    }
+  };
+
+  return UILayout;
+
+})(FellRace.Views.LayoutView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -46946,7 +49570,7 @@ FellRace.Views.UserPrefs = (function(superClass) {
 
   return UserPrefs;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -46975,7 +49599,7 @@ FellRace.Views.User = (function(superClass) {
 
   return User;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -47041,7 +49665,7 @@ FellRace.Views.UserActionMenu = (function(superClass) {
 
   return UserActionMenu;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -47111,7 +49735,7 @@ FellRace.Views.UserConfirmationNotice = (function(superClass) {
       success: (function(_this) {
         return function(model, data) {
           _this.render();
-          return $.notify("success", "Confirmation message sent");
+          return _fr.broadcast("success", "Confirmation message sent");
         };
       })(this)
     });
@@ -47119,7 +49743,7 @@ FellRace.Views.UserConfirmationNotice = (function(superClass) {
 
   return UserConfirmationNotice;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -47169,7 +49793,7 @@ FellRace.Views.UserControls = (function(superClass) {
 
   return UserControls;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -47209,7 +49833,7 @@ FellRace.Views.UserGreeting = (function(superClass) {
 
   return UserGreeting;
 
-})(Backbone.Marionette.ItemView);var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+})(FellRace.View);var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 FellRace.Views.UserMarker = (function(superClass) {
@@ -47313,7 +49937,7 @@ FellRace.Views.Me = (function(superClass) {
 
   return Me;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -47352,7 +49976,7 @@ FellRace.Views.UserSignInOut = (function(superClass) {
 
   return UserSignInOut;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -47455,7 +50079,7 @@ FellRace.Views.UserSignupForm = (function(superClass) {
         return function(model, data) {
           _fr.session.setUser(data);
           _fr.actionRegion.close();
-          return $.notify("success", "Confirmation email sent to " + (_this.model.get("email")));
+          return _fr.broadcast("success", "Confirmation email sent to " + (_this.model.get("email")));
         };
       })(this),
       error: (function(_this) {
@@ -47477,7 +50101,7 @@ FellRace.Views.UserSignupForm = (function(superClass) {
 
   return UserSignupForm;
 
-})(Backbone.Marionette.ItemView);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+})(FellRace.View);var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -47634,7 +50258,7 @@ FellRace.Views.UserSignupFormForRace = (function(superClass) {
         return function(model, data) {
           _fr.session.setUser(data);
           _fr.actionRegion.close();
-          return $.notify("success", "Confirmation email sent to " + (_this.model.get("email")));
+          return _fr.broadcast("success", "Confirmation email sent to " + (_this.model.get("email")));
         };
       })(this),
       error: (function(_this) {
@@ -47656,25 +50280,7 @@ FellRace.Views.UserSignupFormForRace = (function(superClass) {
 
   return UserSignupFormForRace;
 
-})(Backbone.Marionette.ItemView);$(function() {
-  _.mixin(_.str.exports());
-  $(document).on("click", "a:not([data-bypass])", function(e) {
-    var href, prot;
-    if (this.protocol !== "mailto:") {
-      href = $(this).attr("href");
-      if ($(this).attr("data-window")) {
-        e.preventDefault();
-        return window.open(href);
-      } else {
-        prot = this.protocol + "//";
-        if (href && href.slice(0, prot.length) !== prot) {
-          e.preventDefault();
-          return _fr.navigate(href);
-        }
-      }
-    }
-  });
-  console.log("ok go");
+})(FellRace.View);$(function() {
   return new FellRace.Application().start();
 });
 

@@ -1,4 +1,4 @@
-class FellRace.Views.RacePublicationIndexItem extends Backbone.Marionette.ItemView
+class FellRace.Views.RacePublicationIndexItem extends FellRace.View
   template: "race_publications/index_item"
 
   bindings:
@@ -47,7 +47,7 @@ class FellRace.Views.RacePublicationIndexItem extends Backbone.Marionette.ItemVi
   canEdit: ({can_edit:can_edit}={}) ->
     can_edit
 
-class FellRace.Views.RacePublicationsIndex extends Backbone.Marionette.CompositeView
+class FellRace.Views.RacePublicationsIndex extends FellRace.CollectionView
   template: "race_publications/index"
   tagName: "section"
   itemView: FellRace.Views.RacePublicationIndexItem

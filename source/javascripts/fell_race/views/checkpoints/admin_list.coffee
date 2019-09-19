@@ -1,4 +1,4 @@
-class FellRace.Views.AdminCheckpoint extends Backbone.Marionette.ItemView
+class FellRace.Views.AdminCheckpoint extends FellRace.View
   template: 'checkpoints/admin_list_item'
   tagName: "li"
   className: "checkpoint"
@@ -65,13 +65,13 @@ class FellRace.Views.AdminCheckpoint extends Backbone.Marionette.ItemView
     @marker?.close()
 
 
-class FellRace.Views.AddFirstCheckpoint extends Backbone.Marionette.ItemView
+class FellRace.Views.AddFirstCheckpoint extends FellRace.View
   template: 'checkpoints/empty'
   tagName: "li"
   className: "note"
 
 
-class FellRace.Views.AdminCheckpointsList extends Backbone.Marionette.CollectionView
+class FellRace.Views.AdminCheckpointsList extends Marionette.CollectionView
   itemView: FellRace.Views.AdminCheckpoint
   emptyView: FellRace.Views.AddFirstCheckpoint
   selectable: true

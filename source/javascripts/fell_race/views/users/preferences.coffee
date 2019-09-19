@@ -1,4 +1,4 @@
-class FellRace.Views.UserPrefs extends Backbone.Marionette.ItemView
+class FellRace.Views.UserPrefs extends FellRace.View
   template: 'users/preferences'
   id: "user"
 

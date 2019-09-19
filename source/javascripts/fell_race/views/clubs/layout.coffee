@@ -32,7 +32,7 @@ class FellRace.Views.ClubsLayout extends FellRace.Views.LayoutView
 
   default: =>
     _fr.closeRight()
-    $.notify "error", "no 'runners' page yet"
+    _fr.broadcast "error", "no 'runners' page yet"
     @_previous =
       route: "default"
 

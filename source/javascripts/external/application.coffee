@@ -9,14 +9,14 @@ FellRace.months =
 root = exports ? this
 root.FellRace = FellRace
 
-class FellRace.Application extends Backbone.Marionette.Application
+class FellRace.Application extends Marionette.Application
   regions:
     gmapRegion: "#fell_race_map"
     contentRegion: "#fell_race_info"
 
   constructor: ->
     super
-    Backbone.Marionette.Renderer.render = @render
+    Marionette.Renderer.render = @render
     root._fr = @
     @addRegions @regions
     @race_publications = new FellRace.Collections.RacePublications
@@ -71,7 +71,7 @@ class FellRace.Application extends Backbone.Marionette.Application
     else
       ""
 
-class FellRace.Views.ExternalRacePublication extends Backbone.Marionette.ItemView
+class FellRace.Views.ExternalRacePublication extends FellRace.View
   template: 'race_publications/external'
   className: "race"
 
@@ -122,12 +122,12 @@ class FellRace.Views.ExternalRacePublication extends Backbone.Marionette.ItemVie
     @model.trigger "toggle_select"
 
 
-class FellRace.Views.ExternalRacePublicationsList extends Backbone.Marionette.CollectionView
+class FellRace.Views.ExternalRacePublicationsList extends Marionette.CollectionView
   itemView: FellRace.Views.ExternalRacePublication
 
 
 
-# class FellRace.Views.ExternalMap extends Backbone.Marionette.ItemView
+# class FellRace.Views.ExternalMap extends FellRace.View
 #   template: 'events/external_map'
 #
 #   mapConfig:

@@ -1,4 +1,4 @@
-class FellRace.Views.AdminLink extends Backbone.Marionette.ItemView
+class FellRace.Views.AdminLink extends FellRace.View
   template: 'links/admin_list_item'
   tagName: "li"
   className: "link"
@@ -17,11 +17,11 @@ class FellRace.Views.AdminLink extends Backbone.Marionette.ItemView
     e.preventDefault() if e
     @model.destroy()
 
-class FellRace.Views.AddLink extends Backbone.Marionette.ItemView
+class FellRace.Views.AddLink extends FellRace.View
   template: 'links/empty'
   tagName: "li"
   className: "note"
 
-class FellRace.Views.AdminLinksList extends Backbone.Marionette.CollectionView
+class FellRace.Views.AdminLinksList extends Marionette.CollectionView
   emptyView: FellRace.Views.AddLink
   itemView: FellRace.Views.AdminLink

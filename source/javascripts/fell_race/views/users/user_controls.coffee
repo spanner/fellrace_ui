@@ -1,4 +1,4 @@
-class FellRace.Views.UserControls extends Backbone.Marionette.ItemView
+class FellRace.Views.UserControls extends FellRace.View
   template: "users/controls"
 
   #bindings: avatar image

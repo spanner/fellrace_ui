@@ -1,4 +1,4 @@
-class FellRace.Views.AdminClubRow extends Backbone.Marionette.ItemView
+class FellRace.Views.AdminClubRow extends FellRace.View
   template: "clubs/admin_row"
   tagName: "tr"
   className: "club"
@@ -51,7 +51,7 @@ class FellRace.Views.AdminClubRow extends Backbone.Marionette.ItemView
     if confirm "Merge '#{alias}' into '#{club_name}'?"
       $.post "#{@model.url()}/merge", (data) =>
         _fr.clubs.remove(@model)
-        $.notify "success", "Merged '#{alias}' into '#{club_name}"
+        _fr.broadcast "success", "Merged '#{alias}' into '#{club_name}"
 
   untrue: (val) =>
     !val
@@ -77,7 +77,7 @@ class FellRace.Views.AdminClubRow extends Backbone.Marionette.ItemView
       @model.set original_club_id: id, {persistChange:true}
       @model.set merging: false
 
-class FellRace.Views.AdminClubsTable extends Backbone.Marionette.CompositeView
+class FellRace.Views.AdminClubsTable extends FellRace.CollectionView
   template: "clubs/admin_table"
   tagName: "section"
   itemView: FellRace.Views.AdminClubRow

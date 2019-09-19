@@ -1,4 +1,4 @@
-class FellRace.Views.ConfirmationRequired extends Backbone.Marionette.ItemView
+class FellRace.Views.ConfirmationRequired extends FellRace.View
   template: 'sessions/confirmation_required'
 
   events:
@@ -19,7 +19,7 @@ class FellRace.Views.ConfirmationRequired extends Backbone.Marionette.ItemView
   click: =>
     _fr.user_actions().reconfirm()
 
-class FellRace.Views.SessionReconfirmationForm extends Backbone.Marionette.ItemView
+class FellRace.Views.SessionReconfirmationForm extends FellRace.View
   template: 'sessions/reconfirmation_form'
 
   events:
@@ -58,7 +58,7 @@ class FellRace.Views.SessionReconfirmationForm extends Backbone.Marionette.ItemV
       error: @fail
 
   succeed: () =>
-    $.notify "success", "Reconfirmation instructions sent to #{@model.get "email"}"
+    _fr.broadcast "success", "Reconfirmation instructions sent to #{@model.get "email"}"
     _fr.actionRegion.close()
     # @_form.slideUp () =>
     #   @_confirmation.show()

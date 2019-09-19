@@ -1,4 +1,4 @@
-class FellRace.Views.UserSignInOut extends Backbone.Marionette.ItemView
+class FellRace.Views.UserSignInOut extends FellRace.View
   template: 'users/sign_in_out'
   className: 'controls'
 

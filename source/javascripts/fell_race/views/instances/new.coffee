@@ -1,4 +1,4 @@
-class FellRace.Views.NewInstance extends Backbone.Marionette.ItemView
+class FellRace.Views.NewInstance extends FellRace.View
   template: 'instances/new'
   className: "instance new"
   tagName: "section"

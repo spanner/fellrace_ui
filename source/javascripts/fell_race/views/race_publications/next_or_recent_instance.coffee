@@ -1,4 +1,4 @@
-class FellRace.Views.NextOrRecentInstance extends Backbone.Marionette.ItemView
+class FellRace.Views.NextOrRecentInstance extends FellRace.View
   template: "race_publications/next_or_recent_instance"
 
   events:

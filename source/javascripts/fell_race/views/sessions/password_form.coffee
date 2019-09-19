@@ -1,4 +1,4 @@
-class FellRace.Views.SessionPasswordForm extends Backbone.Marionette.ItemView
+class FellRace.Views.SessionPasswordForm extends FellRace.View
   template: 'sessions/password_form'
   className: 'reset'
 
@@ -57,7 +57,7 @@ class FellRace.Views.SessionPasswordForm extends Backbone.Marionette.ItemView
         # @$el.find('.confirmation').show()
         _fr.actionRegion.close()
         _fr.navigate('/')
-        $.notify "success", "Password successfully changed"
+        _fr.broadcast "success", "Password successfully changed"
         _fr.session.setUser(json)
 
   fail: (err) =>

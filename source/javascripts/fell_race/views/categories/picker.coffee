@@ -1,4 +1,4 @@
-class FellRace.Views.CategoryOption extends Backbone.Marionette.ItemView
+class FellRace.Views.CategoryOption extends FellRace.View
   template: 'categories/option'
   tagName: 'li'
 
@@ -14,7 +14,7 @@ class FellRace.Views.CategoryOption extends Backbone.Marionette.ItemView
     @stickit()
 
 
-class FellRace.Views.CategoryPicker extends Backbone.Marionette.CompositeView
+class FellRace.Views.CategoryPicker extends FellRace.CollectionView
   template: 'categories/picker'
   itemView: FellRace.Views.CategoryOption
   itemViewContainer: ".categories"

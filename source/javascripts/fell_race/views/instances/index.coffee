@@ -1,4 +1,4 @@
-class FellRace.Views.IndexInstance extends Backbone.Marionette.ItemView
+class FellRace.Views.IndexInstance extends FellRace.View
   className: "instance"
 
   bindings:
@@ -79,8 +79,8 @@ class FellRace.Views.PastIndexInstance extends FellRace.Views.IndexInstance
       ]
     "span.performances_count": "performances_count"
 
-class FellRace.Views.FutureIndexInstances extends Backbone.Marionette.CompositeView
+class FellRace.Views.FutureIndexInstances extends FellRace.CollectionView
   itemView: FellRace.Views.FutureIndexInstance
 
-class FellRace.Views.PastIndexInstances extends Backbone.Marionette.CollectionView
+class FellRace.Views.PastIndexInstances extends Marionette.CollectionView
   itemView: FellRace.Views.PastIndexInstance

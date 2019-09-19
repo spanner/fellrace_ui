@@ -1,4 +1,4 @@
-class FellRace.Views.CompetitorListItem extends Backbone.Marionette.ItemView
+class FellRace.Views.CompetitorListItem extends FellRace.View
   template: 'competitors/list_item'
   className: "competitor"
 
@@ -20,5 +20,5 @@ class FellRace.Views.CompetitorListItem extends Backbone.Marionette.ItemView
     "#{values[0]} #{values[1]}"
 
 
-class FellRace.Views.CompetitorsList extends Backbone.Marionette.CollectionView
+class FellRace.Views.CompetitorsList extends Marionette.CollectionView
   itemView: FellRace.Views.CompetitorListItem

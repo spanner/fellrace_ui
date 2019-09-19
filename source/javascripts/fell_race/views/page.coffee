@@ -1,3 +1,3 @@
-class FellRace.Views.Page extends Backbone.Marionette.Layout
+class FellRace.Views.Page extends FellRace.View
   initialize: (opts) ->
     @template = opts.template

@@ -1,4 +1,4 @@
-class FellRace.Views.AdminListedInstance extends Backbone.Marionette.ItemView
+class FellRace.Views.AdminListedInstance extends FellRace.View
   tagName: "li"
   className: "instance"
   events:
@@ -57,14 +57,14 @@ class FellRace.Views.AdminPastListedInstance extends FellRace.Views.AdminListedI
       "#{value} runners"
 
 
-class FellRace.Views.AddPastInstance extends Backbone.Marionette.ItemView
+class FellRace.Views.AddPastInstance extends FellRace.View
   template: 'instances/add_results'
   tagName: "li"
   className: "note"
 
-class FellRace.Views.AdminPastInstancesList extends Backbone.Marionette.CollectionView
+class FellRace.Views.AdminPastInstancesList extends Marionette.CollectionView
   emptyView: FellRace.Views.AddPastInstance
   itemView: FellRace.Views.AdminPastListedInstance
 
-class FellRace.Views.AdminFutureInstancesList extends Backbone.Marionette.CollectionView
+class FellRace.Views.AdminFutureInstancesList extends Marionette.CollectionView
   itemView: FellRace.Views.AdminFutureListedInstance

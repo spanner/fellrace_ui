@@ -44,7 +44,7 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
             instance.set fetching:false
             @instance instance_name,path
       else
-        $.notify "error", "This instance doesn't exist. Redirecting to the race page."
+        _fr.broadcast "error", "This instance doesn't exist. Redirecting to the race page."
         _fr.navigate "/races/#{@model.get("slug")}", replace:true
 
   checkpoint: (slug,path) =>
@@ -91,8 +91,8 @@ class FellRace.Views.RacePublicationsLayout extends FellRace.Views.LayoutView
       error: (model,response) =>
         $.getJSON "#{_fr.apiUrl()}/races/#{slug}/permissions", (data) =>
           if data.permissions.can_edit
-            $.notify('error', "This race needs to be published.")
+            _fr.broadcast('error', "This race needs to be published.")
             _fr.navigate "/admin/races/#{slug}", replace:true
           else
-            $.notify('error', "#{slug}.fellrace.org.uk does not exist.")
+            _fr.broadcast('error', "#{slug}.fellrace.org.uk does not exist.")
             _fr.navigate "/", replace:true

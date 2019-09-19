@@ -1,4 +1,4 @@
-class FellRace.Views.Race extends Backbone.Marionette.ItemView
+class FellRace.Views.Race extends FellRace.View
   template: 'races/edit'
   className: "race"
   modelEvents:
@@ -168,7 +168,7 @@ class FellRace.Views.Race extends Backbone.Marionette.ItemView
     @model.publish()
 
   error: (args) =>
-    $.notify "Error fetching record", args
+    _fr.broadcast "Error fetching record", args
 
   peify: ($el, value, model, options) =>
     checkExist = setInterval(() =>

@@ -1,4 +1,4 @@
-class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
+class FellRace.Views.SessionLoginForm extends FellRace.View
   template: 'sessions/login_form'
 
   events:
@@ -45,7 +45,7 @@ class FellRace.Views.SessionLoginForm extends Backbone.Marionette.ItemView
 
   succeed: (json) =>
     _fr.actionRegion.close()
-    $.notify "success", "Sign in successful"
+    _fr.broadcast "success", "Sign in successful"
     _fr.navigate(@opts.destination_url, replace:true) if @opts.destination_url
     @model.setUser(json)
 
