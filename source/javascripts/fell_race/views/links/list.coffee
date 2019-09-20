@@ -28,4 +28,4 @@ class FellRace.Views.Link extends FellRace.View
     window.open "http://#{@model.get("url")}"
 
 class FellRace.Views.LinksList extends FellRace.CollectionView
-  itemView: FellRace.Views.Link
+  childView: FellRace.Views.Link

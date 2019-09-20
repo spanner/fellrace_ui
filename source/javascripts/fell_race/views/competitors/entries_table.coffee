@@ -44,7 +44,7 @@ class FellRace.Views.CompetitorEntryRow extends FellRace.View
 
 class FellRace.Views.CompetitorEntriesTable extends FellRace.CollectionView
   template: "competitors/entries"
-  itemView: FellRace.Views.CompetitorEntryRow
+  childView: FellRace.Views.CompetitorEntryRow
   itemViewContainer: 'tbody'
 
   bindings:

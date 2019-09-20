@@ -123,7 +123,7 @@ class FellRace.Views.ExternalRacePublication extends FellRace.View
 
 
 class FellRace.Views.ExternalRacePublicationsList extends FellRace.CollectionView
-  itemView: FellRace.Views.ExternalRacePublication
+  childView: FellRace.Views.ExternalRacePublication
 
 
 

@@ -21,4 +21,4 @@ class FellRace.Views.CompetitorListItem extends FellRace.View
 
 
 class FellRace.Views.CompetitorsList extends FellRace.CollectionView
-  itemView: FellRace.Views.CompetitorListItem
+  childView: FellRace.Views.CompetitorListItem

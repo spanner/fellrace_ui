@@ -88,7 +88,7 @@ class FellRace.Views.ResultRow extends FellRace.View
 
 class FellRace.Views.ResultsTable extends FellRace.CollectionView
   template: "performances/results_table"
-  itemView: FellRace.Views.ResultRow
+  childView: FellRace.Views.ResultRow
   itemViewContainer: "tbody"
 
   collectionEvents:

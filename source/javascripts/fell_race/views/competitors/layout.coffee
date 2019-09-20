@@ -10,7 +10,7 @@ class FellRace.Views.CompetitorLayout extends FellRace.Views.LayoutView
     _fr.mainRegion.show view
 
   show: =>
-    _fr.closeRight()
+    _fr.noExtraView()
     @_previous =
       route: "default"
 
@@ -37,7 +37,7 @@ class FellRace.Views.CompetitorsLayout extends FellRace.Views.LayoutView
     ":id(/*path)": @competitor
 
   default: =>
-    _fr.closeRight()
+    _fr.noExtraView()
     _fr.broadcast "error", "no 'runners' page yet"
     @_previous =
       route: "default"

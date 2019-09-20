@@ -65,7 +65,7 @@ class FellRace.Views.CheckpointMarker extends MapStick.Marker
     selected is true
 
 class FellRace.Views.CheckpointMarkers extends MapStick.OverlayCollection
-  itemView: FellRace.Views.CheckpointMarker
+  childView: FellRace.Views.CheckpointMarker
 
 
 class FellRace.Views.Checkpoint extends FellRace.View
@@ -117,4 +117,4 @@ class FellRace.Views.Checkpoint extends FellRace.View
     lat and lng
 
 class FellRace.Views.CheckpointsList extends FellRace.CollectionView
-  itemView: FellRace.Views.Checkpoint
+  childView: FellRace.Views.Checkpoint

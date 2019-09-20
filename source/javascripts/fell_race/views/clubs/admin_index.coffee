@@ -80,7 +80,7 @@ class FellRace.Views.AdminClubRow extends FellRace.View
 class FellRace.Views.AdminClubsTable extends FellRace.CollectionView
   template: "clubs/admin_table"
   tagName: "section"
-  itemView: FellRace.Views.AdminClubRow
+  childView: FellRace.Views.AdminClubRow
   itemViewContainer: "tbody"
   id: "clubs"
 

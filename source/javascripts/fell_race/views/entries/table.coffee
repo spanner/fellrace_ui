@@ -46,7 +46,7 @@ class FellRace.Views.EntryRow extends FellRace.View
 
 
 class FellRace.Views.EntriesTable extends FellRace.CollectionView
-  itemView: FellRace.Views.EntryRow
+  childView: FellRace.Views.EntryRow
   template: "entries/table"
   itemViewContainer: "tbody"
 

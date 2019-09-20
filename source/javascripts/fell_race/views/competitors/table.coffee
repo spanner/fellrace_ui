@@ -31,7 +31,7 @@ class FellRace.Views.CompetitorRow extends FellRace.View
     "#{values[0]} #{values[1]}"
 
 class FellRace.Views.CompetitorsTable extends FellRace.CollectionView
-  itemView: FellRace.Views.CompetitorRow
+  childView: FellRace.Views.CompetitorRow
   itemViewContainer: ".competitors"
   template: "competitors/table"
   id: "competitors"

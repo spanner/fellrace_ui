@@ -7,13 +7,13 @@ class FellRace.Views.UserLayout extends FellRace.Views.LayoutView
     view = new FellRace.Views.User
       model: @model
     _fr.mainRegion.show view
-    _fr.closeRight()
+    _fr.noExtraView()
 
   prefs: =>
     view = new FellRace.Views.UserPrefs
       model: @model
     _fr.mainRegion.show view
-    _fr.closeRight()
+    _fr.noExtraView()
 
 
 class FellRace.Views.UsersLayout extends FellRace.Views.LayoutView
@@ -23,7 +23,7 @@ class FellRace.Views.UsersLayout extends FellRace.Views.LayoutView
     ":id(/*path)": @user
 
   # index: =>
-  #   _fr.closeRight()
+  #   _fr.noExtraView()
   #   @_previous =
   #     route: "index"
 

@@ -72,7 +72,7 @@ class FellRace.Views.AddFirstCheckpoint extends FellRace.View
 
 
 class FellRace.Views.AdminCheckpointsList extends FellRace.CollectionView
-  itemView: FellRace.Views.AdminCheckpoint
+  childView: FellRace.Views.AdminCheckpoint
   emptyView: FellRace.Views.AddFirstCheckpoint
   selectable: true
   sortable: true

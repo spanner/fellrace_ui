@@ -22,6 +22,7 @@ class FellRace.Application extends Marionette.Application
     $(document).ajaxSend @sendAuthenticationHeader
 
     @_config = new FellRace.Config
+    @_logging = @_config.get('logging')
     @_radio = Backbone.Radio.channel('fell_race')
     @_api_url = @config("api_url")
     @_domain = @config("domain")
@@ -133,7 +134,6 @@ class FellRace.Application extends Marionette.Application
   navigate: (route, {trigger:trigger, replace:replace}={}) =>
     trigger ?= true
     replace ?= false
-    @vent.off "login:changed"
     Backbone.history.navigate route,
       trigger:trigger
       replace:replace
@@ -197,9 +197,13 @@ class FellRace.Application extends Marionette.Application
   warn: (message) =>
     @_radio.trigger 'flash', message
 
-  log: =>
+  log: (label, messages...) =>
     if @logging() and console?.log?
-      console.log "[FR]", arguments...
+      unless messages
+        messages = label
+        label = null
+      prefix = label or '?'
+      console.log "[#{prefix}]", messages...
 
 
   ## UI pass-through
@@ -224,8 +228,14 @@ class FellRace.Application extends Marionette.Application
   setMapOptions: (opts) =>
     @_ui.setMapOptions(opts)
 
-  closeRight: =>
-    @_ui.closeRight()
+  noExtraView: =>
+    @_ui.noExtraView()
+
+  showExtraView: (view) =>
+    @_ui.showExtraView(view)
+
+  moveMapTo: (model, zoom) =>
+    @_ui.moveMapTo model, zoom
 
   # especially temporary
   user_actions: =>

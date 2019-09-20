@@ -67,7 +67,7 @@ class FellRace.Views.NoHistory extends FellRace.View
 
 
 class FellRace.Views.HistoryTable extends FellRace.CollectionView
-  itemView: FellRace.Views.HistoryRow
+  childView: FellRace.Views.HistoryRow
   emptyView: FellRace.Views.NoHistory
 
   onRender: =>

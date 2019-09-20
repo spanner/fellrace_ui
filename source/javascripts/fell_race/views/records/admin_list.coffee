@@ -35,5 +35,5 @@ class FellRace.Views.AddFirstRecord extends FellRace.View
   className: "note"
 
 class FellRace.Views.AdminRecordsList extends FellRace.CollectionView
-  itemView: FellRace.Views.AdminRecord
+  childView: FellRace.Views.AdminRecord
   emptyView: FellRace.Views.AddFirstRecord

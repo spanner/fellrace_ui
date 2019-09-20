@@ -188,7 +188,7 @@ input.filter
     background:
       position: right 8px
       repeat: no-repeat
-      image: image-url('spinner.gif')
+      image: url('/imagesspinner.gif')
 
 table
   border-collapse: collapse
@@ -289,7 +289,7 @@ table.ranking
   th
     a.sortable
       padding-left: 10px
-      background: image-url('race_results/sorts.png') no-repeat 0 5px
+      background: url('/imagesrace_results/sorts.png') no-repeat 0 5px
       &.up
         background-position: 0 -11px
       &.down
@@ -337,7 +337,7 @@ p.download
   font-size: 1.4em
   a.csv
     padding-left: 20px
-    background: transparent image-url('race_results/csv.png') no-repeat 0 0
+    background: transparent url('/imagesrace_results/csv.png') no-repeat 0 0
     &:hover
       background-position: 0 -16px
 
@@ -539,7 +539,7 @@ $shadow: 1px 3px 8px #333
     background:
       position: 0 0
       repeat: no-repeat
-      image: image-url("availability.png")
+      image: url("/imagesavailability.png")
     &.ok
       color: $green
       background-position: 0 -32px
@@ -610,7 +610,7 @@ a.race_link
 #content
   position: relative
   width: 580px
-  height: 100vh
+  min-height: 100vh
   background-color: white
   border-right: 1px solid white
   z-index: 300
@@ -636,7 +636,7 @@ a.race_link
     background:
       position: 0 0
       repeat: no-repeat
-      image: image-url('view_toggle.png')
+      image: url('/images/view_toggle.png')
     &:hover
       background-position: 0 -96px
   header
@@ -645,7 +645,7 @@ a.race_link
     left: 0
     height: 60px
 
-  main
+  article
     position: relative
     width: 100%
     .head
@@ -662,7 +662,7 @@ a.race_link
           size: cover
           repeat: no-repeat
         &.home
-          background-image: image-url("fells.jpg")
+          background-image: url("/imagesfells.jpg")
         input[type="file"]
           display: none
         label.pick
@@ -701,7 +701,7 @@ a.race_link
             margin-left: 0
           background:
             position: 0 0
-            image: image-url('externals.png')
+            image: url('/imagesexternals.png')
           &.twit
             &:hover
               background-position: -32px 0
@@ -763,7 +763,7 @@ a.race_link
           margin-right: 15px
         a.search
           +button($green)
-    > .race
+    .race
       position: relative
       margin: 0
       width: 100%
@@ -1136,7 +1136,7 @@ section#extra
           color: #df0f00
           cursor: pointer
           &.pdf
-            background-image: image-url('icons.png')
+            background-image: url('/imagesicons.png')
             text-indent: 25px
             line-height: 26px
             color: #df0f00
@@ -1220,7 +1220,7 @@ section#extra
         padding-top: 5px
         margin-bottom: 10px
         background:
-          image: image-url("padlock.png")
+          image: url("/imagespadlock.png")
           position: 0 0
           repeat: no-repeat
       input#expiry_month, input#expiry_year
@@ -1239,7 +1239,7 @@ section#extra
         opacity: 0.6
         background:
           position: 0 -80px
-          image: image-url('cards.png')
+          image: url('/imagescards.png')
           repeat: no-repeat
         &.visa
           background-position: 0 0
@@ -1325,7 +1325,7 @@ a.file_icon
   min-height: 26px
   text-indent: 25px
   line-height: 26px
-  background-image: image-url('icons.png')
+  background-image: url('/imagesicons.png')
   background: 
     repeat: no-repeat
     position: 0 0
@@ -1366,7 +1366,7 @@ a.working
   margin-left: -20px
   pointer-events: none
   background:
-    image: image-url('spinner.gif')
+    image: url('/imagesspinner.gif')
     position: 2px 5px
     repeat: no-repeat
 
@@ -1376,7 +1376,7 @@ h3.working
   font-weight: normal
   margin: 3em 2em
   background:
-    image: image-url('spinner.gif')
+    image: url('/imagesspinner.gif')
     position: 0 2px
     repeat: no-repeat
   
@@ -1409,7 +1409,7 @@ h3.working
     padding-left: 32px
     pointer-events: none
     background:
-      image: image-url('spinner.gif')
+      image: url('/imagesspinner.gif')
       position: 8px 10px
       repeat: no-repeat
 .head, header
@@ -1443,7 +1443,7 @@ h3.working
       left: 5px
       top: 5px
       background:
-        image: image-url('settings.png')
+        image: url('/imagessettings.png')
         repeat: no-repeat
 
 ul.sortable
@@ -1643,7 +1643,7 @@ ul.chooser
       margin-left: -440px
     #user_controls
       left: 440px
-    main > .race .race_body .summary
+    article > .race .race_body .summary
       .profile .basic_details
         margin: -30px 0 0 20px
       .next_or_recent

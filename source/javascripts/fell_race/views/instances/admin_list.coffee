@@ -64,7 +64,7 @@ class FellRace.Views.AddPastInstance extends FellRace.View
 
 class FellRace.Views.AdminPastInstancesList extends FellRace.CollectionView
   emptyView: FellRace.Views.AddPastInstance
-  itemView: FellRace.Views.AdminPastListedInstance
+  childView: FellRace.Views.AdminPastListedInstance
 
 class FellRace.Views.AdminFutureInstancesList extends FellRace.CollectionView
-  itemView: FellRace.Views.AdminFutureListedInstance
+  childView: FellRace.Views.AdminFutureListedInstance

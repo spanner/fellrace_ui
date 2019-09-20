@@ -13,4 +13,4 @@ class FellRace.Views.Record extends FellRace.View
     @stickit()
 
 class FellRace.Views.RecordsList extends FellRace.CollectionView
-  itemView: FellRace.Views.Record
+  childView: FellRace.Views.Record

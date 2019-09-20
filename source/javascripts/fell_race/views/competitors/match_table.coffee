@@ -38,7 +38,7 @@ class FellRace.Views.MatchRow extends FellRace.View
         _fr.broadcast "success", "Merge request sent to admin"
 
 class FellRace.Views.MatchTable extends FellRace.CollectionView
-  itemView: FellRace.Views.MatchRow
+  childView: FellRace.Views.MatchRow
   itemViewContainer: 'tbody'
   template: "competitors/match_table"
 

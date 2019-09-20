@@ -48,18 +48,23 @@ class FellRace.Views.UILayout extends FellRace.Views.LayoutView
   ## Routes
   #
   showIndex: =>
-    @closeRight()
+    @noExtraView()
     @indexMapView()
     @showView FellRace.Views.IndexView
 
   showPage: (page_name) =>
-    @closeRight()
+    @noExtraView()
     @indexMapView()
     @showView FellRace.Views.Page,
       template: "pages/#{page_name}"
 
-  showRace: (path) =>
-    @showView FellRace.Views.RacePublicationsLayout,
+  showRaces: =>
+    @showView FellRace.Views.RacePublicationsIndex
+
+  showRace: (slug, path) =>
+    model = _fr.race_publications.add(slug: slug)
+    @showView FellRace.Views.RacePublicationLayout,
+      model: model
       path: path
 
   showRunner: (path) =>
@@ -96,8 +101,9 @@ class FellRace.Views.UILayout extends FellRace.Views.LayoutView
   ## View actions
   #
   showView: (view_class, options={}) =>
-    if @_view and @_view instanceOf view_class
-      @_view.handle options.path if options.path
+    if @_view and @_view instanceof view_class
+      @_view.setModel options.model if options.model
+      @_view.setPath options.path if options.path
     else
       @_view = new view_class(options)
       @showChildView 'content', @_view
@@ -110,6 +116,9 @@ class FellRace.Views.UILayout extends FellRace.Views.LayoutView
   showExtraView: (view, options={}) =>
     @_extra_view = view
     @showChildView 'extra', @_extra_view
+
+  noExtraView: =>
+    @getRegion('extra').reset()
 
 
   ## Ancient Mike Globals
@@ -129,8 +138,8 @@ class FellRace.Views.UILayout extends FellRace.Views.LayoutView
   setMapOptions: (opts) =>
     @_map_view?.setOptions(opts)
 
-  closeRight: =>
-    @getRegion('extra').reset()
+  moveMapTo: (model, zoom) =>
+    @_map_view.moveTo model, zoom
 
   # Mike's strange old action set has a sort of logic to it.
   # Now moved into the UI and awaiting humane replacement.

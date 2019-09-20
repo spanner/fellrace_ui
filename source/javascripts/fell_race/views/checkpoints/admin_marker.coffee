@@ -63,4 +63,4 @@ class FellRace.Views.AdminCheckpointMarker extends MapStick.Marker
       "black"
 
 class FellRace.Views.AdminCheckpointMarkers extends MapStick.OverlayCollection
-  itemView: FellRace.Views.AdminCheckpointMarker
+  childView: FellRace.Views.AdminCheckpointMarker

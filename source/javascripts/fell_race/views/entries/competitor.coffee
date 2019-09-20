@@ -35,9 +35,6 @@ class FellRace.Views.EditEntryCompetitor extends FellRace.View
       input: @_club_input
     @_club_chooser.render()
     @_club_chooser.on "chosen", @setClubName
-    #
-    # @_club_input.on "blur", (e) =>
-    #   console.log $(e.currentTarget).val()
 
     @_dob_picker = new Pikaday
       field: @$el.find('input#dob')[0]

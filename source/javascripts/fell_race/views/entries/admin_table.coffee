@@ -52,7 +52,7 @@ class FellRace.Views.UncancelledAdminEntryRow extends FellRace.Views.AdminEntryR
 
 
 class FellRace.Views.AdminEntriesTable extends FellRace.CollectionView
-  itemView: FellRace.Views.UncancelledAdminEntryRow
+  childView: FellRace.Views.UncancelledAdminEntryRow
   template: "entries/admin_table"
   tagName: "table"
   itemViewContainer: "tbody"
@@ -68,5 +68,5 @@ class FellRace.Views.CancelledAdminEntryRow extends FellRace.Views.AdminEntryRow
 
 
 class FellRace.Views.AdminCancelledEntriesTable extends FellRace.Views.AdminEntriesTable
-  itemView: FellRace.Views.CancelledAdminEntryRow
+  childView: FellRace.Views.CancelledAdminEntryRow
 

@@ -52,7 +52,7 @@ class FellRace.Views.ClubSuggestion extends FellRace.View
 class FellRace.Views.ClubChooser extends FellRace.CollectionView
   tagName: "ul"
   className: "chooser"
-  itemView: FellRace.Views.ClubSuggestion
+  childView: FellRace.Views.ClubSuggestion
 
   initialize: (options = {}) ->
     @_search_box = options.input

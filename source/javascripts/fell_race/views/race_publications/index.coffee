@@ -50,5 +50,5 @@ class FellRace.Views.RacePublicationIndexItem extends FellRace.View
 class FellRace.Views.RacePublicationsIndex extends FellRace.CollectionView
   template: "race_publications/index"
   tagName: "section"
-  itemView: FellRace.Views.RacePublicationIndexItem
+  childView: FellRace.Views.RacePublicationIndexItem
   itemViewContainer: ".races"

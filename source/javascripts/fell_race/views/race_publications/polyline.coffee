@@ -34,7 +34,7 @@ class FellRace.Views.RacePublicationPolyline extends MapStick.Polyline
     _fr.navigate("/races/#{@model.get("slug")}") unless @model.get("selected")
 
   path: ({route:route_string,checkpoint_route:cp_route_string}={}) ->
-    MapStick.decodePathString(route_string or cp_route_string or "")    
+    MapStick.decodePathString(route_string or cp_route_string or "")
 
   icons: ({colour:colour,selected:selected}={}) =>
     if selected

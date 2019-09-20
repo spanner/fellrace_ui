@@ -9,7 +9,7 @@ class FellRace.Views.AdminCompetitorLayout extends FellRace.Views.LayoutView
     _fr.mainRegion.show view
 
   default: =>
-    _fr.closeRight()
+    _fr.noExtraView()
 
 class FellRace.Views.AdminCompetitorsLayout extends FellRace.Views.LayoutView
   routes: =>

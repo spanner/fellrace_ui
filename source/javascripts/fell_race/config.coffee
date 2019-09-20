@@ -23,6 +23,7 @@ class FellRace.Config
   defaults: 
     api_url: "//api.fellrace.org.uk"
     domain: "fellrace.org.uk"
+    logging: false
     stripe_publishable_key: "pk_live_dOxGZ6LC5I1womT8MgsDn3jB"
     bing_api_key: "ApY0qAIIkStmgyAoqcr-Iav2s1obEi-MHhyMkNyZDD6Z2b-gf3CLmHo7djH6968P"
     google_api_key: "AIzaSyBP7pXQfGfZOeIC33zcyFP_S2go1V1I4fw"
@@ -31,6 +32,7 @@ class FellRace.Config
   development:
     api_url: "//api.fr.dev"
     domain: "fr.dev"
+    logging: true
     stripe_publishable_key: "pk_test_orOZm4kTjBQOf5XB3RM01q0U"
     bing_api_key: "ApY0qAIIkStmgyAoqcr-Iav2s1obEi-MHhyMkNyZDD6Z2b-gf3CLmHo7djH6968P"
     google_api_key: "AIzaSyBP7pXQfGfZOeIC33zcyFP_S2go1V1I4fw"

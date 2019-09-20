@@ -36,4 +36,4 @@ class FellRace.Views.Attachment extends FellRace.View
 
 
 class FellRace.Views.AttachmentsList extends FellRace.CollectionView
-  itemView: FellRace.Views.Attachment
+  childView: FellRace.Views.Attachment

@@ -82,7 +82,7 @@ class FellRace.Views.MainCompetitor extends FellRace.View
     "#{values[0]} #{values[1]}"
 
 class FellRace.Views.CompetitorsMergeTable extends FellRace.CollectionView
-  itemView: FellRace.Views.CompetitorMergeRow
+  childView: FellRace.Views.CompetitorMergeRow
   itemViewContainer: "table.competitors"
   template: "competitors/merge_table"
   id: "competitors"

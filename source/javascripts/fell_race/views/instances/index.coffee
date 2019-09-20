@@ -21,7 +21,6 @@ class FellRace.Views.IndexInstance extends FellRace.View
   onRender: =>
     _.extend(@bindings, @extra_bindings) if @extra_bindings
     @stickit()
-    console.log @model
     if @model.has("route_profile") and @model.get("route_profile") != ""
       _.defer @peify
 
@@ -80,7 +79,7 @@ class FellRace.Views.PastIndexInstance extends FellRace.Views.IndexInstance
     "span.performances_count": "performances_count"
 
 class FellRace.Views.FutureIndexInstances extends FellRace.CollectionView
-  itemView: FellRace.Views.FutureIndexInstance
+  childView: FellRace.Views.FutureIndexInstance
 
 class FellRace.Views.PastIndexInstances extends FellRace.CollectionView
-  itemView: FellRace.Views.PastIndexInstance
+  childView: FellRace.Views.PastIndexInstance

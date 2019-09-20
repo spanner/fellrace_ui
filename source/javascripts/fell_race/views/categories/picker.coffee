@@ -16,7 +16,7 @@ class FellRace.Views.CategoryOption extends FellRace.View
 
 class FellRace.Views.CategoryPicker extends FellRace.CollectionView
   template: 'categories/picker'
-  itemView: FellRace.Views.CategoryOption
+  childView: FellRace.Views.CategoryOption
   itemViewContainer: ".categories"
 
   bindings: 

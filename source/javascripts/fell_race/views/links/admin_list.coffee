@@ -24,4 +24,4 @@ class FellRace.Views.AddLink extends FellRace.View
 
 class FellRace.Views.AdminLinksList extends FellRace.CollectionView
   emptyView: FellRace.Views.AddLink
-  itemView: FellRace.Views.AdminLink
+  childView: FellRace.Views.AdminLink

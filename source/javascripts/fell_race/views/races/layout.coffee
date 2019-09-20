@@ -11,7 +11,7 @@ class FellRace.Views.RaceLayout extends FellRace.Views.LayoutView
     _fr.mainRegion.show view
 
   default: =>
-    _fr.closeRight()
+    _fr.noExtraView()
 
   instance: (instance_name,path) =>
     if instance = @model.past_instances.findWhere(name: instance_name)

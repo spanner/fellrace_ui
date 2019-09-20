@@ -243,4 +243,4 @@ class FellRace.Views.RacePublication extends FellRace.View
     can_edit
 
 class FellRace.Views.RacePublicationsList extends FellRace.CollectionView
-  itemView: FellRace.Views.RacePublication
+  childView: FellRace.Views.RacePublication

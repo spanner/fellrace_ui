@@ -2,7 +2,8 @@ class FellRace.AppRouter extends Backbone.Router
   routes:
     "(/)": "index"
     "faq/:page_name(/)": "page"
-    "races(/*path)": "race"
+    "races": "races"
+    "races/:slug(/*path)": "race"
     "runners(/*path)": "runner"
     "users(/*path)": "user"
     "confirm/:uid/:token(/)": "confirmUser"
@@ -21,8 +22,11 @@ class FellRace.AppRouter extends Backbone.Router
   page: (page_name) =>
     @_ui.showPage(page_name)
 
-  race: (path) =>
-    @_ui.showRace(path)
+  races: =>
+    @_ui.showRaces()
+
+  race: (slug, path) =>
+    @_ui.showRace(slug, path)
 
   runner: (path) =>
     @_ui.showRunner(path)
@@ -45,3 +49,5 @@ class FellRace.AppRouter extends Backbone.Router
   adminRunners: (path) =>
     @_ui.showAdminRunners(path)
 
+  log: (msgs...) =>
+    _fr.log(msgs...)
