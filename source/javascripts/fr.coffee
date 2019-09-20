@@ -1,12 +1,15 @@
+## old vendor dependencies
+#
 #= require vendor/jquery
 #= require vendor/modernizr
 #= require vendor/moment
-#= require vendor/jquery.peity
 #= require vendor/jquery.cookie
 #= require vendor/jquery.complexify
 #= require vendor/pikaday
 #= require vendor/tinycolor
 
+## npm dependencies
+#
 #= require underscore/underscore
 #= require underscore.string/dist/underscore.string
 #= require backbone/backbone
@@ -14,6 +17,7 @@
 #= require backbone.radio/build/backbone.radio
 #= require backbone.stickit/backbone.stickit
 #= require backbone.mapstick/backbone.mapstick
+#= require peity/jquery.peity
 
 #= require vendor/backbone.validation
 #= require vendor/medium-editor

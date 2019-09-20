@@ -90,7 +90,7 @@ class FellRace.Views.RacePublication extends FellRace.View
         onGet: (val) => "http://fellrunner.org.uk/races.php?id=#{val}"
       ]
 
-    'span.age_limit': 
+    'span.age_limit':
       observe: "age_limit"
 
     '.route_elevation': "route_elevation"
@@ -169,6 +169,7 @@ class FellRace.Views.RacePublication extends FellRace.View
     if (isVisible) then $el.slideDown('fast') else $el.slideUp('fast')
 
   onRender: =>
+    window.r = @model
     @stickit()
     @model.trigger("select")
     @model.fetch()
@@ -192,7 +193,6 @@ class FellRace.Views.RacePublication extends FellRace.View
     if instance = @model.nextOrRecentInstance()
       @showChildView 'next_or_recent', new FellRace.Views.NextOrRecentInstance(model: instance)
 
-
   visibleBlock: ($el, isVisible, options) =>
     if isVisible
       $el.css display: "inline-block"
@@ -200,23 +200,15 @@ class FellRace.Views.RacePublication extends FellRace.View
       $el.hide()
 
   peify: ($el, value, model, options) =>
-    $(window).on "resize", =>
-      @old_peify($el)
-    checkExist = setInterval(() =>
-      if $el.length
-        clearInterval(checkExist)
-        $el.text value
-        # $el.peity("line")
-        @old_peify($el)
-    , 100)
-
-  old_peify: ($el) =>
+    @log "peify", value
     holder = $el.parent()
-    $el.peity "line",
-      fill: "#e2e1dd"
-      stroke: "#d6d6d4"
-      width: holder.width()
-      height: 64
+    $el.text value
+    _.defer =>
+      $el.peity "line",
+        fill: "#e2e1dd"
+        stroke: "#d6d6d4"
+        width: holder.width()
+        height: 64
 
   hasAny: (array) =>
     array.length > 0

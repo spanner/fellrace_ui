@@ -76,6 +76,7 @@ class FellRace.Models.Race extends FellRace.Model
 
   setProfile: =>
     path = @getPath() || []
+    @log "setProfile", path
     if path.length > 1
       @elevator.getElevationAlongPath(
         {
