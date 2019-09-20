@@ -1,11 +1,11 @@
-class FellRace.Models.RacePublication extends Backbone.Model
+class FellRace.Models.RacePublication extends FellRace.Model
   idAttribute: "slug"
 
   url: =>
     "#{_fr.apiUrl()}/race_publications/#{@get("slug")}"
 
   initialize: ->
-    @build()
+    super()
     @on "select", @select
     @on "deselect", @deselect
     @on "toggle_select", @toggleSelect
@@ -16,9 +16,7 @@ class FellRace.Models.RacePublication extends Backbone.Model
     @links = new FellRace.Collections.Links(@get("links")||[])
     @checkpoints = new FellRace.Collections.PublicCheckpoints(@get("checkpoints")||[], race_publication: this)
     @setUrls()
-
     @buildInstances()
-
     _.each ["attachments","checkpoints","records","links"], (collection) =>
       @on "change:#{collection}", (model,data) =>
         @[collection].reset data
@@ -30,11 +28,11 @@ class FellRace.Models.RacePublication extends Backbone.Model
     @future_instances = new FellRace.Collections.PublicFutureInstances [],
       race_publication: @
       url: "#{@url()}/instances"
-
     @partitionInstances() if @get("instances")
     @on "change:instances", @partitionInstances
 
   partitionInstances: =>
+    @log "partitionInstances", @get("instances")
     [past_instances, future_instances] = _.partition(@get("instances"), (e) -> new Date(e.date) < Date.now())
     @past_instances.reset past_instances
     @future_instances.reset future_instances

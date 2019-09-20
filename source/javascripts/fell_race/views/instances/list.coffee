@@ -30,6 +30,7 @@ class FellRace.Views.FutureListedInstance extends FellRace.View
   time: (time) =>
     "at #{time}" if time
 
+
 class FellRace.Views.PastListedInstance extends FellRace.View
   template: 'instances/past_list_item'
   tagName: "li"
@@ -61,6 +62,7 @@ class FellRace.Views.PastListedInstance extends FellRace.View
       visible: true
 
   onRender: () =>
+    @log "render"
     @stickit()
 
   summarise: (value, options) =>

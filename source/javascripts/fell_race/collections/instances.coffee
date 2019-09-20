@@ -5,6 +5,7 @@ class FellRace.Collections.Instances extends FellRace.Collection
     @filter (model) =>
       instance.id isnt model.id and model.get("year") is year
 
+
 class FellRace.Collections.FutureInstances extends FellRace.Collections.Instances
   comparator: (m) ->
     m.getDate()
@@ -16,6 +17,7 @@ class FellRace.Collections.FutureInstances extends FellRace.Collections.Instance
   next: =>
     @sort()
     @filter((instance)->instance.getDate())[0]
+
 
 class FellRace.Collections.PastInstances extends FellRace.Collections.Instances
   comparator: (m) ->

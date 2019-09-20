@@ -2,6 +2,14 @@ class FellRace.Views.RacePublication extends FellRace.View
   template: 'race_publications/show'
   className: "race"
 
+  regions:
+    attachments: "ul.attachments"
+    links: "ul.links"
+    checkpoints: "ul.checkpoints"
+    records: "ul.records"
+    past_instances: "ul.past_instances"
+    next_or_recent: ".next_or_recent"
+
   events:
     'click a.social': 'openTab'
 
@@ -163,13 +171,14 @@ class FellRace.Views.RacePublication extends FellRace.View
   onRender: =>
     @stickit()
     @model.trigger("select")
-    new FellRace.Views.AttachmentsList(collection: @model.attachments, el: @$el.find("ul.attachments")).render()
-    new FellRace.Views.LinksList(collection: @model.links, el: @$el.find("ul.links")).render()
-    new FellRace.Views.CheckpointsList(collection: @model.checkpoints, el: @$el.find("ul.checkpoints"), race_slug: @model.get('slug')).render()
-    new FellRace.Views.RecordsList(collection: @model.records, el: @$el.find("ul.records")).render()
-    new FellRace.Views.PastInstancesList(collection: @model.past_instances, el: @$el.find("ul.past_instances")).render()
-    if instance = @model.nextOrRecentInstance()
-      new FellRace.Views.NextOrRecentInstance(model: instance, el: @$el.find(".next_or_recent")).render()
+    @model.fetch()
+    @showChildView 'attachments', new FellRace.Views.AttachmentsList(collection: @model.attachments)
+    @showChildView 'links', new FellRace.Views.LinksList(collection: @model.links)
+    @showChildView 'checkpoints', new FellRace.Views.CheckpointsList(collection: @model.checkpoints, race_slug: @model.get('slug'))
+    @showChildView 'records', new FellRace.Views.RecordsList(collection: @model.records)
+    @showChildView 'past_instances', new FellRace.Views.PastInstancesList(collection: @model.past_instances)
+    @showNextOrRecentInstance()
+    @model.on 'change:instances', @showNextOrRecentInstance
 
   showPresence: (e) =>
     el = $(e.currentTarget)
@@ -178,6 +187,11 @@ class FellRace.Views.RacePublication extends FellRace.View
       el.addClass('present')
     else
       el.removeClass('present')
+
+  showNextOrRecentInstance: =>
+    if instance = @model.nextOrRecentInstance()
+      @showChildView 'next_or_recent', new FellRace.Views.NextOrRecentInstance(model: instance)
+
 
   visibleBlock: ($el, isVisible, options) =>
     if isVisible

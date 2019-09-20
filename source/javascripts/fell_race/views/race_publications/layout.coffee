@@ -16,27 +16,20 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
     _fr.noExtraView()
 
   instance: (instance_name,path) =>
-    if @_previous.route is "instance" and @_previous.param is instance_name
-      @_previous.view.handle path
-    else
-      instance = @model.past_instances.findWhere(name: instance_name)
-      instance ?= @model.future_instances.findWhere(name: instance_name)
-      if instance
-        if instance.populated
-          view = new FellRace.Views.InstanceLayout
-            model: instance
-            path: path
-          @_previous =
-            route: "instance"
-            param: instance_name
-            view: view
-        else
-          instance.set fetching:true
-          instance.fetch().done =>
-            instance.build()
-            instance.populated = true
-            instance.set fetching:false
-            @instance instance_name,path
+    instance = @model.past_instances.findWhere(name: instance_name)
+    instance ?= @model.future_instances.findWhere(name: instance_name)
+    if instance
+      if instance.populated
+        view = new FellRace.Views.InstanceLayout
+          model: instance
+          path: path
+      else
+        instance.set fetching:true
+        instance.fetch().done =>
+          instance.build()
+          instance.populated = true
+          instance.set fetching:false
+          @instance instance_name,path
 
   checkpoint: (slug,path) =>
     if cp = @model.checkpoints.findWhere(slug: slug)

@@ -22,6 +22,7 @@ class FellRace.CollectionView extends Marionette.CollectionView
     @_radio = Backbone.Radio.channel('fell_race')
 
   onRender: () =>
+    @log "render", @collection.size()
     @triggerMethod 'ready', this
 
   log: (msgs...) =>

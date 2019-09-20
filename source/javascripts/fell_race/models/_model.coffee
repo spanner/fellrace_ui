@@ -1,6 +1,7 @@
 class FellRace.Model extends Backbone.Model
 
   initialize: ->
+    @_classname = @constructor.name
     @on "sync", =>
       @set saving:false
     if @isNew()
@@ -10,7 +11,6 @@ class FellRace.Model extends Backbone.Model
       @updateable()
 
     @build()
-
     @on "publish", @publish
 
   build: =>
@@ -67,3 +67,6 @@ class FellRace.Model extends Backbone.Model
 
   unmatches: (term) =>
     @matchString().toLowerCase().indexOf(term.toLowerCase()) is -1
+
+  log: (msgs...) =>
+    _fr.log(@_classname, msgs...)

@@ -61,10 +61,11 @@ class FellRace.Views.Checkpoint extends FellRace.View
   latAndLng: ([lat,lng]=[]) =>
     lat and lng
 
+
 class FellRace.Views.CheckpointsList extends FellRace.CollectionView
   childView: FellRace.Views.Checkpoint
 
-  itemViewOptions: () =>
+  childViewOptions: () =>
     race_slug: @_race_slug
 
   initialize: (options) =>
