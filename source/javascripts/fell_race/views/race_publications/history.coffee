@@ -72,7 +72,7 @@ class FellRace.Views.RaceHistory extends FellRace.View
       el: @table_el
     table.render()
     # hacky shortcut, this, to bring down any wait spinners we have scattered around. Do it properly!
-    _fr.vent.trigger 'loaded'
+    _fr.broadcast 'loaded'
 
   racePublicationUrl: (slug) =>
     "/races/#{slug}"

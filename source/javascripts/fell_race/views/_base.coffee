@@ -4,11 +4,17 @@
 
 class FellRace.View extends Marionette.View
 
+  initialize: ->
+    @_radio = Backbone.Radio.channel('fell_race')
+
   onRender: () =>
     @triggerMethod 'ready', this
 
 
 class FellRace.CollectionView extends Marionette.CollectionView
+
+  initialize: ->
+    @_radio = Backbone.Radio.channel('fell_race')
 
   onRender: () =>
     @triggerMethod 'ready', this
@@ -18,6 +24,7 @@ class FellRace.Views.LayoutView extends Marionette.View
   routes: {}
 
   initialize: (opts={}) ->
+    @_radio = Backbone.Radio.channel('fell_race')
     @_router = new FellRace.ViewRouter
       view: this
       routes: _.result(this, 'routes')

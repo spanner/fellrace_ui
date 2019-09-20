@@ -66,7 +66,7 @@ class FellRace.Views.NoHistory extends FellRace.View
   tagName: "tr"
 
 
-class FellRace.Views.HistoryTable extends Marionette.CollectionView
+class FellRace.Views.HistoryTable extends FellRace.CollectionView
   itemView: FellRace.Views.HistoryRow
   emptyView: FellRace.Views.NoHistory
 

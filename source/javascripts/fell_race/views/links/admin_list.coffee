@@ -22,6 +22,6 @@ class FellRace.Views.AddLink extends FellRace.View
   tagName: "li"
   className: "note"
 
-class FellRace.Views.AdminLinksList extends Marionette.CollectionView
+class FellRace.Views.AdminLinksList extends FellRace.CollectionView
   emptyView: FellRace.Views.AddLink
   itemView: FellRace.Views.AdminLink

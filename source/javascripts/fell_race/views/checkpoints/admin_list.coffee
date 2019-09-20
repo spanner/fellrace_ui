@@ -71,7 +71,7 @@ class FellRace.Views.AddFirstCheckpoint extends FellRace.View
   className: "note"
 
 
-class FellRace.Views.AdminCheckpointsList extends Marionette.CollectionView
+class FellRace.Views.AdminCheckpointsList extends FellRace.CollectionView
   itemView: FellRace.Views.AdminCheckpoint
   emptyView: FellRace.Views.AddFirstCheckpoint
   selectable: true

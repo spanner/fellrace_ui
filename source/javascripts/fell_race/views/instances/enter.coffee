@@ -13,7 +13,7 @@ class FellRace.Views.InstanceEnter extends FellRace.View
       ]
 
   initialize: ->
-    _fr.vent.on "auth.change", @render
+    @_radio.on "auth.change", @render
 
   onRender: () =>
     @stickit()

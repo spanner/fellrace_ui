@@ -11,15 +11,14 @@ class FellRace.Views.UILayout extends FellRace.Views.LayoutView
 
   regions:
     gmap: '#gmap'
-    content: '#content'
-    main: 'main'
+    content: '#fellrace'
     user_controls: '#user_controls'
     notice: '#notice'
     action: '#action'
-    extraContent: 'section#extra'
+    extra: 'section#extra'
 
   ui:
-    content: "#content"
+    content: "#fellrace"
 
   open_drawer: true
 
@@ -40,11 +39,10 @@ class FellRace.Views.UILayout extends FellRace.Views.LayoutView
     @_user_controls = new FellRace.Views.UserControls()
     @showChildView 'user_controls', @_user_controls
 
-    @_notifier = new Notifier model: _fr._radio, wait: 4000
+    @_notifier = new FellRace.Views.Notifier model: _fr._radio, wait: 4000
     @showChildView 'notice', @_notifier
 
     @listenToToggle()
-    @session.load()
 
 
   ## Routes
@@ -109,10 +107,14 @@ class FellRace.Views.UILayout extends FellRace.Views.LayoutView
     @showChildView 'action', @_action_view
     @showIndex() unless @_view
 
+  showExtraView: (view, options={}) =>
+    @_extra_view = view
+    @showChildView 'extra', @_extra_view
+
 
   ## Ancient Mike Globals
   #
-  showRace: (race) =>
+  showMapRace: (race) =>
     @_map_view.showRace race
 
   indexMapView: =>
@@ -124,14 +126,14 @@ class FellRace.Views.UILayout extends FellRace.Views.LayoutView
   adminMapView: =>
     @_map_view.adminView()
 
-  toPublicOrHome: =>
-    _fr.navigate Backbone.history.fragment.match(/admin(.+)/)?[1] || "/"
+  setMapOptions: (opts) =>
+    @_map_view?.setOptions(opts)
 
   closeRight: =>
-    @extraContentRegion.close()
+    @getRegion('extra').reset()
 
   # Mike's strange old action set has a sort of logic to it.
-  # Now moved into the UI and awaiting humane destruction.
+  # Now moved into the UI and awaiting humane replacement.
   #
   user_actions: =>
     resetPassword: (uid, token) =>

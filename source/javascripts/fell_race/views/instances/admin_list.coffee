@@ -62,9 +62,9 @@ class FellRace.Views.AddPastInstance extends FellRace.View
   tagName: "li"
   className: "note"
 
-class FellRace.Views.AdminPastInstancesList extends Marionette.CollectionView
+class FellRace.Views.AdminPastInstancesList extends FellRace.CollectionView
   emptyView: FellRace.Views.AddPastInstance
   itemView: FellRace.Views.AdminPastListedInstance
 
-class FellRace.Views.AdminFutureInstancesList extends Marionette.CollectionView
+class FellRace.Views.AdminFutureInstancesList extends FellRace.CollectionView
   itemView: FellRace.Views.AdminFutureListedInstance

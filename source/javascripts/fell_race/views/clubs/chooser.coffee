@@ -49,7 +49,7 @@ class FellRace.Views.ClubSuggestion extends FellRace.View
       name
 
 
-class FellRace.Views.ClubChooser extends Marionette.CollectionView
+class FellRace.Views.ClubChooser extends FellRace.CollectionView
   tagName: "ul"
   className: "chooser"
   itemView: FellRace.Views.ClubSuggestion

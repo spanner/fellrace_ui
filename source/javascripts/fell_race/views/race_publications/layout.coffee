@@ -7,7 +7,7 @@ class FellRace.Views.RacePublicationLayout extends FellRace.Views.LayoutView
 
   handle: =>
     super
-    _fr.vent.on 'login:changed', =>
+    @_radio.on 'login:changed', =>
       @model.fetchPermissions()
 
   initialize: ->

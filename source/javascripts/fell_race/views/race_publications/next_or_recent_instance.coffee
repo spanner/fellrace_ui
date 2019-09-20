@@ -130,7 +130,7 @@ class FellRace.Views.NextOrRecentInstance extends FellRace.View
   linkWorking: (e) =>
     if link = e.currentTarget
       $(link).addClass('working')
-      _fr.vent.once 'loaded', () ->
+      @_radio.once 'loaded', () ->
         $(link).removeClass('working')
 
   ifFuture: (date) =>

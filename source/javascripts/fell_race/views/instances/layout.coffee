@@ -46,10 +46,10 @@ class FellRace.Views.InstanceLayout extends FellRace.Views.LayoutView
       _fr.extraContentRegion.show view
       @_previous =
         route: "myEntry"
-      _fr.vent.once "login:changed", =>
+      @_radio.once "login:changed", =>
         _fr.navigate @defaultUrl()
     else if _fr.authPending()
-      _fr.vent.once "login:changed", =>
+      @_radio.once "login:changed", =>
         @myEntry()
     else
       _fr.navigate @defaultUrl()

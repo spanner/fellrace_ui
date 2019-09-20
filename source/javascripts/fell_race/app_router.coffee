@@ -16,7 +16,7 @@ class FellRace.AppRouter extends Backbone.Router
     @_ui = opts.ui
 
   index: =>
-    @_ui.showIndexView()
+    @_ui.showIndex()
 
   page: (page_name) =>
     @_ui.showPage(page_name)

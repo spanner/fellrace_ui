@@ -242,5 +242,5 @@ class FellRace.Views.RacePublication extends FellRace.View
   canEdit: ({can_edit:can_edit}={}) =>
     can_edit
 
-class FellRace.Views.RacePublicationsList extends Marionette.CollectionView
+class FellRace.Views.RacePublicationsList extends FellRace.CollectionView
   itemView: FellRace.Views.RacePublication

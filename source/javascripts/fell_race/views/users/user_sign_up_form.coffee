@@ -14,7 +14,7 @@ class FellRace.Views.UserSignupForm extends FellRace.View
   initialize: (opts={}) ->
     @_opts = opts
     @model = _fr.currentUser()
-    _fr.vent.on "auth.change", @observeState
+    @_radio.on "auth.change", @observeState
 
   onRender: () =>
     @_form = @$el.find('form')

@@ -61,7 +61,7 @@ class FellRace.Views.Checkpoint extends FellRace.View
   latAndLng: ([lat,lng]=[]) =>
     lat and lng
 
-class FellRace.Views.CheckpointsList extends Marionette.CollectionView
+class FellRace.Views.CheckpointsList extends FellRace.CollectionView
   itemView: FellRace.Views.Checkpoint
 
   itemViewOptions: () =>

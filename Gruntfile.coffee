@@ -38,6 +38,7 @@ config = (grunt) ->
         cwd: 'source/stylesheets/'
         src: ['*.sass']
         dest: 'dist/stylesheets/'
+        ext: '.css'
       ]
       # files:
       #   'dist/stylesheets/fell_race.css': 'source/stylesheets/fell_race.sass'

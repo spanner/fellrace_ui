@@ -15,8 +15,9 @@ class FellRace.Views.UserConfirmationNotice extends FellRace.View
       visible: true
 
   initialize: () ->
+    super()
     @model = _fr.currentUser()
-    _fr.vent.on "auth.change", @render
+    @_radio.on "auth.change", @render
     @render()
 
   onRender: () =>

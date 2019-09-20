@@ -7,7 +7,7 @@ class FellRace.Views.UserGreeting extends FellRace.View
 
   initialize: =>
     @model = _fr.currentUser()
-    _fr.vent.on "auth.change", @render
+    @_radio.on "auth.change", @render
     @render()
 
   onRender: () =>

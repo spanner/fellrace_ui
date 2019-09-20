@@ -82,5 +82,5 @@ class FellRace.Views.PastIndexInstance extends FellRace.Views.IndexInstance
 class FellRace.Views.FutureIndexInstances extends FellRace.CollectionView
   itemView: FellRace.Views.FutureIndexInstance
 
-class FellRace.Views.PastIndexInstances extends Marionette.CollectionView
+class FellRace.Views.PastIndexInstances extends FellRace.CollectionView
   itemView: FellRace.Views.PastIndexInstance

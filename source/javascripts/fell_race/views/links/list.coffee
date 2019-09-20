@@ -27,5 +27,5 @@ class FellRace.Views.Link extends FellRace.View
     e.preventDefault() if e
     window.open "http://#{@model.get("url")}"
 
-class FellRace.Views.LinksList extends Marionette.CollectionView
+class FellRace.Views.LinksList extends FellRace.CollectionView
   itemView: FellRace.Views.Link

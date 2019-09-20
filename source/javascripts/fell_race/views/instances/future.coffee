@@ -141,7 +141,7 @@ class FellRace.Views.FutureInstance extends FellRace.View
     # this old version of marionette seems to leave a render gap, so we wait for the DOM to arrive.
     _.defer @model.setEntryCounts
     # hacky shortcut this, to bring down any wait spinners we have scattered around. Do it properly!
-    _fr.vent.trigger 'loaded'
+    _fr.broadcast 'loaded'
 
   renderClubChart: (model, data) =>
     @_clubs_chart = new Chartist.Pie '.clubs_chart.ct-chart', @model.get('club_data'),

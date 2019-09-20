@@ -8,7 +8,7 @@ class FellRace.Views.UserSignInOut extends FellRace.View
 
   initialize: () ->
     @model = _fr.session
-    _fr.vent.on "auth.change", @render
+    @_radio.on "auth.change", @render
     @render()
 
   onRender: () =>

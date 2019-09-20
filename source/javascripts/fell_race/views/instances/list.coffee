@@ -70,8 +70,8 @@ class FellRace.Views.PastListedInstance extends FellRace.View
       "#{value} runners"
 
 
-class FellRace.Views.FutureInstancesList extends Marionette.CollectionView
+class FellRace.Views.FutureInstancesList extends FellRace.CollectionView
   itemView: FellRace.Views.FutureListedInstance
 
-class FellRace.Views.PastInstancesList extends Marionette.CollectionView
+class FellRace.Views.PastInstancesList extends FellRace.CollectionView
   itemView: FellRace.Views.PastListedInstance

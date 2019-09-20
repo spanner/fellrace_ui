@@ -20,5 +20,5 @@ class FellRace.Views.CompetitorListItem extends FellRace.View
     "#{values[0]} #{values[1]}"
 
 
-class FellRace.Views.CompetitorsList extends Marionette.CollectionView
+class FellRace.Views.CompetitorsList extends FellRace.CollectionView
   itemView: FellRace.Views.CompetitorListItem

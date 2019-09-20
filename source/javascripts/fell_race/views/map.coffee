@@ -35,29 +35,17 @@ class FellRace.Views.Map extends FellRace.View
 
   onRender: () =>
     throw new Error("Google maps API is not loaded.") unless google and google.maps
-    @initBingTiles().done =>
-      @_gmap = new google.maps.Map @$el.find('.map_holder')[0], @mapConfig()
-      google.maps.event.addListener @_gmap, "dragend", @setState
-      @addMapTypes()
-      @userMarker = new FellRace.Views.UserMarker
-        model: _fr.currentUser?()
-        map: @_gmap
-      @_polys = new FellRace.Views.RacePublicationPolylines
-        collection: _fr.race_publications
-        map: @_gmap
 
-  initBingTiles: =>
-    apikey = _fr.config('bing_api_key')
-    inited = $.Deferred()
-    getter = $.getJSON("https://dev.virtualearth.net/REST/V1/Imagery/Metadata/Road?output=json&include=ImageryProviders&key=#{apikey}").done (response) =>
-      if res = response.resourceSets[0].resources[0]
-        @_bing =
-          url: res.imageUrl
-          subdomains: res.imageUrlSubdomains
-          w: res.imageWidth
-          h: res.imageHeight
-      inited.resolve()
-    inited.promise()
+    @_gmap = new google.maps.Map @$el.find('.map_holder')[0], @mapConfig()
+    google.maps.event.addListener @_gmap, "dragend", @setState
+
+    @addMapTypes()
+    @userMarker = new FellRace.Views.UserMarker
+      model: _fr.currentUser?()
+      map: @_gmap
+    @_race_polys = new FellRace.Views.RacePublicationPolylines
+      collection: _fr.race_publications
+      map: @_gmap
 
   showRace: (race) =>
     @removeRace()
@@ -75,10 +63,10 @@ class FellRace.Views.Map extends FellRace.View
 
   publicView: =>
     @removeRace()
-    @_polys.show()
+    @_race_polys.show()
 
   adminView: =>
-    @_polys.hide()
+    @_race_polys.hide()
 
   setOptions: (opts={}) =>
     @_gmap.setOptions _.extend(_.clone(@mapConfig), opts)
@@ -104,14 +92,6 @@ class FellRace.Views.Map extends FellRace.View
     localStorage["fr_zoom"] = @_gmap.zoom
 
   addMapTypes: =>
-    # @_gmap.mapTypes.set "OOM", new google.maps.ImageMapType
-    #   getTileUrl: (coord, zoom) ->
-    #     return "https://tiler#{"123".charAt(Math.floor(Math.random() * 2))}.oobrien.com/oterrain/#{zoom}/#{coord.x}/#{coord.y}.png"
-    #   tileSize: new google.maps.Size(256, 256)
-    #   name: "OOM"
-    #   maxZoom: 17
-    #   minZoom: 12
-    #
     @_gmap.mapTypes.set "Open", new google.maps.ImageMapType
       getTileUrl: (coord, zoom) ->
         apikey = _fr.config('osm_api_key')
@@ -119,21 +99,6 @@ class FellRace.Views.Map extends FellRace.View
       tileSize: new google.maps.Size(256, 256)
       name: "OSM"
       maxZoom: 18
-
-    bu = @_bing.url
-    bs = @_bing.subdomains
-    
-    @_gmap.mapTypes.set "OS", new google.maps.ImageMapType
-      getTileUrl: (coord, zoom) =>
-        apikey = _fr.config('bing_api_key')
-        url = bu.replace('{subdomain}', bs[Math.floor(Math.random() * bs.length)])
-                .replace('{quadkey}', @tileXYToQuadKey(coord.x,coord.y,zoom))
-                .replace('{culture}', "en-GB")
-        "#{url}&productSet=mmOS&key=#{apikey}&c4w=1"
-      tileSize: new google.maps.Size(@_bing.w, @_bing.h)
-      name: "OS"
-      maxZoom: 17
-      minZoom: 10
 
     shadow = new google.maps.ImageMapType
       getTileUrl: (coord, zoom) ->
@@ -154,16 +119,4 @@ class FellRace.Views.Map extends FellRace.View
 
       google.maps.event.trigger @_gmap, "maptypeid_changed"
 
-  tileXYToQuadKey: (tileX, tileY, levelOfDetail) ->
-    quadKey = ""
-    for i in [levelOfDetail..1]
-      digit = '0'
-      mask = 1 << (i - 1)
-      if (tileX & mask) != 0
-        digit++
-      if (tileY & mask) != 0
-        digit++
-        digit++
-      quadKey = "#{quadKey}#{digit}"
-    quadKey
 

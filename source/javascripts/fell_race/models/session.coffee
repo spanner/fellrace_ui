@@ -82,7 +82,7 @@ class FellRace.Models.UserSession extends Backbone.Model
       @set "state", FellRace.Models.UserSession.unconfirmedState
 
   changedState: (model, value, options) =>
-    _fr.vent.trigger('auth.change', model, value)
+    _fr.broadcast('auth.change', model, value)
 
   authPending: =>
     @getState() is FellRace.Models.UserSession.pendingState
@@ -113,10 +113,10 @@ class FellRace.Models.UserSession extends Backbone.Model
         domain: @cookieDomain()
         path: "/"
         expires: 7
-      _fr.vent.trigger "login:changed"
+      _fr.broadcast "login:changed"
 
   unsetCookie: () =>
     $.removeCookie 'fellrace_blah',
       domain: @cookieDomain()
       path: "/"
-    _fr.vent.trigger "login:changed"
+    _fr.broadcast "login:changed"

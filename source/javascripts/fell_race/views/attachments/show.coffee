@@ -35,5 +35,5 @@ class FellRace.Views.Attachment extends FellRace.View
     @stickit()
 
 
-class FellRace.Views.AttachmentsList extends Marionette.CollectionView
+class FellRace.Views.AttachmentsList extends FellRace.CollectionView
   itemView: FellRace.Views.Attachment

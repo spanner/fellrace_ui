@@ -34,6 +34,6 @@ class FellRace.Views.AddFirstRecord extends FellRace.View
   tagName: "li"
   className: "note"
 
-class FellRace.Views.AdminRecordsList extends Marionette.CollectionView
+class FellRace.Views.AdminRecordsList extends FellRace.CollectionView
   itemView: FellRace.Views.AdminRecord
   emptyView: FellRace.Views.AddFirstRecord

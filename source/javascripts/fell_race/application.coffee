@@ -29,6 +29,8 @@ class FellRace.Application extends Marionette.Application
 
   onBeforeStart: =>
     @session = new FellRace.Models.UserSession()
+    @session.load()
+
     @clubs = new FellRace.Collections.Clubs([])
     @categories = new FellRace.Collections.Categories([])
     @categories.fetch()
@@ -55,12 +57,22 @@ class FellRace.Application extends Marionette.Application
       root: '/'
     $(document).on "click", "a:not([data-bypass])", @handleLinkClick
 
+
   config: (key) =>
     @_config.get(key)
+
+  apiUrl: =>
+    @_api_url
+
+  domain: =>
+    @_domain
 
   getCategories: () =>
     @categories
 
+
+  ## Auth
+  #
   currentUser: =>
     @session.user
 
@@ -74,40 +86,29 @@ class FellRace.Application extends Marionette.Application
     @session.authPending()
 
   getCurrentCompetitor: =>
-    #TODO: repopulate competitor before entry process begins.
     @currentUser()?.getCompetitor()
 
 
-  ## UI pass-through
+  ## Saving
   #
-  offsetX: =>
-    @ui.offsetX()
-
-  user_actions: =>
-    @ui.user_actions()
-
-
   sync: (method, model, opts) =>
-      # unless method is "read"
-        # job = opts.job || @announce("Saving")
-        # opts.beforeSend = (xhr, settings) ->
-        #   settings.xhr = () ->
-        #     xhr = new window.XMLHttpRequest()
-        #     xhr.upload.addEventListener "progress", (e) ->
-        #       job.setProgress e
-        #     , false
-        #     xhr
-        # opts.success = ->
-        #   job.setCompleted true
-        # opts.error = ->
-      @original_backbone_sync method, model, opts
+    # unless method is "read"
+      # job = opts.job || @announce("Saving")
+      # opts.beforeSend = (xhr, settings) ->
+      #   settings.xhr = () ->
+      #     xhr = new window.XMLHttpRequest()
+      #     xhr.upload.addEventListener "progress", (e) ->
+      #       job.setProgress e
+      #     , false
+      #     xhr
+      # opts.success = ->
+      #   job.setCompleted true
+      # opts.error = ->
+    @original_backbone_sync method, model, opts
 
-  apiUrl: =>
-    @_api_url
 
-  domain: =>
-    @_domain
-
+  ## Rendering
+  #
   render: (template, data={}) =>
     if _.isFunction(template)
       template = template()
@@ -119,6 +120,9 @@ class FellRace.Application extends Marionette.Application
     else
       ""
 
+
+  ## Routing
+  #
   handleLinkClick: (e) ->
     href = $(@).attr("href")
     if href and href[0] isnt "#" and href.slice(0, 4) isnt 'http' and href.slice(0, 6) isnt 'mailto'
@@ -137,6 +141,9 @@ class FellRace.Application extends Marionette.Application
   sendAuthenticationHeader: (e, request) =>
     if token = @session?.authToken()
       request.setRequestHeader("Authorization", "Token token=#{token}")
+
+  toPublicOrHome: =>
+    @navigate Backbone.history.fragment.match(/admin(.+)/)?[1] || "/"
 
 
   ## Logging
@@ -161,47 +168,65 @@ class FellRace.Application extends Marionette.Application
 
   ## Notification
   #
-  broadcast: (event_type, argument) =>
-    @_radio.trigger event_type, argument
+  broadcast: (event_type, args...) =>
+    @_radio.trigger event_type, args
 
   reportError: (message, source, lineno, colno, error) =>
     if error is "not_allowed"
-      @complain('<p><strong>' + t('problems.not_allowed') + '</strong>.' + t('notes.view_denied') + t('please_go_home') + '</p>', 100000)
+      @complain("Not allowed!")
       true
     else if error is "not_found"
-      @complain('<p><strong>' + t('problems.not_found') + '</strong>.' + t('notes.item_denied') + t('please_go_home') + '</p>', 100000)
+      @complain("Not found!")
       true
     else
-      complaint = "<strong>#{message}</strong> #{t('at')} #{source} #{t('line')} #{lineno} #{t('col')} #{colno}."
+      complaint = "<strong>#{message}</strong> at #{source} line #{lineno} col #{colno}."
       if @config('report_errors')
-        @notify complaint, 100000, null, 'error'
+        @complain complaint
       # Honeybadger has to be webpacked in now
       # if @config('badger_errors')
       #   Honeybadger.notify error,
       #     message: complaint
       true if @config('trap_errors')
 
-  confirm: (message, href) =>
-    @notify message, 4000, href, 'confirmation'
+  confirm: (message) =>
+    @_radio.trigger 'success', message
 
-  complain: (message, href) =>
-    @notify message, 10000, href, 'error'
+  complain: (message) =>
+    @_radio.trigger 'error', message
 
-  warn: (message, href) =>
-    @notify message, 10000, href, 'warning'
-
-  notify: (html_or_text, duration=4000, href=null, notice_type='information') =>
-    if @_ui_view
-      @_notices.add
-        message: html_or_text
-        href: href
-        duration: duration
-        notice_type: notice_type
-    else
-      failure_notice = $('<div class="complete_failure" />').appendTo($("#notices"))
-      failure_notice.html(html_or_text)
+  warn: (message) =>
+    @_radio.trigger 'flash', message
 
   log: =>
     if @logging() and console?.log?
       console.log "[FR]", arguments...
 
+
+  ## UI pass-through
+  #  temporary relay of old globals while refactoring.
+  #  to be replaced with observers in the map view, mostly.
+  #
+  offsetX: =>
+    @_ui.offsetX()
+
+  showRace: (race) =>
+    @_ui.showMapRace(race)
+
+  indexMapView: =>
+    @_ui.indexMapView()
+
+  publicMapView: =>
+    @_ui.publicMapView()
+
+  adminMapView: =>
+    @_ui.adminMapView()
+
+  setMapOptions: (opts) =>
+    @_ui.setMapOptions(opts)
+
+  closeRight: =>
+    @_ui.closeRight()
+
+  # especially temporary
+  user_actions: =>
+    @_ui.user_actions()

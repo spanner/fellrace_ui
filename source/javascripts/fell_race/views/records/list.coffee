@@ -12,5 +12,5 @@ class FellRace.Views.Record extends FellRace.View
   onRender: () =>
     @stickit()
 
-class FellRace.Views.RecordsList extends Marionette.CollectionView
+class FellRace.Views.RecordsList extends FellRace.CollectionView
   itemView: FellRace.Views.Record

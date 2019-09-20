@@ -122,7 +122,7 @@ class FellRace.Views.ExternalRacePublication extends FellRace.View
     @model.trigger "toggle_select"
 
 
-class FellRace.Views.ExternalRacePublicationsList extends Marionette.CollectionView
+class FellRace.Views.ExternalRacePublicationsList extends FellRace.CollectionView
   itemView: FellRace.Views.ExternalRacePublication
 
 

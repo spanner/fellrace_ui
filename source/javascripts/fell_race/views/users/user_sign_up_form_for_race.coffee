@@ -22,7 +22,7 @@ class FellRace.Views.UserSignupFormForRace extends FellRace.View
     
   initialize: () ->
     @model = _fr.currentUser()
-    _fr.vent.on "auth.change", @observeState
+    @_radio.on "auth.change", @observeState
     $.getJSON "#{_fr.apiUrl()}/races/taken", (response) =>
       @slugs = response
       @render()

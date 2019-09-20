@@ -14,7 +14,7 @@ class FellRace.Views.SessionLoginForm extends FellRace.View
   initialize: (opts={}) ->
     @opts = opts
     @model = _fr.session
-    _fr.vent.on "auth.change", @render
+    @_radio.on "auth.change", @render
 
   onRender: () =>
     state = _fr.session.getState()
